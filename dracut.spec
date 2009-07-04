@@ -11,9 +11,8 @@
 %define rdist %{?dist}
 %endif
 
-
 Name: dracut
-Version: 0.3
+Version: 0.4
 Release: 1%{?rdist}
 Summary: Initramfs generator using udev
 Group: System Environment/Base		
@@ -27,6 +26,7 @@ Requires: module-init-tools
 Requires: cpio
 Requires: coreutils
 Requires: findutils
+Requires: binutils
 Requires: grep
 Requires: mktemp
 Requires: mount
@@ -59,11 +59,16 @@ Requires: rpcbind nfs-utils
 Requires: iscsi-initiator-utils
 Requires: nbd
 Requires: net-tools iproute
+Requires: kernel-firmware
+Requires: ql2100-firmware
+Requires: ql2200-firmware
+Requires: ql23xx-firmware
+Requires: ql2400-firmware
+Requires: ql2500-firmware
 
 %description generic
 This package requires everything which is needed to build a generic
 all purpose initramfs.
-
 
 %prep
 %setup -q -n %{name}-%{version}%{?dashgittag}
@@ -101,6 +106,9 @@ rm -rf $RPM_BUILD_ROOT
 %doc README.generic
 
 %changelog
+* Sat Jul 04 2009 Harald Hoyer <harald@redhat.com> 0.4-1
+- version 0.4
+
 * Thu Jul 02 2009 Harald Hoyer <harald@redhat.com> 0.3-1
 - version 0.3
 
