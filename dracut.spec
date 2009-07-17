@@ -12,7 +12,7 @@
 %endif
 
 Name: dracut
-Version: 0.4
+Version: 0.5
 Release: 1%{?rdist}
 Summary: Initramfs generator using udev
 Group: System Environment/Base		
@@ -65,6 +65,7 @@ Requires: ql2200-firmware
 Requires: ql23xx-firmware
 Requires: ql2400-firmware
 Requires: ql2500-firmware
+Requires: plymouth-system-theme plymouth-theme-charge plymouth-theme-solar
 
 %description generic
 This package requires everything which is needed to build a generic
@@ -92,6 +93,7 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root,0755)
 %doc README HACKING TODO COPYING AUTHORS
 /sbin/dracut
+/sbin/dracut-gencmdline
 %if 0%{?with_switch_root}
 /sbin/switch_root
 %endif
@@ -106,6 +108,9 @@ rm -rf $RPM_BUILD_ROOT
 %doc README.generic
 
 %changelog
+* Fri Jul 17 2009 Harald Hoyer <harald@redhat.com> 0.5-1
+- version 0.5
+
 * Sat Jul 04 2009 Harald Hoyer <harald@redhat.com> 0.4-1
 - version 0.4
 
