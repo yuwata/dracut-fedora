@@ -13,7 +13,7 @@
 
 Name: dracut
 Version: 0.5
-Release: 1%{?rdist}
+Release: 2%{?rdist}
 Summary: Initramfs generator using udev
 Group: System Environment/Base		
 License: GPLv2+	
@@ -108,6 +108,9 @@ rm -rf $RPM_BUILD_ROOT
 %doc README.generic
 
 %changelog
+* Fri Jul 24 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.5-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_12_Mass_Rebuild
+
 * Fri Jul 17 2009 Harald Hoyer <harald@redhat.com> 0.5-1
 - version 0.5
 
