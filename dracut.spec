@@ -12,8 +12,8 @@
 %endif
 
 Name: dracut
-Version: 0.5
-Release: 2%{?rdist}
+Version: 0.7
+Release: 1%{?rdist}
 Summary: Initramfs generator using udev
 Group: System Environment/Base		
 License: GPLv2+	
@@ -38,6 +38,7 @@ Requires: filesystem >= 2.1.0, cpio, device-mapper, initscripts >= 8.63-1
 Requires: e2fsprogs >= 1.38-12, libselinux, libsepol, coreutils
 Requires: mdadm, elfutils-libelf, plymouth >= 0.7.0
 Requires: cryptsetup-luks
+Requires: bridge-utils
 %ifnarch s390 s390x
 Requires: dmraid
 Requires: kbd
@@ -51,25 +52,43 @@ BuildArch: noarch
 %description
 dracut is a new, event-driven initramfs infrastructure based around udev.
 
-
 %package generic
-Summary: Metapackage to build a generic initramfs
+Summary: Metapackage to build a generic initramfs with dracut
 Requires: %{name} = %{version}-%{release}
 Requires: rpcbind nfs-utils 
 Requires: iscsi-initiator-utils
 Requires: nbd
 Requires: net-tools iproute
-Requires: kernel-firmware
+Requires: plymouth-system-theme plymouth-theme-charge plymouth-theme-solar
+
+%description generic
+This package requires everything which is needed to build a generic
+all purpose initramfs with dracut.
+
+%package kernel
+Summary: Metapackage to build generic initramfs with dracut with only kernel modules
+Requires: %{name} = %{version}-%{release}
 Requires: ql2100-firmware
 Requires: ql2200-firmware
 Requires: ql23xx-firmware
 Requires: ql2400-firmware
 Requires: ql2500-firmware
-Requires: plymouth-system-theme plymouth-theme-charge plymouth-theme-solar
 
-%description generic
-This package requires everything which is needed to build a generic
-all purpose initramfs.
+%description kernel
+This package requires everything which is needed to build a initramfs with all
+kernel modules and firmware files needed by dracut modules.
+
+%package tools
+Summary: dracut tools to build the local initramfs
+Requires: %{name} = %{version}-%{release}
+Requires: ql2100-firmware
+Requires: ql2200-firmware
+Requires: ql23xx-firmware
+Requires: ql2400-firmware
+Requires: ql2500-firmware
+
+%description tools
+This package contains tools to assemble the local initrd and host configuration.
 
 %prep
 %setup -q -n %{name}-%{version}%{?dashgittag}
@@ -86,6 +105,9 @@ make install DESTDIR=$RPM_BUILD_ROOT sbindir=/sbin sysconfdir=/etc mandir=%{_man
 rm -f $RPM_BUILD_ROOT/sbin/switch_root
 %endif
 
+mkdir -p $RPM_BUILD_ROOT/boot/dracut
+mkdir -p $RPM_BUILD_ROOT/var/lib/dracut/overlay
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
@@ -93,7 +115,6 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root,0755)
 %doc README HACKING TODO COPYING AUTHORS
 /sbin/dracut
-/sbin/dracut-gencmdline
 %if 0%{?with_switch_root}
 /sbin/switch_root
 %endif
@@ -107,9 +128,25 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root,0755)
 %doc README.generic
 
+%files kernel 
+%defattr(-,root,root,0755)
+%doc README.kernel
+
+%files tools 
+%defattr(-,root,root,0755)
+%doc COPYING
+/sbin/dracut-gencmdline
+/sbin/dracut-catimages
+%dir /boot/dracut
+%dir /var/lib/dracut
+%dir /var/lib/dracut/overlay
+
 %changelog
-* Fri Jul 24 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.5-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_12_Mass_Rebuild
+* Fri Jul 24 2009 Harald Hoyer <harald@redhat.com> 0.7-1
+- version 0.7
+
+* Wed Jul 22 2009 Harald Hoyer <harald@redhat.com> 0.6-1
+- version 0.6
 
 * Fri Jul 17 2009 Harald Hoyer <harald@redhat.com> 0.5-1
 - version 0.5
