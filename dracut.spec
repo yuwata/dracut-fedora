@@ -1,7 +1,7 @@
 %if 0%{?fedora} < 12
 %define with_switch_root 1
 %else
-%define with_switch_root 1
+%define with_switch_root 0
 %endif
 
 %if %{defined gittag}
@@ -45,7 +45,7 @@ Requires: kbd
 %endif
 
 %if ! 0%{?with_switch_root}
-Requires: /sbin/switch_root
+Requires: util-linux-ng >= 2.16
 BuildArch: noarch
 %endif
 
@@ -142,6 +142,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Sun Jul 26 2009 Harald Hoyer <harald@redhat.com> 0.7-1
+- build without /sbin/switch_root
+
 * Fri Jul 24 2009 Harald Hoyer <harald@redhat.com> 0.7-1
 - version 0.7
 
