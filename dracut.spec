@@ -13,7 +13,7 @@
 
 Name: dracut
 Version: 0.7
-Release: 3%{?rdist}
+Release: 4%{?rdist}
 Summary: Initramfs generator using udev
 Group: System Environment/Base		
 License: GPLv2+	
@@ -40,6 +40,7 @@ Requires: mdadm, elfutils-libelf, plymouth >= 0.7.0
 Requires: cryptsetup-luks
 Requires: bridge-utils
 Requires: file
+Requires: bzip2
 %ifnarch s390 s390x
 Requires: dmraid
 Requires: kbd
@@ -143,8 +144,8 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
-* Mon Aug 03 2009 Warren Togami <wtogami@redhat.com> 0.7-3
-- require which and file
+* Mon Aug 03 2009 Warren Togami <wtogami@redhat.com> 0.7-4
+- require which, file, bzip2
 
 * Sun Jul 26 2009 Harald Hoyer <harald@redhat.com> 0.7-1
 - build without /sbin/switch_root
