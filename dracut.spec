@@ -12,8 +12,8 @@
 %endif
 
 Name: dracut
-Version: 0.7
-Release: 4%{?rdist}
+Version: 0.8
+Release: 1%{?rdist}
 Summary: Initramfs generator using udev
 Group: System Environment/Base		
 License: GPLv2+	
@@ -22,17 +22,18 @@ Source0: dracut-%{version}%{?dashgittag}.tar.bz2
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires: udev
 Requires: util-linux-ng
-Requires: module-init-tools
+Requires: module-init-tools >= 3.7-9
 Requires: cpio
 Requires: coreutils
 Requires: findutils
 Requires: binutils
 Requires: grep
 Requires: which
+Requires: mktemp >= 1.5-5
 Requires: mount
 Requires: bash
 Requires: /bin/sh 
-Requires: fileutils, grep, mount, gzip, tar, mktemp >= 1.5-5, findutils
+Requires: fileutils, gzip, tar
 Requires: lvm2 >= 2.02.33-9, dhclient
 Requires: filesystem >= 2.1.0, cpio, device-mapper, initscripts >= 8.63-1
 Requires: e2fsprogs >= 1.38-12, libselinux, libsepol, coreutils
@@ -82,12 +83,10 @@ kernel modules and firmware files needed by dracut modules.
 
 %package tools
 Summary: dracut tools to build the local initramfs
-Requires: %{name} = %{version}-%{release}
-Requires: ql2100-firmware
-Requires: ql2200-firmware
-Requires: ql23xx-firmware
-Requires: ql2400-firmware
-Requires: ql2500-firmware
+Requires: coreutils cryptsetup-luks device-mapper
+Requires: diffutils dmraid findutils gawk grep lvm2
+Requires: module-init-tools sed
+Requires: cpio gzip
 
 %description tools
 This package contains tools to assemble the local initrd and host configuration.
@@ -144,26 +143,29 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
-* Mon Aug 03 2009 Warren Togami <wtogami@redhat.com> 0.7-4
-- require which, file, bzip2
-
-* Sun Jul 26 2009 Harald Hoyer <harald@redhat.com> 0.7-1
-- build without /sbin/switch_root
+* Thu Aug 06 2009 Harald Hoyer <harald@redhat.com> 0.8-1
+- version 0.8 
+- see http://dracut.git.sourceforge.net/git/gitweb.cgi?p=dracut;a=blob_plain;f=NEWS
 
 * Fri Jul 24 2009 Harald Hoyer <harald@redhat.com> 0.7-1
 - version 0.7
+- see http://dracut.git.sourceforge.net/git/gitweb.cgi?p=dracut;a=blob_plain;f=NEWS
 
 * Wed Jul 22 2009 Harald Hoyer <harald@redhat.com> 0.6-1
 - version 0.6
+- see http://dracut.git.sourceforge.net/git/gitweb.cgi?p=dracut;a=blob_plain;f=NEWS
 
 * Fri Jul 17 2009 Harald Hoyer <harald@redhat.com> 0.5-1
 - version 0.5
+- see http://dracut.git.sourceforge.net/git/gitweb.cgi?p=dracut;a=blob_plain;f=NEWS
 
 * Sat Jul 04 2009 Harald Hoyer <harald@redhat.com> 0.4-1
 - version 0.4
+- see http://dracut.git.sourceforge.net/git/gitweb.cgi?p=dracut;a=blob_plain;f=NEWS
 
 * Thu Jul 02 2009 Harald Hoyer <harald@redhat.com> 0.3-1
 - version 0.3
+- see http://dracut.git.sourceforge.net/git/gitweb.cgi?p=dracut;a=blob_plain;f=NEWS
 
 * Wed Jul 01 2009 Harald Hoyer <harald@redhat.com> 0.2-1
 - version 0.2
