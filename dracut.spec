@@ -12,7 +12,7 @@
 %endif
 
 Name: dracut
-Version: 0.8
+Version: 0.9
 Release: 1%{?rdist}
 Summary: Initramfs generator using udev
 Group: System Environment/Base		
@@ -32,6 +32,7 @@ Requires: which
 Requires: mktemp >= 1.5-5
 Requires: mount
 Requires: bash
+Requires: dash
 Requires: /bin/sh 
 Requires: fileutils, gzip, tar
 Requires: lvm2 >= 2.02.33-9, dhclient
@@ -63,6 +64,7 @@ Requires: iscsi-initiator-utils
 Requires: nbd
 Requires: net-tools iproute
 Requires: plymouth-system-theme plymouth-theme-charge plymouth-theme-solar
+Requires: plymouth-theme-fade-in plymouth-theme-spinfinity
 
 %description generic
 This package requires everything which is needed to build a generic
@@ -143,6 +145,10 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Fri Aug 14 2009 Harald Hoyer <harald@redhat.com> 0.9-1
+- version 0.9
+- see http://dracut.git.sourceforge.net/git/gitweb.cgi?p=dracut;a=blob_plain;f=NEWS
+
 * Thu Aug 06 2009 Harald Hoyer <harald@redhat.com> 0.8-1
 - version 0.8 
 - see http://dracut.git.sourceforge.net/git/gitweb.cgi?p=dracut;a=blob_plain;f=NEWS
