@@ -13,7 +13,7 @@
 
 Name: dracut
 Version: 0.9
-Release: 1%{?rdist}
+Release: 2%{?rdist}
 Summary: Initramfs generator using udev
 Group: System Environment/Base		
 License: GPLv2+	
@@ -43,10 +43,7 @@ Requires: cryptsetup-luks
 Requires: bridge-utils
 Requires: file
 Requires: bzip2
-%ifnarch s390 s390x
 Requires: dmraid
-Requires: kbd
-%endif
 
 %if ! 0%{?with_switch_root}
 Requires: util-linux-ng >= 2.16
@@ -145,6 +142,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Mon Aug 24 2009 Harald Hoyer <harald@redhat.com> 0.9-2
+- removed kdb requirement (because s390x does not have it)
+
 * Fri Aug 14 2009 Harald Hoyer <harald@redhat.com> 0.9-1
 - version 0.9
 - see http://dracut.git.sourceforge.net/git/gitweb.cgi?p=dracut;a=blob_plain;f=NEWS
