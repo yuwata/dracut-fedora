@@ -13,7 +13,7 @@
 
 Name: dracut
 Version: 0.9
-Release: 3%{?rdist}
+Release: 4%{?rdist}
 Summary: Initramfs generator using udev
 Group: System Environment/Base		
 License: GPLv2+	
@@ -45,7 +45,7 @@ Requires: file
 Requires: bzip2
 Requires: dmraid
 %ifnarch s390 s390x
-Requires: kdb
+Requires: kbd
 %endif
 
 %if ! 0%{?with_switch_root}
@@ -144,6 +144,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Wed Aug 26 2009 Dennis Gilmore <dennis@ausil.us> 0.9-4
+- its kbd not kdb
+
 * Wed Aug 26 2009 Dennis Gilmore <dennis@ausil.us> 0.9-3
 - make arch specific. There are arch specific dependancies.
 - add back kdb requirement on arches where its used.
