@@ -13,7 +13,7 @@
 
 Name: dracut
 Version: 0.9
-Release: 5%{?rdist}
+Release: 6%{?rdist}
 Summary: Initramfs generator using udev
 Group: System Environment/Base		
 License: GPLv2+	
@@ -48,6 +48,7 @@ Requires: kbd
 
 %if ! 0%{?with_switch_root}
 Requires: util-linux-ng >= 2.16
+BuildArch: noarch
 %endif
 
 %description
@@ -142,6 +143,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Wed Aug 26 2009 Dennis Gilmore <dennis@ausil.us> 0.9-6
+- add BuildArch: noarch to actually make dracut noarch again
+
 * Wed Aug 26 2009 Karsten Hopp <karsten@redhat.com> 0.9-5
 - make it noarch again, just excluding kbd on s390x doesn't
   work as code needs to be changed as well.
