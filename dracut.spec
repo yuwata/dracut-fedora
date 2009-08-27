@@ -13,7 +13,7 @@
 
 Name: dracut
 Version: 0.9
-Release: 1%{?rdist}
+Release: 2%{?rdist}
 Summary: Initramfs generator using udev
 Group: System Environment/Base		
 License: GPLv2+	
@@ -52,6 +52,8 @@ Requires: kbd
 Requires: util-linux-ng >= 2.16
 BuildArch: noarch
 %endif
+
+Patch1: dracut-0.9-vol_id.patch
 
 %description
 dracut is a new, event-driven initramfs infrastructure based around udev.
@@ -95,6 +97,7 @@ This package contains tools to assemble the local initrd and host configuration.
 
 %prep
 %setup -q -n %{name}-%{version}%{?dashgittag}
+%patch1 -p1 
 
 %build
 make
@@ -145,6 +148,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Thu Aug 27 2009 Harald Hoyer <harald@redhat.com> 0.9-2
+- patch dracut to install vol_id
+
 * Fri Aug 14 2009 Harald Hoyer <harald@redhat.com> 0.9-1
 - version 0.9
 - see http://dracut.git.sourceforge.net/git/gitweb.cgi?p=dracut;a=blob_plain;f=NEWS

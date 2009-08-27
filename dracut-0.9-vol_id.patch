@@ -1,0 +1,11 @@
+diff -up dracut-0.9/modules.d/95udev-rules/install.vol_id dracut-0.9/modules.d/95udev-rules/install
+--- dracut-0.9/modules.d/95udev-rules/install.vol_id	2009-08-27 14:43:25.000000000 +0200
++++ dracut-0.9/modules.d/95udev-rules/install	2009-08-27 14:43:33.000000000 +0200
+@@ -32,6 +32,7 @@ hid2hci \
+ path_id \
+ scsi_id \
+ usb_id \
++vol_id \
+ ; do
+     [ -x /lib/udev/$i ] && dracut_install /lib/udev/$i
+ done
