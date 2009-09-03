@@ -13,12 +13,17 @@
 
 Name: dracut
 Version: 001
-Release: 1%{?rdist}
+Release: 2%{?rdist}
 Summary: Initramfs generator using udev
 Group: System Environment/Base		
 License: GPLv2+	
 URL: http://apps.sourceforge.net/trac/dracut/wiki
 Source0: dracut-%{version}%{?dashgittag}.tar.bz2
+
+Patch1: 0005-mdraid-add-grep-for-convenience.patch
+Patch2: 0006--crypt-dmraid-lvm-mdraid-cleanup-with-pre-pivot-30.patch
+
+
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires: udev
 Requires: util-linux-ng
@@ -102,10 +107,11 @@ This package contains tools to assemble the local initrd and host configuration.
 
 %prep
 %setup -q -n %{name}-%{version}%{?dashgittag}
+%patch1 -p1 
+%patch2 -p1 
 
 %build
 make
-
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -179,6 +185,10 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Thu Sep 03 2009 Harald Hoyer <harald@redhat.com> 001-2
+- fixed missing grep for md
+- reorder cleanup
+
 * Wed Sep 02 2009 Harald Hoyer <harald@redhat.com> 001-1
 - version 001
 - see http://dracut.git.sourceforge.net/git/gitweb.cgi?p=dracut/dracut;a=blob_plain;f=NEWS
