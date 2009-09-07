@@ -13,7 +13,7 @@
 
 Name: dracut
 Version: 001
-Release: 2%{?rdist}
+Release: 3%{?rdist}
 Summary: Initramfs generator using udev
 Group: System Environment/Base		
 License: GPLv2+	
@@ -22,7 +22,7 @@ Source0: dracut-%{version}%{?dashgittag}.tar.bz2
 
 Patch1: 0005-mdraid-add-grep-for-convenience.patch
 Patch2: 0006--crypt-dmraid-lvm-mdraid-cleanup-with-pre-pivot-30.patch
-
+Patch3: 0007-95udev-rules-fixed-c-p-bug-which-did-not-install-61.patch
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires: udev
@@ -109,6 +109,7 @@ This package contains tools to assemble the local initrd and host configuration.
 %setup -q -n %{name}-%{version}%{?dashgittag}
 %patch1 -p1 
 %patch2 -p1 
+%patch3 -p1 
 
 %build
 make
@@ -185,6 +186,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Mon Sep 07 2009 Harald Hoyer <harald@redhat.com> 001-3
+- fixed bug, which prevents installing 61-persistent-storage.rules (bug #520109)
+
 * Thu Sep 03 2009 Harald Hoyer <harald@redhat.com> 001-2
 - fixed missing grep for md
 - reorder cleanup
