@@ -13,7 +13,7 @@
 
 Name: dracut
 Version: 001
-Release: 3%{?rdist}
+Release: 4%{?rdist}
 Summary: Initramfs generator using udev
 Group: System Environment/Base		
 License: GPLv2+	
@@ -23,6 +23,10 @@ Source0: dracut-%{version}%{?dashgittag}.tar.bz2
 Patch1: 0005-mdraid-add-grep-for-convenience.patch
 Patch2: 0006--crypt-dmraid-lvm-mdraid-cleanup-with-pre-pivot-30.patch
 Patch3: 0007-95udev-rules-fixed-c-p-bug-which-did-not-install-61.patch
+Patch4: 0009-mdraid_start.sh-fixed-raid-activation.patch
+Patch5: 0010-add-scp-to-debug-module.patch
+Patch6: 0011-mdraid-cleanup-do-not-stop-mdraid-container.patch
+Patch7: 0012-added-initqueue-settled-and-refactored-code.patch
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires: udev
@@ -110,6 +114,10 @@ This package contains tools to assemble the local initrd and host configuration.
 %patch1 -p1 
 %patch2 -p1 
 %patch3 -p1 
+%patch4 -p1 
+%patch5 -p1 
+%patch6 -p1 
+%patch7 -p1 
 
 %build
 make
@@ -186,6 +194,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Mon Sep 07 2009 Harald Hoyer <harald@redhat.com> 001-4
+- fixed mdraid for IMSM
+
 * Mon Sep 07 2009 Harald Hoyer <harald@redhat.com> 001-3
 - fixed bug, which prevents installing 61-persistent-storage.rules (bug #520109)
 

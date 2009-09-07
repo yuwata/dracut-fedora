@@ -1,0 +1,461 @@
+From 273b197d75da0165ce5ad22bcab6697bc22dbb04 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 7 Sep 2009 17:40:04 +0200
+Subject: [PATCH 12/12] added initqueue-settled and refactored code
+
+---
+ modules.d/90crypt/cryptroot-ask.sh                 |    2 -
+ modules.d/90dmraid/61-dmraid-imsm.rules            |    4 +-
+ modules.d/90dmraid/dmraid.sh                       |   45 +++++++--------
+ .../90dmsquash-live/dmsquash-live-genrules.sh      |    4 +-
+ modules.d/90lvm/64-lvm-vol_id.rules                |   22 -------
+ modules.d/90lvm/64-lvm.rules                       |    9 ++-
+ modules.d/90lvm/install                            |    7 +--
+ modules.d/90lvm/lvm_scan.sh                        |   61 +++++++++----------
+ modules.d/90mdraid/65-md-incremental-imsm.rules    |   42 ++++++++++++-
+ modules.d/90mdraid/mdcontainer_start.sh            |    9 +--
+ modules.d/90mdraid/mdraid_start.sh                 |   11 +--
+ modules.d/95rootfs-block/block-genrules.sh         |    2 +-
+ modules.d/99base/dracut-lib.sh                     |    7 ++
+ modules.d/99base/init                              |   17 +++++-
+ modules.d/99base/initqueue                         |   34 +++++++++--
+ modules.d/99base/install                           |    1 +
+ 16 files changed, 160 insertions(+), 117 deletions(-)
+ delete mode 100644 modules.d/90lvm/64-lvm-vol_id.rules
+
+diff --git a/modules.d/90crypt/cryptroot-ask.sh b/modules.d/90crypt/cryptroot-ask.sh
+index a2ebde6..7872d64 100755
+--- a/modules.d/90crypt/cryptroot-ask.sh
++++ b/modules.d/90crypt/cryptroot-ask.sh
+@@ -35,6 +35,4 @@ fi
+ # mark device as asked
+ >> /tmp/cryptroot-asked-$2
+ 
+-udevsettle
+-
+ exit 0
+diff --git a/modules.d/90dmraid/61-dmraid-imsm.rules b/modules.d/90dmraid/61-dmraid-imsm.rules
+index 172e09f..d610643 100644
+--- a/modules.d/90dmraid/61-dmraid-imsm.rules
++++ b/modules.d/90dmraid/61-dmraid-imsm.rules
+@@ -11,7 +11,9 @@ ENV{ID_FS_TYPE}=="isw_raid_member", ENV{rd_NO_MDIMSM}!="?*", GOTO="dm_end"
+ ENV{ID_FS_TYPE}!="*_raid_member", , GOTO="dm_end"
+ TEST=="/tmp/.dmraid_scan-%k", GOTO="dm_end"
+ 
+-RUN+="/bin/sh -c '>/tmp/.dmraid_scan-%k; /bin/ln -fs /sbin/dmraid_scan /initqueue/dmraid_scan.sh'"
++RUN+="/sbin/initqueue --onetime --unique --settled /sbin/dmraid_scan"
++
++ACTION=="change", RUN+="/bin/sh -c '>/tmp/.dmraid_scan-%k'"
+ 
+ ENV{DEVTYPE}!="partition", \
+     RUN+="/sbin/partx -d --nr 1-1024 $env{DEVNAME}"
+diff --git a/modules.d/90dmraid/dmraid.sh b/modules.d/90dmraid/dmraid.sh
+index 2cd6773..e382233 100755
+--- a/modules.d/90dmraid/dmraid.sh
++++ b/modules.d/90dmraid/dmraid.sh
+@@ -1,28 +1,25 @@
+ #!/bin/sh
+ 
+-if $UDEV_QUEUE_EMPTY >/dev/null 2>&1; then
+-    [ -h "$job" ] && rm -f "$job"
+-    DM_RAIDS=$(getargs rd_DM_UUID=)
+-    # run dmraid if udev has settled
+-    info "Scanning for dmraid devices $DM_RAIDS"
+-    if [ -n "$DM_RAIDS" ]; then
+-	# only activate specified DM RAIDS
+-	SETS=$(dmraid -c -s)
+-	info "Found dmraid sets:"
+-	echo $SETS|vinfo
+-	for r in $DM_RAIDS; do 
+-	    for s in $SETS; do 
+-		if [ "${s##$r}" != "$s" ]; then
+-		    info "Activating $s"
+-		    dmraid -ay $s 2>&1 | vinfo
+-                    udevsettle
+-		fi
+-	    done
++. /lib/dracut-lib.sh
++
++DM_RAIDS=$(getargs rd_DM_UUID=)
++# run dmraid if udev has settled
++info "Scanning for dmraid devices $DM_RAIDS"
++if [ -n "$DM_RAIDS" ]; then
++    # only activate specified DM RAIDS
++    SETS=$(dmraid -c -s)
++    info "Found dmraid sets:"
++    echo $SETS|vinfo
++    for r in $DM_RAIDS; do 
++	for s in $SETS; do 
++	    if [ "${s##$r}" != "$s" ]; then
++		info "Activating $s"
++		dmraid -ay $s 2>&1 | vinfo
++                udevsettle
++	    fi
+ 	done
+-    else 
+-	# scan and activate all DM RAIDS
+-	dmraid -ay 2>&1 | vinfo
+-        udevsettle
+-    fi
++    done
++else 
++    # scan and activate all DM RAIDS
++    dmraid -ay 2>&1 | vinfo
+ fi
+-
+diff --git a/modules.d/90dmsquash-live/dmsquash-live-genrules.sh b/modules.d/90dmsquash-live/dmsquash-live-genrules.sh
+index a3858e1..4bf993d 100644
+--- a/modules.d/90dmsquash-live/dmsquash-live-genrules.sh
++++ b/modules.d/90dmsquash-live/dmsquash-live-genrules.sh
+@@ -4,9 +4,9 @@ if [ "${root%%:*}" = "live" ]; then
+     	${root#live:/dev/} 
+     printf 'SYMLINK=="%s", SYMLINK+="live"\n' \
+ 	${root#live:/dev/} 
+-    printf 'KERNEL=="%s", RUN+="/sbin/initqueue --onetime /sbin/dmsquash-live-root $env{DEVNAME}"\n' \
++    printf 'KERNEL=="%s", RUN+="/sbin/initqueue --onetime --unique /sbin/dmsquash-live-root $env{DEVNAME}"\n' \
+     	${root#live:/dev/} 
+-    printf 'SYMLINK=="%s", RUN+="/sbin/initqueue --onetime /sbin/dmsquash-live-root $env{DEVNAME}"\n' \
++    printf 'SYMLINK=="%s", RUN+="/sbin/initqueue --onetime --unique /sbin/dmsquash-live-root $env{DEVNAME}"\n' \
+ 	${root#live:/dev/} 
+ 
+     ) >> /etc/udev/rules.d/99-live-mount.rules
+diff --git a/modules.d/90lvm/64-lvm-vol_id.rules b/modules.d/90lvm/64-lvm-vol_id.rules
+deleted file mode 100644
+index 4f349a6..0000000
+--- a/modules.d/90lvm/64-lvm-vol_id.rules
++++ /dev/null
+@@ -1,22 +0,0 @@
+-# hacky rules to try to activate lvm when we get new block devs...
+-#
+-# Copyright 2008, Red Hat, Inc.
+-# Jeremy Katz <katzj@redhat.com>
+-
+-
+-SUBSYSTEM!="block", GOTO="lvm_end"
+-ACTION!="add|change", GOTO="lvm_end"
+-KERNEL=="dm-[0-9]*", ACTION!="change", GOTO="lvm_end"
+-
+-ENV{ID_FS_TYPE}=="LVM2_member", \
+-    TEST!="/tmp/.lvm_scan-%k", \
+-    RUN+="/bin/sh -c '>/tmp/.lvm_scan-%k; /bin/ln -fs /sbin/lvm_scan /initqueue/lvm_scan.sh'"
+-
+-KERNEL!="dm-[0-9]*", GOTO="lvm_end"
+-
+-OPTIONS="link_priority=-100"
+-ENV{ID_FS_USAGE}=="filesystem|other|crypto", ENV{ID_FS_UUID_ENC}=="?*", SYMLINK+="disk/by-uuid/$env{ID_FS_UUID_ENC}"
+-ENV{ID_FS_USAGE}=="filesystem|other", ENV{ID_FS_LABEL_ENC}=="?*", SYMLINK+="disk/by-label/$env{ID_FS_LABEL_ENC}"
+-
+-
+-LABEL="lvm_end"
+diff --git a/modules.d/90lvm/64-lvm.rules b/modules.d/90lvm/64-lvm.rules
+index 0a053ae..a200add 100644
+--- a/modules.d/90lvm/64-lvm.rules
++++ b/modules.d/90lvm/64-lvm.rules
+@@ -7,9 +7,12 @@
+ SUBSYSTEM!="block", GOTO="lvm_end"
+ ACTION!="add|change", GOTO="lvm_end"
+ KERNEL=="dm-[0-9]*", ACTION=="add", GOTO="lvm_end"
++ENV{ID_FS_TYPE}!="LVM2_member", GOTO="lvm_end"
+ 
+-ENV{ID_FS_TYPE}=="LVM2_member", \
+-    TEST!="/tmp/.lvm_scan-%k", \
+-    RUN+="/bin/sh -c '>/tmp/.lvm_scan-%k; /bin/ln -fs /sbin/lvm_scan /initqueue/lvm_scan.sh'"
++TEST!="/tmp/.lvm_change-%k", \
++    RUN+="/sbin/initqueue --settled --onetime --unique /sbin/lvm_scan"
++
++ACTION=="add", RUN+="/bin/sh -c '>/tmp/.lvm_scan-%k;'"
++ACTION=="change", RUN+="/bin/sh -c '>/tmp/.lvm_change-%k;>/tmp/.lvm_scan-%k;'"
+ 
+ LABEL="lvm_end"
+diff --git a/modules.d/90lvm/install b/modules.d/90lvm/install
+index ad4d2e2..c0952e2 100755
+--- a/modules.d/90lvm/install
++++ b/modules.d/90lvm/install
+@@ -1,10 +1,7 @@
+ #!/bin/bash
+ inst lvm
+-if [ -x /lib/udev/vol_id ]; then
+-    inst_rules "$moddir/64-lvm-vol_id.rules" 64-device-mapper.rules
+-else
+-    inst_rules "$moddir/64-lvm.rules" 64-device-mapper.rules
+-fi
++
++inst_rules "$moddir/64-lvm.rules" 64-lvm.rules
+ 
+ if [[ $hostonly ]]; then 
+     [ -f /etc/lvm/lvm.conf ] && inst /etc/lvm/lvm.conf
+diff --git a/modules.d/90lvm/lvm_scan.sh b/modules.d/90lvm/lvm_scan.sh
+index a40b677..f606055 100755
+--- a/modules.d/90lvm/lvm_scan.sh
++++ b/modules.d/90lvm/lvm_scan.sh
+@@ -1,38 +1,35 @@
+ #!/bin/sh
+ 
+-if $UDEV_QUEUE_EMPTY >/dev/null 2>&1; then
+-    [ -h "$job" ] && rm -f "$job"
+-    # run lvm scan if udev has settled
++# run lvm scan if udev has settled
+ 
+-    VGS=$(getargs rd_LVM_VG=)
++. /lib/dracut-lib.sh
+ 
+-    [ -d /etc/lvm ] || mkdir -p /etc/lvm
+-    # build a list of devices to scan
+-    lvmdevs=$(
+-	for f in /tmp/.lvm_scan-*; do
+-	    [ -e "$f" ] || continue
+-	    echo -n "${f##/tmp/.lvm_scan-} "
+-	done
+-	)
++VGS=$(getargs rd_LVM_VG=)
+ 
+-    if [ ! -e /etc/lvm/lvm.conf ]; then 
+-        {
+-	    echo 'devices {';
+-	    echo -n '    filter = [ '
+-	    for dev in $lvmdevs; do
+-		printf '"a|^/dev/%s$|", ' $dev;
+-	    done;
+-	    echo '"r/.*/" ]';
+-	    echo 'types = [ "blkext", 1024 , "cciss0", 1024 ]'
+-	    echo '}';	  
+-        } > /etc/lvm/lvm.conf
+-	lvmwritten=1
+-    fi
+-    info "Scanning devices $lvmdevs for LVM volume groups $VGS"
+-    lvm vgscan 2>&1 | vinfo
+-    lvm vgchange -ay $VGS 2>&1 | vinfo
+-    [ "$lvmwritten" ] && rm -f /etc/lvm/lvm.conf
+-    unset lvmwritten
+-    udevsettle
+-fi
++[ -d /etc/lvm ] || mkdir -p /etc/lvm
++# build a list of devices to scan
++lvmdevs=$(
++    for f in /tmp/.lvm_scan-*; do
++	[ -e "$f" ] || continue
++	echo -n "${f##/tmp/.lvm_scan-} "
++    done
++)
+ 
++if [ ! -e /etc/lvm/lvm.conf ]; then 
++    {
++	echo 'devices {';
++	echo -n '    filter = [ '
++	for dev in $lvmdevs; do
++	    printf '"a|^/dev/%s$|", ' $dev;
++	done;
++	echo '"r/.*/" ]';
++	echo 'types = [ "blkext", 1024 , "cciss0", 1024 ]'
++	echo '}';	  
++    } > /etc/lvm/lvm.conf
++    lvmwritten=1
++fi
++info "Scanning devices $lvmdevs for LVM volume groups $VGS"
++lvm vgscan 2>&1 | vinfo
++lvm vgchange -ay $VGS 2>&1 | vinfo
++[ "$lvmwritten" ] && rm -f /etc/lvm/lvm.conf
++unset lvmwritten
+diff --git a/modules.d/90mdraid/65-md-incremental-imsm.rules b/modules.d/90mdraid/65-md-incremental-imsm.rules
+index 5104fc5..0a06988 100644
+--- a/modules.d/90mdraid/65-md-incremental-imsm.rules
++++ b/modules.d/90mdraid/65-md-incremental-imsm.rules
+@@ -20,12 +20,46 @@ ENV{DEVTYPE}!="partition", \
+ 
+ RUN+="/sbin/mdadm -I --no-degraded $env{DEVNAME}"
+ 
+-RUN+="/bin/sh -c '>/tmp/.mdraid_start-%k; /bin/ln -s /sbin/mdraid_start /initqueue/mdraid_start.sh'"
+-
+ LABEL="md_inc_end"
+ 
++#
++# Handle non-container raid arrays
++#
++ACTION=="add|change", \
++	KERNEL=="md[0-9]*|md/*", \
++	ENV{DEVTYPE}!="partition", \
++	ENV{MD_LEVEL}!="container", \
++	GOTO="do_raidstart"
++
++GOTO="end_raidstart"
++
++LABEL="do_raidstart"
++
++TEST!="/tmp/.mdraid_start-%k", \
++	RUN+="/sbin/initqueue --settled --onetime --unique /sbin/mdraid_start"
++
++ACTION=="change", \
++	RUN+="/bin/sh -c '>/tmp/.mdraid_start-%k'"
++
++LABEL="end_raidstart"
++
++#
++# Handle container raid arrays
++#
+ ACTION=="add|change", \
++	KERNEL=="md[0-9]*|md/*", \
+ 	ENV{DEVTYPE}!="partition", \
+ 	ENV{MD_LEVEL}=="container", \
+-	TEST!="/tmp/.mdcontainer_start-%k", \
+-	RUN+="/bin/sh -c '>/tmp/.mdcontainer_start-%k; initqueue /sbin/mdcontainer_start $env{DEVNAME}'"
++	GOTO="do_container"
++
++GOTO="end_container"
++
++LABEL="do_container"
++
++TEST!="/tmp/.mdcontainer_start-%k", \
++	RUN+="/sbin/initqueue --settled --onetime /sbin/mdcontainer_start $env{DEVNAME}"
++
++ACTION=="change", \
++	RUN+="/bin/sh -c '>/tmp/.mdcontainer_start-%k'"
++
++LABEL="end_container"
+diff --git a/modules.d/90mdraid/mdcontainer_start.sh b/modules.d/90mdraid/mdcontainer_start.sh
+index 403b62b..4cb282d 100755
+--- a/modules.d/90mdraid/mdcontainer_start.sh
++++ b/modules.d/90mdraid/mdcontainer_start.sh
+@@ -1,9 +1,6 @@
+ #!/bin/sh
+ . /lib/dracut-lib.sh
+ 
+-if $UDEV_QUEUE_EMPTY >/dev/null 2>&1; then
+-    # run mdadm if udev has settled
+-    md=$1
+-    # and activate any containers
+-    mdadm -IR $md 2>&1 | vinfo
+-fi
++md=$1
++# and activate any containers
++mdadm -IR $md 2>&1 | vinfo
+diff --git a/modules.d/90mdraid/mdraid_start.sh b/modules.d/90mdraid/mdraid_start.sh
+index 55e7d9c..ee9362c 100755
+--- a/modules.d/90mdraid/mdraid_start.sh
++++ b/modules.d/90mdraid/mdraid_start.sh
+@@ -1,9 +1,6 @@
+ #!/bin/sh
+ 
+-if $UDEV_QUEUE_EMPTY >/dev/null 2>&1; then
+-    [ -h "$job" ] && rm -f "$job"
+-    # run mdadm if udev has settled
+-    info "Assembling MD RAID arrays"
+-    mdadm -IRs 2>&1 | vinfo
+-    udevsettle 
+-fi
++. /lib/dracut-lib.sh
++# run mdadm if udev has settled
++info "Assembling MD RAID arrays"
++mdadm -IRs 2>&1 | vinfo
+diff --git a/modules.d/95rootfs-block/block-genrules.sh b/modules.d/95rootfs-block/block-genrules.sh
+index 10471ea..f12a6b9 100644
+--- a/modules.d/95rootfs-block/block-genrules.sh
++++ b/modules.d/95rootfs-block/block-genrules.sh
+@@ -8,5 +8,5 @@ if [ "${root%%:*}" = "block" ]; then
+     (
+     printf '[ -e "%s" ] && { ln -s "%s" /dev/root; rm "$job"; }\n' \
+ 	"${root#block:}" "${root#block:}"
+-    ) >> /initqueue/blocksymlink.sh
++    ) >> /initqueue-settled/blocksymlink.sh
+ fi
+diff --git a/modules.d/99base/dracut-lib.sh b/modules.d/99base/dracut-lib.sh
+index a717bb4..9e33cf3 100644
+--- a/modules.d/99base/dracut-lib.sh
++++ b/modules.d/99base/dracut-lib.sh
+@@ -117,3 +117,10 @@ udevsettle() {
+         udevadm settle --timeout=30
+     fi
+ }
++
++if [ -e /proc/cmdline ]; then
++	if getarg rdinitdebug; then
++	    set -x
++	fi
++fi
++
+diff --git a/modules.d/99base/init b/modules.d/99base/init
+index d94a3a2..14505ed 100755
+--- a/modules.d/99base/init
++++ b/modules.d/99base/init
+@@ -138,7 +138,22 @@ while :; do
+     [ -n "$queuetriggered" ] && continue
+ 
+     if $UDEV_QUEUE_EMPTY >/dev/null 2>&1; then
+-        # no more udev jobs
++        unset queuetriggered
++	for job in /initqueue-settled/*.sh; do
++	    [ -e "$job" ] || break
++
++	    queuetriggered="1"
++
++            job=$job . $job
++	    
++            # bail out, if we have mounted the root filesystem
++            [ -d "$NEWROOT/proc" ] && break 2;
++
++            # check if root can be mounted
++            [ -e /dev/root ] && break 2;
++	done
++
++        # no more udev jobs and queues empty.
+         sleep 0.5
+         i=$(($i+1))
+         [ $i -gt 20 ] \
+diff --git a/modules.d/99base/initqueue b/modules.d/99base/initqueue
+index a5c6ef6..b2d4406 100755
+--- a/modules.d/99base/initqueue
++++ b/modules.d/99base/initqueue
+@@ -1,12 +1,32 @@
+ #!/bin/sh
+ 
+-if [ "$1" = "--onetime" ]; then
+-    onetime="yes"
+-    shift
++. /lib/dracut-lib.sh
++
++while [ $# -gt 0 ]; do
++    case "$1" in
++	--onetime)
++	    onetime="yes"
++	    shift;;
++	--settled)
++	    settled="-settled"
++	    shift;;
++	--unique)
++	    unique="yes"
++	    shift;;
++	*)
++	    break;;
++    esac
++done
++
++if [ -z "$unique" ]; then
++	job=$$
++else
++	job=${1##*/}
+ fi
+-echo "$@" > /tmp/$$.sh
++
++echo "$@" > /tmp/${job}.sh
+ if [ -n "$onetime" ]; then
+-   echo '[ -e "$job" ] && rm "$job"' >> /tmp/$$.sh
++   echo '[ -e "$job" ] && rm "$job"' >> /tmp/${job}.sh
+ fi
+-mv /tmp/$$.sh /initqueue/
+->> /initqueue/work
++mv -f /tmp/${job}.sh /initqueue${settled}/
++[ -z "$settled" ] && >> /initqueue/work
+diff --git a/modules.d/99base/install b/modules.d/99base/install
+index bc2336a..08ca8f0 100755
+--- a/modules.d/99base/install
++++ b/modules.d/99base/install
+@@ -9,6 +9,7 @@ fi
+ inst "$moddir/init" "/init"
+ inst "$moddir/initqueue" "/sbin/initqueue"
+ mkdir -p ${initdir}/initqueue
++mkdir -p ${initdir}/initqueue-settled
+ mkdir -p ${initdir}/tmp
+ # Bail out if switch_root does not exist
+ if which switch_root >/dev/null 2>&1; then
+-- 
+1.6.2.5
+
