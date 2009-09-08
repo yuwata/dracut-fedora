@@ -13,7 +13,7 @@
 
 Name: dracut
 Version: 001
-Release: 4%{?rdist}
+Release: 5%{?rdist}
 Summary: Initramfs generator using udev
 Group: System Environment/Base		
 License: GPLv2+	
@@ -118,6 +118,7 @@ This package contains tools to assemble the local initrd and host configuration.
 %patch5 -p1 
 %patch6 -p1 
 %patch7 -p1 
+chmod a+x modules.d/*/*.sh
 
 %build
 make
@@ -194,6 +195,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Tue Sep 08 2009 Harald Hoyer <harald@redhat.com> 001-5
+- patch does not honor file modes, fixed them manually
+
 * Mon Sep 07 2009 Harald Hoyer <harald@redhat.com> 001-4
 - fixed mdraid for IMSM
 
