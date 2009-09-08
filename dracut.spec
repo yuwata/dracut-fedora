@@ -1,3 +1,5 @@
+%define gittag f5c4374d
+
 %if 0%{?fedora} < 12
 %define with_switch_root 1
 %else
@@ -13,21 +15,12 @@
 
 Name: dracut
 Version: 001
-Release: 5%{?rdist}
+Release: 6%{?rdist}
 Summary: Initramfs generator using udev
 Group: System Environment/Base		
 License: GPLv2+	
 URL: http://apps.sourceforge.net/trac/dracut/wiki
 Source0: dracut-%{version}%{?dashgittag}.tar.bz2
-
-Patch1: 0005-mdraid-add-grep-for-convenience.patch
-Patch2: 0006--crypt-dmraid-lvm-mdraid-cleanup-with-pre-pivot-30.patch
-Patch3: 0007-95udev-rules-fixed-c-p-bug-which-did-not-install-61.patch
-Patch4: 0009-mdraid_start.sh-fixed-raid-activation.patch
-Patch5: 0010-add-scp-to-debug-module.patch
-Patch6: 0011-mdraid-cleanup-do-not-stop-mdraid-container.patch
-Patch7: 0012-added-initqueue-settled-and-refactored-code.patch
-
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires: udev
 Requires: util-linux-ng
@@ -111,17 +104,10 @@ This package contains tools to assemble the local initrd and host configuration.
 
 %prep
 %setup -q -n %{name}-%{version}%{?dashgittag}
-%patch1 -p1 
-%patch2 -p1 
-%patch3 -p1 
-%patch4 -p1 
-%patch5 -p1 
-%patch6 -p1 
-%patch7 -p1 
-chmod a+x modules.d/*/*.sh
 
 %build
 make
+
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -195,6 +181,10 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Tue Sep 08 2009 Harald Hoyer <harald@redhat.com> 001-6
+- fixed several problems with md raid containers
+- fixed selinux policy loading
+
 * Tue Sep 08 2009 Harald Hoyer <harald@redhat.com> 001-5
 - patch does not honor file modes, fixed them manually
 
