@@ -14,7 +14,7 @@
 
 Name: dracut
 Version: 001
-Release: 8%{?rdist}
+Release: 9%{?rdist}
 Summary: Initramfs generator using udev
 Group: System Environment/Base		
 License: GPLv2+	
@@ -45,6 +45,7 @@ Requires: file
 Requires: bzip2
 Requires: dmraid
 Requires: kbd
+Requires: plymouth-scripts
 
 %if ! 0%{?with_switch_root}
 Requires: util-linux-ng >= 2.16
@@ -179,6 +180,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Wed Sep 09 2009 Harald Hoyer <harald@redhat.com> 001-8
+- added Requires: plymouth-scripts
+
 * Wed Sep 09 2009 Harald Hoyer <harald@redhat.com> 001-8
 - plymouth: use plymouth-populate-initrd
 - add add_drivers for dracut and dracut.conf
