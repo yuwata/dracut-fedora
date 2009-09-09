@@ -1,4 +1,4 @@
-%define gittag 71094bee
+%define gittag 6f0e469d
 %if 0%{?fedora} < 12
 %define with_switch_root 1
 %else
@@ -14,7 +14,7 @@
 
 Name: dracut
 Version: 001
-Release: 7%{?rdist}
+Release: 8%{?rdist}
 Summary: Initramfs generator using udev
 Group: System Environment/Base		
 License: GPLv2+	
@@ -43,7 +43,6 @@ Requires: mdadm, elfutils-libelf, plymouth >= 0.7.0
 Requires: cryptsetup-luks
 Requires: file
 Requires: bzip2
-Requires: policycoreutils
 Requires: dmraid
 Requires: kbd
 
@@ -180,6 +179,11 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Wed Sep 09 2009 Harald Hoyer <harald@redhat.com> 001-8
+- plymouth: use plymouth-populate-initrd
+- add add_drivers for dracut and dracut.conf
+- do not mount /proc and /selinux manually in selinux-load-policy
+
 * Wed Sep 09 2009 Harald Hoyer <harald@redhat.com> 001-7
 - add scsi_wait_scan to be sure everything was scanned
 
