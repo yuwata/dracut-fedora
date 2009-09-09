@@ -1,5 +1,4 @@
-%define gittag f5c4374d
-
+%define gittag 71094bee
 %if 0%{?fedora} < 12
 %define with_switch_root 1
 %else
@@ -15,7 +14,7 @@
 
 Name: dracut
 Version: 001
-Release: 6%{?rdist}
+Release: 7%{?rdist}
 Summary: Initramfs generator using udev
 Group: System Environment/Base		
 License: GPLv2+	
@@ -181,6 +180,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Wed Sep 09 2009 Harald Hoyer <harald@redhat.com> 001-7
+- add scsi_wait_scan to be sure everything was scanned
+
 * Tue Sep 08 2009 Harald Hoyer <harald@redhat.com> 001-6
 - fixed several problems with md raid containers
 - fixed selinux policy loading
