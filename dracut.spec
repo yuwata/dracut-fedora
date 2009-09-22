@@ -1,4 +1,4 @@
-%define gittag 8eb16b08
+%define gittag 23aa2048
 %if 0%{?fedora} < 12
 %define with_switch_root 1
 %else
@@ -14,7 +14,7 @@
 
 Name: dracut
 Version: 002
-Release: 3%{?rdist}
+Release: 4%{?rdist}
 Summary: Initramfs generator using udev
 Group: System Environment/Base		
 License: GPLv2+	
@@ -181,6 +181,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Mon Sep 21 2009 Warren Togami <wtogami@redhat.com> 002-4
+- Fix LiveCD boot regression
+
 * Mon Sep 21 2009 Harald Hoyer <harald@redhat.com> 002-3
 - bail out if selinux policy could not be loaded and 
   selinux=0 not specified on kernel command line 
