@@ -1,4 +1,4 @@
-%define gittag 6d902042
+%define gittag b9c4654a 
 %if 0%{?fedora} < 12
 %define with_switch_root 1
 %else
@@ -14,7 +14,7 @@
 
 Name: dracut
 Version: 002
-Release: 6%{?rdist}
+Release: 7%{?rdist}
 Summary: Initramfs generator using udev
 Group: System Environment/Base		
 License: GPLv2+	
@@ -181,6 +181,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Wed Sep 23 2009 harald@redhat.com 002-7
+- build with the correct tarball
+
 * Wed Sep 23 2009 harald@redhat.com 002-6
 - add new device mapper udev rules and dmeventd 
   bug 525319, 525015
