@@ -1,4 +1,4 @@
-%define gittag 845dd502
+%define gittag 6d902042
 %if 0%{?fedora} < 12
 %define with_switch_root 1
 %else
@@ -14,7 +14,7 @@
 
 Name: dracut
 Version: 002
-Release: 5%{?rdist}
+Release: 6%{?rdist}
 Summary: Initramfs generator using udev
 Group: System Environment/Base		
 License: GPLv2+	
@@ -181,6 +181,10 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Wed Sep 23 2009 harald@redhat.com 002-6
+- add new device mapper udev rules and dmeventd 
+  bug 525319, 525015
+
 * Wed Sep 23 2009 Warren Togami <wtogami@redaht.com> 002-5
 - Revert back to -3, Add umount back to initrd
   This makes no functional difference to LiveCD.  See Bug #525319
