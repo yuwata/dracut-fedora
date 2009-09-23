@@ -1,4 +1,4 @@
-%define gittag 23aa2048
+%define gittag 845dd502
 %if 0%{?fedora} < 12
 %define with_switch_root 1
 %else
@@ -14,7 +14,7 @@
 
 Name: dracut
 Version: 002
-Release: 4%{?rdist}
+Release: 5%{?rdist}
 Summary: Initramfs generator using udev
 Group: System Environment/Base		
 License: GPLv2+	
@@ -181,6 +181,10 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Wed Sep 23 2009 Warren Togami <wtogami@redaht.com> 002-5
+- Revert back to -3, Add umount back to initrd
+  This makes no functional difference to LiveCD.  See Bug #525319
+
 * Mon Sep 21 2009 Warren Togami <wtogami@redhat.com> 002-4
 - Fix LiveCD boot regression
 
