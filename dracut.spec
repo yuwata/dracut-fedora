@@ -1,4 +1,4 @@
-%define gittag b9c4654a 
+%define gittag 845dd502
 %if 0%{?fedora} < 12
 %define with_switch_root 1
 %else
@@ -14,7 +14,7 @@
 
 Name: dracut
 Version: 002
-Release: 7%{?rdist}
+Release: 8%{?rdist}
 Summary: Initramfs generator using udev
 Group: System Environment/Base		
 License: GPLv2+	
@@ -181,6 +181,10 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Fri Sep 25 2009 Warren Togami <wtogami@redhat.com> 002-8
+- revert back to dracut-002-5 tarball 845dd502
+  lvm2 was reverted to pre-udev
+
 * Wed Sep 23 2009 harald@redhat.com 002-7
 - build with the correct tarball
 
