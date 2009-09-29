@@ -1,4 +1,4 @@
-%define gittag 845dd502
+%define gittag 99fd62e3
 %if 0%{?fedora} < 12
 %define with_switch_root 1
 %else
@@ -14,7 +14,7 @@
 
 Name: dracut
 Version: 002
-Release: 8%{?rdist}
+Release: 9%{?rdist}
 Summary: Initramfs generator using udev
 Group: System Environment/Base		
 License: GPLv2+	
@@ -148,7 +148,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/dracut/modules.d/95debug
 %{_datadir}/dracut/modules.d/95resume
 %{_datadir}/dracut/modules.d/95rootfs-block
-%{_datadir}/dracut/modules.d/95s390
+%{_datadir}/dracut/modules.d/95dasd
 %{_datadir}/dracut/modules.d/95terminfo
 %{_datadir}/dracut/modules.d/95udev-rules
 %{_datadir}/dracut/modules.d/95udev-rules.ub810
@@ -181,14 +181,18 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Tue Sep 29 2009 Harald Hoyer <harald@redhat.com> 002-9
+- make install of new dm/lvm udev rules optionally
+- correct dasd module typo
+
 * Fri Sep 25 2009 Warren Togami <wtogami@redhat.com> 002-8
 - revert back to dracut-002-5 tarball 845dd502
   lvm2 was reverted to pre-udev
 
-* Wed Sep 23 2009 harald@redhat.com 002-7
+* Wed Sep 23 2009 Harald Hoyer <harald@redhat.com> 002-7
 - build with the correct tarball
 
-* Wed Sep 23 2009 harald@redhat.com 002-6
+* Wed Sep 23 2009 Harald Hoyer <harald@redhat.com> 002-6
 - add new device mapper udev rules and dmeventd 
   bug 525319, 525015
 
