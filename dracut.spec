@@ -1,4 +1,4 @@
-%define gittag a8a3ca51
+%define gittag 8f397a9b
 %if 0%{?fedora} < 12
 %define with_switch_root 1
 %else
@@ -14,7 +14,7 @@
 
 Name: dracut
 Version: 002
-Release: 11%{?rdist}
+Release: 12%{?rdist}
 Summary: Initramfs generator using udev
 Group: System Environment/Base		
 License: GPLv2+	
@@ -184,6 +184,10 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Tue Oct 06 2009 Harald Hoyer <harald@redhat.com> 002-12
+- add missing loginit helper
+- corrected dracut manpage
+
 * Thu Oct 01 2009 Harald Hoyer <harald@redhat.com> 002-11
 - fixed dracut-gencmdline for root=UUID or LABEL
 
