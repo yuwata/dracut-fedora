@@ -1,0 +1,18 @@
+commit 8d0a55cfac2b7dc2b3ce71235dce40fef17e9953
+Author: Harald Hoyer <harald@redhat.com>
+Date:   Wed Oct 7 12:48:47 2009 +0200
+
+    do not use init= arg as first argument
+
+diff --git a/modules.d/99base/init b/modules.d/99base/init
+index 54d35cc..a5b565c 100755
+--- a/modules.d/99base/init
++++ b/modules.d/99base/init
+@@ -227,6 +227,7 @@ if getarg init= >/dev/null ; then
+     read CLINE </proc/cmdline
+     CLINE=${CLINE#*init=}
+     set $CLINE
++    shift
+     for x in "$@"; do
+         for s in $ignoreargs; do       
+             [ "${x%%=*}" = $s ] && continue 2

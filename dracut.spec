@@ -14,12 +14,17 @@
 
 Name: dracut
 Version: 002
-Release: 12%{?rdist}
+Release: 13%{?rdist}
 Summary: Initramfs generator using udev
 Group: System Environment/Base		
 License: GPLv2+	
 URL: http://apps.sourceforge.net/trac/dracut/wiki
 Source0: dracut-%{version}%{?dashgittag}.tar.bz2
+
+Patch1: dracut-git8d0a55cfac2b7dc2b3ce71235dce40fef17e9953.patch
+Patch2: dracut-gitcdc74b198ebbda69f550a7d744534e41cffd7e25.patch
+Patch3: dracut-gitac36d5db7e85ff2861b62ab7212655d49eee1b42.patch
+
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires: udev
 Requires: util-linux-ng
@@ -103,6 +108,9 @@ This package contains tools to assemble the local initrd and host configuration.
 
 %prep
 %setup -q -n %{name}-%{version}%{?dashgittag}
+%patch1 -p1
+%patch2 -p1
+%patch3 -p1
 
 %build
 make
@@ -184,6 +192,11 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Wed Oct 07 2009 Harald Hoyer <harald@redhat.com> 002-13
+- fixed init=<command> handling
+- kill loginit if "rdinitdebug" specified
+- run dmsquash-live-root after udev has settled (bug #527514)
+
 * Tue Oct 06 2009 Harald Hoyer <harald@redhat.com> 002-12
 - add missing loginit helper
 - corrected dracut manpage
