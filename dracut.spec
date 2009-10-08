@@ -1,4 +1,5 @@
-%define gittag 99fd62e3
+%define gittag 218292f6
+%define gittag 218292f6
 %if 0%{?fedora} < 12
 %define with_switch_root 1
 %else
@@ -14,7 +15,7 @@
 
 Name: dracut
 Version: 002
-Release: 9%{?rdist}
+Release: 14%{?rdist}
 Summary: Initramfs generator using udev
 Group: System Environment/Base		
 License: GPLv2+	
@@ -120,6 +121,8 @@ rm -f $RPM_BUILD_ROOT/sbin/switch_root
 
 mkdir -p $RPM_BUILD_ROOT/boot/dracut
 mkdir -p $RPM_BUILD_ROOT/var/lib/dracut/overlay
+mkdir -p $RPM_BUILD_ROOT%{_localstatedir}/log
+touch $RPM_BUILD_ROOT%{_localstatedir}/log/dracut.log
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -149,11 +152,14 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/dracut/modules.d/95resume
 %{_datadir}/dracut/modules.d/95rootfs-block
 %{_datadir}/dracut/modules.d/95dasd
+%{_datadir}/dracut/modules.d/95zfcp
+%{_datadir}/dracut/modules.d/95ccw
 %{_datadir}/dracut/modules.d/95terminfo
 %{_datadir}/dracut/modules.d/95udev-rules
 %{_datadir}/dracut/modules.d/95udev-rules.ub810
 %{_datadir}/dracut/modules.d/98syslog
 %{_datadir}/dracut/modules.d/99base
+%attr(0644,root,root) %ghost %config(missingok,noreplace) %{_localstatedir}/log/dracut.log
 
 %files network
 %defattr(-,root,root,0755)
@@ -162,6 +168,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/dracut/modules.d/95iscsi
 %{_datadir}/dracut/modules.d/95nbd
 %{_datadir}/dracut/modules.d/95nfs
+%{_datadir}/dracut/modules.d/45ifcfg
 
 %files kernel 
 %defattr(-,root,root,0755)
@@ -181,6 +188,41 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Thu Oct 08 2009 Harald Hoyer <harald@redhat.com> 002-14
+- add multinic support
+- add s390 zfcp support
+- add s390 network support
+
+* Wed Oct 07 2009 Harald Hoyer <harald@redhat.com> 002-13
+- fixed init=<command> handling
+- kill loginit if "rdinitdebug" specified
+- run dmsquash-live-root after udev has settled (bug #527514)
+
+* Tue Oct 06 2009 Harald Hoyer <harald@redhat.com> 002-12
+- add missing loginit helper
+- corrected dracut manpage
+
+* Thu Oct 01 2009 Harald Hoyer <harald@redhat.com> 002-11
+- fixed dracut-gencmdline for root=UUID or LABEL
+
+* Thu Oct 01 2009 Harald Hoyer <harald@redhat.com> 002-10
+- do not destroy assembled raid arrays if mdadm.conf present
+- mount /dev/shm 
+- let udevd not resolve group and user names
+- preserve timestamps of tools on initramfs generation
+- generate symlinks for binaries correctly
+- moved network from udev to initqueue
+- mount nfs3 with nfsvers=3 option and retry with nfsvers=2
+- fixed nbd initqueue-finished
+- improved debug output: specifying "rdinitdebug" now logs
+  to dmesg, console and /init.log
+- stop udev before killing it
+- add ghost /var/log/dracut.log
+- dmsquash: use info() and die() rather than echo
+- strip kernel modules which have no x bit set
+- redirect stdin, stdout, stderr all RW to /dev/console
+  so the user can use "less" to view /init.log and dmesg
+
 * Tue Sep 29 2009 Harald Hoyer <harald@redhat.com> 002-9
 - make install of new dm/lvm udev rules optionally
 - correct dasd module typo
