@@ -1,5 +1,4 @@
-%define gittag 218292f6
-%define gittag 218292f6
+%define gittag 2331d1ff
 %if 0%{?fedora} < 12
 %define with_switch_root 1
 %else
@@ -15,7 +14,7 @@
 
 Name: dracut
 Version: 002
-Release: 14%{?rdist}
+Release: 15%{?rdist}
 Summary: Initramfs generator using udev
 Group: System Environment/Base		
 License: GPLv2+	
@@ -188,6 +187,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Thu Oct 08 2009 Harald Hoyer <harald@redhat.com> 002-15
+- s390 ccw: s/layer1/layer2/g
+
 * Thu Oct 08 2009 Harald Hoyer <harald@redhat.com> 002-14
 - add multinic support
 - add s390 zfcp support
