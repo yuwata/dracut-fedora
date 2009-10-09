@@ -14,7 +14,7 @@
 
 Name: dracut
 Version: 002
-Release: 13.2%{?rdist}
+Release: 13.3%{?rdist}
 Summary: Initramfs generator using udev
 Group: System Environment/Base		
 License: GPLv2+	
@@ -25,6 +25,7 @@ Patch1: dracut-git8d0a55cfac2b7dc2b3ce71235dce40fef17e9953.patch
 Patch2: dracut-gitcdc74b198ebbda69f550a7d744534e41cffd7e25.patch
 Patch3: dracut-gitac36d5db7e85ff2861b62ab7212655d49eee1b42.patch
 Patch4: dracut-git4d9b6060d4df252474f3cc8999726f2066587cda.patch
+Patch5: dracut-git67307075d197433fc3591d6678a5349b0b32b923.patch
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires: udev
@@ -113,6 +114,7 @@ This package contains tools to assemble the local initrd and host configuration.
 %patch2 -p1
 %patch3 -p1
 %patch4 -p1
+%patch5 -p1
 
 %build
 make
@@ -194,6 +196,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Fri Oct 09 2009 Harald Hoyer <harald@redhat.com> 002-13.3
+- removed one wildcard of libdmraid-events-isw.so install
+
 * Fri Oct 09 2009 Harald Hoyer <harald@redhat.com> 002-13.2
 - do not fail, if libdmraid-events-isw.so is not present
 

@@ -1,0 +1,21 @@
+commit 67307075d197433fc3591d6678a5349b0b32b923
+Author: Harald Hoyer <harald@redhat.com>
+Date:   Fri Oct 9 13:16:02 2009 +0200
+
+    dmraid: only install libdmraid-events-isw.so
+    
+    the symlink will trigger install of the real lib file
+
+diff --git a/modules.d/90dmraid/install b/modules.d/90dmraid/install
+index 11a47a8..a1d2265 100755
+--- a/modules.d/90dmraid/install
++++ b/modules.d/90dmraid/install
+@@ -2,7 +2,7 @@
+ dracut_install dmraid partx kpartx 
+ 
+ inst  dmeventd
+-inst  /usr/lib*/libdmraid-events-isw.so*
++inst  /usr/lib*/libdmraid-events-isw.so
+ inst_rules 10-dm.rules 12-dm-disk.rules 95-dm-notify.rules 
+ 
+ inst "$moddir/dmraid.sh" /sbin/dmraid_scan
