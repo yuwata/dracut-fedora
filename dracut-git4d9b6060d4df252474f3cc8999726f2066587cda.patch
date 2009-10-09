@@ -1,0 +1,25 @@
+commit 4d9b6060d4df252474f3cc8999726f2066587cda
+Author: Harald Hoyer <harald@redhat.com>
+Date:   Fri Oct 9 10:16:08 2009 +0200
+
+    dmraid: do not fail if /usr/lib/libdmraid-events-isw.so is not present
+
+diff --git a/modules.d/90dmraid/install b/modules.d/90dmraid/install
+index 0aecb2a..11a47a8 100755
+--- a/modules.d/90dmraid/install
++++ b/modules.d/90dmraid/install
+@@ -1,11 +1,9 @@
+ #!/bin/bash
+ dracut_install dmraid partx kpartx 
+ 
+-if which dmeventd &>/dev/null ; then
+-    dracut_install  dmeventd
+-    dracut_install  /usr/lib*/libdmraid-events-isw.so*
+-    inst_rules 10-dm.rules 12-dm-disk.rules 95-dm-notify.rules 
+-fi
++inst  dmeventd
++inst  /usr/lib*/libdmraid-events-isw.so*
++inst_rules 10-dm.rules 12-dm-disk.rules 95-dm-notify.rules 
+ 
+ inst "$moddir/dmraid.sh" /sbin/dmraid_scan
+ 

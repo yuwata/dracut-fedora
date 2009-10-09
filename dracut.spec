@@ -14,7 +14,7 @@
 
 Name: dracut
 Version: 002
-Release: 13%{?rdist}
+Release: 13.2%{?rdist}
 Summary: Initramfs generator using udev
 Group: System Environment/Base		
 License: GPLv2+	
@@ -24,6 +24,7 @@ Source0: dracut-%{version}%{?dashgittag}.tar.bz2
 Patch1: dracut-git8d0a55cfac2b7dc2b3ce71235dce40fef17e9953.patch
 Patch2: dracut-gitcdc74b198ebbda69f550a7d744534e41cffd7e25.patch
 Patch3: dracut-gitac36d5db7e85ff2861b62ab7212655d49eee1b42.patch
+Patch4: dracut-git4d9b6060d4df252474f3cc8999726f2066587cda.patch
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires: udev
@@ -111,6 +112,7 @@ This package contains tools to assemble the local initrd and host configuration.
 %patch1 -p1
 %patch2 -p1
 %patch3 -p1
+%patch4 -p1
 
 %build
 make
@@ -192,6 +194,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Fri Oct 09 2009 Harald Hoyer <harald@redhat.com> 002-13.2
+- do not fail, if libdmraid-events-isw.so is not present
+
 * Wed Oct 07 2009 Harald Hoyer <harald@redhat.com> 002-13
 - fixed init=<command> handling
 - kill loginit if "rdinitdebug" specified
