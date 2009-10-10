@@ -14,7 +14,7 @@
 
 Name: dracut
 Version: 002
-Release: 13.3%{?rdist}
+Release: 13.4%{?rdist}
 Summary: Initramfs generator using udev
 Group: System Environment/Base		
 License: GPLv2+	
@@ -46,7 +46,8 @@ Requires: fileutils, gzip, tar
 Requires: lvm2 >= 2.02.33-9, dhclient
 Requires: filesystem >= 2.1.0, cpio, device-mapper, initscripts >= 8.63-1
 Requires: e2fsprogs >= 1.38-12, libselinux, libsepol, coreutils
-Requires: mdadm, elfutils-libelf, plymouth >= 0.7.0
+Requires: mdadm, elfutils-libelf
+Requires(pre): plymouth >= 0.7.0
 Requires: cryptsetup-luks
 Requires: file
 Requires: bzip2
@@ -196,6 +197,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Fri Oct 09 2009 Jesse Keating <jkeating@redhat.com> - 002-13.4
+- Requires(pre) on plymouth to ensure plymouth is installed before kernel
+
 * Fri Oct 09 2009 Harald Hoyer <harald@redhat.com> 002-13.3
 - removed one wildcard of libdmraid-events-isw.so install
 
