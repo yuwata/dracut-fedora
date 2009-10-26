@@ -1,7 +1,11 @@
-%define gittag 2331d1ff
-%if 0%{?fedora} < 12
+%define gittag 35758e5c
 %define with_switch_root 1
-%else
+
+%if 0%{?fedora} > 11
+%define with_switch_root 0
+%endif
+
+%if 0%{?rhel} > 5
 %define with_switch_root 0
 %endif
 
@@ -14,7 +18,7 @@
 
 Name: dracut
 Version: 002
-Release: 16%{?rdist}
+Release: 17%{?rdist}
 Summary: Initramfs generator using udev
 Group: System Environment/Base		
 License: GPLv2+	
@@ -39,14 +43,15 @@ Requires: fileutils, gzip, tar
 Requires: lvm2 >= 2.02.33-9, dhclient
 Requires: filesystem >= 2.1.0, cpio, device-mapper, initscripts >= 8.63-1
 Requires: e2fsprogs >= 1.38-12, libselinux, libsepol, coreutils
-Requires: mdadm, elfutils-libelf
+Requires: mdadm, elfutils-libelf 
+Requires(pre): plymouth >= 0.7.0
+Requires: plymouth >= 0.7.0
 Requires: cryptsetup-luks
 Requires: file
 Requires: bzip2
 Requires: dmraid
 Requires: kbd
 Requires: plymouth-scripts
-Requires(pre): plymouth >= 0.7.0
 
 %if ! 0%{?with_switch_root}
 Requires: util-linux-ng >= 2.16
@@ -143,6 +148,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/dracut/modules.d/10rpmversion
 %{_datadir}/dracut/modules.d/50plymouth
 %{_datadir}/dracut/modules.d/90crypt
+%{_datadir}/dracut/modules.d/90dm
 %{_datadir}/dracut/modules.d/90dmraid
 %{_datadir}/dracut/modules.d/90dmsquash-live
 %{_datadir}/dracut/modules.d/90kernel-modules
@@ -188,6 +194,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Mon Oct 26 2009 Harald Hoyer <harald@redhat.com> 002-17
+- load dm_mod module (bug #530540)
+
 * Fri Oct 09 2009 Jesse Keating <jkeating@redhat.com> - 002-16
 - Upgrade plymouth to Requires(pre) to make it show up before kernel
 
