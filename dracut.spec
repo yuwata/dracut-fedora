@@ -1,4 +1,4 @@
-%define gittag 78b52181
+%define gittag 8686bd55
 %define with_switch_root 1
 
 %if 0%{?fedora} > 11
@@ -18,7 +18,7 @@
 
 Name: dracut
 Version: 002
-Release: 19%{?rdist}
+Release: 21%{?rdist}
 Summary: Initramfs generator using udev
 Group: System Environment/Base		
 License: GPLv2+	
@@ -195,6 +195,14 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Fri Nov 06 2009 Harald Hoyer <harald@redhat.com> 002-21
+- fix rd_DASD argument handling (bug #531720)
+- Resolves: rhbz#531720
+
+* Wed Nov 04 2009 Harald Hoyer <harald@redhat.com> 002-20
+- fix rd_DASD argument handling (bug #531720)
+- Resolves: rhbz#531720
+
 * Tue Nov 03 2009 Harald Hoyer <harald@redhat.com> 002-19
 - changed rd_DASD to rd_DASD_MOD (bug #531720)
 - Resolves: rhbz#531720
