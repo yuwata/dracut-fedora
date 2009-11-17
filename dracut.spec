@@ -18,7 +18,7 @@
 
 Name: dracut
 Version: 002
-Release: 23%{?rdist}
+Release: 24%{?rdist}
 Summary: Initramfs generator using udev
 Group: System Environment/Base		
 License: GPLv2+	
@@ -73,6 +73,15 @@ Requires: bridge-utils
 %description network
 This package requires everything which is needed to build a generic
 all purpose initramfs with network support with dracut.
+
+%package fips
+Summary: dracut modules to build a dracut initramfs with an integrity check.
+Requires: %{name} = %{version}-%{release}
+Requires: hmaccalc
+
+%description fips
+This package requires everything which is needed to build an
+all purpose initramfs with dracut, which does an integrity check.
 
 %package generic
 Summary: Metapackage to build a generic initramfs with dracut
@@ -144,7 +153,6 @@ rm -rf $RPM_BUILD_ROOT
 %config(noreplace) /etc/dracut.conf
 %{_mandir}/man8/dracut.8*
 %{_datadir}/dracut/modules.d/00dash
-%{_datadir}/dracut/modules.d/01fips
 %{_datadir}/dracut/modules.d/10redhat-i18n
 %{_datadir}/dracut/modules.d/10rpmversion
 %{_datadir}/dracut/modules.d/50plymouth
@@ -180,6 +188,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/dracut/modules.d/95nfs
 %{_datadir}/dracut/modules.d/45ifcfg
 
+%files fips
+%defattr(-,root,root,0755)
+%doc COPYING
+%{_datadir}/dracut/modules.d/01fips
+
 %files kernel 
 %defattr(-,root,root,0755)
 %doc README.kernel
@@ -198,6 +211,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Tue Nov 17 2009 Harald Hoyer <harald@redhat.com> 002-24
+- put fips module in a subpackage (bug #537619)
+
 * Tue Nov 17 2009 Harald Hoyer <harald@redhat.com> 002-23
 - install xdr utils for multipath (bug #463458)
 
