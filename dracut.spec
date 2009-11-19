@@ -18,7 +18,7 @@
 
 Name: dracut
 Version: 002
-Release: 24%{?rdist}
+Release: 25%{?rdist}
 Summary: Initramfs generator using udev
 Group: System Environment/Base		
 License: GPLv2+	
@@ -78,6 +78,8 @@ all purpose initramfs with network support with dracut.
 Summary: dracut modules to build a dracut initramfs with an integrity check.
 Requires: %{name} = %{version}-%{release}
 Requires: hmaccalc
+Requires: nss-softokn
+Requires: nss-softokn-freebl
 
 %description fips
 This package requires everything which is needed to build an
@@ -211,6 +213,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Thu Nov 19 2009 Harald Hoyer <harald@redhat.com> 002-25
+- add more requirements for dracut-fips (bug #539257)
+
 * Tue Nov 17 2009 Harald Hoyer <harald@redhat.com> 002-24
 - put fips module in a subpackage (bug #537619)
 
