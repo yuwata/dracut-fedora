@@ -1,0 +1,27 @@
+commit a7de5c00b10cae1ac3618d9844a233474f5e7e46
+Author: Harald Hoyer <harald@redhat.com>
+Date:   Thu Nov 5 13:07:24 2009 +0100
+
+    kernel-modules: install all usb storage modules also
+
+diff --git a/modules.d/90kernel-modules/installkernel b/modules.d/90kernel-modules/installkernel
+index b5e4c93..0535eba 100755
+--- a/modules.d/90kernel-modules/installkernel
++++ b/modules.d/90kernel-modules/installkernel
+@@ -5,7 +5,7 @@ if [[ -z $drivers ]]; then
+ 
+ 	 nm -uPA "$1" | egrep -q "$blockfuncs"
+     }
+-    instmods pcmcia sd_mod $(filter_kernel_modules block_module_test) "=drivers/pcmcia" =ide
++    instmods pcmcia sd_mod $(filter_kernel_modules block_module_test) "=drivers/pcmcia" =ide "=drivers/usb/storage"
+     # if not on hostonly mode, install all known filesystems.
+     if [[ $hostonly = '' ]]; then
+ 	instmods '=fs'
+@@ -24,4 +24,5 @@ fi
+ old_hostonly=$hostonly
+ hostonly=''
+ instmods scsi_wait_scan
+-hostonly=$old_hostonly
+\ No newline at end of file
++hostonly=$old_hostonly
++
