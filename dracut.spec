@@ -17,7 +17,7 @@
 
 Name: dracut
 Version: 003
-Release: 1%{?rdist}
+Release: 2%{?rdist}
 Summary: Initramfs generator using udev
 Group: System Environment/Base		
 License: GPLv2+	
@@ -45,8 +45,8 @@ Requires: lvm2 >= 2.02.33-9, dhclient
 Requires: filesystem >= 2.1.0, cpio, device-mapper, initscripts >= 8.63-1
 Requires: e2fsprogs >= 1.38-12, libselinux, libsepol, coreutils
 Requires: mdadm, elfutils-libelf 
-Requires(pre): plymouth >= 0.7.0
-Requires: plymouth >= 0.7.0
+Requires(pre): plymouth >= 0.8.0-0.2009.29.09.19.1
+Requires: plymouth >= 0.8.0-0.2009.29.09.19.1
 Requires: cryptsetup-luks
 Requires: file
 Requires: bzip2
@@ -109,6 +109,7 @@ Requires: ql2200-firmware
 Requires: ql23xx-firmware
 Requires: ql2400-firmware
 Requires: ql2500-firmware
+Requires: xorg-x11-drv-ati-firmware
 
 %description kernel
 This package requires everything which is needed to build a initramfs with all
@@ -216,6 +217,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Tue Jan 12 2010 Dave Airlie <airlied@redhat.com> 003-2
+- add new requirements for F12 updates-testing
+
 * Fri Nov 27 2009 Harald Hoyer <harald@redhat.com> 003-1
 - version 003
 
