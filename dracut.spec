@@ -221,6 +221,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Wed Jan 13 2009 Warren Togami <wtogami@redhat.com> 003-2
+- nbd is Fedora only
+
 * Fri Nov 27 2009 Harald Hoyer <harald@redhat.com> 003-1
 - version 003
 
