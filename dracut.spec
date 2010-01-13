@@ -1,11 +1,14 @@
-%define with_switch_root 1
+# Variables must be defined
+%define with_switch_root	1
+%define with_nbd		1
 
-%if 0%{?fedora} > 11
+# switchroot provided by util-linux-ng in F-12+
+%if 0%{?fedora} > 11 || 0%{?rhel} >= 6
 %define with_switch_root 0
 %endif
-
-%if 0%{?rhel} > 5
-%define with_switch_root 0
+# nbd in Fedora only
+%if 0%{?rhel} >= 6
+%define with_nbd 0
 %endif
 
 %if %{defined gittag}
@@ -17,7 +20,7 @@
 
 Name: dracut
 Version: 003
-Release: 1%{?rdist}
+Release: 2%{?rdist}
 Summary: Initramfs generator using udev
 Group: System Environment/Base		
 License: GPLv2+	
@@ -67,7 +70,9 @@ Summary: Dracut modules to build a dracut initramfs with network support
 Requires: %{name} = %{version}-%{release}
 Requires: rpcbind nfs-utils 
 Requires: iscsi-initiator-utils
+%if %{with_nbd}
 Requires: nbd
+%endif
 Requires: net-tools iproute
 Requires: bridge-utils
 
