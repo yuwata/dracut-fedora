@@ -1,11 +1,14 @@
-%define with_switch_root 1
+# Variables must be defined
+%define with_switch_root	1
+%define with_nbd		1
 
-%if 0%{?fedora} > 11
+# switchroot provided by util-linux-ng in F-12+
+%if 0%{?fedora} > 11 || 0%{?rhel} >= 6
 %define with_switch_root 0
 %endif
-
-%if 0%{?rhel} > 5
-%define with_switch_root 0
+# nbd in Fedora only
+%if 0%{?rhel} >= 6
+%define with_nbd 0
 %endif
 
 %if %{defined gittag}
@@ -16,8 +19,8 @@
 %endif
 
 Name: dracut
-Version: 003
-Release: 2%{?rdist}
+Version: 004
+Release: 1%{?rdist}
 Summary: Initramfs generator using udev
 Group: System Environment/Base		
 License: GPLv2+	
@@ -26,6 +29,16 @@ URL: http://apps.sourceforge.net/trac/dracut/wiki
 # http://dracut.git.sourceforge.net/git/gitweb.cgi?p=dracut/dracut;a=snapshot;h=%{?dashgittag};sf=tgz
 Source0: dracut-%{version}%{?dashgittag}.tar.bz2
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+
+%if 0%{?fedora} > 12 || 0%{?rhel} >= 6
+# no "provides", because dracut does not offer
+# all functionality of the obsoleted packages
+Obsoletes: mkinitrd <= 6.0.93
+Obsoletes: mkinitrd-devel <= 6.0.93
+Obsoletes: nash <= 6.0.93
+Obsoletes: libbdevid-python <= 6.0.93
+%endif
+
 Requires: udev
 Requires: util-linux-ng
 Requires: module-init-tools >= 3.7-9
@@ -67,7 +80,9 @@ Summary: Dracut modules to build a dracut initramfs with network support
 Requires: %{name} = %{version}-%{release}
 Requires: rpcbind nfs-utils 
 Requires: iscsi-initiator-utils
+%if %{with_nbd}
 Requires: nbd
+%endif
 Requires: net-tools iproute
 Requires: bridge-utils
 
@@ -109,13 +124,13 @@ Requires: ql2200-firmware
 Requires: ql23xx-firmware
 Requires: ql2400-firmware
 Requires: ql2500-firmware
-Requires: xorg-x11-drv-ati-firmware
 
 %description kernel
 This package requires everything which is needed to build a initramfs with all
 kernel modules and firmware files needed by dracut modules.
 
 %package tools
+Requires: %{name} = %{version}-%{release}
 Summary: Dracut tools to build the local initramfs
 Requires: coreutils cryptsetup-luks device-mapper
 Requires: diffutils dmraid findutils gawk grep lvm2
@@ -144,6 +159,11 @@ mkdir -p $RPM_BUILD_ROOT/var/lib/dracut/overlay
 mkdir -p $RPM_BUILD_ROOT%{_localstatedir}/log
 touch $RPM_BUILD_ROOT%{_localstatedir}/log/dracut.log
 
+%if 0%{?fedora} <= 12 && 0%{?rhel} < 6
+rm $RPM_BUILD_ROOT/sbin/mkinitrd
+rm $RPM_BUILD_ROOT/sbin/lsinitrd
+%endif
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
@@ -154,6 +174,10 @@ rm -rf $RPM_BUILD_ROOT
 %if 0%{?with_switch_root}
 /sbin/switch_root
 %endif
+%if 0%{?fedora} > 12 || 0%{?rhel} >= 6
+/sbin/mkinitrd
+/sbin/lsinitrd
+%endif
 %dir %{_datadir}/dracut
 %{_datadir}/dracut/dracut-functions
 %config(noreplace) /etc/dracut.conf
@@ -163,6 +187,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/dracut/modules.d/10redhat-i18n
 %{_datadir}/dracut/modules.d/10rpmversion
 %{_datadir}/dracut/modules.d/50plymouth
+%{_datadir}/dracut/modules.d/60xen
 %{_datadir}/dracut/modules.d/90crypt
 %{_datadir}/dracut/modules.d/90dm
 %{_datadir}/dracut/modules.d/90dmraid
@@ -180,6 +205,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/dracut/modules.d/95znet
 %{_datadir}/dracut/modules.d/95terminfo
 %{_datadir}/dracut/modules.d/95udev-rules
+%{_datadir}/dracut/modules.d/95uswsusp
 %{_datadir}/dracut/modules.d/98syslog
 %{_datadir}/dracut/modules.d/99base
 %attr(0644,root,root) %ghost %config(missingok,noreplace) %{_localstatedir}/log/dracut.log
@@ -210,6 +236,8 @@ rm -rf $RPM_BUILD_ROOT
 %files tools 
 %defattr(-,root,root,0755)
 %doc COPYING NEWS
+%{_mandir}/man8/dracut-gencmdline.8*
+%{_mandir}/man8/dracut-catimages.8*
 /sbin/dracut-gencmdline
 /sbin/dracut-catimages
 %dir /boot/dracut
@@ -217,8 +245,17 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
-* Tue Jan 12 2010 Dave Airlie <airlied@redhat.com> 003-2
-- add new requirements for F12 updates-testing
+* Fri Jan 15 2010 Harald Hoyer <harald@redhat.com> 004-1
+- version 004
+- Resolves: rhbz#529339 rhbz#533494 rhbz#548550 
+- Resolves: rhbz#548555 rhbz#553195
+
+* Wed Jan 13 2010 Harald Hoyer <harald@redhat.com> 003-3
+- add Obsoletes of mkinitrd/nash/libbdevid-python
+- Related: rhbz#543948
+
+* Wed Jan 13 2010 Warren Togami <wtogami@redhat.com> 003-2
+- nbd is Fedora only
 
 * Fri Nov 27 2009 Harald Hoyer <harald@redhat.com> 003-1
 - version 003
