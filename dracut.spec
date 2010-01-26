@@ -20,7 +20,7 @@
 
 Name: dracut
 Version: 004
-Release: 3%{?rdist}
+Release: 4%{?rdist}
 Summary: Initramfs generator using udev
 Group: System Environment/Base		
 License: GPLv2+	
@@ -30,6 +30,7 @@ URL: http://apps.sourceforge.net/trac/dracut/wiki
 Source0: dracut-%{version}%{?dashgittag}.tar.bz2
 Patch1:  dracut-004-emergency.patch
 Patch2:  dracut-004-forcepermissive.patch
+Patch3:  dracut-004-multipath-check.patch
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 %if 0%{?fedora} > 12 || 0%{?rhel} >= 6
@@ -146,6 +147,7 @@ This package contains tools to assemble the local initrd and host configuration.
 %setup -q -n %{name}-%{version}%{?dashgittag}
 %patch1 -p1
 %patch2 -p1
+%patch3 -p1 
 
 %build
 make WITH_SWITCH_ROOT=0%{?with_switch_root}
@@ -249,6 +251,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Tue Jan 26 2010 Harald Hoyer <harald@redhat.com> 004-4
+- add multipath check
+
 * Tue Jan 26 2010 Harald Hoyer <harald@redhat.com> 004-3
 - fix selinux handling if .autorelabel is present
 - Resolves: rhbz#557744
