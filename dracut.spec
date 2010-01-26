@@ -148,6 +148,8 @@ This package contains tools to assemble the local initrd and host configuration.
 %patch1 -p1
 %patch2 -p1
 %patch3 -p1 
+chmod 0755 modules.d/90multipath/check
+chmod 0755 modules.d/60xen/check
 
 %build
 make WITH_SWITCH_ROOT=0%{?with_switch_root}
