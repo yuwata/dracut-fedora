@@ -1,6 +1,7 @@
---- /usr/share/dracut/modules.d/99base/selinux-loadpolicy.sh~	2009-11-27 09:25:46.000000000 -0500
-+++ /usr/share/dracut/modules.d/99base/selinux-loadpolicy.sh	2010-01-22 08:21:25.000000000 -0500
-@@ -37,6 +37,8 @@
+diff -up dracut-004/modules.d/99base/selinux-loadpolicy.sh.load dracut-004/modules.d/99base/selinux-loadpolicy.sh
+--- dracut-004/modules.d/99base/selinux-loadpolicy.sh.load	2010-01-15 14:07:54.000000000 +0100
++++ dracut-004/modules.d/99base/selinux-loadpolicy.sh	2010-01-26 11:23:56.000000000 +0100
+@@ -37,6 +37,8 @@ rd_load_policy()
  	} 2>&1 | vinfo
  
  	if [ $ret -eq 0 -o $ret -eq 2 ]; then
