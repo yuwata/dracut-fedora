@@ -1,0 +1,70 @@
+From 58ffd15bfffddd593b1a8f29eb5935a0ce39d2dc Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Tue, 13 Apr 2010 14:03:05 +0200
+Subject: [PATCH 05/15] add module btrfs
+
+---
+ modules.d/90btrfs/40-btrfs.rules |    7 +++++++
+ modules.d/90btrfs/check          |   10 ++++++++++
+ modules.d/90btrfs/install        |    4 ++++
+ modules.d/95udev-rules/install   |    2 +-
+ 4 files changed, 22 insertions(+), 1 deletions(-)
+ create mode 100644 modules.d/90btrfs/40-btrfs.rules
+ create mode 100755 modules.d/90btrfs/check
+ create mode 100755 modules.d/90btrfs/install
+
+diff --git a/modules.d/90btrfs/40-btrfs.rules b/modules.d/90btrfs/40-btrfs.rules
+new file mode 100644
+index 0000000..e74ba1a
+--- /dev/null
++++ b/modules.d/90btrfs/40-btrfs.rules
+@@ -0,0 +1,7 @@
++SUBSYSTEM!="block", GOTO="btrfs_end"
++ACTION!="add|change", GOTO="btrfs_end"
++
++ENV{ID_FS_TYPE}=="btrfs", RUN+="/sbin/btrfs device scan $env{DEVNAME}"
++
++LABEL="btrfs_end"
++
+diff --git a/modules.d/90btrfs/check b/modules.d/90btrfs/check
+new file mode 100755
+index 0000000..2897d46
+--- /dev/null
++++ b/modules.d/90btrfs/check
+@@ -0,0 +1,10 @@
++#!/bin/bash
++
++# We depend on udev-rules being loaded
++[ "$1" = "-d" ] && exit 0
++
++# if we don't have dmraid installed on the host system, no point
++# in trying to support it in the initramfs.
++which btrfs >/dev/null 2>&1 || exit 1
++
++exit 0
+diff --git a/modules.d/90btrfs/install b/modules.d/90btrfs/install
+new file mode 100755
+index 0000000..130a84d
+--- /dev/null
++++ b/modules.d/90btrfs/install
+@@ -0,0 +1,4 @@
++#!/bin/bash
++
++inst_rules "$moddir/40-btrfs.rules"
++dracut_install btrfs
+diff --git a/modules.d/95udev-rules/install b/modules.d/95udev-rules/install
+index ae64f3e..23693fe 100755
+--- a/modules.d/95udev-rules/install
++++ b/modules.d/95udev-rules/install
+@@ -24,7 +24,7 @@ else
+     inst_rules "$moddir/59-persistent-storage-volid.rules"
+ fi
+ inst_rules "$moddir/61-persistent-storage.rules"
+-    
++
+ for i in \
+ ata_id \
+ cdrom_id \
+-- 
+1.7.0.1
+
