@@ -1,0 +1,25 @@
+From cd83e4c54d195e12f709fdda279efb15c7c6cbf3 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 14 Apr 2010 16:36:30 +0200
+Subject: [PATCH 07/15] init: trigger with --action=add
+
+---
+ modules.d/99base/init |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/modules.d/99base/init b/modules.d/99base/init
+index b9b6361..4696915 100755
+--- a/modules.d/99base/init
++++ b/modules.d/99base/init
+@@ -147,7 +147,7 @@ getarg 'rdbreak=pre-trigger' && emergency_shell -n pre-trigger "Break before pre
+ source_all pre-trigger
+ 
+ # then the rest
+-udevadm trigger $udevtriggeropts  >/dev/null 2>&1
++udevadm trigger --action=add $udevtriggeropts  >/dev/null 2>&1
+ 
+ getarg 'rdbreak=initqueue' && emergency_shell -n initqueue "Break before initqueue"
+ 
+-- 
+1.7.0.1
+

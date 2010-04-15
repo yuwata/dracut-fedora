@@ -1,0 +1,27 @@
+From d2931339823a1ea3a8ea9d13a274720b7057aa83 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 14 Apr 2010 17:50:39 +0200
+Subject: [PATCH 08/15] add missing paragraph for --add-drivers
+
+---
+ dracut.8 |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+diff --git a/dracut.8 b/dracut.8
+index 57626fe..834c4f2 100644
+--- a/dracut.8
++++ b/dracut.8
+@@ -28,8 +28,9 @@ omit a space-separated list of dracut modules.
+ add a space-separated list of dracut modules.
+ .TP
+ .BR \-d ", " \-\-drivers " \fILIST\fR"
+-specify a space-separated list of kernel modules to exclusively include#
++specify a space-separated list of kernel modules to exclusively include
+ in the initramfs.
++.TP
+ .BR \-\-add-drivers " \fILIST\fR"
+ specify a space-separated list of kernel modules to add to the initramfs.
+ .TP
+-- 
+1.7.0.1
+
