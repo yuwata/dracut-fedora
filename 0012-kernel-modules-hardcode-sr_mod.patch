@@ -1,0 +1,27 @@
+From d4abad22883978f60bf4df030186fc92187c757f Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 15 Apr 2010 12:47:26 +0200
+Subject: [PATCH 12/15] kernel-modules: hardcode sr_mod
+
+---
+ modules.d/90kernel-modules/installkernel |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/modules.d/90kernel-modules/installkernel b/modules.d/90kernel-modules/installkernel
+index 3416e7c..4848f2a 100755
+--- a/modules.d/90kernel-modules/installkernel
++++ b/modules.d/90kernel-modules/installkernel
+@@ -5,8 +5,8 @@ if [[ -z $drivers ]]; then
+ 
+ 	 nm -uPA "$1" | egrep -q "$blockfuncs"
+     }
+-    hostonly='' instmods pcmcia sd_mod scsi_dh scsi_dh_rdac scsi_dh_emc
+-    hostonly='' instmods firewire-ohci
++    hostonly='' instmods sr_mod sd_mod scsi_dh scsi_dh_rdac scsi_dh_emc
++    hostonly='' instmods pcmcia firewire-ohci
+ 
+     # install keyboard support
+     hostonly='' instmods atkbd i8042 usbhid hid-apple ehci-hcd ohci-hcd uhci-hcd
+-- 
+1.7.0.1
+

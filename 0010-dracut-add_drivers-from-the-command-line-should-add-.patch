@@ -1,0 +1,25 @@
+From 4828beb949f25d894351c7abbe6a4930a1d1d95c Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 14 Apr 2010 19:32:44 +0200
+Subject: [PATCH 10/15] dracut: add_drivers from the command line should add up to the conffile
+
+---
+ dracut |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/dracut b/dracut
+index b16e205..8c0adad 100755
+--- a/dracut
++++ b/dracut
+@@ -143,7 +143,7 @@ fi
+ [[ $omit_dracutmodules_l ]] && omit_dracutmodules=$omit_dracutmodules_l
+ [[ $add_dracutmodules_l ]] && add_dracutmodules="$add_dracutmodules $add_dracutmodules_l"
+ [[ $drivers_l ]] && drivers=$drivers_l
+-[[ $add_drivers_l ]] && add_drivers=$add_drivers_l
++[[ $add_drivers_l ]] && add_drivers="$add_drivers $add_drivers_l"
+ [[ $filesystems_l ]] && filesystems=$filesystems_l
+ [[ $drivers_dir_l ]] && drivers_dir=$drivers_dir_l
+ [[ $fw_dir_l ]] && fw_dir=$fw_dir_l
+-- 
+1.7.0.1
+
