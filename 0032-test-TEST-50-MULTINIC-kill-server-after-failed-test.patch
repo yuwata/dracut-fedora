@@ -1,0 +1,43 @@
+From 6c980807d03804f667cdb519f8b28d5912818e04 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 16 Apr 2010 16:59:11 +0200
+Subject: [PATCH 32/40] test/TEST-50-MULTINIC: kill server after failed test
+
+---
+ test/TEST-50-MULTINIC/test.sh |    8 +++++++-
+ 1 files changed, 7 insertions(+), 1 deletions(-)
+
+diff --git a/test/TEST-50-MULTINIC/test.sh b/test/TEST-50-MULTINIC/test.sh
+index 98d4504..1e6cdab 100755
+--- a/test/TEST-50-MULTINIC/test.sh
++++ b/test/TEST-50-MULTINIC/test.sh
+@@ -75,7 +75,10 @@ test_run() {
+ 	echo "Failed to start server" 1>&2
+ 	return 1
+     fi
++    test_client || { kill_server; return 1; }
++}
+ 
++test_client() {
+     # Mac Numbering Scheme
+     # ...:00-02 receive IP adresses all others don't
+     # ...:02 receives a dhcp root-path
+@@ -217,11 +220,14 @@ test_setup() {
+ 	-f initramfs.testing $KVERSION || return 1
+ }
+ 
+-test_cleanup() {
++kill_server() {
+     if [[ -s server.pid ]]; then
+ 	sudo kill -TERM $(cat server.pid)
+ 	rm -f server.pid
+     fi
++}
++
++test_cleanup() {
+     rm -rf mnt overlay
+     rm -f server.ext2 client.img initramfs.server initramfs.testing
+ }
+-- 
+1.7.0.1
+

@@ -1,0 +1,26 @@
+From 8f4c066020263028643b905a7cd9ed129c69e788 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 16 Apr 2010 17:09:31 +0200
+Subject: [PATCH 36/40] test/MULTINIC: kill server after passing all tests
+
+---
+ test/TEST-50-MULTINIC/test.sh |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+diff --git a/test/TEST-50-MULTINIC/test.sh b/test/TEST-50-MULTINIC/test.sh
+index a97d9a3..083cf60 100755
+--- a/test/TEST-50-MULTINIC/test.sh
++++ b/test/TEST-50-MULTINIC/test.sh
+@@ -112,6 +112,9 @@ test_client() {
+ 	00 01 02 \
+ 	"root=dhcp ip=eth0:dhcp ip=eth1:dhcp ip=eth2:dhcp bootdev=eth2" \
+ 	"eth0 eth1 eth2" || return 1
++
++    kill_server
++    return 0
+ }
+ 
+ test_setup() {
+-- 
+1.7.0.1
+

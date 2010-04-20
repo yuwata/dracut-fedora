@@ -1,0 +1,59 @@
+From 1d149cd039dd865e9cb83e289bb7bc7eae124a71 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 16 Apr 2010 16:43:34 +0200
+Subject: [PATCH 21/40] dracut-lib: turn of shell debug mode in strstr and getarg(s)
+
+---
+ modules.d/99base/dracut-lib.sh |   12 ++++++++----
+ 1 files changed, 8 insertions(+), 4 deletions(-)
+
+diff --git a/modules.d/99base/dracut-lib.sh b/modules.d/99base/dracut-lib.sh
+index de23566..e9c2ccc 100644
+--- a/modules.d/99base/dracut-lib.sh
++++ b/modules.d/99base/dracut-lib.sh
+@@ -5,6 +5,7 @@ strstr() {
+ }
+ 
+ getarg() {
++    set +x 
+     local o line
+     if [ -z "$CMDLINE" ]; then
+         if [ -e /etc/cmdline ]; then
+@@ -16,13 +17,15 @@ getarg() {
+ 	CMDLINE="$CMDLINE $CMDLINE_ETC"
+     fi
+     for o in $CMDLINE; do
+-	[ "$o" = "$1" ] && return 0
+-	[ "${o%%=*}" = "${1%=}" ] && { echo ${o#*=}; return 0; }
++	[ "$o" = "$1" ] && { [ "$RDDEBUG" = "yes" ] && set -x; return 0; }
++	[ "${o%%=*}" = "${1%=}" ] && { echo ${o#*=}; [ "$RDDEBUG" = "yes" ] && set -x; return 0; }
+     done
++    [ "$RDDEBUG" = "yes" ] && set -x 
+     return 1
+ }
+ 
+ getargs() {
++    set +x 
+     local o line found
+     if [ -z "$CMDLINE" ]; then
+ 	if [ -e /etc/cmdline ]; then
+@@ -34,13 +37,14 @@ getargs() {
+ 	CMDLINE="$CMDLINE $CMDLINE_ETC"
+     fi
+     for o in $CMDLINE; do
+-	[ "$o" = "$1" ] && return 0
++	[ "$o" = "$1" ] && { [ "$RDDEBUG" = "yes" ] && set -x; return 0; }
+ 	if [ "${o%%=*}" = "${1%=}" ]; then
+ 	    echo -n "${o#*=} "; 
+ 	    found=1;
+ 	fi
+     done
+-    [ -n "$found" ] && return 0
++    [ -n "$found" ] && { [ "$RDDEBUG" = "yes" ] && set -x; return 0; }
++    [ "$RDDEBUG" = "yes" ] && set -x 
+     return 1;
+ }
+ 
+-- 
+1.7.0.1
+

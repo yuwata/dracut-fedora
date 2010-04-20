@@ -1,0 +1,53 @@
+From 127fb81754b5c72690435f9cee08a7dc39926043 Mon Sep 17 00:00:00 2001
+From: Matt <smoothsailing72@hotmail.com>
+Date: Fri, 16 Apr 2010 18:03:08 +0200
+Subject: [PATCH 39/40] Needs btrfsctl, not btrfs module
+
+---
+ modules.d/90btrfs/40-btrfs.rules |    2 +-
+ modules.d/90btrfs/check          |    6 +++---
+ modules.d/90btrfs/install        |    2 +-
+ 3 files changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/modules.d/90btrfs/40-btrfs.rules b/modules.d/90btrfs/40-btrfs.rules
+index e74ba1a..6bc8a14 100644
+--- a/modules.d/90btrfs/40-btrfs.rules
++++ b/modules.d/90btrfs/40-btrfs.rules
+@@ -1,7 +1,7 @@
+ SUBSYSTEM!="block", GOTO="btrfs_end"
+ ACTION!="add|change", GOTO="btrfs_end"
+ 
+-ENV{ID_FS_TYPE}=="btrfs", RUN+="/sbin/btrfs device scan $env{DEVNAME}"
++ENV{ID_FS_TYPE}=="btrfs", RUN+="/sbin/btrfsctl -A $env{DEVNAME}"
+ 
+ LABEL="btrfs_end"
+ 
+diff --git a/modules.d/90btrfs/check b/modules.d/90btrfs/check
+index 2897d46..532e2ef 100755
+--- a/modules.d/90btrfs/check
++++ b/modules.d/90btrfs/check
+@@ -3,8 +3,8 @@
+ # We depend on udev-rules being loaded
+ [ "$1" = "-d" ] && exit 0
+ 
+-# if we don't have dmraid installed on the host system, no point
+-# in trying to support it in the initramfs.
+-which btrfs >/dev/null 2>&1 || exit 1
++# if we don't have btrfs (btrfsctl) installed on the host system,
++# no point in trying to support it in the initramfs.
++which btrfsctl >/dev/null 2>&1 || exit 1
+ 
+ exit 0
+diff --git a/modules.d/90btrfs/install b/modules.d/90btrfs/install
+index 130a84d..c6a8f48 100755
+--- a/modules.d/90btrfs/install
++++ b/modules.d/90btrfs/install
+@@ -1,4 +1,4 @@
+ #!/bin/bash
+ 
+ inst_rules "$moddir/40-btrfs.rules"
+-dracut_install btrfs
++dracut_install btrfsctl
+-- 
+1.7.0.1
+

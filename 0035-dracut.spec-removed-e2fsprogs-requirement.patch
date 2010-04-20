@@ -1,0 +1,25 @@
+From 1fca65c57654af35b2da0e88d882c4f841f3429b Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 16 Apr 2010 17:03:34 +0200
+Subject: [PATCH 35/40] dracut.spec: removed e2fsprogs requirement
+
+---
+ dracut.spec |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/dracut.spec b/dracut.spec
+index e2b6f44..a29098a 100644
+--- a/dracut.spec
++++ b/dracut.spec
+@@ -58,7 +58,7 @@ Requires: /bin/sh
+ Requires: fileutils, gzip, tar
+ Requires: lvm2 >= 2.02.33-9, dhclient
+ Requires: filesystem >= 2.1.0, cpio, device-mapper, initscripts >= 8.63-1
+-Requires: e2fsprogs >= 1.38-12, coreutils
++Requires: coreutils
+ Requires: mdadm, elfutils-libelf 
+ Requires(pre): plymouth >= 0.8.0-0.2009.29.09.19.1
+ Requires: plymouth >= 0.8.0-0.2009.29.09.19.1
+-- 
+1.7.0.1
+

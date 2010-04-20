@@ -1,0 +1,39 @@
+From 3e96d7aa33c96d84f9f38fc940388b109f34f7b8 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 16 Apr 2010 16:48:08 +0200
+Subject: [PATCH 26/40] TEST-12-RAID-DEG/create-root: filter MD_UUID only
+
+---
+ test/TEST-12-RAID-DEG/create-root.sh |    2 +-
+ test/TEST-12-RAID-DEG/test.sh        |    2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/test/TEST-12-RAID-DEG/create-root.sh b/test/TEST-12-RAID-DEG/create-root.sh
+index 23f1afc..6a2988d 100755
+--- a/test/TEST-12-RAID-DEG/create-root.sh
++++ b/test/TEST-12-RAID-DEG/create-root.sh
+@@ -35,7 +35,7 @@ cryptsetup luksClose /dev/mapper/dracut_crypt_test && \
+ mdadm /dev/md0 --fail /dev/sda2 --remove /dev/sda2 && \
+ { mdadm -W /dev/md0 || : ;} && \
+ {
+-/sbin/mdadm --detail --export /dev/md0 > /tmp/mduuid ;
++/sbin/mdadm --detail --export /dev/md0 |grep MD_UUID > /tmp/mduuid ;
+ . /tmp/mduuid;
+ } && \
+ {
+diff --git a/test/TEST-12-RAID-DEG/test.sh b/test/TEST-12-RAID-DEG/test.sh
+index fb39551..0d78b93 100755
+--- a/test/TEST-12-RAID-DEG/test.sh
++++ b/test/TEST-12-RAID-DEG/test.sh
+@@ -74,7 +74,7 @@ test_setup() {
+     (
+ 	initdir=overlay
+ 	. $basedir/dracut-functions
+-	dracut_install sfdisk mke2fs poweroff cp umount dd
++	dracut_install sfdisk mke2fs poweroff cp umount dd grep
+ 	inst_simple ./create-root.sh /initqueue/01create-root.sh
+  	inst_simple ./99-idesymlinks.rules /etc/udev/rules.d/99-idesymlinks.rules
+    )
+-- 
+1.7.0.1
+

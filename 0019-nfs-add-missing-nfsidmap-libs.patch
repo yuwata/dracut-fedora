@@ -1,0 +1,26 @@
+From 0679a6d24eb394e96f9e23943477a6e8245214b6 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 16 Apr 2010 16:42:27 +0200
+Subject: [PATCH 19/40] nfs: add missing nfsidmap libs
+
+---
+ modules.d/95nfs/install |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+diff --git a/modules.d/95nfs/install b/modules.d/95nfs/install
+index e0465bb..5d3c535 100755
+--- a/modules.d/95nfs/install
++++ b/modules.d/95nfs/install
+@@ -16,7 +16,8 @@ else
+ fi
+ 
+ dracut_install $(ls {/usr,}$LIBDIR/libnfsidmap_nsswitch.so* 2>/dev/null )
+-#dracut_install $(ls {/usr,}$LIBDIR/libnfsidmap*.so* 2>/dev/null )
++dracut_install $(ls {/usr,}$LIBDIR/libnfsidmap/*.so 2>/dev/null )
++dracut_install $(ls {/usr,}$LIBDIR/libnfsidmap*.so* 2>/dev/null )
+ 
+ nsslibs=$(sed -e '/^#/d' -e 's/^.*://' -e 's/\[NOTFOUND=return\]//' /etc/nsswitch.conf \
+               |  tr -s '[:space:]' '\n' | sort -u | tr -s '[:space:]' '|')
+-- 
+1.7.0.1
+

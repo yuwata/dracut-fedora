@@ -20,7 +20,7 @@
 
 Name: dracut
 Version: 005
-Release: 2%{?rdist}
+Release: 3%{?rdist}
 Summary: Initramfs generator using udev
 Group: System Environment/Base          
 License: GPLv2+ 
@@ -42,7 +42,33 @@ Patch10: 0010-dracut-add_drivers-from-the-command-line-should-add-.patch
 Patch11: 0011-AUTHORS-updated.patch
 Patch12: 0012-kernel-modules-hardcode-sr_mod.patch
 Patch13: 0013-kernel-modules-only-remove-ocfs2-if-all-filesystems-.patch
+Patch14: 0014-dracut.spec-add-btrfs-module.patch
 Patch15: 0015-Use-pigz-for-gzipping-if-available.patch
+Patch16: 0016-nfs-fixed-nsswitch.conf-parsing.patch
+Patch17: 0017-network-removed-bogus-udev-rules.patch
+Patch18: 0018-network-correct-rules-for-multiple-nics.patch
+Patch19: 0019-nfs-add-missing-nfsidmap-libs.patch
+Patch20: 0020-udev-rules-be-more-careful-about-md-devices-and-blki.patch
+Patch21: 0021-dracut-lib-turn-of-shell-debug-mode-in-strstr-and-ge.patch
+Patch22: 0022-mdraid-try-to-start-container-childs-manually-with-m.patch
+Patch23: 0023-init-fix-cdrom-polling-loop.patch
+Patch24: 0024-init-do-not-redirect-to.patch
+Patch25: 0025-loginit-turn-off-debugging.patch
+Patch26: 0026-TEST-12-RAID-DEG-create-root-filter-MD_UUID-only.patch
+Patch27: 0027-run-qemu-add-usr-libexec-qemu-kvm-to-search.patch
+Patch28: 0028-test-change-testsuite-to-local-tcp-rather-than-udp-m.patch
+Patch29: 0029-add-rd_retry-kernel-command-line-parameter.patch
+Patch30: 0030-test-nfs-correct-return-code-and-cleanup.patch
+Patch31: 0031-NBD-kill-server-after-failed-test.patch
+Patch32: 0032-test-TEST-50-MULTINIC-kill-server-after-failed-test.patch
+Patch33: 0033-test-TEST-50-MULTINIC-install-all-nfsidmap-libs-for-.patch
+Patch34: 0034-test-TEST-50-MULTINIC-install-sd_mod-and-ata_piix-ke.patch
+Patch35: 0035-dracut.spec-removed-e2fsprogs-requirement.patch
+Patch36: 0036-test-MULTINIC-kill-server-after-passing-all-tests.patch
+Patch37: 0037-NEWS-update.patch
+Patch38: 0038-test-NBD-check-for-nbd-kernel-module-first.patch
+Patch39: 0039-Needs-btrfsctl-not-btrfs-module.patch
+Patch40: 0040-btfrs-load-btrfs-module-and-updated-NEWS.patch
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -163,7 +189,33 @@ This package contains tools to assemble the local initrd and host configuration.
 %patch11 -p1
 %patch12 -p1
 %patch13 -p1
+%patch14 -p1
 %patch15 -p1
+%patch16 -p1
+%patch17 -p1
+%patch18 -p1
+%patch19 -p1
+%patch20 -p1
+%patch21 -p1
+%patch22 -p1
+%patch23 -p1
+%patch24 -p1
+%patch25 -p1
+%patch26 -p1
+%patch27 -p1
+%patch28 -p1
+%patch29 -p1
+%patch30 -p1
+%patch31 -p1
+%patch32 -p1
+%patch33 -p1
+%patch34 -p1
+%patch35 -p1
+%patch36 -p1
+%patch37 -p1
+%patch38 -p1
+%patch39 -p1
+%patch40 -p1
 
 %build
 make WITH_SWITCH_ROOT=0%{?with_switch_root}
@@ -267,6 +319,13 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Tue Apr 20 2010 Harald Hoyer <harald@redhat.com> 005-3
+- fixed network with multiple nics
+- fixed nfsidmap paths
+- do not run blkid on non active container raids
+- fixed cdrom polling mechanism
+- update to latest git
+
 * Thu Apr 15 2010 Harald Hoyer <harald@redhat.com> 005-2
 - fixed dracut manpages
 - dmraid parse different error messages

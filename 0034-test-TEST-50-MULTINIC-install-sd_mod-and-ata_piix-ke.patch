@@ -1,0 +1,25 @@
+From da4e644327e4c1f1416b101475ba590c5e34b62d Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 16 Apr 2010 17:00:28 +0200
+Subject: [PATCH 34/40] test/TEST-50-MULTINIC: install sd_mod and ata_piix kernel modules
+
+---
+ test/TEST-50-MULTINIC/test.sh |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/test/TEST-50-MULTINIC/test.sh b/test/TEST-50-MULTINIC/test.sh
+index b995902..a97d9a3 100755
+--- a/test/TEST-50-MULTINIC/test.sh
++++ b/test/TEST-50-MULTINIC/test.sh
+@@ -225,7 +225,7 @@ test_setup() {
+     $basedir/dracut -l -i overlay / \
+ 	-o "plymouth" \
+ 	-a "debug" \
+-	-d "piix ide-gd_mod e1000 nfs sunrpc" \
++	-d "piix sd_mod sr_mod ata_piix ide-gd_mod e1000 nfs sunrpc" \
+ 	-f initramfs.testing $KVERSION || return 1
+ }
+ 
+-- 
+1.7.0.1
+

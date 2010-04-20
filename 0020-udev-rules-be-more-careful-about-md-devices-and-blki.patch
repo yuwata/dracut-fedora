@@ -1,0 +1,44 @@
+From dafa4f621f2841e73a09a458e372d6af973e1eda Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 16 Apr 2010 16:42:54 +0200
+Subject: [PATCH 20/40] udev-rules: be more careful about md devices and blkid runs
+
+---
+ modules.d/95udev-rules/59-persistent-storage.rules |   21 +++++++++++++++++++-
+ 1 files changed, 20 insertions(+), 1 deletions(-)
+
+diff --git a/modules.d/95udev-rules/59-persistent-storage.rules b/modules.d/95udev-rules/59-persistent-storage.rules
+index 299a71d..89c7609 100644
+--- a/modules.d/95udev-rules/59-persistent-storage.rules
++++ b/modules.d/95udev-rules/59-persistent-storage.rules
+@@ -3,7 +3,26 @@ ACTION!="add|change", GOTO="ps_end"
+ 
+ KERNEL=="cciss[0-9]*", IMPORT{program}="/sbin/blkid -o udev -p $tempnode"
+ KERNEL=="nbd[0-9]*", IMPORT{program}="/sbin/blkid -o udev -p $tempnode"
+-KERNEL=="md[0-9]*|md_d[0-9]*|md/*", IMPORT{program}="/sbin/blkid -o udev -p $tempnode"
++
++
++KERNEL!="md[0-9]*|md_d[0-9]*|md/*", KERNEL!="md*", GOTO="md_end"
++
++# partitions have no md/{array_state,metadata_version}
++ENV{DEVTYPE}=="partition", GOTO="md_ignore_state"
++
++# container devices have a metadata version of e.g. 'external:ddf' and
++# never leave state 'inactive'
++ATTR{md/metadata_version}=="external:[A-Za-z]*", ATTR{md/array_state}=="inactive", GOTO="md_ignore_state"
++TEST!="md/array_state", GOTO="md_end"
++ATTR{md/array_state}=="|clear|inactive", GOTO="md_end"
++
++LABEL="md_ignore_state"
++
++IMPORT{program}="/sbin/mdadm --detail --export $tempnode"
++IMPORT{program}="/sbin/blkid -o udev -p $tempnode"
++OPTIONS+="link_priority=100"
++OPTIONS+="watch"
++LABEL="md_end"
+ 
+ 
+ KERNEL!="dm-[0-9]*", GOTO="ps_end"
+-- 
+1.7.0.1
+

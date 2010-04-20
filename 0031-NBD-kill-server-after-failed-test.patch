@@ -1,0 +1,44 @@
+From 97add1b38333949960f3b1d60641716cce47766e Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 16 Apr 2010 16:58:16 +0200
+Subject: [PATCH 31/40] NBD: kill server after failed test
+
+---
+ test/TEST-40-NBD/test.sh |   10 +++++++++-
+ 1 files changed, 9 insertions(+), 1 deletions(-)
+
+diff --git a/test/TEST-40-NBD/test.sh b/test/TEST-40-NBD/test.sh
+index d84d657..8da1ba4 100755
+--- a/test/TEST-40-NBD/test.sh
++++ b/test/TEST-40-NBD/test.sh
+@@ -88,6 +88,10 @@ test_run() {
+ 	echo "Failed to start server" 1>&2
+ 	return 1
+     fi
++    client_run || { kill_server; return 1; }
++}
++
++client_run() {
+ 
+     # The default is ext3,errors=continue so use that to determine
+     # if our options were parsed and used
+@@ -309,11 +313,15 @@ test_setup() {
+ 	-f initramfs.testing $KVERSION || return 1
+ }
+ 
+-test_cleanup() {
++kill_server() {
+     if [[ -s server.pid ]]; then
+ 	sudo kill -TERM $(cat server.pid)
+ 	rm -f server.pid
+     fi
++}
++
++test_cleanup() {
++    kill_server
+     rm -fr overlay mnt
+     rm -f flag.img server.ext2 nbd.ext2 encrypted.ext2
+     rm -f initramfs.server initramfs.testing initramfs.makeroot
+-- 
+1.7.0.1
+

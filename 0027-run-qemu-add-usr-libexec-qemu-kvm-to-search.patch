@@ -1,0 +1,24 @@
+From 709302e3ccfa7349b0c45e976655394724a56de7 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 16 Apr 2010 16:49:52 +0200
+Subject: [PATCH 27/40] run-qemu: add /usr/libexec/qemu-kvm to search
+
+---
+ test/run-qemu |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+diff --git a/test/run-qemu b/test/run-qemu
+index a63a644..667975f 100755
+--- a/test/run-qemu
++++ b/test/run-qemu
+@@ -7,6 +7,7 @@ export PATH=/sbin:/bin:/usr/sbin:/usr/bin
+ $(lsmod | grep -q '^kqemu ') && BIN=/usr/bin/qemu && ARGS="-kernel-kqemu "
+ [[ -c /dev/kvm && -x /usr/bin/kvm ]] && BIN=/usr/bin/kvm && ARGS=""
+ [[ -c /dev/kvm && -x /usr/bin/qemu-kvm ]] && BIN=/usr/bin/qemu-kvm && ARGS=""
++[[ -c /dev/kvm && -x /usr/libexec/qemu-kvm ]] && BIN=/usr/libexec/qemu-kvm && ARGS=""
+ 
+ [[ $BIN ]] || {
+    echo "Could not find a working KVM or QEMU to test with!" >&2
+-- 
+1.7.0.1
+

@@ -1,0 +1,24 @@
+From 4058d85cb69bb687f93f2b3cc50a6c5a90531080 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 16 Apr 2010 16:45:53 +0200
+Subject: [PATCH 24/40] init: do not redirect to -
+
+---
+ modules.d/99base/init |    1 -
+ 1 files changed, 0 insertions(+), 1 deletions(-)
+
+diff --git a/modules.d/99base/init b/modules.d/99base/init
+index 612c021..1262ae1 100755
+--- a/modules.d/99base/init
++++ b/modules.d/99base/init
+@@ -10,7 +10,6 @@ wait_for_loginit()
+ {
+     if getarg rdinitdebug; then
+ 	set +x
+-	exec 1>- 2>-
+ 	exec 0<>/dev/console 1<>/dev/console 2<>/dev/console
+ 	# wait for loginit
+ 	i=0
+-- 
+1.7.0.1
+

@@ -1,0 +1,33 @@
+From bdcb63b0e64c0d1fbd889c49da2138cb08a53356 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 16 Apr 2010 17:13:15 +0200
+Subject: [PATCH 37/40] NEWS: update
+
+---
+ NEWS |   13 +++++++++++++
+ 1 files changed, 13 insertions(+), 0 deletions(-)
+
+diff --git a/NEWS b/NEWS
+index 5f8b18c..a177156 100644
+--- a/NEWS
++++ b/NEWS
+@@ -1,3 +1,16 @@
++dracut-006
++==========
++- fixed mdraid with IMSM
++- fixed dracut manpages
++- dmraid parse different error messages
++- add cdrom polling mechanism for slow cdroms
++- add module btrfs
++- teach dmsquash live-root to use rootflags
++- trigger udev with action=add
++- fixed add_drivers handling 
++- add sr_mod
++- use pigz instead of gzip, if available
++
+ dracut-005
+ ==========
+ - dcb support to dracut's FCoE support 
+-- 
+1.7.0.1
+

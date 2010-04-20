@@ -1,0 +1,36 @@
+From 3de984ba7f14bea072322016e5edc1817d979ea7 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 16 Apr 2010 16:56:18 +0200
+Subject: [PATCH 30/40] test/nfs: correct return code and cleanup
+
+---
+ test/TEST-20-NFS/test.sh |    9 +++++++--
+ 1 files changed, 7 insertions(+), 2 deletions(-)
+
+diff --git a/test/TEST-20-NFS/test.sh b/test/TEST-20-NFS/test.sh
+index 62aa02c..530a42c 100755
+--- a/test/TEST-20-NFS/test.sh
++++ b/test/TEST-20-NFS/test.sh
+@@ -178,12 +178,17 @@ test_run() {
+ 	return 1
+     fi
+ 
+-    test_nfsv3 || return 1
+-    test_nfsv4
++    test_nfsv3 && \
++	test_nfsv4
++
++    ret=$?
++
+     if [[ -s server.pid ]]; then
+ 	sudo kill -TERM $(cat server.pid)
+ 	rm -f server.pid
+     fi
++
++    return $ret
+ }
+ 
+ test_setup() {
+-- 
+1.7.0.1
+

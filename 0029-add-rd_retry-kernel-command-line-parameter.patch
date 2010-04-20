@@ -1,0 +1,174 @@
+From 85fd75f91fdd3697bf6d9d6e186208fc1ddeba29 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 16 Apr 2010 16:55:14 +0200
+Subject: [PATCH 29/40] add rd_retry kernel command line parameter
+
+rd_retry=<seconds to retry in the main loop>
+
+speeds up internal test suite
+---
+ modules.d/99base/init             |    6 +++++-
+ test/TEST-10-RAID/test.sh         |    2 +-
+ test/TEST-11-LVM/test.sh          |    2 +-
+ test/TEST-12-RAID-DEG/test.sh     |    2 +-
+ test/TEST-13-ENC-RAID-LVM/test.sh |    2 +-
+ test/TEST-14-IMSM/test.sh         |    2 +-
+ test/TEST-20-NFS/test.sh          |    2 +-
+ test/TEST-30-ISCSI/test.sh        |    2 +-
+ test/TEST-40-NBD/test.sh          |    4 ++--
+ test/TEST-50-MULTINIC/test.sh     |    2 +-
+ 10 files changed, 15 insertions(+), 11 deletions(-)
+
+diff --git a/modules.d/99base/init b/modules.d/99base/init
+index 1262ae1..45033af 100755
+--- a/modules.d/99base/init
++++ b/modules.d/99base/init
+@@ -150,6 +150,10 @@ udevadm trigger --action=add $udevtriggeropts  >/dev/null 2>&1
+ 
+ getarg 'rdbreak=initqueue' && emergency_shell -n initqueue "Break before initqueue"
+ 
++RDRETRY=$(getarg 'rd_retry=')
++RDRETRY=${RDRETRY:-20}
++RDRETRY=$(($RDRETRY*2))
++
+ i=0
+ while :; do
+ 
+@@ -198,7 +202,7 @@ while :; do
+     done
+     
+     i=$(($i+1))
+-    [ $i -gt 40 ] \
++    [ $i -gt $RDRETRY ] \
+         && { flock -s 9 ; emergency_shell "No root device found"; } 9>/.console_lock
+ done
+ unset job
+diff --git a/test/TEST-10-RAID/test.sh b/test/TEST-10-RAID/test.sh
+index 875f454..83a461a 100755
+--- a/test/TEST-10-RAID/test.sh
++++ b/test/TEST-10-RAID/test.sh
+@@ -9,7 +9,7 @@ KVERSION=${KVERSION-$(uname -r)}
+ test_run() {
+     $testdir/run-qemu -hda root.ext2 -m 256M -nographic \
+ 	-net none -kernel /boot/vmlinuz-$KVERSION \
+-	-append "root=/dev/dracut/root rw quiet rdinfo console=ttyS0,115200n81 selinux=0 rdinitdebug rdnetdebug $DEBUGFAIL" \
++	-append "root=/dev/dracut/root rw quiet rd_retry=3 rdinfo console=ttyS0,115200n81 selinux=0 rdinitdebug rdnetdebug $DEBUGFAIL" \
+ 	-initrd initramfs.testing
+     grep -m 1 -q dracut-root-block-success root.ext2 || return 1
+ }
+diff --git a/test/TEST-11-LVM/test.sh b/test/TEST-11-LVM/test.sh
+index 798b24f..849aeb1 100755
+--- a/test/TEST-11-LVM/test.sh
++++ b/test/TEST-11-LVM/test.sh
+@@ -9,7 +9,7 @@ KVERSION=${KVERSION-$(uname -r)}
+ test_run() {
+     $testdir/run-qemu -hda root.ext2 -m 256M -nographic \
+ 	-net none -kernel /boot/vmlinuz-$KVERSION \
+-	-append "root=/dev/dracut/root rw quiet rdinfo console=ttyS0,115200n81 selinux=0 rdinitdebug rdnetdebug $DEBUGFAIL" \
++	-append "root=/dev/dracut/root rw quiet rd_retry=3 rdinfo console=ttyS0,115200n81 selinux=0 rdinitdebug rdnetdebug $DEBUGFAIL" \
+ 	-initrd initramfs.testing
+     grep -m 1 -q dracut-root-block-success root.ext2 || return 1
+ }
+diff --git a/test/TEST-12-RAID-DEG/test.sh b/test/TEST-12-RAID-DEG/test.sh
+index 0d78b93..4618c0f 100755
+--- a/test/TEST-12-RAID-DEG/test.sh
++++ b/test/TEST-12-RAID-DEG/test.sh
+@@ -10,7 +10,7 @@ client_run() {
+     echo "CLIENT TEST START: $@"
+     $testdir/run-qemu -hda root.ext2 -m 256M -nographic \
+ 	-net none -kernel /boot/vmlinuz-$KVERSION \
+-	-append "$@ root=LABEL=root rw quiet rdinfo console=ttyS0,115200n81 selinux=0 rdinitdebug rdnetdebug $DEBUGFAIL " \
++	-append "$@ root=LABEL=root rw quiet rd_retry=3 rdinfo console=ttyS0,115200n81 selinux=0 rdinitdebug rdnetdebug $DEBUGFAIL " \
+ 	-initrd initramfs.testing
+     if ! grep -m 1 -q dracut-root-block-success root.ext2; then
+ 	echo "CLIENT TEST END: $@ [FAIL]"
+diff --git a/test/TEST-13-ENC-RAID-LVM/test.sh b/test/TEST-13-ENC-RAID-LVM/test.sh
+index 436e429..adb94cb 100755
+--- a/test/TEST-13-ENC-RAID-LVM/test.sh
++++ b/test/TEST-13-ENC-RAID-LVM/test.sh
+@@ -9,7 +9,7 @@ KVERSION=${KVERSION-$(uname -r)}
+ test_run() {
+     $testdir/run-qemu -hda root.ext2 -m 256M -nographic \
+ 	-net none -kernel /boot/vmlinuz-$KVERSION \
+-	-append "root=/dev/dracut/root rw quiet rdinfo console=ttyS0,115200n81 selinux=0 rdinitdebug rdnetdebug $DEBUGFAIL" \
++	-append "root=/dev/dracut/root rw quiet rd_retry=3 rdinfo console=ttyS0,115200n81 selinux=0 rdinitdebug rdnetdebug $DEBUGFAIL" \
+ 	-initrd initramfs.testing
+     grep -m 1 -q dracut-root-block-success root.ext2 || return 1
+ }
+diff --git a/test/TEST-14-IMSM/test.sh b/test/TEST-14-IMSM/test.sh
+index efddb9a..80d4b1b 100755
+--- a/test/TEST-14-IMSM/test.sh
++++ b/test/TEST-14-IMSM/test.sh
+@@ -10,7 +10,7 @@ client_run() {
+     echo "CLIENT TEST START: $@"
+     $testdir/run-qemu -hda root.ext2 -hdb disk1 -hdc disk2 -m 256M -nographic \
+ 	-net none -kernel /boot/vmlinuz-$KVERSION \
+-	-append "$@ root=LABEL=root rw quiet rdinfo console=ttyS0,115200n81 selinux=0 rdinitdebug rdnetdebug $DEBUGFAIL" \
++	-append "$@ root=LABEL=root rw quiet rd_retry=5 rdinitdebug console=ttyS0,115200n81 selinux=0 rdinfo $DEBUGFAIL" \
+ 	-initrd initramfs.testing
+     if ! grep -m 1 -q dracut-root-block-success root.ext2; then
+ 	echo "CLIENT TEST END: $@ [FAIL]"
+diff --git a/test/TEST-20-NFS/test.sh b/test/TEST-20-NFS/test.sh
+index 01e1d7a..62aa02c 100755
+--- a/test/TEST-20-NFS/test.sh
++++ b/test/TEST-20-NFS/test.sh
+@@ -46,7 +46,7 @@ client_test() {
+   	-net nic,macaddr=$mac,model=e1000 \
+ 	-net socket,connect=127.0.0.1:12345 \
+   	-kernel /boot/vmlinuz-$KVERSION \
+-  	-append "$cmdline $DEBUGFAIL rdinitdebug rdinfo quiet rdnetdebug ro console=ttyS0,115200n81 selinux=0" \
++  	-append "$cmdline $DEBUGFAIL rdinitdebug rd_retry=10 rdinfo quiet rdnetdebug ro console=ttyS0,115200n81 selinux=0" \
+   	-initrd initramfs.testing
+ 
+     if [[ $? -ne 0 ]] || ! grep -m 1 -q nfs-OK client.img; then
+diff --git a/test/TEST-30-ISCSI/test.sh b/test/TEST-30-ISCSI/test.sh
+index ba7465a..4dbd6d6 100755
+--- a/test/TEST-30-ISCSI/test.sh
++++ b/test/TEST-30-ISCSI/test.sh
+@@ -37,7 +37,7 @@ run_client() {
+   	-net nic,macaddr=52:54:00:12:34:00,model=e1000 \
+ 	-net socket,connect=127.0.0.1:12345 \
+   	-kernel /boot/vmlinuz-$KVERSION \
+-	-append "root=dhcp rw quiet rdinitdebug rdinfo rdnetdebug console=ttyS0,115200n81 selinux=0 $DEBUGFAIL" \
++	-append "root=dhcp rw quiet rd_retry=5 rdinitdebug rdinfo rdnetdebug console=ttyS0,115200n81 selinux=0 $DEBUGFAIL" \
+   	-initrd initramfs.testing
+     grep -m 1 -q iscsi-OK client.img || return 1
+ }
+diff --git a/test/TEST-40-NBD/test.sh b/test/TEST-40-NBD/test.sh
+index 58d93f3..d84d657 100755
+--- a/test/TEST-40-NBD/test.sh
++++ b/test/TEST-40-NBD/test.sh
+@@ -13,7 +13,7 @@ run_server() {
+     $testdir/run-qemu -hda server.ext2 -hdb nbd.ext2 -hdc encrypted.ext2 \
+ 	-m 256M -nographic \
+ 	-net nic,macaddr=52:54:00:12:34:56,model=e1000 \
+-	-net socket,mcast=230.0.0.1:1236 \
++	-net socket,listen=127.0.0.1:12345 \
+ 	-serial udp:127.0.0.1:9999 \
+ 	-kernel /boot/vmlinuz-$KVERSION \
+ 	-append "root=/dev/sda rw quiet console=ttyS0,115200n81 selinux=0" \
+@@ -48,7 +48,7 @@ client_test() {
+ 
+     $testdir/run-qemu -hda flag.img -m 256M -nographic \
+ 	-net nic,macaddr=$mac,model=e1000 \
+-	-net socket,mcast=230.0.0.1:1236 \
++	-net socket,connect=127.0.0.1:12345 \
+ 	-kernel /boot/vmlinuz-$KVERSION \
+ 	-append "$cmdline $DEBUGFAIL rdinitdebug rdinfo rdnetdebug ro quiet console=ttyS0,115200n81 selinux=0" \
+ 	-initrd initramfs.testing
+diff --git a/test/TEST-50-MULTINIC/test.sh b/test/TEST-50-MULTINIC/test.sh
+index c3e3eb8..98d4504 100755
+--- a/test/TEST-50-MULTINIC/test.sh
++++ b/test/TEST-50-MULTINIC/test.sh
+@@ -48,7 +48,7 @@ client_test() {
+   	-net nic,macaddr=52:54:00:12:34:$mac3,model=e1000 \
+ 	-net socket,connect=127.0.0.1:12345 \
+   	-kernel /boot/vmlinuz-$KVERSION \
+-  	-append "$cmdline $DEBUGFAIL rdinitdebug rdinfo rdnetdebug ro quiet console=ttyS0,115200n81 selinux=0 rdshell rdcopystate" \
++  	-append "$cmdline $DEBUGFAIL rd_retry=5 rdinitdebug rdinfo rdnetdebug ro quiet console=ttyS0,115200n81 selinux=0 rdcopystate" \
+   	-initrd initramfs.testing
+ 
+     if [[ $? -ne 0 ]] || ! grep -m 1 -q OK client.img; then
+-- 
+1.7.0.1
+

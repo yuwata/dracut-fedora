@@ -1,0 +1,33 @@
+From c5ef4b63a30e8473fc3d5b806e033ef6e989143e Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 16 Apr 2010 16:59:53 +0200
+Subject: [PATCH 33/40] test/TEST-50-MULTINIC: install all nfsidmap libs for server
+
+---
+ test/TEST-50-MULTINIC/test.sh |    9 +++++++++
+ 1 files changed, 9 insertions(+), 0 deletions(-)
+
+diff --git a/test/TEST-50-MULTINIC/test.sh b/test/TEST-50-MULTINIC/test.sh
+index 1e6cdab..b995902 100755
+--- a/test/TEST-50-MULTINIC/test.sh
++++ b/test/TEST-50-MULTINIC/test.sh
+@@ -148,7 +148,16 @@ test_setup() {
+  	fi
+ 
+  	dracut_install $(ls {/usr,}$LIBDIR/libnfsidmap*.so* 2>/dev/null )
++ 	dracut_install $(ls {/usr,}$LIBDIR/libnfsidmap/*.so 2>/dev/null )
+  	dracut_install $(ls {/usr,}$LIBDIR/libnss*.so 2>/dev/null)
++
++
++	nsslibs=$(sed -e '/^#/d' -e 's/^.*://' -e 's/\[NOTFOUND=return\]//' /etc/nsswitch.conf \
++              |  tr -s '[:space:]' '\n' | sort -u | tr -s '[:space:]' '|')
++	nsslibs=${nsslibs#|}
++	nsslibs=${nsslibs%|}
++
++	dracut_install $(for i in $(ls {/usr,}$LIBDIR/libnss*.so 2>/dev/null); do echo $i;done | egrep "$nsslibs")
+  	(
+  	    cd "$initdir";
+  	    mkdir -p dev sys proc etc var/run tmp var/lib/{dhcpd,rpcbind}
+-- 
+1.7.0.1
+

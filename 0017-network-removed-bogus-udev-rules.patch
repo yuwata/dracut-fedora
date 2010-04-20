@@ -1,0 +1,25 @@
+From 400723054c4303df26c1e395ca24942389b2f9c3 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 16 Apr 2010 16:40:59 +0200
+Subject: [PATCH 17/40] network: removed bogus udev rules
+
+---
+ modules.d/40network/ifname-genrules.sh |    2 --
+ 1 files changed, 0 insertions(+), 2 deletions(-)
+
+diff --git a/modules.d/40network/ifname-genrules.sh b/modules.d/40network/ifname-genrules.sh
+index 547f230..5186e91 100755
+--- a/modules.d/40network/ifname-genrules.sh
++++ b/modules.d/40network/ifname-genrules.sh
+@@ -2,8 +2,6 @@
+ 
+ # if there are no ifname parameters, just use NAME=KERNEL
+ if ! getarg ifname= >/dev/null ; then
+-    echo 'SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", ATTR{address}=="?*", ATTR{type}=="1", NAME="%k"' \
+-        > /etc/udev/rules.d/50-ifname.rules
+     return
+ fi
+ 
+-- 
+1.7.0.1
+

@@ -1,0 +1,25 @@
+From 2937028c542f3ffc80f1c15968547c6a85bfdcac Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 16 Apr 2010 16:45:25 +0200
+Subject: [PATCH 23/40] init: fix cdrom polling loop
+
+---
+ modules.d/99base/init |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/modules.d/99base/init b/modules.d/99base/init
+index 4696915..612c021 100755
+--- a/modules.d/99base/init
++++ b/modules.d/99base/init
+@@ -195,7 +195,7 @@ while :; do
+ 	# skip, if cdrom medium was already found
+         strstr "$(udevadm info --query=env --path=${cdrom##/sys})" \
+ 	    ID_CDROM_MEDIA && continue
+-        echo change > "$cdrom"        
++        echo change > "$cdrom/uevent"        
+     done
+     
+     i=$(($i+1))
+-- 
+1.7.0.1
+
