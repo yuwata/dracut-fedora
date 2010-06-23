@@ -1,0 +1,21 @@
+From 95c1941ce5c236a547e0e1155aefad8292a9fab3 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 21 Jun 2010 20:47:01 +0200
+Subject: [PATCH 5/8] crypt: add fpu kernel module
+
+---
+ modules.d/90crypt/installkernel |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/modules.d/90crypt/installkernel b/modules.d/90crypt/installkernel
+index f61f501..de154a5 100755
+--- a/modules.d/90crypt/installkernel
++++ b/modules.d/90crypt/installkernel
+@@ -1,3 +1,3 @@
+ #!/bin/bash
+-instmods dm_crypt cbc sha256 xts aes aes_generic aesni-intel aes-x86_64
++instmods dm_crypt cbc sha256 xts aes aes_generic aesni-intel aes-x86_64 fpu
+ 
+-- 
+1.7.0.1
+

@@ -1,0 +1,25 @@
+From e4ebd474ec39d28a5e211f47bf77db3939ca2e90 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Tue, 22 Jun 2010 10:32:25 +0200
+Subject: [PATCH 7/8] dracut-functions: set LANG=C for ldd output parsing
+
+---
+ dracut-functions |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/dracut-functions b/dracut-functions
+index 58f119f..57dd702 100755
+--- a/dracut-functions
++++ b/dracut-functions
+@@ -248,7 +248,7 @@ inst_binary() {
+     local LDSO NAME IO FILE ADDR I1 n f TLIBDIR
+     [[ -e $initdir$target ]] && return 0
+     # I love bash!
+-    ldd $bin 2>/dev/null | while read line; do
++    LANG=C ldd $bin 2>/dev/null | while read line; do
+ 	[[ $line = 'not a dynamic executable' ]] && return 1
+ 	if [[ $line =~ not\ found ]]; then
+ 	    derror "Missing a shared library required by $bin."
+-- 
+1.7.0.1
+

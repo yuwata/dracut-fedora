@@ -1,0 +1,25 @@
+From 45b5a4e142e7b1f9831b8dbc3e1be0960709e6b6 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Tue, 22 Jun 2010 11:59:49 +0200
+Subject: [PATCH 8/8] dracut-functions: use LC_ALL=C rather than LANG=C
+
+---
+ dracut-functions |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/dracut-functions b/dracut-functions
+index 57dd702..2cd573a 100755
+--- a/dracut-functions
++++ b/dracut-functions
+@@ -248,7 +248,7 @@ inst_binary() {
+     local LDSO NAME IO FILE ADDR I1 n f TLIBDIR
+     [[ -e $initdir$target ]] && return 0
+     # I love bash!
+-    LANG=C ldd $bin 2>/dev/null | while read line; do
++    LC_ALL=C ldd $bin 2>/dev/null | while read line; do
+ 	[[ $line = 'not a dynamic executable' ]] && return 1
+ 	if [[ $line =~ not\ found ]]; then
+ 	    derror "Missing a shared library required by $bin."
+-- 
+1.7.0.1
+
