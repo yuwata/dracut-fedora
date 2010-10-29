@@ -20,10 +20,10 @@ Version: 008
 Release: %{release_prefix}
 
 Summary: Initramfs generator using udev
-%if 0%{?fedora_version} > 0
+%if 0%{?fedora_version} 
 Group: System Environment/Base          
 %endif
-%if 0%{?suse_version} > 0
+%if 0%{?suse_version}
 Group: System/Base
 %endif
 License: GPLv2+ 
@@ -33,20 +33,14 @@ URL: http://apps.sourceforge.net/trac/dracut/wiki
 Source0: dracut-%{version}%{?dashgittag}.tar.bz2
 BuildArch: noarch
 
-%if 0%{?fedora_version} > 0
+%if 0%{?fedora_version} 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 %endif
-%if 0%{?suse_version} > 0
+%if 0%{?suse_version} 
 BuildRoot: %{_tmppath}/%{name}-%{version}-build
 %endif
 
-%if 0%{?fedora_version} > 0
 BuildRequires: docbook-style-xsl docbook-dtds libxslt
-%endif
-
-%if 0%{?suse_version} > 0
-BuildRequires: docbook-xsl-stylesheets libxslt
-%endif
 
 %if 0%{?fedora} > 12 || 0%{?rhel} >= 6
 # no "provides", because dracut does not offer
@@ -81,14 +75,14 @@ Requires: sed
 Requires: tar
 Requires: udev
 
-%if 0%{?fedora_version} > 0
+%if 0%{?fedora_version} 
 Requires: util-linux-ng >= 2.16
 Requires: initscripts >= 8.63-1
 Requires: plymouth >= 0.8.0-0.2009.29.09.19.1
 Requires: mount
 %endif
 
-%if 0%{?suse_version} > 0
+%if 0%{?suse_version}
 Requires: util-linux >= 2.16
 %endif
 
@@ -110,13 +104,13 @@ Requires: nbd
 Requires: net-tools iproute
 Requires: bridge-utils
 
-%if 0%{?fedora_version} > 0
+%if 0%{?fedora_version} 
 Requires: iscsi-initiator-utils
 Requires: nfs-utils 
 Requires: dhclient
 %endif
 
-%if 0%{?suse_version} > 0
+%if 0%{?suse_version} 
 Requires: dhcp-client
 Requires: nfs-client
 Requires: vlan
@@ -128,7 +122,7 @@ Provides:  dracut-generic = %{version}-%{release}
 This package requires everything which is needed to build a generic
 all purpose initramfs with network support with dracut.
 
-%if 0%{?fedora_version} > 0
+%if 0%{?fedora_version} 
 %package fips
 Summary: Dracut modules to build a dracut initramfs with an integrity check
 Requires: %{name} = %{version}-%{release}
@@ -160,7 +154,7 @@ This package contains tools to assemble the local initrd and host configuration.
 make WITH_SWITCH_ROOT=0%{?with_switch_root}
 
 %install
-%if 0%{?fedora_version} > 0
+%if 0%{?fedora_version} 
 rm -rf $RPM_BUILD_ROOT
 %endif
 make install DESTDIR=$RPM_BUILD_ROOT sbindir=/sbin \
@@ -182,11 +176,11 @@ mkdir -p $RPM_BUILD_ROOT/var/lib/dracut/overlay
 mkdir -p $RPM_BUILD_ROOT%{_localstatedir}/log
 touch $RPM_BUILD_ROOT%{_localstatedir}/log/dracut.log
 
-%if 0%{?fedora_version} > 0
+%if 0%{?fedora_version} 
 install -m 0644 dracut.conf.d/fedora.conf.example $RPM_BUILD_ROOT/etc/dracut.conf.d/01-dist.conf
 %endif
 
-%if 0%{?suse_version} > 0
+%if 0%{?suse_version} 
 install -m 0644 dracut.conf.d/suse.conf.example   $RPM_BUILD_ROOT/etc/dracut.conf.d/01-dist.conf
 %endif
 
@@ -213,7 +207,7 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_datadir}/dracut/modules.d
 %{_datadir}/dracut/dracut-functions
 %config(noreplace) /etc/dracut.conf
-%if 0%{?fedora_version} > 0 || 0%{?suse_version} > 0
+%if 0%{?fedora_version} || 0%{?suse_version} 
 %config(noreplace) /etc/dracut.conf.d/01-dist.conf
 %endif
 %dir /etc/dracut.conf.d
@@ -263,7 +257,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/dracut/modules.d/45ifcfg
 %{_datadir}/dracut/modules.d/95znet
 
-%if 0%{?fedora_version} > 0
+%if 0%{?fedora_version} 
 %files fips
 %defattr(-,root,root,0755)
 %{_datadir}/dracut/modules.d/01fips
