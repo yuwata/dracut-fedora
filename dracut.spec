@@ -1,4 +1,4 @@
-%define gittag 3871942
+%define gittag 5e1898f
 # Variables must be defined
 %define with_nbd                1
 
@@ -16,7 +16,7 @@
 
 Name: dracut
 Version: 008
-%define release_prefix 0.7%{?rdist}
+%define release_prefix 0.8%{?rdist}
 Release: %{release_prefix}
 
 Summary: Initramfs generator using udev
@@ -280,10 +280,13 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
-* Fri Oct 29 2010 Harald Hoyer <harald@redhat.com> 008-0.7%{?rdist}
+* Wed Nov  3 2010 Harald Hoyer <harald@redhat.com> - 008-0.8
+- fixed fsck -a option
+
+* Fri Oct 29 2010 Harald Hoyer <harald@redhat.com> 008-0.7
 - added fsck to initramfs
 
-* Fri Oct 29 2010 Harald Hoyer <harald@redhat.com> 008-0.6%{?rdist}
+* Fri Oct 29 2010 Harald Hoyer <harald@redhat.com> 008-0.6
 - fixed rpm macros
 
 * Fri Oct 29 2010 Harald Hoyer <harald@redhat.com> 008-0.5
