@@ -1,4 +1,4 @@
-%define gittag 5e1898f
+%define gittag 325d491
 # Variables must be defined
 %define with_nbd                1
 
@@ -16,7 +16,7 @@
 
 Name: dracut
 Version: 008
-%define release_prefix 0.8%{?rdist}
+%define release_prefix 0.9%{?rdist}
 Release: %{release_prefix}
 
 Summary: Initramfs generator using udev
@@ -222,6 +222,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/dracut.conf.5*
 %{_datadir}/dracut/modules.d/00bootchart
 %{_datadir}/dracut/modules.d/00dash
+%{_datadir}/dracut/modules.d/05busybox
 %{_datadir}/dracut/modules.d/10i18n
 %{_datadir}/dracut/modules.d/10rpmversion
 %{_datadir}/dracut/modules.d/50plymouth
@@ -244,7 +245,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/dracut/modules.d/95zfcp
 %{_datadir}/dracut/modules.d/95terminfo
 %{_datadir}/dracut/modules.d/95udev-rules
-%{_datadir}/dracut/modules.d/95uswsusp
 %{_datadir}/dracut/modules.d/96insmodpost
 %{_datadir}/dracut/modules.d/98selinux
 %{_datadir}/dracut/modules.d/98syslog
@@ -280,6 +280,11 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Fri Nov 12 2010 Harald Hoyer <harald@redhat.com> 008-0.9%{?rdist}
+- dracut-008 pre git snapshot
+- fixes /dev/.udev permissions
+Resolves: rhbz#651594
+
 * Wed Nov  3 2010 Harald Hoyer <harald@redhat.com> - 008-0.8
 - fixed fsck -a option
 
@@ -607,4 +612,3 @@ Resolves: rhbz#486244
 
 * Thu Dec 18 2008 Jeremy Katz <katzj@redhat.com> - 0.0-1
 - Initial build
-
