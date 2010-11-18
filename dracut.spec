@@ -1,4 +1,4 @@
-%define gittag 325d491
+%define gittag b2415f4
 # Variables must be defined
 %define with_nbd                1
 
@@ -16,7 +16,7 @@
 
 Name: dracut
 Version: 008
-%define release_prefix 0.9%{?rdist}
+%define release_prefix 0.10%{?rdist}
 Release: %{release_prefix}
 
 Summary: Initramfs generator using udev
@@ -280,7 +280,12 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
-* Fri Nov 12 2010 Harald Hoyer <harald@redhat.com> 008-0.9%{?rdist}
+* Thu Nov 18 2010 Harald Hoyer <harald@redhat.com> - 008-0.10
+- dracut-008 pre git snapshot
+- fixes /dev/dri permissions
+Resolves: rhbz#626559
+
+* Fri Nov 12 2010 Harald Hoyer <harald@redhat.com> 008-0.9
 - dracut-008 pre git snapshot
 - fixes /dev/.udev permissions
 Resolves: rhbz#651594
