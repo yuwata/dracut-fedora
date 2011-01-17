@@ -16,7 +16,7 @@
 
 Name: dracut
 Version: 008
-%define release_prefix 0.10%{?rdist}
+%define release_prefix 0.11%{?rdist}
 Release: %{release_prefix}
 
 Summary: Initramfs generator using udev
@@ -85,7 +85,6 @@ Requires: udev
 Requires: util-linux-ng >= 2.16
 Requires: initscripts >= 8.63-1
 Requires: plymouth >= 0.8.0-0.2009.29.09.19.1
-Requires: mount
 %endif
 
 %if 0%{?suse_version}
@@ -280,6 +279,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Mon Jan 17 2011 Harald Hoyer <harald@redhat.com> 008-0.11
+- removed "mount" requirement
+
 * Thu Nov 18 2010 Harald Hoyer <harald@redhat.com> - 008-0.10
 - dracut-008 pre git snapshot
 - fixes /dev/dri permissions
