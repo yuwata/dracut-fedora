@@ -1,4 +1,3 @@
-%define gittag b2415f4
 # Variables must be defined
 %define with_nbd                1
 
@@ -16,7 +15,7 @@
 
 Name: dracut
 Version: 008
-%define release_prefix 0.11%{?rdist}
+%define release_prefix 1%{?rdist}
 Release: %{release_prefix}
 
 Summary: Initramfs generator using udev
@@ -82,7 +81,7 @@ Requires: tar
 Requires: udev
 
 %if 0%{?fedora}
-Requires: util-linux-ng >= 2.16
+Requires: util-linux >= 2.16
 Requires: initscripts >= 8.63-1
 Requires: plymouth >= 0.8.0-0.2009.29.09.19.1
 %endif
@@ -166,8 +165,6 @@ make install DESTDIR=$RPM_BUILD_ROOT sbindir=/sbin \
      sysconfdir=/etc mandir=%{_mandir} WITH_SWITCH_ROOT=0%{?with_switch_root}
 
 echo %{name}-%{version}-%{release} > $RPM_BUILD_ROOT/%{_datadir}/dracut/modules.d/10rpmversion/dracut-version
-rm $RPM_BUILD_ROOT/%{_datadir}/dracut/modules.d/10rpmversion/check
-rm $RPM_BUILD_ROOT/%{_datadir}/dracut/modules.d/01fips/check
 
 %if 0%{?fedora} == 0
 rm -fr $RPM_BUILD_ROOT/%{_datadir}/dracut/modules.d/01fips
@@ -199,7 +196,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root,0755)
-%doc README HACKING TODO COPYING AUTHORS NEWS dracut.html
+%doc README HACKING TODO COPYING AUTHORS NEWS dracut.html dracut.png dracut.svg
 /sbin/dracut
 %if 0%{?with_switch_root}
 /sbin/switch_root
@@ -245,6 +242,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/dracut/modules.d/95terminfo
 %{_datadir}/dracut/modules.d/95udev-rules
 %{_datadir}/dracut/modules.d/96insmodpost
+%{_datadir}/dracut/modules.d/97biosdevname
 %{_datadir}/dracut/modules.d/98selinux
 %{_datadir}/dracut/modules.d/98syslog
 %{_datadir}/dracut/modules.d/99base
@@ -279,6 +277,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Wed Feb 02 2011 Harald Hoyer <harald@redhat.com> 008-1
+- version 008-1
+
 * Mon Jan 17 2011 Harald Hoyer <harald@redhat.com> 008-0.11
 - removed "mount" requirement
 
