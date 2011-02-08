@@ -16,7 +16,7 @@
 Name: dracut
 Version: 008
 %define release_prefix 1%{?rdist}
-Release: %{release_prefix}
+Release: %{release_prefix}.1
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora}
@@ -277,6 +277,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Tue Feb 08 2011 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 008-1.1
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_15_Mass_Rebuild
+
 * Wed Feb 02 2011 Harald Hoyer <harald@redhat.com> 008-1
 - version 008-1
 
