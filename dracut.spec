@@ -6,17 +6,9 @@
 %define with_nbd 0
 %endif
 
-%if %{defined gittag}
-%define rdist .git%{gittag}%{?dist}
-%define dashgittag -%{gittag}
-%else
-%define rdist %{?dist}
-%endif
-
 Name: dracut
 Version: 008
-%define release_prefix 1%{?rdist}
-Release: %{release_prefix}.1
+Release: 2
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora}
@@ -90,6 +82,9 @@ Requires: plymouth >= 0.8.0-0.2009.29.09.19.1
 Requires: util-linux >= 2.16
 %endif
 
+Patch1: 0001-dracut-functions-write-to-HOME-dracut.log-instead-of.patch
+Patch2: 0002-dracut.8.xml-corrected-typo.patch
+Patch3: 0003-plymouth-touch-dev-.systemd-plymouth.patch
 
 %description
 Dracut contains tools to create a bootable initramfs for 2.6 Linux kernels. 
@@ -153,6 +148,9 @@ This package contains tools to assemble the local initrd and host configuration.
 
 %prep
 %setup -q -n %{name}-%{version}%{?dashgittag}
+%patch1 -p1
+%patch2 -p1
+%patch3 -p1
 
 %build
 make WITH_SWITCH_ROOT=0%{?with_switch_root}
@@ -277,6 +275,10 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Wed Feb 09 2011 Harald Hoyer <harald@redhat.com> 008-2
+- do not write dracut.log to /tmp under any circumstances
+- touch /dev/.systemd/plymouth after plymouth started
+
 * Tue Feb 08 2011 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 008-1.1
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_15_Mass_Rebuild
 
