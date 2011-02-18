@@ -1,0 +1,41 @@
+From 0ce274f02b7391dfa5ab34f26ec3fbc6deff3269 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 18 Feb 2011 09:44:47 +0100
+Subject: [PATCH] selinux: turn off selinux by default
+
+In Fedora selinux is now handled by systemd. If you want to enable
+selinux by default, just add it to your /etc/dracut.conf.d/01-dist.conf
+with:
+add_dracutmodules+=" selinux "
+---
+ dracut.conf.d/suse.conf.example     |    3 ---
+ modules.d/98selinux/module-setup.sh |    6 +-----
+ 2 files changed, 1 insertions(+), 8 deletions(-)
+
+diff --git a/dracut.conf.d/suse.conf.example b/dracut.conf.d/suse.conf.example
+index 9afda04..f25ab01 100644
+--- a/dracut.conf.d/suse.conf.example
++++ b/dracut.conf.d/suse.conf.example
+@@ -1,5 +1,2 @@
+ i18n_vars="/etc/sysconfig/language:RC_LANG-LANG,RC_LC_ALL-LC_ALL /etc/sysconfig/console:CONSOLE_UNICODEMAP-FONT_UNIMAP,CONSOLE_FONT-FONT,CONSOLE_SCREENMAP-FONT_MAP /etc/sysconfig/keyboard:KEYTABLE-KEYMAP"
+ 
+-omit_dracutmodules+=" selinux "
+-
+-
+diff --git a/modules.d/98selinux/module-setup.sh b/modules.d/98selinux/module-setup.sh
+index 483e42f..316b552 100755
+--- a/modules.d/98selinux/module-setup.sh
++++ b/modules.d/98selinux/module-setup.sh
+@@ -3,11 +3,7 @@
+ # ex: ts=8 sw=4 sts=4 et filetype=sh
+ 
+ check() {
+-    [[ $hostonly ]] && {
+-        [ -x "/usr/sbin/load_policy" -o -x "/sbin/load_policy" ] || return 1
+-        return 0
+-    }
+-    return 0
++    return 255
+ }
+ 
+ depends() {

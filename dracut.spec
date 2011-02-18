@@ -8,7 +8,7 @@
 
 Name: dracut
 Version: 008
-Release: 2
+Release: 3
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora}
@@ -85,6 +85,13 @@ Requires: util-linux >= 2.16
 Patch1: 0001-dracut-functions-write-to-HOME-dracut.log-instead-of.patch
 Patch2: 0002-dracut.8.xml-corrected-typo.patch
 Patch3: 0003-plymouth-touch-dev-.systemd-plymouth.patch
+Patch4: 0004-dracut-Don-t-suppress-the-modprobe-error-output.patch
+Patch5: 0005-dracut-functions-handle-shared-objects-in-find_binar.patch
+Patch6: 0006-dracut-functions-fixed-installing-libraries-which-li.patch
+Patch7: 0007-i18n-fixed-config-file-parsing-in-hostonly-mode.patch
+Patch8: 0008-i18n-default-to-vconsole.font.unicode-1.patch
+Patch9: 0009-selinux-turn-off-selinux-by-default.patch
+
 
 %description
 Dracut contains tools to create a bootable initramfs for 2.6 Linux kernels. 
@@ -151,6 +158,12 @@ This package contains tools to assemble the local initrd and host configuration.
 %patch1 -p1
 %patch2 -p1
 %patch3 -p1
+%patch4 -p1
+%patch5 -p1
+%patch6 -p1
+%patch7 -p1
+%patch8 -p1
+%patch9 -p1
 
 %build
 make WITH_SWITCH_ROOT=0%{?with_switch_root}
@@ -275,6 +288,10 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Fri Feb 18 2011 Harald Hoyer <harald@redhat.com> 008-3
+- fixed i18n
+- turned off selinux by default
+
 * Wed Feb 09 2011 Harald Hoyer <harald@redhat.com> 008-2
 - do not write dracut.log to /tmp under any circumstances
 - touch /dev/.systemd/plymouth after plymouth started
