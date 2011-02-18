@@ -8,7 +8,7 @@
 
 Name: dracut
 Version: 008
-Release: 3
+Release: 4%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora}
@@ -288,6 +288,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Fri Feb 18 2011 Harald Hoyer <harald@redhat.com> 008-4
+- readded dist tag
+
 * Fri Feb 18 2011 Harald Hoyer <harald@redhat.com> 008-3
 - fixed i18n
 - turned off selinux by default
