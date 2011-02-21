@@ -8,7 +8,7 @@
 
 Name: dracut
 Version: 008
-Release: 4%{?dist}
+Release: 5%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora}
@@ -91,7 +91,11 @@ Patch6: 0006-dracut-functions-fixed-installing-libraries-which-li.patch
 Patch7: 0007-i18n-fixed-config-file-parsing-in-hostonly-mode.patch
 Patch8: 0008-i18n-default-to-vconsole.font.unicode-1.patch
 Patch9: 0009-selinux-turn-off-selinux-by-default.patch
-
+Patch10: 0010-lvm-use-sysinit-if-lvm-version-v2.02.65.patch
+Patch11: 0011-Makefile-do-not-dash-syntax-check-module-setup.sh.patch
+Patch12: 0012-init-set-cdrom-polling-in-kernel.patch
+Patch13: 0013-fix-c0a82e271e2730159f042ee7d7fc4aca2e08d28a.patch
+Patch14: 0014-vconsole.font.unicode-vconsole.unicode.patch
 
 %description
 Dracut contains tools to create a bootable initramfs for 2.6 Linux kernels. 
@@ -164,6 +168,11 @@ This package contains tools to assemble the local initrd and host configuration.
 %patch7 -p1
 %patch8 -p1
 %patch9 -p1
+%patch10 -p1
+%patch11 -p1
+%patch12 -p1
+%patch13 -p1
+%patch14 -p1
 
 %build
 make WITH_SWITCH_ROOT=0%{?with_switch_root}
@@ -288,6 +297,10 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Mon Feb 21 2011 Harald Hoyer <harald@redhat.com> 008-5
+- fixed i18n unicode setting
+- set cdrom in kernel polling
+
 * Fri Feb 18 2011 Harald Hoyer <harald@redhat.com> 008-4
 - readded dist tag
 
