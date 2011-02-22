@@ -1,0 +1,21 @@
+From 2826a877afe74eef6e5ba35e78eddf77107c3d01 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Tue, 22 Feb 2011 18:40:40 +0100
+Subject: [PATCH] 90lvm/lvm_scan.sh: removed garbage line
+
+---
+ modules.d/90lvm/lvm_scan.sh |    1 -
+ 1 files changed, 0 insertions(+), 1 deletions(-)
+
+diff --git a/modules.d/90lvm/lvm_scan.sh b/modules.d/90lvm/lvm_scan.sh
+index 9f9ce92..7573615 100755
+--- a/modules.d/90lvm/lvm_scan.sh
++++ b/modules.d/90lvm/lvm_scan.sh
+@@ -63,7 +63,6 @@ OLDIFS=$IFS
+ IFS=.
+ set $(lvm version 2>/dev/null)
+ IFS=$OLDIFS
+-maj min sub
+ maj=${1##*:}
+ min=$2
+ sub=${3%% *}

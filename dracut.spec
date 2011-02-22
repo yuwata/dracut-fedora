@@ -8,7 +8,7 @@
 
 Name: dracut
 Version: 008
-Release: 6%{?dist}
+Release: 7%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora}
@@ -97,6 +97,7 @@ Patch12: 0012-init-set-cdrom-polling-in-kernel.patch
 Patch13: 0013-fix-c0a82e271e2730159f042ee7d7fc4aca2e08d28a.patch
 Patch14: 0014-vconsole.font.unicode-vconsole.unicode.patch
 Patch15: 0015-90lvm-lvm_scan.sh-fixed-lvm-version-parsing.patch
+Patch16: 0016-90lvm-lvm_scan.sh-removed-garbage-line.patch
 
 %description
 Dracut contains tools to create a bootable initramfs for 2.6 Linux kernels. 
@@ -175,6 +176,7 @@ This package contains tools to assemble the local initrd and host configuration.
 %patch13 -p1
 %patch14 -p1
 %patch15 -p1
+%patch16 -p1
 
 %build
 make WITH_SWITCH_ROOT=0%{?with_switch_root}
@@ -299,6 +301,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Tue Feb 22 2011 Harald Hoyer <harald@redhat.com> 008-7
+- fixed lvm version parsing
+
 * Tue Feb 22 2011 Harald Hoyer <harald@redhat.com> 008-6
 - fixed lvm version parsing
 
