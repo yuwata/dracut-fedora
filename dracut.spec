@@ -20,7 +20,7 @@ Group: System/Base
 License: GPLv2+ 
 URL: https://dracut.wiki.kernel.org/
 Source0: http://www.kernel.org/pub/linux/utils/boot/dracut/dracut-009.tar.bz2
-Patch1: 0001-dracut-don-t-skip-zero-length-string-outfile-argumen.patch
+Patch3: 0003-dracut-don-t-skip-zero-length-string-outfile-argumen.patch
 
 BuildArch: noarch
 
@@ -154,7 +154,7 @@ This package contains tools to assemble the local initrd and host configuration.
 
 %prep
 %setup -q -n %{name}-%{version}%{?dashgittag}
-%patch1 -p1
+%patch3 -p1
 
 %build
 make WITH_SWITCH_ROOT=0%{?with_switch_root}
