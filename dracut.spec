@@ -8,7 +8,7 @@
 
 Name: dracut
 Version: 009
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora}
@@ -20,6 +20,8 @@ Group: System/Base
 License: GPLv2+ 
 URL: https://dracut.wiki.kernel.org/
 Source0: http://www.kernel.org/pub/linux/utils/boot/dracut/dracut-009.tar.bz2
+Patch1: 0001-dracut-don-t-skip-zero-length-string-outfile-argumen.patch
+
 BuildArch: noarch
 
 %if 0%{?fedora}
@@ -152,6 +154,7 @@ This package contains tools to assemble the local initrd and host configuration.
 
 %prep
 %setup -q -n %{name}-%{version}%{?dashgittag}
+%patch1 -p1
 
 %build
 make WITH_SWITCH_ROOT=0%{?with_switch_root}
@@ -288,6 +291,10 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Tue Mar 29 2011 Harald Hoyer <harald@redhat.com> 009-2
+- fixed empty output file argument handling:
+  "dracut '' <kernel version>" 
+
 * Mon Mar 28 2011 Harald Hoyer <harald@redhat.com> 009-1
 - version 009
 
