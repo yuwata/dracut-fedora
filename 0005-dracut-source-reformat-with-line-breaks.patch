@@ -1,0 +1,24 @@
+From 2aad23443e995b99dd1477ed018c5ac472a06aea Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Tue, 29 Mar 2011 11:27:15 +0200
+Subject: [PATCH] dracut: source reformat with line breaks
+
+---
+ dracut |    4 +++-
+ 1 files changed, 3 insertions(+), 1 deletions(-)
+
+diff --git a/dracut b/dracut
+index 0a96c66..c156cdb 100755
+--- a/dracut
++++ b/dracut
+@@ -222,7 +222,9 @@ while (($# > 0)); do
+         -H|--hostonly) hostonly_l="yes" ;;
+         --fstab)       use_fstab_l="yes" ;;
+         -h|--help)     usage; exit 1 ;;
+-        -i|--include)  push include_src "$2"; push include_target "$3"; shift 2;;
++        -i|--include)  push include_src "$2"
++                       push include_target "$3"
++                       shift 2;;
+         --bzip2)       compress_l="bzip2";;
+         --lzma)        compress_l="lzma";;
+         --xz)          compress_l="xz";;

@@ -1,7 +1,7 @@
 From dbf381f7fb369bd6336272847da882d8ef0e5a30 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Amadeusz=20=C5=BBo=C5=82nowski?= <aidecoe@aidecoe.name>
 Date: Tue, 29 Mar 2011 01:21:56 +0200
-Subject: [PATCH 3/3] dracut: don't skip zero-length string outfile argument
+Subject: [PATCH] dracut: don't skip zero-length string outfile argument
 
 When '' was passed as outfile, dracut generated name with following
 pattern:
@@ -27,6 +27,3 @@ index 6b67dc0..c16b222 100755
                  outfile=$1
              elif [[ $kernel = "unset" ]]; then
                  kernel=$1
--- 
-1.7.3.4
-

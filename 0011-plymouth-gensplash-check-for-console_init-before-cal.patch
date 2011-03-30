@@ -1,0 +1,36 @@
+From 7931bf04204ab41d6e87890e172f2805718bb93a Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Tue, 29 Mar 2011 16:38:11 +0200
+Subject: [PATCH] plymouth gensplash: check for console_init before calling it
+
+Thanks Jon Ander Hernandez!
+---
+ modules.d/50gensplash/gensplash-pretrigger.sh |    2 +-
+ modules.d/50plymouth/plymouth-pretrigger.sh   |    2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/modules.d/50gensplash/gensplash-pretrigger.sh b/modules.d/50gensplash/gensplash-pretrigger.sh
+index 5350405..b0330a4 100755
+--- a/modules.d/50gensplash/gensplash-pretrigger.sh
++++ b/modules.d/50gensplash/gensplash-pretrigger.sh
+@@ -9,7 +9,7 @@ if getargbool 1 rd.splash -n rd_NO_SPLASH; then
+ 
+     info "Starting Gentoo Splash"
+ 
+-    /lib/udev/console_init tty0
++    [ -x /lib/udev/console_init ] && /lib/udev/console_init tty0
+     CDROOT=0
+     . /lib/gensplash-lib.sh
+     splash init
+diff --git a/modules.d/50plymouth/plymouth-pretrigger.sh b/modules.d/50plymouth/plymouth-pretrigger.sh
+index eae0be2..d560d6f 100755
+--- a/modules.d/50plymouth/plymouth-pretrigger.sh
++++ b/modules.d/50plymouth/plymouth-pretrigger.sh
+@@ -19,6 +19,6 @@ if getargbool 1 rd.plymouth -n rd_NO_PLYMOUTH; then
+     info "Starting plymouth daemon"
+     [ -x /bin/plymouthd ] && /bin/plymouthd --attach-to-session
+     >/run/initramfs/plymouth
+-    /lib/udev/console_init tty0
++    [ -x /lib/udev/console_init ] && /lib/udev/console_init tty0
+     /bin/plymouth --show-splash 2>&1 | vinfo
+ fi

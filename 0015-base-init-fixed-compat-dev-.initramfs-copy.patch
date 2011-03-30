@@ -1,0 +1,33 @@
+From 249f8b5bfc90d9a8ec542e870a527a08e1da7cc3 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 30 Mar 2011 03:23:37 +0200
+Subject: [PATCH] base/init: fixed compat /dev/.initramfs copy
+
+---
+ modules.d/99base/init |   12 ++++++------
+ 1 files changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/modules.d/99base/init b/modules.d/99base/init
+index a30706b..83d9568 100755
+--- a/modules.d/99base/init
++++ b/modules.d/99base/init
+@@ -379,13 +379,13 @@ if [ -d "$NEWROOT"/run ]; then
+     mount --move /run "$NEWROOT"/run
+ else
+     if [ -e /run/initramfs ]; then
+-        mkdir -m 0755 /dev/.initramfs
+-        cp -axr /run/initramfs/* /dev/.initramfs >/dev/null 2>&1
+-    fi
+-    if [ -e /run/mdadm ]; then
+-        mkdir -m 0755 /dev/.mdadm
+-        cp -axr /run/mdadm/* /dev/.mdadm >/dev/null 2>&1
++        cp -axr /run/initramfs /dev/.initramfs >/dev/null 2>&1
++        if [ -e /run/initramfs/live ]; then
++            mkdir -m 0755 /dev/.initramfs/live
++            mount --move /run/initramfs/live /dev/.initramfs/live
++        fi
+     fi
++    umount -l /run
+ fi
+ 
+ if [ -f /etc/capsdrop ]; then

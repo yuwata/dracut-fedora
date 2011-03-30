@@ -8,7 +8,7 @@
 
 Name: dracut
 Version: 009
-Release: 2%{?dist}
+Release: 3%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora}
@@ -21,6 +21,18 @@ License: GPLv2+
 URL: https://dracut.wiki.kernel.org/
 Source0: http://www.kernel.org/pub/linux/utils/boot/dracut/dracut-009.tar.bz2
 Patch3: 0003-dracut-don-t-skip-zero-length-string-outfile-argumen.patch
+Patch4: 0004-dracut-simplify-kernel-version-argument-setting.patch
+Patch5: 0005-dracut-source-reformat-with-line-breaks.patch
+Patch6: 0006-dracut-functions-bashified-ret-ret-to-ret.patch
+Patch7: 0007-dracut-removed-extra-char-in-Including-modules-done.patch
+Patch8: 0008-dracut-add-lib-firmware-updates-to-default-firmware-.patch
+Patch9: 0009-40network-dhcp-root.sh-s-initqueue-finished-initqueu.patch
+Patch10: 0010-Ensure-rpc_pipefs-is-mounted.patch
+Patch11: 0011-plymouth-gensplash-check-for-console_init-before-cal.patch
+Patch12: 0012-base-init-fix-cdrom-polling.patch
+Patch13: 0013-base-dracut-lib.sh-relax-getargbool-value-parsing.patch
+Patch14: 0014-doc-s-init.log-run-initramfs-init.log-g.patch
+Patch15: 0015-base-init-fixed-compat-dev-.initramfs-copy.patch
 
 BuildArch: noarch
 
@@ -97,7 +109,7 @@ Requires: rpcbind
 %if %{with_nbd}
 Requires: nbd
 %endif
-Requires: net-tools iproute
+Requires: iproute
 Requires: bridge-utils
 
 %if 0%{?fedora}
@@ -155,6 +167,18 @@ This package contains tools to assemble the local initrd and host configuration.
 %prep
 %setup -q -n %{name}-%{version}%{?dashgittag}
 %patch3 -p1
+%patch4 -p1
+%patch5 -p1
+%patch6 -p1
+%patch7 -p1
+%patch8 -p1
+%patch9 -p1
+%patch10 -p1
+%patch11 -p1
+%patch12 -p1
+%patch13 -p1
+%patch14 -p1
+%patch15 -p1
 
 %build
 make WITH_SWITCH_ROOT=0%{?with_switch_root}
@@ -291,6 +315,13 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Wed Mar 30 2011 Harald Hoyer <harald@redhat.com> 009-3
+- fixed dhcp
+- added /lib/firmware/updates to firmware directories 
+- fixed LiveCD /dev/.initramfs fallback
+- fixed cdrom polling
+- dropped net-tools dependency
+
 * Tue Mar 29 2011 Harald Hoyer <harald@redhat.com> 009-2
 - fixed empty output file argument handling:
   "dracut '' <kernel version>" 

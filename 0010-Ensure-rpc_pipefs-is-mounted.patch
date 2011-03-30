@@ -1,0 +1,26 @@
+From c174aea07decb62d264b40301ee944ba50244438 Mon Sep 17 00:00:00 2001
+From: Jon Ander Hernandez <jonan.h@gmail.com>
+Date: Fri, 18 Feb 2011 12:24:06 +0100
+Subject: [PATCH] Ensure rpc_pipefs is mounted
+
+While on some systems (like Fedora) rpc_pipefs is mounted
+automatically when sunrpc module is loaded, on Debian based systems it
+needs to be mounted manually.
+---
+ modules.d/95nfs/nfsroot |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+diff --git a/modules.d/95nfs/nfsroot b/modules.d/95nfs/nfsroot
+index 486c0e1..f4c5051 100755
+--- a/modules.d/95nfs/nfsroot
++++ b/modules.d/95nfs/nfsroot
+@@ -90,6 +90,9 @@ options=${options:+$options,}$nfsrw
+ [ -x /sbin/rpcbind ] && [ -z "$(pidof rpcbind)" ] && rpcbind
+ 
+ if [ "$nfs" = "nfs4" ]; then
++    [ ! -d /var/lib/nfs/rpc_pipefs/nfs ] && \
++         mount -t rpc_pipefs rpc_pipefs /var/lib/nfs/rpc_pipefs
++
+     # Start rpc.statd as mount won't let us use locks on a NFSv4
+     # filesystem without talking to it. NFSv4 does locks internally,
+     # rpc.lockd isn't needed
