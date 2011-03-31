@@ -8,7 +8,7 @@
 
 Name: dracut
 Version: 009
-Release: 3%{?dist}
+Release: 4%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora}
@@ -33,6 +33,9 @@ Patch12: 0012-base-init-fix-cdrom-polling.patch
 Patch13: 0013-base-dracut-lib.sh-relax-getargbool-value-parsing.patch
 Patch14: 0014-doc-s-init.log-run-initramfs-init.log-g.patch
 Patch15: 0015-base-init-fixed-compat-dev-.initramfs-copy.patch
+Patch16: 0016-fips-fixed-boot-dev-handling.patch
+Patch17: 0017-plymouth-use-run-plymouth-pid-instead-of-run-initram.patch
+Patch18: 0018-dmsquash-live-dmsquash-live-genrules.sh-fixed-udev-r.patch
 
 BuildArch: noarch
 
@@ -179,6 +182,9 @@ This package contains tools to assemble the local initrd and host configuration.
 %patch13 -p1
 %patch14 -p1
 %patch15 -p1
+%patch16 -p1
+%patch17 -p1
+%patch18 -p1
 
 %build
 make WITH_SWITCH_ROOT=0%{?with_switch_root}
@@ -315,6 +321,11 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Thu Mar 31 2011 Harald Hoyer <harald@redhat.com> 009-4
+- fixed dmsquash rule generation
+- fixed fips boot arg parsing
+- fixed plymouth pid generation
+
 * Wed Mar 30 2011 Harald Hoyer <harald@redhat.com> 009-3
 - fixed dhcp
 - added /lib/firmware/updates to firmware directories 

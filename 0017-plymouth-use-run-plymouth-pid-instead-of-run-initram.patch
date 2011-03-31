@@ -1,0 +1,24 @@
+From 8ee30d09a44601d54567d7d51c84b2d714dd8e0f Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 30 Mar 2011 16:24:57 +0200
+Subject: [PATCH] plymouth: use /run/plymouth/pid instead of /run/initramfs/plymouth
+
+---
+ modules.d/50plymouth/plymouth-pretrigger.sh |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/modules.d/50plymouth/plymouth-pretrigger.sh b/modules.d/50plymouth/plymouth-pretrigger.sh
+index d560d6f..477975f 100755
+--- a/modules.d/50plymouth/plymouth-pretrigger.sh
++++ b/modules.d/50plymouth/plymouth-pretrigger.sh
+@@ -17,8 +17,8 @@ if getargbool 1 rd.plymouth -n rd_NO_PLYMOUTH; then
+     [ -e /dev/fb ] || ln -s fb0 /dev/fb
+ 
+     info "Starting plymouth daemon"
+-    [ -x /bin/plymouthd ] && /bin/plymouthd --attach-to-session
+-    >/run/initramfs/plymouth
++    mkdir -m 0755 -p /run/plymouth
++    [ -x /bin/plymouthd ] && /bin/plymouthd --attach-to-session --pid-file /run/plymouth/pid
+     [ -x /lib/udev/console_init ] && /lib/udev/console_init tty0
+     /bin/plymouth --show-splash 2>&1 | vinfo
+ fi

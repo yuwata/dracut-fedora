@@ -1,0 +1,41 @@
+From 01583ae4ad05519a78cf661ff1104cd9b2910aa7 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 30 Mar 2011 14:50:42 +0200
+Subject: [PATCH] fips: fixed "boot=<dev>" handling
+
+---
+ modules.d/01fips/fips.sh |   16 +++++++---------
+ 1 files changed, 7 insertions(+), 9 deletions(-)
+
+diff --git a/modules.d/01fips/fips.sh b/modules.d/01fips/fips.sh
+index febe23e..857c355 100755
+--- a/modules.d/01fips/fips.sh
++++ b/modules.d/01fips/fips.sh
+@@ -4,20 +4,18 @@
+ do_fips()
+ {
+     FIPSMODULES=$(cat /etc/fipsmodules)
+-    BOOT=$(getarg boot=)
++    boot=$(getarg boot=)
+     KERNEL=$(uname -r)
+     case "$boot" in
+-        block:LABEL=*|LABEL=*)
+-            boot="${boot#block:}"
++        LABEL=*)
+             boot="$(echo $boot | sed 's,/,\\x2f,g')"
+             boot="/dev/disk/by-label/${boot#LABEL=}"
+-            bootok=1 ;;
+-        block:UUID=*|UUID=*)
+-            boot="${boot#block:}"
+-            boot="/dev/disk/by-uuid/${root#UUID=}"
+-            bootok=1 ;;
++            ;;
++        UUID=*)
++            boot="/dev/disk/by-uuid/${boot#UUID=}"
++            ;;
+         /dev/*)
+-            bootok=1 ;;
++            ;;
+         *)
+             die "You have to specify boot=<boot device> as a boot option for fips=1" ;;
+     esac
