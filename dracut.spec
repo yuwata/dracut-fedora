@@ -8,7 +8,7 @@
 
 Name: dracut
 Version: 009
-Release: 4%{?dist}
+Release: 5%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora}
@@ -36,6 +36,8 @@ Patch15: 0015-base-init-fixed-compat-dev-.initramfs-copy.patch
 Patch16: 0016-fips-fixed-boot-dev-handling.patch
 Patch17: 0017-plymouth-use-run-plymouth-pid-instead-of-run-initram.patch
 Patch18: 0018-dmsquash-live-dmsquash-live-genrules.sh-fixed-udev-r.patch
+Patch19: 0019-base-dracut-lib.sh-changed-kmgs-log-levels.patch
+Patch20: 0020-base-init-reset-PATH-after-the-run-move.patch
 
 BuildArch: noarch
 
@@ -185,6 +187,8 @@ This package contains tools to assemble the local initrd and host configuration.
 %patch16 -p1
 %patch17 -p1
 %patch18 -p1
+%patch19 -p1
+%patch20 -p1
 
 %build
 make WITH_SWITCH_ROOT=0%{?with_switch_root}
@@ -321,6 +325,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Thu Mar 31 2011 Harald Hoyer <harald@redhat.com> 009-5
+- fixed PATH and kmsg logging
+
 * Thu Mar 31 2011 Harald Hoyer <harald@redhat.com> 009-4
 - fixed dmsquash rule generation
 - fixed fips boot arg parsing

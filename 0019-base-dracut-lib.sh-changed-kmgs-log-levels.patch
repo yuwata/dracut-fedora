@@ -1,0 +1,43 @@
+From 79471f365e5f276ac5463404fbe739ddb2e12465 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 31 Mar 2011 13:12:38 +0200
+Subject: [PATCH] base/dracut-lib.sh: changed kmgs log levels
+
+New kernel/dmesg understands syslog levels, so we log with "+24" to indicate
+that dracut is a daemon (current init).
+---
+ modules.d/99base/dracut-lib.sh |    8 ++++----
+ 1 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/modules.d/99base/dracut-lib.sh b/modules.d/99base/dracut-lib.sh
+index 37b3e76..930138a 100755
+--- a/modules.d/99base/dracut-lib.sh
++++ b/modules.d/99base/dracut-lib.sh
+@@ -236,8 +236,8 @@ source_conf() {
+ 
+ die() {
+     {
+-        echo "<1>dracut: FATAL: $@";
+-        echo "<1>dracut: Refusing to continue";
++        echo "<24>dracut: FATAL: $@";
++        echo "<24>dracut: Refusing to continue";
+     } > /dev/kmsg
+ 
+     { 
+@@ -260,14 +260,14 @@ check_quiet() {
+ 
+ warn() {
+     check_quiet
+-    echo "<4>dracut Warning: $@" > /dev/kmsg
++    echo "<28>dracut Warning: $@" > /dev/kmsg
+     [ "$DRACUT_QUIET" != "yes" ] && \
+         echo "dracut Warning: $@" >&2
+ }
+ 
+ info() {
+     check_quiet
+-    echo "<6>dracut: $@" > /dev/kmsg
++    echo "<30>dracut: $@" > /dev/kmsg
+     [ "$DRACUT_QUIET" != "yes" ] && \
+         echo "dracut: $@" 
+ }
