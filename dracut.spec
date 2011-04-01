@@ -7,8 +7,8 @@
 %endif
 
 Name: dracut
-Version: 009
-Release: 5%{?dist}
+Version: 010
+Release: 1%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora}
@@ -19,25 +19,7 @@ Group: System/Base
 %endif
 License: GPLv2+ 
 URL: https://dracut.wiki.kernel.org/
-Source0: http://www.kernel.org/pub/linux/utils/boot/dracut/dracut-009.tar.bz2
-Patch3: 0003-dracut-don-t-skip-zero-length-string-outfile-argumen.patch
-Patch4: 0004-dracut-simplify-kernel-version-argument-setting.patch
-Patch5: 0005-dracut-source-reformat-with-line-breaks.patch
-Patch6: 0006-dracut-functions-bashified-ret-ret-to-ret.patch
-Patch7: 0007-dracut-removed-extra-char-in-Including-modules-done.patch
-Patch8: 0008-dracut-add-lib-firmware-updates-to-default-firmware-.patch
-Patch9: 0009-40network-dhcp-root.sh-s-initqueue-finished-initqueu.patch
-Patch10: 0010-Ensure-rpc_pipefs-is-mounted.patch
-Patch11: 0011-plymouth-gensplash-check-for-console_init-before-cal.patch
-Patch12: 0012-base-init-fix-cdrom-polling.patch
-Patch13: 0013-base-dracut-lib.sh-relax-getargbool-value-parsing.patch
-Patch14: 0014-doc-s-init.log-run-initramfs-init.log-g.patch
-Patch15: 0015-base-init-fixed-compat-dev-.initramfs-copy.patch
-Patch16: 0016-fips-fixed-boot-dev-handling.patch
-Patch17: 0017-plymouth-use-run-plymouth-pid-instead-of-run-initram.patch
-Patch18: 0018-dmsquash-live-dmsquash-live-genrules.sh-fixed-udev-r.patch
-Patch19: 0019-base-dracut-lib.sh-changed-kmgs-log-levels.patch
-Patch20: 0020-base-init-reset-PATH-after-the-run-move.patch
+Source0: http://www.kernel.org/pub/linux/utils/boot/dracut/dracut-%{version}.tar.bz2
 
 BuildArch: noarch
 
@@ -171,24 +153,6 @@ This package contains tools to assemble the local initrd and host configuration.
 
 %prep
 %setup -q -n %{name}-%{version}%{?dashgittag}
-%patch3 -p1
-%patch4 -p1
-%patch5 -p1
-%patch6 -p1
-%patch7 -p1
-%patch8 -p1
-%patch9 -p1
-%patch10 -p1
-%patch11 -p1
-%patch12 -p1
-%patch13 -p1
-%patch14 -p1
-%patch15 -p1
-%patch16 -p1
-%patch17 -p1
-%patch18 -p1
-%patch19 -p1
-%patch20 -p1
 
 %build
 make WITH_SWITCH_ROOT=0%{?with_switch_root}
@@ -325,6 +289,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Fri Apr 01 2011 Harald Hoyer <harald@redhat.com> 010-1
+- version 010
+
 * Thu Mar 31 2011 Harald Hoyer <harald@redhat.com> 009-5
 - fixed PATH and kmsg logging
 
