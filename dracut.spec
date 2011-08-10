@@ -368,6 +368,10 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Wed Aug 10 2011 Harald Hoyer <harald@redhat.com> 011-40.git20110810
+- fixed symbolic link creation in the initramfs
+Resolves: rhbz#728863
+
 * Wed Jul 20 2011 Harald Hoyer <harald@redhat.com> 011-15.git20110720
 - "eject" is optional now
 - refined shutdown procedure
