@@ -1,0 +1,36 @@
+From d765a3e71b7abfbda7a1f9f65745dde25c8b814c Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 4 Aug 2011 13:19:00 +0200
+Subject: [PATCH] dracut-lib.sh: getarg() echo with "" to prevent wildcard
+ subst
+
+if a value of a key on the kernel command line includes wildcards, these
+would be expanded.
+E.g., if you have "key=/dev/sd*" the value would be substituted with
+"/dev/sda /dev/sda1 /dev/sda2" instead of returning "/dev/sd*"
+---
+ modules.d/99base/dracut-lib.sh |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/modules.d/99base/dracut-lib.sh b/modules.d/99base/dracut-lib.sh
+index f65e853..80c1f84 100755
+--- a/modules.d/99base/dracut-lib.sh
++++ b/modules.d/99base/dracut-lib.sh
+@@ -74,7 +74,7 @@ _dogetarg() {
+         fi
+     done
+     if [ -n "$_val" ]; then
+-        [ "x$_doecho" != "x" ] && echo $_val;
++        [ "x$_doecho" != "x" ] && echo "$_val";
+         return 0;
+     fi
+     return 1;
+@@ -150,7 +150,7 @@ getargs() {
+         shift
+     done
+     if [ -n "$_val" ]; then
+-        echo -n $_val
++        echo -n "$_val"
+         [ "$RD_DEBUG" = "yes" ] && set -x
+         return 0
+     fi

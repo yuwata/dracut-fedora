@@ -8,7 +8,7 @@
 
 Name: dracut
 Version: 011
-Release: 15.git20110720
+Release: 40.git20110810
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora}
@@ -36,6 +36,31 @@ Patch11: 0011-shutdown-fixed-check_shutdown-loop.patch
 Patch12: 0012-dracut-lib.sh-fixed-getargs.patch
 Patch13: 0013-99base-dracut-lib.sh-fix-previous-getargs-patch.patch
 Patch14: 0014-TEST-10-RAID-test-init-add-comment-for-rd.break-shut.patch
+Patch15: 0015-busybox-module-parse-busybox-defined-functions-dynam.patch
+Patch16: 0016-dracut.kernel.7.xml-s-voonsole.keymap-vconsole.keyma.patch
+Patch17: 0017-dracut.kernel.7.xml-beautified-doc.patch
+Patch18: 0018-99base-dracut-lib.sh-don-t-be-quiet-on-rd.debug.patch
+Patch19: 0019-dracut-functions-only-dinfo-about-missing-optioal-dr.patch
+Patch20: 0020-99base-init-try-to-mount-usr-if-init-lives-on-usr.patch
+Patch21: 0021-fixed-typos.patch
+Patch22: 0022-dracut-logger-initialize-basic-vars.patch
+Patch23: 0023-dracut-functions-convert-absolute-symlinks-to-relati.patch
+Patch24: 0024-move-debian-to-debian.template-on-request-of-debian-.patch
+Patch25: 0025-dracut-functions-resolve-relative-path-and-recursive.patch
+Patch26: 0026-removed-debian.template.patch
+Patch27: 0027-dracut-install-lib-for-kernel-images.patch
+Patch28: 0028-dracut-functions-remove-double-slashes-for-symlink-c.patch
+Patch29: 0029-dracut-update-initramfs-removed-on-request-of-the-de.patch
+Patch30: 0030-base-init-mount-the-securityfs-filesystem.patch
+#Patch31: 0031-dracut-added-new-module-masterkey.patch
+#Patch32: 0032-dracut-added-new-module-integrity.patch
+#Patch33: 0033-dracut-added-new-module-ecryptfs.patch
+Patch34: 0034-parse-lvm.sh-fix-for-generated-initqueue-finished-sc.patch
+Patch35: 0035-git2spec.pl-make-rename-diffs.patch
+Patch36: 0036-dracut.spec-add-97masterkey-98ecryptfs-98integrity.patch
+Patch37: 0037-dracut-functions-create-relative-symlinks-for-librar.patch
+Patch38: 0038-99base-init-use-udevadm-control-to-set-the-logging-p.patch
+Patch39: 0039-dracut-lib.sh-getarg-echo-with-to-prevent-wildcard-s.patch
 
 
 BuildArch: noarch
@@ -184,6 +209,31 @@ This package contains tools to assemble the local initrd and host configuration.
 %patch12 -p1
 %patch13 -p1
 %patch14 -p1
+%patch15 -p1
+%patch16 -p1
+%patch17 -p1
+%patch18 -p1
+%patch19 -p1
+%patch20 -p1
+%patch21 -p1
+%patch22 -p1
+%patch23 -p1
+%patch24 -p1
+%patch25 -p1
+%patch26 -p1
+%patch27 -p1
+%patch28 -p1
+%patch29 -p1
+%patch30 -p1
+#%patch31 -p1
+#%patch32 -p1
+#%patch33 -p1
+%patch34 -p1
+%patch35 -p1
+%patch36 -p1
+%patch37 -p1
+%patch38 -p1
+%patch39 -p1
 
 
 %build

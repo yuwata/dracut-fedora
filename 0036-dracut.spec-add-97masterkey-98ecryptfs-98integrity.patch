@@ -1,0 +1,23 @@
+From d727c5ae7b83247e4c577e338a582b5f3f57044d Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 29 Jul 2011 11:14:41 +0200
+Subject: [PATCH] dracut.spec: add 97masterkey 98ecryptfs 98integrity
+
+---
+ dracut.spec |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+diff --git a/dracut.spec b/dracut.spec
+index 30741cd..b75cd19 100644
+--- a/dracut.spec
++++ b/dracut.spec
+@@ -248,6 +248,9 @@ rm -rf $RPM_BUILD_ROOT
+ %{_datadir}/dracut/modules.d/95terminfo
+ %{_datadir}/dracut/modules.d/95udev-rules
+ %{_datadir}/dracut/modules.d/97biosdevname
++%{_datadir}/dracut/modules.d/97masterkey
++%{_datadir}/dracut/modules.d/98ecryptfs
++%{_datadir}/dracut/modules.d/98integrity
+ %{_datadir}/dracut/modules.d/98selinux
+ %{_datadir}/dracut/modules.d/98syslog
+ %{_datadir}/dracut/modules.d/99base

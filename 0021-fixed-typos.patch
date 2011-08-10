@@ -1,0 +1,50 @@
+From 7641c73decf850aeffe59bb6122db41b8aae4b30 Mon Sep 17 00:00:00 2001
+From: Thomas Lange <lange@informatik.uni-koeln.de>
+Date: Mon, 25 Jul 2011 09:11:56 +0200
+Subject: [PATCH] fixed typos
+
+---
+ NEWS                             |    2 +-
+ modules.d/02caps/README          |    2 +-
+ modules.d/95nbd/parse-nbdroot.sh |    2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/NEWS b/NEWS
+index 8566260..a93a9cd 100644
+--- a/NEWS
++++ b/NEWS
+@@ -21,7 +21,7 @@ dracut-009
+ 
+ - initramfs
+   - hooks moved to /lib/dracut/hooks in initramfs
+-  - rd.driver.{blacklist|pre|post} accept comma seperated driver list
++  - rd.driver.{blacklist|pre|post} accept comma separated driver list
+   - iSCSI: iSCSI Boot Firmware Table (iBFT) support
+   - support for /run
+   - live image: support for generic rootfs.img (instead of ext3fs.img)
+diff --git a/modules.d/02caps/README b/modules.d/02caps/README
+index 57d2538..34e0f02 100644
+--- a/modules.d/02caps/README
++++ b/modules.d/02caps/README
+@@ -2,7 +2,7 @@ This adds the following parameters:
+ rd.caps=1
+         turn the caps module on/off
+ rd.caps.initdrop=cap_sys_module,cap_sys_rawio
+-        drop the specified comma seperated capabilities
++        drop the specified comma separated capabilities
+ rd.caps.disablemodules=1
+         turn off module loading
+ rd.caps.disablekexec=1
+diff --git a/modules.d/95nbd/parse-nbdroot.sh b/modules.d/95nbd/parse-nbdroot.sh
+index 40fcef6..376681b 100755
+--- a/modules.d/95nbd/parse-nbdroot.sh
++++ b/modules.d/95nbd/parse-nbdroot.sh
+@@ -6,7 +6,7 @@
+ #       root=nbd:srv:port[:fstype[:rootflags[:nbdopts]]]
+ #       [root=*] netroot=nbd:srv:port[:fstype[:rootflags[:nbdopts]]]
+ #
+-# nbdopts is a comma seperated list of options to give to nbd-client
++# nbdopts is a comma separated list of options to give to nbd-client
+ #
+ # root= takes precedence over netroot= if root=nbd[...]
+ #

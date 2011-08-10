@@ -1,0 +1,23 @@
+From a4c235ed3acd1c4cffcbda81efc8dc18f4ef01c7 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 22 Jul 2011 14:18:23 +0200
+Subject: [PATCH] dracut-functions: only "dinfo" about missing optioal
+ dracut_install
+
+---
+ dracut-functions |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/dracut-functions b/dracut-functions
+index e3e0392..cdb1964 100755
+--- a/dracut-functions
++++ b/dracut-functions
+@@ -489,7 +489,7 @@ dracut_install() {
+     while (($# > 0)); do
+         if ! inst "$1" ; then
+             if [[ $_optional = yes ]]; then
+-                dwarn "Skipping program $1 as it cannot be found and is" \
++                dinfo "Skipping program $1 as it cannot be found and is" \
+                     "flagged to be optional"
+             else
+                 dfatal "Failed to install $1"

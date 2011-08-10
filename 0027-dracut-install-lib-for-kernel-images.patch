@@ -1,0 +1,29 @@
+From 6f09acf8558d0ce7f831d05b3aa0abbc9c136414 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 25 Jul 2011 14:28:40 +0200
+Subject: [PATCH] dracut: install /lib* for kernel images
+
+---
+ dracut |    9 +++++++++
+ 1 files changed, 9 insertions(+), 0 deletions(-)
+
+diff --git a/dracut b/dracut
+index 079d5be..aa8cb58 100755
+--- a/dracut
++++ b/dracut
+@@ -503,6 +503,15 @@ if [[ $kernel_only != yes ]]; then
+ 
+     ln -sfn /run "$initdir/var/run"
+     ln -sfn /run/lock "$initdir/var/lock"
++else
++    for d in lib "$libdir"; do
++        [[ -e "${initdir}${prefix}/$d" ]] && continue
++        if [ -h "/$d" ]; then
++            inst "/$d" "${prefix}/$d"
++        else
++            mkdir -m 0755 -p "${initdir}${prefix}/$d"
++        fi
++    done
+ fi
+ 
+ # check all our modules to see if they should be sourced.

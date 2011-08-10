@@ -1,0 +1,31 @@
+From a6c418ee432bbc62633a42417d6a0c41160c404a Mon Sep 17 00:00:00 2001
+From: Roberto Sassu <roberto.sassu@polito.it>
+Date: Fri, 8 Jul 2011 14:10:59 +0200
+Subject: [PATCH] base/init: mount the securityfs filesystem
+
+Mount the securityfs filesystem and make available its location through the
+exported variable SECURITYFSDIR.
+
+Signed-off-by: Roberto Sassu <roberto.sassu@polito.it>
+Acked-by: Gianluca Ramunno <ramunno@polito.it>
+---
+ modules.d/99base/init |    6 ++++++
+ 1 files changed, 6 insertions(+), 0 deletions(-)
+
+diff --git a/modules.d/99base/init b/modules.d/99base/init
+index 1fac580..ae834be 100755
+--- a/modules.d/99base/init
++++ b/modules.d/99base/init
+@@ -84,6 +84,12 @@ RD_DEBUG=""
+ [ ! -d /sys/kernel ] && \
+     mount -t sysfs -o nosuid,noexec,nodev sysfs /sys >/dev/null 2>&1
+ 
++SECURITYFSDIR="/sys/kernel/security"
++export SECURITYFSDIR
++if ! ismounted "${SECURITYFSDIR}"; then
++    mount -t securityfs -o nosuid,noexec,nodev ${SECURITYFSDIR} ${SECURITYFSDIR} >/dev/null 2>&1
++fi
++
+ if [ -x /lib/systemd/systemd-timestamp ]; then
+     RD_TIMESTAMP=$(/lib/systemd/systemd-timestamp)
+ else

@@ -1,0 +1,45 @@
+From 626d9eba9c421640da5bb8f881a892a460067929 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 25 Jul 2011 14:28:55 +0200
+Subject: [PATCH] dracut-functions: remove double slashes, for symlink
+ conversion
+
+remove double slashes for symlink conversion from absolute to relative
+---
+ dracut-functions |   14 +++++++++++---
+ 1 files changed, 11 insertions(+), 3 deletions(-)
+
+diff --git a/dracut-functions b/dracut-functions
+index a261ddd..61e10e8 100755
+--- a/dracut-functions
++++ b/dracut-functions
+@@ -82,6 +82,13 @@ print_vars() {
+     done
+ }
+ 
++normalize_path() {
++    p=$1
++    while [[ ${p#*//*} != $p ]]; do
++        p=${p/\/\///}
++    done
++    echo $p
++}
+ 
+ convert_abs_rel() {
+     local __current __absolute __abssize __cursize __i __level __newpath
+@@ -92,11 +99,12 @@ convert_abs_rel() {
+         echo "."
+         return
+     fi
+-
++    __current=$(normalize_path "$1")
++    __absolute=$(normalize_path "$2")
+     IFS="/"
+ 
+-    __current=($1)
+-    __absolute=($2)
++    __current=($__current)
++    __absolute=($__absolute)
+ 
+     __abssize=${#__absolute[@]}
+     __cursize=${#__current[@]}

@@ -1,0 +1,653 @@
+From a8eecab0797f939cac52a9213776a59a245ccd73 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 25 Jul 2011 10:31:54 +0200
+Subject: [PATCH] move "debian" to debian.template on request of debian
+ maintainer
+
+---
+ debian.template/changelog              |   53 ++++++++++++++++++++++++++++++++
+ debian.template/compat                 |    1 +
+ debian.template/control                |   41 ++++++++++++++++++++++++
+ debian.template/copyright              |   39 +++++++++++++++++++++++
+ debian.template/dracut-network.dirs    |    5 +++
+ debian.template/dracut-network.install |    5 +++
+ debian.template/dracut.dirs            |   25 +++++++++++++++
+ debian.template/dracut.docs            |    4 ++
+ debian.template/dracut.install         |   28 +++++++++++++++++
+ debian.template/dracut.manpages        |    4 ++
+ debian.template/dracut.postinst        |    8 +++++
+ debian.template/dracut.triggers        |    1 +
+ debian.template/rules                  |    3 ++
+ debian/changelog                       |   53 --------------------------------
+ debian/compat                          |    1 -
+ debian/control                         |   41 ------------------------
+ debian/copyright                       |   39 -----------------------
+ debian/dracut-network.dirs             |    5 ---
+ debian/dracut-network.install          |    5 ---
+ debian/dracut.dirs                     |   25 ---------------
+ debian/dracut.docs                     |    4 --
+ debian/dracut.install                  |   28 -----------------
+ debian/dracut.manpages                 |    4 --
+ debian/dracut.postinst                 |    8 -----
+ debian/dracut.triggers                 |    1 -
+ debian/rules                           |    3 --
+ 26 files changed, 217 insertions(+), 217 deletions(-)
+ create mode 100644 debian.template/changelog
+ create mode 100644 debian.template/compat
+ create mode 100644 debian.template/control
+ create mode 100644 debian.template/copyright
+ create mode 100644 debian.template/dracut-network.dirs
+ create mode 100644 debian.template/dracut-network.install
+ create mode 100644 debian.template/dracut.dirs
+ create mode 100644 debian.template/dracut.docs
+ create mode 100644 debian.template/dracut.install
+ create mode 100644 debian.template/dracut.manpages
+ create mode 100644 debian.template/dracut.postinst
+ create mode 100644 debian.template/dracut.triggers
+ create mode 100755 debian.template/rules
+ delete mode 100644 debian/changelog
+ delete mode 100644 debian/compat
+ delete mode 100644 debian/control
+ delete mode 100644 debian/copyright
+ delete mode 100644 debian/dracut-network.dirs
+ delete mode 100644 debian/dracut-network.install
+ delete mode 100644 debian/dracut.dirs
+ delete mode 100644 debian/dracut.docs
+ delete mode 100644 debian/dracut.install
+ delete mode 100644 debian/dracut.manpages
+ delete mode 100644 debian/dracut.postinst
+ delete mode 100644 debian/dracut.triggers
+ delete mode 100755 debian/rules
+
+diff --git a/debian.template/changelog b/debian.template/changelog
+new file mode 100644
+index 0000000..b7a9d12
+--- /dev/null
++++ b/debian.template/changelog
+@@ -0,0 +1,53 @@
++dracut (2.26) unstable; urgency=low
++
++  [ Harald Hoyer ]
++  * multipath: install udev rules and helper tools
++  * NEWS update
++  * multipath: install xdr utils
++  * multipath: install multipath kernel module
++  * specfile update
++  * dracut.8: fixed formatting for rootfs and mount options
++  * dracut: check more return codes, check for permissions and use
++    derror
++  * dracut: create initramfs-$(kernelversion).img by default
++  * Makefile: add WITH_SWITCH_ROOT
++  * fips: search different lib paths
++  * kernel-modules: add firewire-ohci to hardcoded modules list
++  * 90dm: install more device mapper kernel modules
++  * specfile update
++
++  [ Peter Jones ]
++  * Use glob for libdir when installing multipath libraries.
++  * Add #!/bin/bash for consistency.
++  * Make sure and get all the multipath related modules.
++  * Bring up multipath devices that are configured in multipath.conf.
++  * Fix missing shell variables.
++  * This has to be executable.
++  * Handle modules with hyphens in their names properly.
++
++  [ Harald Hoyer ]
++  * lvm: scan without monitor
++
++  [ Yanko Kaneti ]
++  * Wildcards need dracut_install
++
++  [ Harald Hoyer ]
++  * lvm/dmraid: make LIBDIR depend on the binary
++  * nfs: install passwd entries for nobody and nfsnobody
++  * nfs: add rd_NFS_DOMAIN parameter to set the NFSv4 domain name
++  * dracut-functions: inst_simple(): do not bail out if target is a dir
++    and exists
++  * dm: install dmsetup
++  * multipath: corrected initqueue parameter
++  * rootfs-block/mount-root: remount root with /etc/fstab filesystem
++    options
++  * test: set PATH
++
++ -- Philippe Seewer <philippe.seewer@.bfh.ch>  Fri, 27 Nov 2009 10:58:26 +0100
++
++dracut (2.21) unstable; urgency=low
++  [ Harald Hoyer ]
++  * fix rd_DASD argument handling (bug #531720)
++  * Resolves: rhbz#531720
++
++ -- Philippe Seewer <philippe.seewer@.bfh.ch>  Fri, 06 Nov 2009 15:52:00 +0100
+diff --git a/debian.template/compat b/debian.template/compat
+new file mode 100644
+index 0000000..7ed6ff8
+--- /dev/null
++++ b/debian.template/compat
+@@ -0,0 +1 @@
++5
+diff --git a/debian.template/control b/debian.template/control
+new file mode 100644
+index 0000000..430d427
+--- /dev/null
++++ b/debian.template/control
+@@ -0,0 +1,41 @@
++Source: dracut
++Section: utils
++Priority: optional
++Maintainer: Philippe Seewer <philippe.seewer@bfh.ch>
++Build-Depends: debhelper (>= 5.0), cdbs
++Standards-Version: 3.8.4
++Vcs-Browser: http://git.kernel.org/?p=boot/dracut/dracut.git
++Vcs-Git: git://git.kernel.org/pub/scm/boot/dracut/dracut.git
++
++Package: dracut
++Architecture: all
++Recommends: cryptsetup, dmsetup, dmraid, lvm2, mdadm
++Suggests: dracut-network
++Depends: cpio, module-init-tools, udev, ${misc:Depends}
++Provides: linux-initramfs-tool
++Description: A new initramfs infrastructure
++ Unlike existing initramfs's, this is an attempt at having as little as
++ possible hard-coded into the initramfs as possible.  The initramfs has
++ (basically) one purpose in life -- getting the rootfs mounted so that
++ we can transition to the real rootfs.  This is all driven off of
++ device availability.  Therefore, instead of scripts hard-coded to do
++ various things, we depend on udev to create device nodes for us and
++ then when we have the rootfs's device node, we mount and carry on. 
++ Having the root on MD, LVM2, LUKS is supported as well as NFS, iSCSI,
++ NBD and FCOE with dracut-network.
++
++Package: dracut-network
++Architecture: all
++Recommends: nfs-common, open-iscsi, nbd-client
++Depends: dracut, iputils-arping, dhcp3-client, ${misc:Depends}
++Description: A new initramfs infrastucture
++ Unlike existing initramfs's, this is an attempt at having as little as
++ possible hard-coded into the initramfs as possible.  The initramfs has
++ (basically) one purpose in life -- getting the rootfs mounted so that
++ we can transition to the real rootfs.  This is all driven off of
++ device availability.  Therefore, instead of scripts hard-coded to do
++ various things, we depend on udev to create device nodes for us and
++ then when we have the rootfs's device node, we mount and carry on. 
++ Having the root on MD, LVM2, LUKS is supported as well as NFS, iSCSI,
++ NBD and FCOE with dracut-network.
++
+diff --git a/debian.template/copyright b/debian.template/copyright
+new file mode 100644
+index 0000000..8d6caf7
+--- /dev/null
++++ b/debian.template/copyright
+@@ -0,0 +1,39 @@
++This package was debianized by Philippe Seewer <philippe.seewer@bfh.ch> on
++Fri Nov 20 15:45:00 +0100
++
++Sources can be downloaded from:
++
++    http://www.kernel.org/pub/linux/utils/boot/dracut/
++
++Upstream Maintainer:
++    Harald Hoyer <harald@redhat.com>
++
++Updstream Authors:
++    Victor Lowther <victor.lowther@gmail.com>
++    Warren Togami <wtogami@redhat.com>
++    Jeremy Katz <katzj@redhat.com>
++    Philippe Seewer <philippe.seewer@bfh.ch>
++    David Dillow <dave@thedillows.org>
++    Andreas Thienemann <andreas@bawue.net>
++    Hans de Goede <hdegoede@redhat.com>
++    Marc Grimme <grimme@atix.de>
++    Bill Nottingham <notting@redhat.com>
++    Daniel Drake <dsd@laptop.org>
++    Lance Albertson <lance@osuosl.org>
++    Michael Ploujnikov <plouj@somanetworks.com>
++    Peter Jones <pjones@redhat.com>
++    Dave Jones <davej@redhat.com>
++    Michal Schmidt <mschmidt@redhat.com>
++    Peter Rajnoha <prajnoha@redhat.com>
++    Quentin Armitage <quentin@armitage.org.uk>
++    Sergey Fionov <fionov@gmail.com>
++    Thilo Bangert <thilo.bangert@gmx.net>
++
++Copyright:
++    Copyright 2009 Harald Hoyer <harald@redhat.com>
++
++
++License: GPLv2
++
++On Debian systems, the complete text of the GNU General Public 
++License version 2 can be found in `/usr/share/common-licenses/GPL-2'.
+diff --git a/debian.template/dracut-network.dirs b/debian.template/dracut-network.dirs
+new file mode 100644
+index 0000000..44f96fb
+--- /dev/null
++++ b/debian.template/dracut-network.dirs
+@@ -0,0 +1,5 @@
++usr/share/dracut/modules.d/40network
++usr/share/dracut/modules.d/95fcoe
++usr/share/dracut/modules.d/95iscsi
++usr/share/dracut/modules.d/95nbd
++usr/share/dracut/modules.d/95nfs
+diff --git a/debian.template/dracut-network.install b/debian.template/dracut-network.install
+new file mode 100644
+index 0000000..dd11096
+--- /dev/null
++++ b/debian.template/dracut-network.install
+@@ -0,0 +1,5 @@
++modules.d/40network	usr/share/dracut/modules.d
++modules.d/95fcoe	usr/share/dracut/modules.d
++modules.d/95iscsi	usr/share/dracut/modules.d
++modules.d/95nbd		usr/share/dracut/modules.d
++modules.d/95nfs		usr/share/dracut/modules.d
+diff --git a/debian.template/dracut.dirs b/debian.template/dracut.dirs
+new file mode 100644
+index 0000000..6314b20
+--- /dev/null
++++ b/debian.template/dracut.dirs
+@@ -0,0 +1,25 @@
++usr/share/dracut
++usr/share/dracut/modules.d/00dash
++usr/share/dracut/modules.d/01fips
++usr/share/dracut/modules.d/60xen
++usr/share/dracut/modules.d/90crypt
++usr/share/dracut/modules.d/90dm
++usr/share/dracut/modules.d/90dmraid
++usr/share/dracut/modules.d/90kernel-modules
++usr/share/dracut/modules.d/90lvm
++usr/share/dracut/modules.d/90mdraid
++usr/share/dracut/modules.d/90multipath
++usr/share/dracut/modules.d/95dasd
++usr/share/dracut/modules.d/95dasd_mod
++usr/share/dracut/modules.d/95debug
++usr/share/dracut/modules.d/95resume
++usr/share/dracut/modules.d/95rootfs-block
++usr/share/dracut/modules.d/95terminfo
++usr/share/dracut/modules.d/95udev-rules
++usr/share/dracut/modules.d/95uswsusp
++usr/share/dracut/modules.d/95zfcp
++usr/share/dracut/modules.d/95znet
++usr/share/dracut/modules.d/98syslog
++usr/share/dracut/modules.d/99base
++/var/lib/dracut
++/etc/dracut.conf.d
+\ No newline at end of file
+diff --git a/debian.template/dracut.docs b/debian.template/dracut.docs
+new file mode 100644
+index 0000000..883ffc9
+--- /dev/null
++++ b/debian.template/dracut.docs
+@@ -0,0 +1,4 @@
++HACKING
++README.generic
++README.kernel
++README.modules
+diff --git a/debian.template/dracut.install b/debian.template/dracut.install
+new file mode 100644
+index 0000000..50e01b6
+--- /dev/null
++++ b/debian.template/dracut.install
+@@ -0,0 +1,28 @@
++dracut			usr/sbin
++dracut-catimages	usr/sbin
++dracut-update-initramfs	usr/sbin
++dracut-gencmdline	usr/sbin
++dracut-functions	usr/share/dracut
++dracut.conf		etc
++modules.d/00dash		usr/share/dracut/modules.d
++modules.d/01fips		usr/share/dracut/modules.d
++modules.d/60xen			usr/share/dracut/modules.d
++modules.d/90crypt		usr/share/dracut/modules.d
++modules.d/90dm			usr/share/dracut/modules.d
++modules.d/90dmraid		usr/share/dracut/modules.d
++modules.d/90kernel-modules	usr/share/dracut/modules.d
++modules.d/90lvm			usr/share/dracut/modules.d
++modules.d/90mdraid		usr/share/dracut/modules.d
++modules.d/90multipath		usr/share/dracut/modules.d
++modules.d/95dasd		usr/share/dracut/modules.d
++modules.d/95dasd_mod		usr/share/dracut/modules.d
++modules.d/95debug		usr/share/dracut/modules.d
++modules.d/95resume		usr/share/dracut/modules.d
++modules.d/95rootfs-block	usr/share/dracut/modules.d
++modules.d/95terminfo		usr/share/dracut/modules.d
++modules.d/95udev-rules		usr/share/dracut/modules.d
++modules.d/95uswsusp		usr/share/dracut/modules.d
++modules.d/95zfcp		usr/share/dracut/modules.d
++modules.d/95znet		usr/share/dracut/modules.d
++modules.d/98syslog		usr/share/dracut/modules.d
++modules.d/99base		usr/share/dracut/modules.d
+diff --git a/debian.template/dracut.manpages b/debian.template/dracut.manpages
+new file mode 100644
+index 0000000..cad8c6e
+--- /dev/null
++++ b/debian.template/dracut.manpages
+@@ -0,0 +1,4 @@
++dracut.8
++dracut.conf.5
++dracut-catimages.8
++dracut-gencmdline.8
+diff --git a/debian.template/dracut.postinst b/debian.template/dracut.postinst
+new file mode 100644
+index 0000000..f2f61ed
+--- /dev/null
++++ b/debian.template/dracut.postinst
+@@ -0,0 +1,8 @@
++#!/bin/sh
++
++set -e
++
++# Regenerate initramfs when we're `installed`
++DPKG_MAINTSCRIPT_PACKAGE='' dracut-update-initramfs -u
++
++#DEBHELPER#
+diff --git a/debian.template/dracut.triggers b/debian.template/dracut.triggers
+new file mode 100644
+index 0000000..860c664
+--- /dev/null
++++ b/debian.template/dracut.triggers
+@@ -0,0 +1 @@
++interest update-initramfs
+diff --git a/debian.template/rules b/debian.template/rules
+new file mode 100755
+index 0000000..e6192f6
+--- /dev/null
++++ b/debian.template/rules
+@@ -0,0 +1,3 @@
++#!/usr/bin/make -f
++
++include /usr/share/cdbs/1/rules/debhelper.mk
+diff --git a/debian/changelog b/debian/changelog
+deleted file mode 100644
+index b7a9d12..0000000
+--- a/debian/changelog
++++ /dev/null
+@@ -1,53 +0,0 @@
+-dracut (2.26) unstable; urgency=low
+-
+-  [ Harald Hoyer ]
+-  * multipath: install udev rules and helper tools
+-  * NEWS update
+-  * multipath: install xdr utils
+-  * multipath: install multipath kernel module
+-  * specfile update
+-  * dracut.8: fixed formatting for rootfs and mount options
+-  * dracut: check more return codes, check for permissions and use
+-    derror
+-  * dracut: create initramfs-$(kernelversion).img by default
+-  * Makefile: add WITH_SWITCH_ROOT
+-  * fips: search different lib paths
+-  * kernel-modules: add firewire-ohci to hardcoded modules list
+-  * 90dm: install more device mapper kernel modules
+-  * specfile update
+-
+-  [ Peter Jones ]
+-  * Use glob for libdir when installing multipath libraries.
+-  * Add #!/bin/bash for consistency.
+-  * Make sure and get all the multipath related modules.
+-  * Bring up multipath devices that are configured in multipath.conf.
+-  * Fix missing shell variables.
+-  * This has to be executable.
+-  * Handle modules with hyphens in their names properly.
+-
+-  [ Harald Hoyer ]
+-  * lvm: scan without monitor
+-
+-  [ Yanko Kaneti ]
+-  * Wildcards need dracut_install
+-
+-  [ Harald Hoyer ]
+-  * lvm/dmraid: make LIBDIR depend on the binary
+-  * nfs: install passwd entries for nobody and nfsnobody
+-  * nfs: add rd_NFS_DOMAIN parameter to set the NFSv4 domain name
+-  * dracut-functions: inst_simple(): do not bail out if target is a dir
+-    and exists
+-  * dm: install dmsetup
+-  * multipath: corrected initqueue parameter
+-  * rootfs-block/mount-root: remount root with /etc/fstab filesystem
+-    options
+-  * test: set PATH
+-
+- -- Philippe Seewer <philippe.seewer@.bfh.ch>  Fri, 27 Nov 2009 10:58:26 +0100
+-
+-dracut (2.21) unstable; urgency=low
+-  [ Harald Hoyer ]
+-  * fix rd_DASD argument handling (bug #531720)
+-  * Resolves: rhbz#531720
+-
+- -- Philippe Seewer <philippe.seewer@.bfh.ch>  Fri, 06 Nov 2009 15:52:00 +0100
+diff --git a/debian/compat b/debian/compat
+deleted file mode 100644
+index 7ed6ff8..0000000
+--- a/debian/compat
++++ /dev/null
+@@ -1 +0,0 @@
+-5
+diff --git a/debian/control b/debian/control
+deleted file mode 100644
+index 430d427..0000000
+--- a/debian/control
++++ /dev/null
+@@ -1,41 +0,0 @@
+-Source: dracut
+-Section: utils
+-Priority: optional
+-Maintainer: Philippe Seewer <philippe.seewer@bfh.ch>
+-Build-Depends: debhelper (>= 5.0), cdbs
+-Standards-Version: 3.8.4
+-Vcs-Browser: http://git.kernel.org/?p=boot/dracut/dracut.git
+-Vcs-Git: git://git.kernel.org/pub/scm/boot/dracut/dracut.git
+-
+-Package: dracut
+-Architecture: all
+-Recommends: cryptsetup, dmsetup, dmraid, lvm2, mdadm
+-Suggests: dracut-network
+-Depends: cpio, module-init-tools, udev, ${misc:Depends}
+-Provides: linux-initramfs-tool
+-Description: A new initramfs infrastructure
+- Unlike existing initramfs's, this is an attempt at having as little as
+- possible hard-coded into the initramfs as possible.  The initramfs has
+- (basically) one purpose in life -- getting the rootfs mounted so that
+- we can transition to the real rootfs.  This is all driven off of
+- device availability.  Therefore, instead of scripts hard-coded to do
+- various things, we depend on udev to create device nodes for us and
+- then when we have the rootfs's device node, we mount and carry on. 
+- Having the root on MD, LVM2, LUKS is supported as well as NFS, iSCSI,
+- NBD and FCOE with dracut-network.
+-
+-Package: dracut-network
+-Architecture: all
+-Recommends: nfs-common, open-iscsi, nbd-client
+-Depends: dracut, iputils-arping, dhcp3-client, ${misc:Depends}
+-Description: A new initramfs infrastucture
+- Unlike existing initramfs's, this is an attempt at having as little as
+- possible hard-coded into the initramfs as possible.  The initramfs has
+- (basically) one purpose in life -- getting the rootfs mounted so that
+- we can transition to the real rootfs.  This is all driven off of
+- device availability.  Therefore, instead of scripts hard-coded to do
+- various things, we depend on udev to create device nodes for us and
+- then when we have the rootfs's device node, we mount and carry on. 
+- Having the root on MD, LVM2, LUKS is supported as well as NFS, iSCSI,
+- NBD and FCOE with dracut-network.
+-
+diff --git a/debian/copyright b/debian/copyright
+deleted file mode 100644
+index 8d6caf7..0000000
+--- a/debian/copyright
++++ /dev/null
+@@ -1,39 +0,0 @@
+-This package was debianized by Philippe Seewer <philippe.seewer@bfh.ch> on
+-Fri Nov 20 15:45:00 +0100
+-
+-Sources can be downloaded from:
+-
+-    http://www.kernel.org/pub/linux/utils/boot/dracut/
+-
+-Upstream Maintainer:
+-    Harald Hoyer <harald@redhat.com>
+-
+-Updstream Authors:
+-    Victor Lowther <victor.lowther@gmail.com>
+-    Warren Togami <wtogami@redhat.com>
+-    Jeremy Katz <katzj@redhat.com>
+-    Philippe Seewer <philippe.seewer@bfh.ch>
+-    David Dillow <dave@thedillows.org>
+-    Andreas Thienemann <andreas@bawue.net>
+-    Hans de Goede <hdegoede@redhat.com>
+-    Marc Grimme <grimme@atix.de>
+-    Bill Nottingham <notting@redhat.com>
+-    Daniel Drake <dsd@laptop.org>
+-    Lance Albertson <lance@osuosl.org>
+-    Michael Ploujnikov <plouj@somanetworks.com>
+-    Peter Jones <pjones@redhat.com>
+-    Dave Jones <davej@redhat.com>
+-    Michal Schmidt <mschmidt@redhat.com>
+-    Peter Rajnoha <prajnoha@redhat.com>
+-    Quentin Armitage <quentin@armitage.org.uk>
+-    Sergey Fionov <fionov@gmail.com>
+-    Thilo Bangert <thilo.bangert@gmx.net>
+-
+-Copyright:
+-    Copyright 2009 Harald Hoyer <harald@redhat.com>
+-
+-
+-License: GPLv2
+-
+-On Debian systems, the complete text of the GNU General Public 
+-License version 2 can be found in `/usr/share/common-licenses/GPL-2'.
+diff --git a/debian/dracut-network.dirs b/debian/dracut-network.dirs
+deleted file mode 100644
+index 44f96fb..0000000
+--- a/debian/dracut-network.dirs
++++ /dev/null
+@@ -1,5 +0,0 @@
+-usr/share/dracut/modules.d/40network
+-usr/share/dracut/modules.d/95fcoe
+-usr/share/dracut/modules.d/95iscsi
+-usr/share/dracut/modules.d/95nbd
+-usr/share/dracut/modules.d/95nfs
+diff --git a/debian/dracut-network.install b/debian/dracut-network.install
+deleted file mode 100644
+index dd11096..0000000
+--- a/debian/dracut-network.install
++++ /dev/null
+@@ -1,5 +0,0 @@
+-modules.d/40network	usr/share/dracut/modules.d
+-modules.d/95fcoe	usr/share/dracut/modules.d
+-modules.d/95iscsi	usr/share/dracut/modules.d
+-modules.d/95nbd		usr/share/dracut/modules.d
+-modules.d/95nfs		usr/share/dracut/modules.d
+diff --git a/debian/dracut.dirs b/debian/dracut.dirs
+deleted file mode 100644
+index 6314b20..0000000
+--- a/debian/dracut.dirs
++++ /dev/null
+@@ -1,25 +0,0 @@
+-usr/share/dracut
+-usr/share/dracut/modules.d/00dash
+-usr/share/dracut/modules.d/01fips
+-usr/share/dracut/modules.d/60xen
+-usr/share/dracut/modules.d/90crypt
+-usr/share/dracut/modules.d/90dm
+-usr/share/dracut/modules.d/90dmraid
+-usr/share/dracut/modules.d/90kernel-modules
+-usr/share/dracut/modules.d/90lvm
+-usr/share/dracut/modules.d/90mdraid
+-usr/share/dracut/modules.d/90multipath
+-usr/share/dracut/modules.d/95dasd
+-usr/share/dracut/modules.d/95dasd_mod
+-usr/share/dracut/modules.d/95debug
+-usr/share/dracut/modules.d/95resume
+-usr/share/dracut/modules.d/95rootfs-block
+-usr/share/dracut/modules.d/95terminfo
+-usr/share/dracut/modules.d/95udev-rules
+-usr/share/dracut/modules.d/95uswsusp
+-usr/share/dracut/modules.d/95zfcp
+-usr/share/dracut/modules.d/95znet
+-usr/share/dracut/modules.d/98syslog
+-usr/share/dracut/modules.d/99base
+-/var/lib/dracut
+-/etc/dracut.conf.d
+\ No newline at end of file
+diff --git a/debian/dracut.docs b/debian/dracut.docs
+deleted file mode 100644
+index 883ffc9..0000000
+--- a/debian/dracut.docs
++++ /dev/null
+@@ -1,4 +0,0 @@
+-HACKING
+-README.generic
+-README.kernel
+-README.modules
+diff --git a/debian/dracut.install b/debian/dracut.install
+deleted file mode 100644
+index 50e01b6..0000000
+--- a/debian/dracut.install
++++ /dev/null
+@@ -1,28 +0,0 @@
+-dracut			usr/sbin
+-dracut-catimages	usr/sbin
+-dracut-update-initramfs	usr/sbin
+-dracut-gencmdline	usr/sbin
+-dracut-functions	usr/share/dracut
+-dracut.conf		etc
+-modules.d/00dash		usr/share/dracut/modules.d
+-modules.d/01fips		usr/share/dracut/modules.d
+-modules.d/60xen			usr/share/dracut/modules.d
+-modules.d/90crypt		usr/share/dracut/modules.d
+-modules.d/90dm			usr/share/dracut/modules.d
+-modules.d/90dmraid		usr/share/dracut/modules.d
+-modules.d/90kernel-modules	usr/share/dracut/modules.d
+-modules.d/90lvm			usr/share/dracut/modules.d
+-modules.d/90mdraid		usr/share/dracut/modules.d
+-modules.d/90multipath		usr/share/dracut/modules.d
+-modules.d/95dasd		usr/share/dracut/modules.d
+-modules.d/95dasd_mod		usr/share/dracut/modules.d
+-modules.d/95debug		usr/share/dracut/modules.d
+-modules.d/95resume		usr/share/dracut/modules.d
+-modules.d/95rootfs-block	usr/share/dracut/modules.d
+-modules.d/95terminfo		usr/share/dracut/modules.d
+-modules.d/95udev-rules		usr/share/dracut/modules.d
+-modules.d/95uswsusp		usr/share/dracut/modules.d
+-modules.d/95zfcp		usr/share/dracut/modules.d
+-modules.d/95znet		usr/share/dracut/modules.d
+-modules.d/98syslog		usr/share/dracut/modules.d
+-modules.d/99base		usr/share/dracut/modules.d
+diff --git a/debian/dracut.manpages b/debian/dracut.manpages
+deleted file mode 100644
+index cad8c6e..0000000
+--- a/debian/dracut.manpages
++++ /dev/null
+@@ -1,4 +0,0 @@
+-dracut.8
+-dracut.conf.5
+-dracut-catimages.8
+-dracut-gencmdline.8
+diff --git a/debian/dracut.postinst b/debian/dracut.postinst
+deleted file mode 100644
+index f2f61ed..0000000
+--- a/debian/dracut.postinst
++++ /dev/null
+@@ -1,8 +0,0 @@
+-#!/bin/sh
+-
+-set -e
+-
+-# Regenerate initramfs when we're `installed`
+-DPKG_MAINTSCRIPT_PACKAGE='' dracut-update-initramfs -u
+-
+-#DEBHELPER#
+diff --git a/debian/dracut.triggers b/debian/dracut.triggers
+deleted file mode 100644
+index 860c664..0000000
+--- a/debian/dracut.triggers
++++ /dev/null
+@@ -1 +0,0 @@
+-interest update-initramfs
+diff --git a/debian/rules b/debian/rules
+deleted file mode 100755
+index e6192f6..0000000
+--- a/debian/rules
++++ /dev/null
+@@ -1,3 +0,0 @@
+-#!/usr/bin/make -f
+-
+-include /usr/share/cdbs/1/rules/debhelper.mk

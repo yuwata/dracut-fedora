@@ -1,0 +1,30 @@
+From 3cd98a6094ff6120a7a53429bf3db70f80523a44 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 25 Jul 2011 10:25:12 +0200
+Subject: [PATCH] dracut-logger: initialize basic vars
+
+---
+ dracut-logger |    6 ++----
+ 1 files changed, 2 insertions(+), 4 deletions(-)
+
+diff --git a/dracut-logger b/dracut-logger
+index a5a3ee9..d85cbaf 100755
+--- a/dracut-logger
++++ b/dracut-logger
+@@ -107,14 +107,12 @@ __DRACUT_LOGGER__=1
+ # See file doc comment for details.
+ dlog_init() {
+     local __oldumask
+-    # Skip initialization if it's already done.
+-    [ -n "$maxloglvl" ] && return 0
+-
+     local ret=0; local errmsg
+-
+     [ -z "$stdloglvl" ] && stdloglvl=4
+     [ -z "$sysloglvl" ] && sysloglvl=0
+     [ -z "$kmsgloglvl" ] && kmsgloglvl=0
++    # Skip initialization if it's already done.
++    [ -n "$maxloglvl" ] && return 0
+ 
+     if [ -z "$fileloglvl" ]; then
+         [ -w "$logfile" ] && fileloglvl=4 || fileloglvl=0
