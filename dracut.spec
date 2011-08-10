@@ -8,7 +8,7 @@
 
 Name: dracut
 Version: 011
-Release: 40.git20110810
+Release: 41.git20110810
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora}
@@ -61,7 +61,7 @@ Patch36: 0036-dracut.spec-add-97masterkey-98ecryptfs-98integrity.patch
 Patch37: 0037-dracut-functions-create-relative-symlinks-for-librar.patch
 Patch38: 0038-99base-init-use-udevadm-control-to-set-the-logging-p.patch
 Patch39: 0039-dracut-lib.sh-getarg-echo-with-to-prevent-wildcard-s.patch
-
+Patch40: 0040-dracut-lib.sh-fixed-getargs-for-empty-arguments.patch
 
 BuildArch: noarch
 BuildRequires: dash bash
@@ -234,7 +234,7 @@ This package contains tools to assemble the local initrd and host configuration.
 %patch37 -p1
 %patch38 -p1
 %patch39 -p1
-
+%patch40 -p1
 
 %build
 make
@@ -368,6 +368,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Wed Aug 10 2011 Harald Hoyer <harald@redhat.com> 011-41.git20110810
+- fixed getargs() for empty args
+
 * Wed Aug 10 2011 Harald Hoyer <harald@redhat.com> 011-40.git20110810
 - fixed symbolic link creation in the initramfs
 Resolves: rhbz#728863

@@ -1,0 +1,36 @@
+From d609c64209af738540f629bccecdef8c6bafa91d Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 10 Aug 2011 20:03:21 +0200
+Subject: [PATCH] dracut-lib.sh: fixed getargs() for empty arguments
+
+---
+ modules.d/99base/dracut-lib.sh |   14 +++++++++++---
+ 1 files changed, 11 insertions(+), 3 deletions(-)
+
+diff --git a/modules.d/99base/dracut-lib.sh b/modules.d/99base/dracut-lib.sh
+index 80c1f84..dec5d92 100755
+--- a/modules.d/99base/dracut-lib.sh
++++ b/modules.d/99base/dracut-lib.sh
+@@ -142,11 +142,19 @@ _dogetargs() {
+ }
+ 
+ getargs() {
+-    local _val
+-    unset _val
+     set +x
++    local _val _nval
++    unset _val
++    unset _nval
+     while [ $# -gt 0 ]; do
+-        _val="$_val $(_dogetargs $1)"
++        _nval=$(_dogetargs $1)
++        if [ -n "$_nval" ]; then
++            if [ -n "$_val" ]; then
++                _val="$_val $_nval"
++            else
++                _val="$_nval"
++            fi
++        fi
+         shift
+     done
+     if [ -n "$_val" ]; then
