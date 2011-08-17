@@ -8,7 +8,7 @@
 
 Name: dracut
 Version: 013
-Release: 3%{?dist}
+Release: 4%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora}
@@ -23,6 +23,7 @@ URL: https://dracut.wiki.kernel.org/
 # http://git.kernel.org/?p=boot/dracut/dracut.git;a=snapshot;h=%{version};sf=tgz
 Source0: http://www.kernel.org/pub/linux/utils/boot/dracut/dracut-%{version}.tar.bz2
 Patch1: 0002-90dmsquash-live-dmsquash-live-root-include-fs_lib.sh.patch
+Patch2: 0003-fix-live-crash-with-livenet-installed.patch
 
 BuildArch: noarch
 BuildRequires: dash bash
@@ -157,6 +158,7 @@ This package contains tools to assemble the local initrd and host configuration.
 %prep
 %setup -q -n %{name}-%{version}
 %patch1 -p1
+%patch2 -p1
 
 %build
 make
@@ -295,6 +297,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Wed Aug 17 2011 Harald Hoyer <harald@redhat.com> 013-4
+- fixed crash with livenet installed
+
 * Wed Aug 17 2011 Harald Hoyer <harald@redhat.com> 013-3
 - fixed live iso mounting
 Resolves: rhbz#730579
