@@ -8,10 +8,10 @@
 
 Name: dracut
 Version: 013
-Release: 4%{?dist}
+Release: 85.git20111019%{?dist}
 
 Summary: Initramfs generator using udev
-%if 0%{?fedora}
+%if 0%{?fedora} || 0%{?rhel} > 6
 Group: System Environment/Base
 %endif
 %if 0%{?suse_version}
@@ -24,17 +24,99 @@ URL: https://dracut.wiki.kernel.org/
 Source0: http://www.kernel.org/pub/linux/utils/boot/dracut/dracut-%{version}.tar.bz2
 Patch1: 0002-90dmsquash-live-dmsquash-live-root-include-fs_lib.sh.patch
 Patch2: 0003-fix-live-crash-with-livenet-installed.patch
+Patch3: 0004-profile.py-parse-the-output-of-dracut-profile-for-pr.patch
+Patch4: 0005-add-TEST-16-DMSQUASH.patch
+Patch5: 0006-dracut-functions-s-emergency-shutdown-shutdown-emerg.patch
+Patch6: 0007-dracut-unset-LD_LIBRARY_PATH.patch
+Patch7: 0008-build-initramfs-prelink-undo-sbin.patch
+Patch8: 0009-dracut-functions-speed-up-inst_dir.patch
+Patch9: 0010-90crypt-ask_for_password-pings-plymouthd.patch
+Patch10: 0011-99base-whitespace-fix.patch
+Patch11: 0012-dracut-functions-new-function-inst_any-d-dest-f1-f2-.patch
+Patch12: 0013-livenet-take-into-account-other-ca-bundle-paths-use-.patch
+Patch13: 0014-luks-key-on-ext-dev-wait-for-luks.patch
+Patch14: 0015-crypt-changed-cmdline-arg-name-from-rd.luks.tout-to-.patch
+Patch15: 0016-luks-key-on-ext-dev-wait-for-luks.patch
+Patch16: 0017-dracut-functions-fix-inst_dir-for-non-absolute-dirs.patch
+Patch17: 0018-90mdraid-65-md-incremental-imsm.rules-incremental-ru.patch
+Patch18: 0019-dracut.spec-fixed-rhel-fedora-version-checks.patch
+Patch19: 0020-50plymouth-add-plymouth.enable-kernel-command-line-o.patch
+Patch20: 0021-99base-init-only-poll-cdroms-if-the-kernel-does-supp.patch
+Patch21: 0022-build-initramfs-unclear-_mpargs-in-instmods.patch
+Patch22: 0023-90crypt-parse-crypt.sh-also-accept-the-beginning-of-.patch
+Patch23: 0024-99base-init-save-and-restore-environment-given-from-.patch
+Patch24: 0025-99base-init-move-switch_root-breakpoint-to-a-later-p.patch
+Patch25: 0026-dracut-functions-hmac-checksum-files-can-be-symlinks.patch
+Patch26: 0027-95udev-rules-add-input_id.patch
+Patch27: 0028-inst_simple-inst_dir-make-fast-case-faster.patch
+Patch28: 0029-filter_kernel_modules-is-a-specialized-filter_kernel.patch
+Patch29: 0030-install_kmod_with_fw-make-fast-case-faster.patch
+Patch30: 0031-instmods-get-filenames-from-stdin-if-no-args-use-it.patch
+Patch31: 0032-instmods-sanity-for-_mpargs.patch
+Patch32: 0033-instmods-factor-out-egrep-of-FATAL-Module-.-not-foun.patch
+Patch33: 0034-99base-init-do-not-fail-when-importing-the-original-.patch
+Patch34: 0035-dracut-cp-with-sparse.patch
+Patch35: 0036-99base-init-removed-cdrom-polling-reset-code.patch
+Patch36: 0037-dmsquash-live-root-use-blkid-to-determine-fstype-of-.patch
+Patch37: 0038-dmsquash-live-root-load-filesystem-modules-before-mo.patch
+Patch38: 0039-90dmsquash-live-do-not-symlink-to-dev-live.patch
+Patch39: 0040-99base-init-remove-dev-root-helper-symlink.patch
+Patch40: 0041-Do-not-use-run-udev-rules.d-for-udev-rules.patch
+Patch41: 0042-99base-init-mount-securityfs-with-source-securityfs-.patch
+Patch42: 0043-mount-securityfs-in-a-seperate-dracut-module.patch
+Patch43: 0044-mount-securityfs-in-a-seperate-dracut-module.patch
+Patch44: 0045-90mdraid-adjust-stock-mdadm-udev-rules.patch
+Patch45: 0046-90mdraid-containers-are-not-runnable.patch
+Patch46: 0047-90mdraid-fix-adjust-mdraid-cleanup.patch
+Patch47: 0048-90mdraid-fix-adjust-force-run-script.patch
+Patch48: 0049-90-md-dm-raid-recognize-ddf-container.patch
+Patch49: 0050-90mdraid-fix-adjust-65-md-rules-and-related-scripts.patch
+Patch50: 0051-TEST-40-NBD-relaxed-check-on-ext3-filesystem-options.patch
+Patch51: 0052-99fs-lib-fs-lib.sh-fsck-btrfs-via-mounting-like-xfs.patch
+Patch52: 0053-dracut-functions-inst_rules-do-not-check-std-dirs-fo.patch
+Patch53: 0054-str_replace-fix.patch
+Patch54: 0055-dracut-logger-bail-out-early-if-we-don-t-have-to-log.patch
+Patch55: 0056-dracut-create-dev-besides-proc-sys-and-so.patch
+Patch56: 0057-99fs-lib-export-FSTAB_FILE-before-fsck-call.patch
+Patch57: 0058-dracut-functions-inst_rules-add-missing.patch
+Patch58: 0059-90mdraid-check-precisely-for-supported-contaiers.patch
+Patch59: 0060-90mdraid-more-thorough-64-md-raid.rules-edit.patch
+Patch60: 0061-90mdraid-adjust-dev-md-loops.patch
+Patch61: 0062-dracut-PATCH-Parameter-expansion-occurs-before-comma.patch
+Patch62: 0063-dracut-PATCH-es-parallelize-block_module-filter-and-.patch
+Patch63: 0064-order-mdadm-and-lvm-timeout-operations.patch
+Patch64: 0065-90mdraid-mdraid_start.sh-fix-path-to-md-sysfs.patch
+Patch65: 0066-90mdraid-module-setup.sh-fixed-sed-arguments.patch
+Patch66: 0067-95udev-rules-module-setup.sh-also-search-in-lib-udev.patch
+Patch67: 0068-update-the-documentation-of-no-prefix.patch
+Patch68: 0069-dracut-check-mktemp-return-value.patch
+Patch69: 0070-convert_abs_rel-fixups.patch
+Patch70: 0071-dracut.8-add-missing-lvmconf-info.patch
+Patch71: 0072-fs-lib-add-ability-to-choose-fsck-tools.patch
+Patch72: 0073-manuals-add-info-about-fs-lib-fsck-configuration.patch
+Patch73: 0074-dracut-functions-conv-normalize-minor-corrections.patch
+Patch74: 0075-dracut.-.xml-s-exisiting-existing-g.patch
+Patch75: 0076-95udev-rules-module-setup.s-fixed-symlink-for-udevd-.patch
+Patch76: 0077-dracut.conf.5.xml-tag-mismatch-fix.patch
+Patch77: 0078-bash3-compat-patch.patch
+Patch78: 0079-explicitly-verify-bash-version.patch
+Patch79: 0080-dracut-remove-duplicate-options.patch
+Patch80: 0081-dracut-lib.sh-fix-dropped-backslashes-in-CMDLINE.patch
+Patch81: 0082-dmsquash-live-fix-log-message-about-root-liveroot.patch
+Patch82: 0083-check-root-candidates-more-carefully.patch
+Patch83: 0084-netroot-do-not-die-if-arping-failed.patch
+
 
 BuildArch: noarch
 BuildRequires: dash bash
-%if 0%{?fedora}
+%if 0%{?fedora} || 0%{?rhel} > 6
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 %endif
 %if 0%{?suse_version}
 BuildRoot: %{_tmppath}/%{name}-%{version}-build
 %endif
 
-%if 0%{?fedora}
+%if 0%{?fedora} || 0%{?rhel} > 6
 BuildRequires: docbook-style-xsl docbook-dtds libxslt
 %endif
 
@@ -75,7 +157,7 @@ Requires: sed
 Requires: tar
 Requires: udev
 
-%if 0%{?fedora}
+%if 0%{?fedora} || 0%{?rhel} > 6
 Requires: util-linux >= 2.16
 Requires: initscripts >= 8.63-1
 Requires: plymouth >= 0.8.0-0.2009.29.09.19.1
@@ -103,7 +185,7 @@ Requires: nbd
 Requires: iproute
 Requires: bridge-utils
 
-%if 0%{?fedora}
+%if 0%{?fedora} || 0%{?rhel} > 6
 Requires: iscsi-initiator-utils
 Requires: nfs-utils
 Requires: dhclient
@@ -121,7 +203,7 @@ Provides:  dracut-generic = %{version}-%{release}
 This package requires everything which is needed to build a generic
 all purpose initramfs with network support with dracut.
 
-%if 0%{?fedora}
+%if 0%{?fedora} || 0%{?rhel} > 6
 %package fips
 Summary: Dracut modules to build a dracut initramfs with an integrity check
 Requires: %{name} = %{version}-%{release}
@@ -159,12 +241,94 @@ This package contains tools to assemble the local initrd and host configuration.
 %setup -q -n %{name}-%{version}
 %patch1 -p1
 %patch2 -p1
+%patch3 -p1
+%patch4 -p1
+%patch5 -p1
+%patch6 -p1
+%patch7 -p1
+%patch8 -p1
+%patch9 -p1
+%patch10 -p1
+%patch11 -p1
+%patch12 -p1
+%patch13 -p1
+%patch14 -p1
+%patch15 -p1
+%patch16 -p1
+%patch17 -p1
+%patch18 -p1
+%patch19 -p1
+%patch20 -p1
+%patch21 -p1
+%patch22 -p1
+%patch23 -p1
+%patch24 -p1
+%patch25 -p1
+%patch26 -p1
+%patch27 -p1
+%patch28 -p1
+%patch29 -p1
+%patch30 -p1
+%patch31 -p1
+%patch32 -p1
+%patch33 -p1
+%patch34 -p1
+%patch35 -p1
+%patch36 -p1
+%patch37 -p1
+%patch38 -p1
+%patch39 -p1
+%patch40 -p1
+%patch41 -p1
+%patch42 -p1
+%patch43 -p1
+%patch44 -p1
+%patch45 -p1
+%patch46 -p1
+%patch47 -p1
+%patch48 -p1
+%patch49 -p1
+%patch50 -p1
+%patch51 -p1
+%patch52 -p1
+%patch53 -p1
+%patch54 -p1
+%patch55 -p1
+%patch56 -p1
+%patch57 -p1
+%patch58 -p1
+%patch59 -p1
+%patch60 -p1
+%patch61 -p1
+%patch62 -p1
+%patch63 -p1
+%patch64 -p1
+%patch65 -p1
+%patch66 -p1
+%patch67 -p1
+%patch68 -p1
+%patch69 -p1
+%patch70 -p1
+%patch71 -p1
+%patch72 -p1
+%patch73 -p1
+%patch74 -p1
+%patch75 -p1
+%patch76 -p1
+%patch77 -p1
+%patch78 -p1
+%patch79 -p1
+%patch80 -p1
+%patch81 -p1
+%patch82 -p1
+%patch83 -p1
+
 
 %build
 make
 
 %install
-%if 0%{?fedora}
+%if 0%{?fedora} || 0%{?rhel} > 6
 rm -rf $RPM_BUILD_ROOT
 %endif
 make install DESTDIR=$RPM_BUILD_ROOT sbindir=/sbin \
@@ -172,7 +336,7 @@ make install DESTDIR=$RPM_BUILD_ROOT sbindir=/sbin \
 
 echo %{name}-%{version}-%{release} > $RPM_BUILD_ROOT/%{_datadir}/dracut/modules.d/10rpmversion/dracut-version
 
-%if 0%{?fedora} == 0
+%if 0%{?fedora} == 0 && 0%{?rhel} == 0
 rm -fr $RPM_BUILD_ROOT/%{_datadir}/dracut/modules.d/01fips
 %endif
 
@@ -185,7 +349,7 @@ mkdir -p $RPM_BUILD_ROOT%{_localstatedir}/log
 touch $RPM_BUILD_ROOT%{_localstatedir}/log/dracut.log
 mkdir -p $RPM_BUILD_ROOT%{_sharedstatedir}/initramfs
 
-%if 0%{?fedora}
+%if 0%{?fedora} || 0%{?rhel} > 6
 install -m 0644 dracut.conf.d/fedora.conf.example $RPM_BUILD_ROOT/etc/dracut.conf.d/01-dist.conf
 install -m 0644 dracut.conf.d/fips.conf.example $RPM_BUILD_ROOT/etc/dracut.conf.d/40-fips.conf
 %endif
@@ -218,7 +382,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/dracut/dracut-functions
 %{_datadir}/dracut/dracut-logger
 %config(noreplace) /etc/dracut.conf
-%if 0%{?fedora} || 0%{?suse_version}
+%if 0%{?fedora} || 0%{?suse_version} || 0%{?rhel} > 6
 %config /etc/dracut.conf.d/01-dist.conf
 %endif
 %dir /etc/dracut.conf.d
@@ -251,6 +415,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/dracut/modules.d/95zfcp
 %{_datadir}/dracut/modules.d/95terminfo
 %{_datadir}/dracut/modules.d/95udev-rules
+%{_datadir}/dracut/modules.d/96securityfs
 %{_datadir}/dracut/modules.d/97biosdevname
 %{_datadir}/dracut/modules.d/97masterkey
 %{_datadir}/dracut/modules.d/98ecryptfs
@@ -275,7 +440,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/dracut/modules.d/45ifcfg
 %{_datadir}/dracut/modules.d/95znet
 
-%if 0%{?fedora}
+%if 0%{?fedora} || 0%{?rhel} > 6
 %files fips
 %defattr(-,root,root,0755)
 %{_datadir}/dracut/modules.d/01fips
@@ -297,6 +462,50 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Wed Oct 19 2011 Harald Hoyer <harald@redhat.com> 013-85.git20111019
+- update to latest git
+
+* Tue Oct 04 2011 Harald Hoyer <harald@redhat.com> 013-15
+- fixed mdraid container handling
+Resolves: rhbz#743240
+
+* Thu Sep 22 2011 Harald Hoyer <harald@redhat.com> 013-13
+- fixed mdraid issues
+- fixed btrfsck
+Resolves: rhbz#735602
+
+* Wed Sep 21 2011 Harald Hoyer <harald@redhat.com> 013-12
+- removed patch backup files
+- reintroduced /dev/live
+
+* Tue Sep 20 2011 Harald Hoyer <harald@redhat.com> 013-11
+- move mounting of securitfs to a seperate module
+Resolves: rhbz#737140
+
+* Tue Sep 20 2011 Harald Hoyer <harald@redhat.com> 013-10
+- mount securitfs with the correct source
+Resolves: rhbz#737140
+
+* Tue Sep 20 2011 Harald Hoyer <harald@redhat.com> 013-9
+- do not carry over initramfs udev rules
+Resolves: rhbz#734096
+
+* Fri Sep 02 2011 Harald Hoyer <harald@redhat.com> 013-8
+- hopefully fixed one part of a loop/udev and loop/mount race
+Resolves: rhbz#735199
+
+* Wed Aug 31 2011 Harald Hoyer <harald@redhat.com> 013-7
+- add /lib/udev/input_id to the initramfs
+- fix hmac install
+
+* Tue Aug 30 2011 Harald Hoyer <harald@redhat.com> 013-6
+- fixed environment passing to real init
+Resolves: rhbz#733674
+- fixed lvm on md
+
+* Mon Aug 29 2011 Harald Hoyer <harald@redhat.com> 013-5
+- fixed rhel/fedora version checks
+
 * Wed Aug 17 2011 Harald Hoyer <harald@redhat.com> 013-4
 - fixed crash with livenet installed
 
