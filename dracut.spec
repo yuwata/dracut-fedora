@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 014
-Release: 9.git20111215%{?dist}
+Release: 10.git20111215%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel} > 6
@@ -308,6 +308,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Fri Jan 13 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 014-10.git20111215
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_17_Mass_Rebuild
+
 * Thu Dec 15 2011 Harald Hoyer <harald@redhat.com> 014-9.git20111215
 - update to latest git
 - lots of patch changes
