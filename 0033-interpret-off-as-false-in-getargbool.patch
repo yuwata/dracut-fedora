@@ -1,0 +1,22 @@
+From 1cc57edaf56f309d6023f6fa5a86821f6dfbf919 Mon Sep 17 00:00:00 2001
+From: Will Woods <wwoods@redhat.com>
+Date: Wed, 11 Jan 2012 12:48:27 -0500
+Subject: [PATCH] interpret 'off' as false in getargbool
+
+Signed-off-by: Will Woods <wwoods@redhat.com>
+---
+ modules.d/99base/dracut-lib.sh |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+diff --git a/modules.d/99base/dracut-lib.sh b/modules.d/99base/dracut-lib.sh
+index b4fb435..4897a3d 100755
+--- a/modules.d/99base/dracut-lib.sh
++++ b/modules.d/99base/dracut-lib.sh
+@@ -124,6 +124,7 @@ getargbool() {
+     if [ -n "$_b" ]; then
+         [ $_b = "0" ] && return 1
+         [ $_b = "no" ] && return 1
++        [ $_b = "off" ] && return 1
+     fi
+     return 0
+ }

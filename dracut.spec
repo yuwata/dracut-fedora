@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 014
-Release: 10.git20111215%{?dist}
+Release: 38.git20120117%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel} > 6
@@ -32,6 +32,35 @@ Patch5: 0005-dracut.spec-remove-unnecessary-dependencies.patch
 Patch6: 0006-TEST-12-RAID-DEG-mkdir-run.patch
 Patch7: 0007-99base-dracut-lib.sh-added-inst_mount_hook-add_mount.patch
 Patch8: 0008-dracut-add-add-fstab-and-mount-option.patch
+Patch9: 0009-mkinitrd-dracut.sh-s-read_args-read_arg-g.patch
+Patch10: 0010-Fix-live-update-script-769970.patch
+Patch11: 0011-Makefile-set-bindir-to-prefix-bin-rather-than-sbin.patch
+Patch12: 0012-Makefile-dash-does-not-like-expansion.patch
+Patch13: 0013-mkinitrd-Mention-the-nocompress-option-in-help-outpu.patch
+Patch14: 0014-Fix-Unicode-keytable.patch
+Patch15: 0015-Handle-compressed-kmods.patch
+Patch16: 0016-Only-install-files-from-etc-ld.so.conf.d-directory.patch
+Patch17: 0017-plymouth-Include-kms-modules-even-if-they-are-not-cu.patch
+Patch18: 0018-kernel-modules-Find-and-ulitmately-dereference-any-s.patch
+Patch19: 0019-btrfs-Ensure-crc32c-module-is-installed.patch
+Patch20: 0020-resume-Fix-failure-when-invalid-device-passed-via-re.patch
+Patch21: 0021-dmsquash-Ensure-the-loop-kernel-module-is-included-a.patch
+Patch22: 0022-init-Fix-bogus-message-about-invalid-root-device.patch
+Patch23: 0023-udev-Attempt-to-install-any-programs-used-by-udev-ru.patch
+Patch24: 0024-98usrmount-mount-usr.sh-Don-t-pass-mount-options-to-.patch
+Patch25: 0025-TEST-10-RAID-fixed-TESTDIR-handling.patch
+Patch26: 0026-Allow-to-add-mount-points-even-not-in-hostonly-mode.patch
+Patch27: 0027-Check-module-dependencies-of-mount-points.patch
+Patch28: 0028-Fix-get_maj_min-to-follow-symlink.patch
+Patch29: 0029-Pass-device-name-instead-of-major-minor-in-for_each_.patch
+Patch30: 0030-nfs-fix-regex-patterns-in-check.patch
+Patch31: 0031-lvm-pass-the-correct-rd.lvm.lv-parameter.patch
+Patch32: 0032-Create-a-symlink-for-the-live-image-s-base-loop-devi.patch
+Patch33: 0033-interpret-off-as-false-in-getargbool.patch
+Patch34: 0034-minor-cleanups-in-parsing-for-dmsquash-live-and-live.patch
+Patch35: 0035-fstab-sys-mount-it-in-initramfs-instead-of-newroot-i.patch
+Patch36: 0036-typo-fix.patch
+Patch37: 0037-mktemp-was-long-obsoleted-by-coreutils.patch
 
 
 BuildArch: noarch
@@ -308,6 +337,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Tue Jan 17 2012 Harald Hoyer <harald@redhat.com> 014-38.git20120117
+- update to latest git
+
 * Fri Jan 13 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 014-10.git20111215
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_17_Mass_Rebuild
 

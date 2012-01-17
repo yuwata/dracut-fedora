@@ -1,0 +1,27 @@
+From eead77320496939196428eb33b528533379f2bf0 Mon Sep 17 00:00:00 2001
+From: Cong Wang <xiyou.wangcong@gmail.com>
+Date: Tue, 20 Dec 2011 14:10:00 +0800
+Subject: [PATCH] nfs: fix regex patterns in check()
+
+Signed-off-by: Cong Wang <xiyou.wangcong@gmail.com>
+---
+ modules.d/95nfs/module-setup.sh |    6 +++---
+ 1 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/modules.d/95nfs/module-setup.sh b/modules.d/95nfs/module-setup.sh
+index 641d917..6778f28 100755
+--- a/modules.d/95nfs/module-setup.sh
++++ b/modules.d/95nfs/module-setup.sh
+@@ -9,9 +9,9 @@ check() {
+ 
+     [[ $hostonly ]] || [[ $mount_needs ]] && {
+         for fs in ${host_fs_types[@]}; do
+-            strstr "$fs" "|nfs"  && return 0
+-            strstr "$fs" "|nfs3" && return 0
+-            strstr "$fs" "|nfs4" && return 0
++            strstr "$fs" "\|nfs"  && return 0
++            strstr "$fs" "\|nfs3" && return 0
++            strstr "$fs" "\|nfs4" && return 0
+         done
+         return 255
+     }

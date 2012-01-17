@@ -1,0 +1,42 @@
+From 54f1a77fb678c254eb460844442c2323f2ca9cfc Mon Sep 17 00:00:00 2001
+From: Colin Guthrie <colin@mageia.org>
+Date: Sat, 31 Dec 2011 13:35:59 +0000
+Subject: [PATCH] init: Fix bogus message about invalid root device.
+
+When the initqueue cannot be processed, it might be about an invalid
+root device (in which case a separate message produced via
+wait_for_dev() should be displayed anyway), but it could also
+be for any other reason (e.g. /dev/resume not existing).
+
+Therefore, it is best to use a more generic error message.
+
+Also a minor tab->space conversion in the near vacinity of
+the real change.
+---
+ modules.d/99base/init |    6 +++---
+ 1 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/modules.d/99base/init b/modules.d/99base/init
+index fc00e4f..1e54449 100755
+--- a/modules.d/99base/init
++++ b/modules.d/99base/init
+@@ -259,16 +259,16 @@ while :; do
+     fi
+ 
+     if [ $main_loop -gt $(($RDRETRY/2)) ]; then
+-	for job in $hookdir/initqueue/timeout/*.sh; do
++        for job in $hookdir/initqueue/timeout/*.sh; do
+             [ -e "$job" ] || break
+             job=$job . $job
+             main_loop=0
+-	done
++        done
+     fi
+ 
+     main_loop=$(($main_loop+1))
+     [ $main_loop -gt $RDRETRY ] \
+-        && { flock -s 9 ; emergency_shell "No root device \"$root\" found"; } 9>/.console_lock
++        && { flock -s 9 ; emergency_shell "Unable to process initqueue"; } 9>/.console_lock
+ done
+ unset job
+ unset queuetriggered

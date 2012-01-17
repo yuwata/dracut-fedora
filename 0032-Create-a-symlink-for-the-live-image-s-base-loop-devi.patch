@@ -1,0 +1,28 @@
+From ce32e32f2a8288de15968c22f57fff306fa81753 Mon Sep 17 00:00:00 2001
+From: "Brian C. Lane" <bcl@redhat.com>
+Date: Tue, 20 Dec 2011 14:22:33 -0800
+Subject: [PATCH] Create a symlink for the live image's base loop device
+
+It is useful to know that loop device that the live image's / is mounted
+from. Make a /run/initramfs/live-baseloop symlink that points to it.
+
+Edited-By: harald@redhat.com: changed /dev/live-baseloop
+                              to /run/initramfs/live-baseloop
+---
+ modules.d/90dmsquash-live/dmsquash-live-root |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+diff --git a/modules.d/90dmsquash-live/dmsquash-live-root b/modules.d/90dmsquash-live/dmsquash-live-root
+index b704139..cb104e4 100755
+--- a/modules.d/90dmsquash-live/dmsquash-live-root
++++ b/modules.d/90dmsquash-live/dmsquash-live-root
+@@ -200,6 +200,9 @@ if [ -n "$ROOTFLAGS" ]; then
+     ROOTFLAGS="-o $ROOTFLAGS"
+ fi
+ 
++if [ -b "$BASE_LOOPDEV" ]; then
++    ln -s $BASE_LOOPDEV /dev/live-baseloop
++fi
+ ln -s /dev/mapper/live-rw /dev/root
+ printf '/bin/mount %s /dev/mapper/live-rw %s\n' "$ROOTFLAGS" "$NEWROOT" > $hookdir/mount/01-$$-live.sh
+ 

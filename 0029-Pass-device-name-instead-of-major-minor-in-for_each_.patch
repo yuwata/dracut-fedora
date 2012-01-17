@@ -1,0 +1,80 @@
+From d0096de764e73f372f9ca93063f0270fc6b02c20 Mon Sep 17 00:00:00 2001
+From: Cong Wang <xiyou.wangcong@gmail.com>
+Date: Tue, 20 Dec 2011 14:09:59 +0800
+Subject: [PATCH] Pass device name instead of major:minor in
+ for_each_host_dev_fs()
+
+Signed-off-by: Cong Wang <xiyou.wangcong@gmail.com>
+---
+ dracut           |   11 +++++------
+ dracut-functions |   11 ++++++-----
+ 2 files changed, 11 insertions(+), 11 deletions(-)
+
+diff --git a/dracut b/dracut
+index c3584c0..8c24e7b 100755
+--- a/dracut
++++ b/dracut
+@@ -528,9 +528,8 @@ chmod 755 "$initdir"
+ for line in "${fstab_lines[@]}"; do
+     set -- $line
+     #dev mp fs fsopts
+-    dev="$(get_maj_min $1)"
+-    push host_devs "${dev:-$1}"
+-    push host_fs_types "$dev|$3"
++    push host_devs "$1"
++    push host_fs_types "$1|$3"
+ done
+ 
+ for f in $add_fstab; do
+@@ -556,13 +555,13 @@ if [[ $hostonly ]]; then
+ 
+     for mp in "${host_mp[@]}"; do
+         mountpoint "$mp" >/dev/null 2>&1 || continue
+-        push host_devs $(find_block_device "$mp")
++        push host_devs $(readlink -f "/dev/block/$(find_block_device "$mp")")
+     done
+ fi
+ 
+ _get_fs_type() (
+     [[ $1 ]] || return
+-    if [[ -b /dev/block/$1 ]] && get_fs_env /dev/block/$1; then
++    if [[ -b $1 ]] && get_fs_env $1; then
+         echo "$1|$ID_FS_TYPE"
+         return 1
+     fi
+@@ -576,7 +575,7 @@ _get_fs_type() (
+ for dev in "${host_devs[@]}"; do
+     unset fs_type
+     for fstype in $(_get_fs_type $dev) \
+-        $(check_block_and_slaves _get_fs_type $dev); do
++        $(check_block_and_slaves _get_fs_type $(get_maj_min $dev)); do
+         if ! strstr " ${host_fs_types[*]} " " $fstype ";then
+             push host_fs_types "$fstype"
+         fi
+diff --git a/dracut-functions b/dracut-functions
+index a77a002..a9b15cc 100755
+--- a/dracut-functions
++++ b/dracut-functions
+@@ -247,16 +247,17 @@ find_root_block_device() { find_block_device /; }
+ for_each_host_dev_fs()
+ {
+     local _func="$1"
++    local _dev
++    local _fs
+     for f in ${host_fs_types[@]}; do
+         OLDIFS="$IFS"
+         IFS="|"
+         set -- $f
+         IFS="$OLDIFS"
+-        dev=$1
+-        [[ -b /dev/block/$dev ]] && dev="/dev/block/$dev"
+-        [[ -b $dev ]] || continue
+-        fs="$2"
+-        $_func $dev $fs
++        _dev="$1"
++        [[ -b "$_dev" ]] || continue
++        _fs="$2"
++        $_func $_dev $_fs
+     done
+ }
+ 

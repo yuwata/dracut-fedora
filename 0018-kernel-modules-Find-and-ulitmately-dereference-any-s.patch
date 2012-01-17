@@ -1,0 +1,24 @@
+From fa20c1852567f0cad2247fc315c450f51a1c03ee Mon Sep 17 00:00:00 2001
+From: Colin Guthrie <colin@mageia.org>
+Date: Fri, 16 Dec 2011 23:11:39 +0000
+Subject: [PATCH] kernel-modules: Find (and ulitmately dereference) any
+ symlinks in modprobe.d dir.
+
+Also only do the top level of files (ignore any subdirs and files within)
+---
+ modules.d/90kernel-modules/module-setup.sh |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/modules.d/90kernel-modules/module-setup.sh b/modules.d/90kernel-modules/module-setup.sh
+index 8d2ab91..257b3bc 100755
+--- a/modules.d/90kernel-modules/module-setup.sh
++++ b/modules.d/90kernel-modules/module-setup.sh
+@@ -70,7 +70,7 @@ installkernel() {
+ install() {
+     local _f
+     [ -f /etc/modprobe.conf ] && dracut_install /etc/modprobe.conf
+-    for i in $(find /etc/modprobe.d/ -type f -name '*.conf'); do
++    for i in $(find -L /etc/modprobe.d/ -maxdepth 1 -type f -name '*.conf'); do
+         inst_simple "$i"
+     done
+     inst_hook cmdline 01 "$moddir/parse-kernel.sh"

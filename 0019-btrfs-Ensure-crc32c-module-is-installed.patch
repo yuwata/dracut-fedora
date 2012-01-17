@@ -1,0 +1,27 @@
+From 5d55ceb75ca5a8d04f0a218aa14b6722af2e52ad Mon Sep 17 00:00:00 2001
+From: Colin Guthrie <colin@mageia.org>
+Date: Mon, 26 Dec 2011 23:03:34 +0000
+Subject: [PATCH] btrfs: Ensure crc32c module is installed.
+
+As outlined here:
+ https://bugs.mageia.org/show_bug.cgi?id=3214
+and:
+ https://bugs.launchpad.net/ubuntu/+source/linux-linaro-omap/+bug/715835
+the btrfs module needs a CRC implementation.
+---
+ modules.d/90btrfs/module-setup.sh |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/modules.d/90btrfs/module-setup.sh b/modules.d/90btrfs/module-setup.sh
+index f89713f..d4abbaf 100755
+--- a/modules.d/90btrfs/module-setup.sh
++++ b/modules.d/90btrfs/module-setup.sh
+@@ -29,7 +29,7 @@ depends() {
+ }
+ 
+ installkernel() {
+-    instmods btrfs
++    instmods btrfs crc32c
+ }
+ 
+ install() {

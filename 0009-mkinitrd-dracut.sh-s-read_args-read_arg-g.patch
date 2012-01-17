@@ -1,0 +1,27 @@
+From e74167bd6ae30cc2ea0ed2c4c4ac8011d5feadfa Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 5 Jan 2012 10:51:00 +0100
+Subject: [PATCH] mkinitrd-dracut.sh: s/read_args/read_arg/g
+
+https://bugzilla.redhat.com/show_bug.cgi?id=771106
+---
+ mkinitrd-dracut.sh |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/mkinitrd-dracut.sh b/mkinitrd-dracut.sh
+index b635a53..02f1a7f 100644
+--- a/mkinitrd-dracut.sh
++++ b/mkinitrd-dracut.sh
+@@ -49,10 +49,10 @@ while (($# > 0)); do
+             exit 0;;
+         -v|--verbose) dracut_args="${dracut_args} -v";;
+         -f|--force) dracut_args="${dracut_args} -f";;
+-        --preload) read_args modname "$@" || shift
++        --preload) read_arg modname "$@" || shift
+             basicmodules="$basicmodules $modname";;
+         --image-version) img_vers=yes;;
+-        --rootfs) read_args rootfs "$@" || shift
++        --rootfs) read_arg rootfs "$@" || shift
+             dracut_args="${dracut_args} --filesystems $rootfs";;
+         --nocompress) dracut_args="$dracut_args --no-compress";;
+         --help) usage -n;;

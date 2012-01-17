@@ -1,0 +1,93 @@
+From 95023eb325f899303deaaee7c53d83a41f942340 Mon Sep 17 00:00:00 2001
+From: Colin Guthrie <colin@mageia.org>
+Date: Wed, 30 Nov 2011 22:21:24 +0000
+Subject: [PATCH] Fix Unicode keytable.
+
+This patch was originally from Mandriva: dracut-013-fix_unicode_keytable.patch
+---
+ modules.d/10i18n/README          |    2 +
+ modules.d/10i18n/module-setup.sh |   49 +++++++++++++++++++++++--------------
+ 2 files changed, 32 insertions(+), 19 deletions(-)
+
+diff --git a/modules.d/10i18n/README b/modules.d/10i18n/README
+index 0507a47..89339aa 100644
+--- a/modules.d/10i18n/README
++++ b/modules.d/10i18n/README
+@@ -47,6 +47,8 @@ The following variables are used by i18n install script and at initramfs
+ runtime:
+ 
+     KEYMAP - keyboard translation table loaded by loadkeys
++    KEYTABLE - base name for keyboard translation table; if UNICODE is
++    true, Unicode version will be loaded. Overrides KEYMAP.
+     EXT_KEYMAPS - list of extra keymaps to bo loaded (sep. by space)
+     UNICODE - boolean, indicating UTF-8 mode
+     FONT - console font
+diff --git a/modules.d/10i18n/module-setup.sh b/modules.d/10i18n/module-setup.sh
+index 6248607..8342fb4 100755
+--- a/modules.d/10i18n/module-setup.sh
++++ b/modules.d/10i18n/module-setup.sh
+@@ -110,8 +110,38 @@ install() {
+         [ -f $I18N_CONF ] && . $I18N_CONF
+         [ -f $VCONFIG_CONF ] && . $VCONFIG_CONF
+ 
++        shopt -q -s nocasematch
++        if [[ ${UNICODE} ]]
++        then
++            if [[ ${UNICODE} = YES || ${UNICODE} = 1 ]]
++            then
++                UNICODE=1
++            elif [[ ${UNICODE} = NO || ${UNICODE} = 0 ]]
++            then
++                UNICODE=0
++            else
++                UNICODE=''
++            fi
++        fi
++        if [[ ! ${UNICODE} && ${LANG} =~ .*\.UTF-?8 ]]
++        then
++            UNICODE=1
++        fi
++        shopt -q -u nocasematch
++
+         # Gentoo user may have KEYMAP set to something like "-u pl2",
+         KEYMAP=${KEYMAP#-* }
++
++        # KEYTABLE is a bit special - it defines base keymap name and UNICODE
++        # determines whether non-UNICODE or UNICODE version is used
++
++        if [[ ${KEYTABLE} ]]; then
++           if [[ ${UNICODE} == 1 ]]; then
++               [[ ${KEYTABLE} =~ .*\.uni.* ]] || KEYTABLE=${KEYTABLE%.map*}.uni
++           fi
++           KEYMAP=${KEYTABLE}
++        fi
++
+         # I'm not sure of the purpose of UNIKEYMAP and GRP_TOGGLE.  They were in
+         # original redhat-i18n module.  Anyway it won't hurt.
+         EXT_KEYMAPS+=\ ${UNIKEYMAP}\ ${GRP_TOGGLE}
+@@ -150,25 +180,6 @@ install() {
+             inst_simple ${kbddir}/unimaps/${FONT_UNIMAP}.uni
+         fi
+ 
+-        shopt -q -s nocasematch
+-        if [[ ${UNICODE} ]]
+-        then
+-            if [[ ${UNICODE} = YES || ${UNICODE} = 1 ]]
+-            then
+-                UNICODE=1
+-            elif [[ ${UNICODE} = NO || ${UNICODE} = 0 ]]
+-            then
+-                UNICODE=0
+-            else
+-                UNICODE=''
+-            fi
+-        fi
+-        if [[ ! ${UNICODE} && ${LANG} =~ .*\.UTF-?8 ]]
+-        then
+-            UNICODE=1
+-        fi
+-        shopt -q -u nocasematch
+-
+         mksubdirs ${initdir}${I18N_CONF}
+         mksubdirs ${initdir}${VCONFIG_CONF}
+         print_vars LC_ALL LANG >> ${initdir}${I18N_CONF}

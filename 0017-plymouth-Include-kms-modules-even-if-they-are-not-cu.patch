@@ -1,0 +1,36 @@
+From 5fae9d9a207a80a8336c37399b48a2c0cec081f1 Mon Sep 17 00:00:00 2001
+From: Anssi Hannula <anssi@mageia.org>
+Date: Sat, 3 Dec 2011 11:25:45 +0000
+Subject: [PATCH] plymouth: Include kms modules even if they are not currently
+ loaded.
+
+This should fix initial initrd generation during install.
+If the modules are not desired to be used, the nokmsboot kernel
+command line should disable them.
+---
+ modules.d/50plymouth/module-setup.sh |   12 +++++++++++-
+ 1 files changed, 11 insertions(+), 1 deletions(-)
+
+diff --git a/modules.d/50plymouth/module-setup.sh b/modules.d/50plymouth/module-setup.sh
+index 4ea925e..df0e8d6 100755
+--- a/modules.d/50plymouth/module-setup.sh
++++ b/modules.d/50plymouth/module-setup.sh
+@@ -14,7 +14,17 @@ installkernel() {
+     local _modname
+     # Include KMS capable drm drivers
+     for _modname in $(find "$srcmods/kernel/drivers/gpu/drm" "$srcmods/extra" \( -name '*.ko' -o -name '*.ko.gz' \) 2>/dev/null); do
+-        zgrep -q drm_crtc_init  $_modname && instmods $_modname
++        if zgrep -q drm_crtc_init  $_modname; then
++            # if the hardware is present, include module even if it is not currently loaded,
++            # as we could e.g. be in the installer; nokmsboot boot parameter will disable
++            # loading of the driver if needed
++            if [[ $hostonly ]] && modinfo -F alias $_modname | sed -e 's,\?,\.,g' -e 's,\*,\.\*,g' \
++                                  | grep -qxf - /sys/bus/pci/devices/*/modalias; then
++                hostonly='' instmods $_modname
++                continue
++            fi
++            instmods $_modname
++        fi
+     done
+ }
+ 

@@ -1,0 +1,25 @@
+From 7835e1465fb1f26d514e8312384b99bbf358673f Mon Sep 17 00:00:00 2001
+From: Colin Guthrie <colin@mageia.org>
+Date: Wed, 30 Nov 2011 22:23:54 +0000
+Subject: [PATCH] Handle compressed kmods.
+
+This was orignally from Mandriva patch: dracut-011-plymouth-compressed-kmod.patch
+---
+ modules.d/50plymouth/module-setup.sh |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/modules.d/50plymouth/module-setup.sh b/modules.d/50plymouth/module-setup.sh
+index 338371f..4ea925e 100755
+--- a/modules.d/50plymouth/module-setup.sh
++++ b/modules.d/50plymouth/module-setup.sh
+@@ -13,8 +13,8 @@ depends() {
+ installkernel() {
+     local _modname
+     # Include KMS capable drm drivers
+-    for _modname in $(find "$srcmods/kernel/drivers/gpu/drm" "$srcmods/extra" -name '*.ko' 2>/dev/null); do
+-        grep -q drm_crtc_init  $_modname && instmods $_modname
++    for _modname in $(find "$srcmods/kernel/drivers/gpu/drm" "$srcmods/extra" \( -name '*.ko' -o -name '*.ko.gz' \) 2>/dev/null); do
++        zgrep -q drm_crtc_init  $_modname && instmods $_modname
+     done
+ }
+ 

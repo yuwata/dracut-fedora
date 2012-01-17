@@ -1,0 +1,22 @@
+From 5e90d2665831a137e6726757404f80cda97d1d4f Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 5 Jan 2012 14:36:45 +0100
+Subject: [PATCH] Makefile: set bindir to  ${prefix}/bin rather than sbin
+
+---
+ Makefile |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index b617a20..ccabd1e 100644
+--- a/Makefile
++++ b/Makefile
+@@ -6,7 +6,7 @@ libdir ?= ${prefix}/lib
+ datadir ?= ${prefix}/share
+ pkglibdir ?= ${libdir}/dracut
+ sysconfdir ?= ${prefix}/etc
+-bindir ?= ${prefix}/sbin
++bindir ?= ${prefix}/bin
+ mandir ?= ${prefix}/share/man
+ 
+ manpages = dracut.8 dracut.cmdline.7 dracut.conf.5 dracut-catimages.8  dracut-gencmdline.8
