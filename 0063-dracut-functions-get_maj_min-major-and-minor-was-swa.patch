@@ -1,0 +1,22 @@
+From 74132a10f35685a05a728d598d4e7f9905b3e35b Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 23 Jan 2012 13:50:05 +0100
+Subject: [PATCH] dracut-functions: get_maj_min() major and minor was swapped
+
+---
+ dracut-functions |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/dracut-functions b/dracut-functions
+index 3852478..e04b16d 100755
+--- a/dracut-functions
++++ b/dracut-functions
+@@ -180,7 +180,7 @@ get_fs_uuid() (
+ 
+ get_maj_min() {
+     local _dev
+-    _dev=$(stat -L -c '$((0x%T)):$((0x%t))' "$1" 2>/dev/null)
++    _dev=$(stat -L -c '$((0x%t)):$((0x%T))' "$1" 2>/dev/null)
+     _dev=$(eval "echo $_dev")
+     echo $_dev
+ }

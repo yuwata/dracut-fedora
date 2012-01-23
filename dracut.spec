@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 014
-Release: 61.git20120123%{?dist}
+Release: 65.git20120123%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel} > 6
@@ -84,6 +84,10 @@ Patch57: 0057-dracut-dracut.8.xml-added-more-documentation-about-L.patch
 Patch58: 0058-98usrmount-mount-usr.sh-do-not-mount-usr-read-only.patch
 Patch59: 0059-40network-also-look-in-drivers-s390-net-for-network-.patch
 Patch60: 0060-fix-rpm-build-error-after-adding-ssh-client-module.patch
+Patch61: 0061-iscsi-multipath-also-search-in-drivers-s390-scsi.patch
+Patch62: 0062-dracut-_get_fs_type-also-handle-dev-block-maj-min.patch
+Patch63: 0063-dracut-functions-get_maj_min-major-and-minor-was-swa.patch
+Patch64: 0064-90crypt-module-setup.sh-prepend-luks-to-hostonly-cmd.patch
 
 
 BuildArch: noarch
@@ -361,6 +365,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Mon Jan 23 2012 Harald Hoyer <harald@redhat.com> 014-65.git20120123
+- update to latest git
+
 * Mon Jan 23 2012 Harald Hoyer <harald@redhat.com> 014-61.git20120123
 - update to latest git
 
