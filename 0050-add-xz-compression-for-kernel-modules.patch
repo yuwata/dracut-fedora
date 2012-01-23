@@ -1,0 +1,110 @@
+From 7fffc9f11f836d6e19414f0c0f23e7e8fb4f17c4 Mon Sep 17 00:00:00 2001
+From: James Buren <ryuo@frugalware.org>
+Date: Sun, 22 Jan 2012 13:02:47 -0600
+Subject: [PATCH] add xz compression for kernel modules
+
+---
+ dracut-functions                           |   11 ++++++++---
+ modules.d/40network/module-setup.sh        |    1 +
+ modules.d/90kernel-modules/module-setup.sh |    1 +
+ modules.d/90multipath/module-setup.sh      |    1 +
+ modules.d/95iscsi/module-setup.sh          |    1 +
+ 5 files changed, 12 insertions(+), 3 deletions(-)
+
+diff --git a/dracut-functions b/dracut-functions
+index a9b15cc..3852478 100755
+--- a/dracut-functions
++++ b/dracut-functions
+@@ -364,7 +364,7 @@ inst_simple() {
+         inst "${_src%/*}/.${_src##*/}.hmac" "${target%/*}/.${target##*/}.hmac"
+     fi
+     ddebug "Installing $_src"
+-    cp --sparse=always -pfL "$_src" "${initdir}/$target" 
++    cp --sparse=always -pfL "$_src" "${initdir}/$target"
+ }
+ 
+ # find symlinks linked to given library file
+@@ -508,7 +508,7 @@ inst_symlink() {
+     if [[ -d $_realsrc ]]; then
+         inst_dir "$_realsrc"
+     else
+-        inst "$_realsrc" && mkdir -m 0755 -p "${_target%/*}" 
++        inst "$_realsrc" && mkdir -m 0755 -p "${_target%/*}"
+     fi
+     if [[ -e "${_src}" ]]; then
+         ln -sfn $(convert_abs_rel "${_src}" "${_realsrc}") "$_target"
+@@ -984,6 +984,7 @@ filter_kernel_modules_by_path () (
+     if ! [[ $hostonly ]]; then
+         _filtercmd='find "$srcmods/kernel/$1" "$srcmods/extra"'
+         _filtercmd+=' "$srcmods/weak-updates" -name "*.ko" -o -name "*.ko.gz"'
++        _filtercmd+=' -o -name "*.ko.xz"'
+         _filtercmd+=' 2>/dev/null'
+     else
+         _filtercmd='cut -d " " -f 1 </proc/modules|xargs modinfo -F filename '
+@@ -996,13 +997,17 @@ filter_kernel_modules_by_path () (
+                 $2 $initdir/$$.ko && echo "$_modname"
+                 rm -f $initdir/$$.ko
+                 ;;
++            *.ko.xz) xz -dc "$_modname" > $initdir/$$.ko
++                $2 $initdir/$$.ko && echo "$_modname"
++                rm -f $initdir/$$.ko
++                ;;
+         esac
+     done
+ )
+ find_kernel_modules_by_path () (
+     if ! [[ $hostonly ]]; then
+         find "$srcmods/kernel/$1" "$srcmods/extra" "$srcmods/weak-updates" \
+-          -name "*.ko" -o -name "*.ko.gz" 2>/dev/null
++          -name "*.ko" -o -name "*.ko.gz" -o -name "*.ko.xz" 2>/dev/null
+     else
+         cut -d " " -f 1 </proc/modules \
+         | xargs modinfo -F filename -k $kernel 2>/dev/null
+diff --git a/modules.d/40network/module-setup.sh b/modules.d/40network/module-setup.sh
+index fbf6f34..6c4ae92 100755
+--- a/modules.d/40network/module-setup.sh
++++ b/modules.d/40network/module-setup.sh
+@@ -36,6 +36,7 @@ installkernel() {
+                 case "$_fname" in
+                     *.ko)    _fcont="$(<        $_fname)" ;;
+                     *.ko.gz) _fcont="$(gzip -dc $_fname)" ;;
++                    *.ko.xz) _fcont="$(xz -dc   $_fname)" ;;
+                 esac
+                 [[   $_fcont =~ $_net_drivers
+                 && ! $_fcont =~ iw_handler_get_spy ]] \
+diff --git a/modules.d/90kernel-modules/module-setup.sh b/modules.d/90kernel-modules/module-setup.sh
+index 7888428..46d8591 100755
+--- a/modules.d/90kernel-modules/module-setup.sh
++++ b/modules.d/90kernel-modules/module-setup.sh
+@@ -13,6 +13,7 @@ installkernel() {
+                 while read _f; do case "$_f" in
+                     *.ko)    [[ $(<         $_f) =~ $_blockfuncs ]] && echo "$_f" ;;
+                     *.ko.gz) [[ $(gzip -dc <$_f) =~ $_blockfuncs ]] && echo "$_f" ;;
++                    *.ko.xz) [[ $(xz -dc   <$_f) =~ $_blockfuncs ]] && echo "$_f" ;;
+                     esac
+                 done
+             }
+diff --git a/modules.d/90multipath/module-setup.sh b/modules.d/90multipath/module-setup.sh
+index 43f0a3d..1502f59 100755
+--- a/modules.d/90multipath/module-setup.sh
++++ b/modules.d/90multipath/module-setup.sh
+@@ -40,6 +40,7 @@ installkernel() {
+         while read _f; do case "$_f" in
+             *.ko)    [[ $(<         $_f) =~ $_mpfuncs ]] && echo "$_f" ;;
+             *.ko.gz) [[ $(gzip -dc <$_f) =~ $_mpfuncs ]] && echo "$_f" ;;
++            *.ko.xz) [[ $(xz -dc   <$_f) =~ $_mpfuncs ]] && echo "$_f" ;;
+             esac
+         done
+     }
+diff --git a/modules.d/95iscsi/module-setup.sh b/modules.d/95iscsi/module-setup.sh
+index 8caaf73..560507c 100755
+--- a/modules.d/95iscsi/module-setup.sh
++++ b/modules.d/95iscsi/module-setup.sh
+@@ -48,6 +48,7 @@ installkernel() {
+         while read _f; do case "$_f" in
+             *.ko)    [[ $(<         $_f) =~ $_iscsifuncs ]] && echo "$_f" ;;
+             *.ko.gz) [[ $(gzip -dc <$_f) =~ $_iscsifuncs ]] && echo "$_f" ;;
++            *.ko.xz) [[ $(xz -dc   <$_f) =~ $_iscsifuncs ]] && echo "$_f" ;;
+             esac
+         done
+     }

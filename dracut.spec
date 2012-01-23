@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 014
-Release: 38.git20120117%{?dist}
+Release: 61.git20120123%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel} > 6
@@ -61,6 +61,29 @@ Patch34: 0034-minor-cleanups-in-parsing-for-dmsquash-live-and-live.patch
 Patch35: 0035-fstab-sys-mount-it-in-initramfs-instead-of-newroot-i.patch
 Patch36: 0036-typo-fix.patch
 Patch37: 0037-mktemp-was-long-obsoleted-by-coreutils.patch
+Patch38: 0038-dmsquash-live-really-changed-dev-live-baseloop-to-ru.patch
+Patch39: 0039-90kernel-modules-module-setup.sh-install-modules.ord.patch
+Patch40: 0040-Handle-upper-case-MAC-addresses-in-ifname-option.patch
+Patch41: 0041-server-id-in-ip-is-not-optional.patch
+Patch42: 0042-ip-server-id-should-be-server-IP.patch
+Patch43: 0043-remove-extra-semicolons-in-dracut.8.xml.patch
+Patch44: 0044-deal-common-part-of-etc-passwd-in-99base.patch
+Patch45: 0045-Add-job-control-support-to-emergency-shell.patch
+Patch46: 0046-change-root-home-dir-to-root.patch
+Patch47: 0047-Add-ssh-client-module-code.patch
+Patch48: 0048-ctty-add-help-line-in-usage.patch
+Patch49: 0049-plymouth-add-xz-support-for-kernel-modules.patch
+Patch50: 0050-add-xz-compression-for-kernel-modules.patch
+Patch51: 0051-lsinitrd-add-s-option-to-sort-the-initrd-output-by-f.patch
+Patch52: 0052-dracut-unset-GREP_OPTIONS.patch
+Patch53: 0053-lsinitrd-use-xz-with-single-stream-if-available.patch
+Patch54: 0054-plymouth-kernel-cleanup-not-needed-parts-for-shutdow.patch
+Patch55: 0055-network-dhclient-script-set-FQDN.patch
+Patch56: 0056-AUTHORS-updated-and-fixed-.mailmap.patch
+Patch57: 0057-dracut-dracut.8.xml-added-more-documentation-about-L.patch
+Patch58: 0058-98usrmount-mount-usr.sh-do-not-mount-usr-read-only.patch
+Patch59: 0059-40network-also-look-in-drivers-s390-net-for-network-.patch
+Patch60: 0060-fix-rpm-build-error-after-adding-ssh-client-module.patch
 
 
 BuildArch: noarch
@@ -307,6 +330,7 @@ rm -rf $RPM_BUILD_ROOT
 %{dracutlibdir}/modules.d/90livenet
 %{dracutlibdir}/modules.d/95nbd
 %{dracutlibdir}/modules.d/95nfs
+%{dracutlibdir}/modules.d/95ssh-client
 %{dracutlibdir}/modules.d/45ifcfg
 %{dracutlibdir}/modules.d/95znet
 
@@ -337,6 +361,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Mon Jan 23 2012 Harald Hoyer <harald@redhat.com> 014-61.git20120123
+- update to latest git
+
 * Tue Jan 17 2012 Harald Hoyer <harald@redhat.com> 014-38.git20120117
 - update to latest git
 

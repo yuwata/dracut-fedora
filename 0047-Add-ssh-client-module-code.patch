@@ -1,0 +1,148 @@
+From cdfeb278ab4d4b6a9d848e1b9accc3554e4ac6eb Mon Sep 17 00:00:00 2001
+From: Dave Young <dyoung@redhat.com>
+Date: Mon, 26 Dec 2011 14:29:21 +0800
+Subject: [PATCH] Add ssh client module code
+
+Add ssh client module which support ssh key mode and interactive mode.
+with --sshkey option you can provide the ssh key to be installed
+
+>why not call it "ssh" module?
+ssh-client is better, maybe future there will be ssh-server come in.
+In debian these are also two different packages.
+
+Usage:
+1. sshkey mode:
+transfer your public key to remote machine with ssh-copy-id or do it mannaully
+example of options:
+./dracut -l -H -a ssh-client --sshkey /root/.ssh/id_rsa i.img
+2. interactive mode:
+need use --ctty option, ie.:
+./dracut -l -H -a ssh-client --ctty i.img
+
+[v2 changes]:
+per wangcong: add patch description about module name
+add help line in usage()
+remove useless comment
+
+Signed-off-by: Dave Young <dyoung@redhat.com>
+---
+ dracut                                 |    4 ++-
+ dracut.8.xml                           |    8 ++++
+ modules.d/95ssh-client/module-setup.sh |   60 ++++++++++++++++++++++++++++++++
+ 3 files changed, 71 insertions(+), 1 deletions(-)
+ create mode 100644 modules.d/95ssh-client/module-setup.sh
+
+diff --git a/dracut b/dracut
+index 3c21561..d0c335b 100755
+--- a/dracut
++++ b/dracut
+@@ -118,6 +118,7 @@ Creates initial ramdisk images for preloading modules
+   -M, --show-modules    Print included module's name to standard output during
+                          build.
+   --keep                Keep the temporary initramfs for debugging purposes
++  --sshkey [SSHKEY]     Add ssh key to initramfs (use with ssh-client module)
+ EOF
+ }
+ 
+@@ -233,6 +234,7 @@ while (($# > 0)); do
+         --debug)       debug="yes";;
+         --profile)     profile="yes";;
+         --ctty)        cttyhack="yes";;
++        --sshkey)      read_arg sshkey   "$@" || shift;;
+         -v|--verbose)  ((verbosity_mod_l++));;
+         -q|--quiet)    ((verbosity_mod_l--));;
+         -l|--local)    allowlocal="yes" ;;
+@@ -588,7 +590,7 @@ export initdir dracutbasedir dracutmodules drivers \
+     add_drivers mdadmconf lvmconf filesystems \
+     use_fstab libdir usrlibdir fscks nofscks cttyhack \
+     stdloglvl sysloglvl fileloglvl kmsgloglvl logfile \
+-    debug host_fs_types host_devs
++    debug host_fs_types host_devs sshkey
+ 
+ # Create some directory structure first
+ [[ $prefix ]] && mkdir -m 0755 -p "${initdir}${prefix}"
+diff --git a/dracut.8.xml b/dracut.8.xml
+index 955d4d2..5a5df54 100644
+--- a/dracut.8.xml
++++ b/dracut.8.xml
+@@ -370,6 +370,14 @@ Default:
+         </varlistentry>
+         <varlistentry>
+           <term>
++            <option>--sshkey&nbsp;<replaceable>&lt;sshkey file&gt;</replaceable></option>
++          </term>
++          <listitem>
++            <para>ssh key file used with ssh-client module.</para>
++          </listitem>
++        </varlistentry>
++        <varlistentry>
++          <term>
+             <option>-l</option>
+           </term>
+           <term>
+diff --git a/modules.d/95ssh-client/module-setup.sh b/modules.d/95ssh-client/module-setup.sh
+new file mode 100644
+index 0000000..0ffc298
+--- /dev/null
++++ b/modules.d/95ssh-client/module-setup.sh
+@@ -0,0 +1,60 @@
++#!/bin/bash
++# -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
++# ex: ts=8 sw=4 sts=4 et filetype=sh
++
++# fixme: assume user is root
++
++check() {
++    # If our prerequisites are not met, fail.
++    type -P ssh >/dev/null || return 1
++    type -P scp >/dev/null || return 1
++    if [[ $sshkey ]]; then
++        [ ! -f $sshkey ] && {
++            derror "sshkey is not found!"
++            return 1
++        }
++        [[ ! $cttyhack = yes ]] && {
++            dinfo "--ctty is not used, you should make sure the machine is knowhost and copy the sshkey to remote machine!"
++        }
++    else
++        [[ ! $cttyhack = yes ]] && {
++            derror "ssh interactive mode need option --ctty!"
++            return 1
++        }
++    fi
++
++    return 0
++}
++
++depends() {
++    # We depend on network modules being loaded
++    echo network
++}
++
++inst_sshenv()
++{
++    if [ -d /root/.ssh ]; then
++        inst_dir /root/.ssh
++        chmod 700 ${initdir}/root/.ssh
++    fi
++
++    # Copy over ssh key and knowhosts if needed
++    [[ $sshkey ]] && {
++        inst $sshkey
++        [[ -f /root/.ssh/known_hosts ]] && inst /root/.ssh/known_hosts
++        [[ -f /etc/ssh/ssh_known_hosts ]] && inst /etc/ssh/ssh_known_hosts
++    }
++
++    # Copy over root and system-wide ssh configs.
++    [[ -f /root/.ssh/config ]] && inst /root/.ssh/config
++    [[ -f /etc/ssh/ssh_config ]] && inst /etc/ssh/ssh_config
++
++    return 0
++}
++
++install() {
++    inst ssh
++    inst scp
++    inst_sshenv
++}
++

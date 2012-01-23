@@ -1,0 +1,38 @@
+From c96425c3647d1d5e7110ac369056df79a6024e1d Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 23 Jan 2012 10:34:03 +0100
+Subject: [PATCH] lsinitrd: use xz with --single-stream, if available
+
+The F16 installation image is two concatenated cpio images:
+[xz-compressed dracut initramfs][uncompressed cpio with /squashfs.img]
+
+So to show the contents, use xz with the "--single-stream" option.
+
+https://bugzilla.redhat.com/show_bug.cgi?id=742299
+---
+ lsinitrd |    8 ++++++--
+ 1 files changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/lsinitrd b/lsinitrd
+index ad7ece9..1d953b7 100755
+--- a/lsinitrd
++++ b/lsinitrd
+@@ -36,12 +36,16 @@ image="${1:-/boot/initramfs-$(uname -r).img}"
+ CAT=zcat
+ FILE_T=$(file "$image")
+ 
++if echo "test"|xz|xz -dc --single-stream; then
++    XZ_SINGLE_STREAM="--single-stream"
++fi
++
+ if [[ "$FILE_T" =~ ": gzip compressed data" ]]; then
+     CAT=zcat
+ elif [[ "$FILE_T" =~ ": xz compressed data" ]]; then
+-    CAT=xzcat
++    CAT="xzcat $XZ_SINGLE_STREAM"
+ elif [[ "$FILE_T" =~ ": XZ compressed data" ]]; then
+-    CAT=xzcat
++    CAT="xzcat $XZ_SINGLE_STREAM"
+ elif [[ "$FILE_T" =~ ": data" ]]; then
+     CAT=lzcat
+ fi

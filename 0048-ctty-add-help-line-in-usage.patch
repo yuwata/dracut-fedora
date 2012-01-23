@@ -1,0 +1,24 @@
+From b93aaba84f8cfaaf7f8e07fc23935c80d9e87e20 Mon Sep 17 00:00:00 2001
+From: Dave Young <dyoung@redhat.com>
+Date: Mon, 26 Dec 2011 14:42:18 +0800
+Subject: [PATCH] --ctty: add help line in usage
+
+Adding missed help line in usage
+
+Signed-off-by: Dave Young <dyoung@redhat.com>
+---
+ dracut |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+diff --git a/dracut b/dracut
+index d0c335b..fbf0f74 100755
+--- a/dracut
++++ b/dracut
+@@ -119,6 +119,7 @@ Creates initial ramdisk images for preloading modules
+                          build.
+   --keep                Keep the temporary initramfs for debugging purposes
+   --sshkey [SSHKEY]     Add ssh key to initramfs (use with ssh-client module)
++  --ctty                Add control tty for emergency shells
+ EOF
+ }
+ 

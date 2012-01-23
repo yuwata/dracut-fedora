@@ -1,0 +1,42 @@
+From acfab3733f406a5b052941ffacc70511e9723106 Mon Sep 17 00:00:00 2001
+From: Anton Blanchard <anton@samba.org>
+Date: Tue, 27 Dec 2011 09:08:27 +1100
+Subject: [PATCH] Handle upper case MAC addresses in ifname option
+
+While the documentation states that ifname MAC addresses must be
+lower case, we silently accept upper case ones and fail later on
+when udev doesn't rename the device.
+
+Instead of adding sanity checking on the MAC address just convert
+it to lower case and remove the requirement completely.
+---
+ dracut.cmdline.7.xml                |    1 -
+ modules.d/40network/parse-ifname.sh |    3 ++-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/dracut.cmdline.7.xml b/dracut.cmdline.7.xml
+index 8a49056..9357e25 100644
+--- a/dracut.cmdline.7.xml
++++ b/dracut.cmdline.7.xml
+@@ -464,7 +464,6 @@ This parameter can be specified multiple times.</para>
+           <term><envar>ifname=</envar><replaceable>&lt;interface&gt;</replaceable>:<replaceable>&lt;MAC&gt;</replaceable></term>
+           <listitem>
+             <para>Assign network device name &lt;interface&gt; (ie eth0) to the NIC with MAC &lt;MAC&gt;.
+-Note letters in the MAC-address must be lowercase!
+ <remark>Note: If you use this option you <emphasis remap="B">must</emphasis> specify an ifname= argument for all interfaces used in ip= or fcoe= arguments.</remark>
+ This parameter can be specified multiple times.</para>
+           </listitem>
+diff --git a/modules.d/40network/parse-ifname.sh b/modules.d/40network/parse-ifname.sh
+index 4c3c70e..26e6084 100755
+--- a/modules.d/40network/parse-ifname.sh
++++ b/modules.d/40network/parse-ifname.sh
+@@ -25,7 +25,8 @@ parse_ifname_opts() {
+     case $# in
+         7)
+             ifname_if=$1
+-            ifname_mac=$2:$3:$4:$5:$6:$7
++            # udev requires MAC addresses to be lower case
++            ifname_mac=`echo $2:$3:$4:$5:$6:$7 | tr '[:upper:]' '[:lower:]'`
+             ;;
+         *)
+             die "Invalid arguments for ifname="

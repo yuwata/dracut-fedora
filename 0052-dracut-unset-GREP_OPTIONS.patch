@@ -1,0 +1,25 @@
+From 1fcf2d2f4a7eb95a507f5a4e85640e3d25bce79e Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 23 Jan 2012 10:10:25 +0100
+Subject: [PATCH] dracut: unset GREP_OPTIONS
+
+GREP_OPTIONS can influence the image creation, if set to user defined
+values, so unset it.
+
+https://bugzilla.redhat.com/show_bug.cgi?id=676712
+---
+ dracut |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+diff --git a/dracut b/dracut
+index fbf0f74..9c833a8 100755
+--- a/dracut
++++ b/dracut
+@@ -278,6 +278,7 @@ fi
+ PATH=/sbin:/bin:/usr/sbin:/usr/bin
+ export PATH
+ unset LD_LIBRARY_PATH
++unset GREP_OPTIONS
+ 
+ [[ $debug ]] && {
+     export PS4='${BASH_SOURCE}@${LINENO}(${FUNCNAME[0]}): ';

@@ -1,0 +1,42 @@
+From da55af4763d6a88da5a0b31cb68cdc0a2adfcd7e Mon Sep 17 00:00:00 2001
+From: Ian Dall <ian@beware.dropbear.id.au>
+Date: Mon, 23 Jan 2012 10:46:10 +0100
+Subject: [PATCH] network/dhclient-script: set FQDN
+
+When booting with nfsroot, dracut doesn't necessarily set the initial
+hostname correctly.
+
+According to dhcp-options(5), the name may or may not be qualified with
+the local domain. It goes on to say "it is preferable to use the
+domain-name option to specify the domain name".
+
+So dhclient-script needs to be able to handle the cases: a) where
+host-name is fully qualified and domain name is also specified; b)
+where hostname is fully qualified and the domain is not separately
+specified; c) where host-name is "short" and domain-name is also
+specified; and d) do its best where host-name is short but domain-name
+is not specified.
+
+The dhclient-script in initramfs does not handle case "c", apparently
+the preferred situation properly, setting hostname to "short".
+
+https://bugzilla.redhat.com/show_bug.cgi?id=756347
+---
+ modules.d/40network/dhclient-script |    4 +++-
+ 1 files changed, 3 insertions(+), 1 deletions(-)
+
+diff --git a/modules.d/40network/dhclient-script b/modules.d/40network/dhclient-script
+index 2c26838..e8bd8b2 100755
+--- a/modules.d/40network/dhclient-script
++++ b/modules.d/40network/dhclient-script
+@@ -41,7 +41,9 @@ setup_interface() {
+         done
+     fi >> /tmp/net.$netif.resolv.conf
+ 
+-    [ -n "$hostname" ] && echo "echo $hostname > /proc/sys/kernel/hostname" > /tmp/net.$netif.hostname
++    # Note: hostname can be fqdn OR short hostname, so chop off any
++    # trailing domain name and explicity add any domain if set.
++    [ -n "$hostname" ] && echo "echo ${hostname%.$domain}${domain+.$domain} > /proc/sys/kernel/hostname" > /tmp/net.$netif.hostname
+ }
+ 
+ PATH=/usr/sbin:/usr/bin:/sbin:/bin
