@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 014
-Release: 65.git20120123%{?dist}
+Release: 72.git20120126%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel} > 6
@@ -88,6 +88,13 @@ Patch61: 0061-iscsi-multipath-also-search-in-drivers-s390-scsi.patch
 Patch62: 0062-dracut-_get_fs_type-also-handle-dev-block-maj-min.patch
 Patch63: 0063-dracut-functions-get_maj_min-major-and-minor-was-swa.patch
 Patch64: 0064-90crypt-module-setup.sh-prepend-luks-to-hostonly-cmd.patch
+Patch65: 0065-99base-init-remove-tmpfs-on-dev.patch
+Patch66: 0066-netroot-actually-run-netroot-hooks.patch
+Patch67: 0067-let-some-modules-to-respect-mount_needs.patch
+Patch68: 0068-95ssh-client-module-setup.sh-spell-corrections.patch
+Patch69: 0069-95ssh-client-module-setup.sh-do-not-install-ssh-clie.patch
+Patch70: 0070-add-usrmove-module.patch
+Patch71: 0071-dracut.spec-add-compat-symlinks-to-sbin.patch
 
 
 BuildArch: noarch
@@ -262,13 +269,25 @@ rm $RPM_BUILD_ROOT%{_bindir}/lsinitrd
 mkdir -p $RPM_BUILD_ROOT/etc/logrotate.d
 install -m 0644 dracut.logrotate $RPM_BUILD_ROOT/etc/logrotate.d/dracut_log
 
+# create the ghosts
+mkdir -p $RPM_BUILD_ROOT%{_sbindir} $RPM_BUILD_ROOT/sbin
+ln -s ../bin/dracut $RPM_BUILD_ROOT%{_sbindir}/dracut
+ln -s ../usr/bin/dracut $RPM_BUILD_ROOT/sbin/dracut
+
 %clean
 rm -rf $RPM_BUILD_ROOT
+
+%post -p <lua>
+posix.symlink("../bin/dracut", "%{_sbindir}/dracut")
+posix.symlink("../usr/bin/dracut", "/sbin/dracut")
+return 0
 
 %files
 %defattr(-,root,root,0755)
 %doc README HACKING TODO COPYING AUTHORS NEWS dracut.html dracut.png dracut.svg
 %{_bindir}/dracut
+%ghost /sbin/dracut
+%ghost %{_sbindir}/dracut
 %if 0%{?fedora} > 12 || 0%{?rhel} >= 6 || 0%{?suse_version} > 9999
 %{_bindir}/mkinitrd
 %{_bindir}/lsinitrd
@@ -291,6 +310,7 @@ rm -rf $RPM_BUILD_ROOT
 %{dracutlibdir}/modules.d/05busybox
 %{dracutlibdir}/modules.d/10i18n
 %{dracutlibdir}/modules.d/10rpmversion
+%{dracutlibdir}/modules.d/30usrmove
 %{dracutlibdir}/modules.d/50plymouth
 %{dracutlibdir}/modules.d/90btrfs
 %{dracutlibdir}/modules.d/90crypt
@@ -365,6 +385,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Thu Jan 26 2012 Harald Hoyer <harald@redhat.com> 014-72.git20120126
+- update to latest git
+
 * Mon Jan 23 2012 Harald Hoyer <harald@redhat.com> 014-65.git20120123
 - update to latest git
 
