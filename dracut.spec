@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 014
-Release: 76.git20120126%{?dist}
+Release: 77.git20120126%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel} > 6
@@ -99,6 +99,7 @@ Patch72: 0072-usrmove-install-missing-binaries-and-set-x-only-for-.patch
 Patch73: 0073-30usrmove-usrmove-convert.sh-rename-duplicate-librar.patch
 Patch74: 0074-dracut.spec-create-compat-symlink-instead-of-ghost.patch
 Patch75: 0075-fix-kernel-modules-search-for-s390.patch
+Patch76: 0076-fix-kernel-modules-search-for-s390.patch
 
 
 BuildArch: noarch
@@ -383,6 +384,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Thu Jan 26 2012 Harald Hoyer <harald@redhat.com> 014-77.git20120126
+- update to latest git
+
 * Thu Jan 26 2012 Harald Hoyer <harald@redhat.com> 014-76.git20120126
 - update to latest git
 
