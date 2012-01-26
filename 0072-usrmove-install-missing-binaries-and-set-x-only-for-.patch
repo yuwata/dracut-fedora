@@ -1,0 +1,52 @@
+From 6334ffdbb0ff898667287df56f63a9d1b647ba19 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 26 Jan 2012 13:55:50 +0100
+Subject: [PATCH] usrmove: install missing binaries and "set -x" only for
+ rd.debug
+
+---
+ modules.d/30usrmove/do-usrmove.sh      |    6 +++++-
+ modules.d/30usrmove/module-setup.sh    |    1 +
+ modules.d/30usrmove/usrmove-convert.sh |    2 --
+ 3 files changed, 6 insertions(+), 3 deletions(-)
+
+diff --git a/modules.d/30usrmove/do-usrmove.sh b/modules.d/30usrmove/do-usrmove.sh
+index 8bdf5ab..6596a68 100755
+--- a/modules.d/30usrmove/do-usrmove.sh
++++ b/modules.d/30usrmove/do-usrmove.sh
+@@ -3,5 +3,9 @@
+ # ex: ts=8 sw=4 sts=4 et filetype=sh
+ 
+ if getargbool 0 rd.usrmove; then
+-    usrmove-convert "$NEWROOT" 2>&1 | vinfo
++    if getargbool 0 rd.debug; then
++        bash -x usrmove-convert "$NEWROOT" 2>&1 | vinfo
++    else
++        usrmove-convert "$NEWROOT" 2>&1 | vinfo
++    fi
+ fi
+diff --git a/modules.d/30usrmove/module-setup.sh b/modules.d/30usrmove/module-setup.sh
+index 05b2366..04b44ca 100755
+--- a/modules.d/30usrmove/module-setup.sh
++++ b/modules.d/30usrmove/module-setup.sh
+@@ -13,6 +13,7 @@ depends() {
+ 
+ install() {
+     dracut_install bash
++    dracut_install find ldconfig mv rm cp ln 
+     inst_hook pre-pivot 99 "$moddir/do-usrmove.sh"
+     inst "$moddir/usrmove-convert.sh" /usr/bin/usrmove-convert
+ }
+diff --git a/modules.d/30usrmove/usrmove-convert.sh b/modules.d/30usrmove/usrmove-convert.sh
+index 3295074..8a623b3 100755
+--- a/modules.d/30usrmove/usrmove-convert.sh
++++ b/modules.d/30usrmove/usrmove-convert.sh
+@@ -2,8 +2,6 @@
+ # -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
+ # ex: ts=8 sw=4 sts=4 et filetype=sh
+ 
+-set -x
+-
+ ROOT="$1"
+ 
+ if [[ ! -d "$ROOT" ]]; then
