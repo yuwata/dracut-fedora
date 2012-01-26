@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 014
-Release: 77.git20120126%{?dist}
+Release: 77.git20120126%{?dist}.1
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel} > 6
@@ -384,6 +384,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Thu Jan 26 2012 Harald Hoyer <harald@redhat.com> 014-77.git20120126.1
+- rebuild for rawhide
+
 * Thu Jan 26 2012 Harald Hoyer <harald@redhat.com> 014-77.git20120126
 - update to latest git
 
