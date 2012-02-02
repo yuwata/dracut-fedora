@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 014
-Release: 80.git20120202%{?dist}
+Release: 81.git20120202%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel} > 6
@@ -103,6 +103,7 @@ Patch76: 0076-fix-kernel-modules-search-for-s390.patch
 Patch77: 0077-30usrmove-usrmove-convert.sh-do-not-force-selinux-au.patch
 Patch78: 0078-dracut-functions-install-nosegneg-libs-additionally-.patch
 Patch79: 0079-renamed-usrmove-to-convertfs.patch
+Patch80: 0080-30convertfs-convertfs.sh-fix-check-for-var-run-and-v.patch
 
 
 BuildArch: noarch
@@ -387,6 +388,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Thu Feb 02 2012 Harald Hoyer <harald@redhat.com> 014-81.git20120202
+- update to latest git
+
 * Thu Feb 02 2012 Harald Hoyer <harald@redhat.com> 014-80.git20120202
 - update to latest git
 
