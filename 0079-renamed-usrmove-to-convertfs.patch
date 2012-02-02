@@ -1,0 +1,453 @@
+From 2cf328ad0ae7fb5ee7de8fac5652e4cd58adca1a Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 2 Feb 2012 18:50:26 +0100
+Subject: [PATCH] renamed usrmove to convertfs
+
+---
+ modules.d/30convertfs/convertfs.sh     |  176 ++++++++++++++++++++++++++++++++
+ modules.d/30convertfs/do-convertfs.sh  |   11 ++
+ modules.d/30convertfs/module-setup.sh  |   20 ++++
+ modules.d/30usrmove/do-usrmove.sh      |   11 --
+ modules.d/30usrmove/module-setup.sh    |   20 ----
+ modules.d/30usrmove/usrmove-convert.sh |  159 ----------------------------
+ 6 files changed, 207 insertions(+), 190 deletions(-)
+ create mode 100755 modules.d/30convertfs/convertfs.sh
+ create mode 100755 modules.d/30convertfs/do-convertfs.sh
+ create mode 100755 modules.d/30convertfs/module-setup.sh
+ delete mode 100755 modules.d/30usrmove/do-usrmove.sh
+ delete mode 100755 modules.d/30usrmove/module-setup.sh
+ delete mode 100755 modules.d/30usrmove/usrmove-convert.sh
+
+diff --git a/modules.d/30convertfs/convertfs.sh b/modules.d/30convertfs/convertfs.sh
+new file mode 100755
+index 0000000..6c76a4c
+--- /dev/null
++++ b/modules.d/30convertfs/convertfs.sh
+@@ -0,0 +1,176 @@
++#!/bin/bash
++# -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
++# ex: ts=8 sw=4 sts=4 et filetype=sh
++
++ROOT="$1"
++
++if [[ ! -d "$ROOT" ]]; then
++    echo "Usage: $0 <rootdir>"
++    exit 1
++fi
++
++if [[ "$ROOT" -ef / ]]; then
++    echo "Can't convert the running system."
++    echo "Please boot with 'rd.convertfs' on the kernel command line,"
++    echo "to update with the help of the initramfs,"
++    echo "or run this script from a rescue system."
++    exit 1
++fi
++
++while [[ "$ROOT" != "${ROOT%/}" ]]; do
++    ROOT=${ROOT%/}
++done
++
++needconvert() {
++    for dir in "$ROOT/bin" "$ROOT/sbin" "$ROOT/lib" "$ROOT/lib64"; do
++        if [[ -e "$dir" ]]; then
++            [[ -L "$dir" ]] || return 0
++        fi
++    done
++    return 1
++}
++
++if ! needconvert; then
++    echo "Your system is already converted."
++    exit 0
++fi
++
++testfile="$ROOT/.usrmovecheck$$"
++rm -f "$testfile"
++> "$testfile"
++if [[ ! -e "$testfile" ]]; then
++    echo "Cannot write to $ROOT/"
++    exit 1
++fi
++rm -f "$testfile"
++
++testfile="$ROOT/usr/.usrmovecheck$$"
++rm -f "$testfile"
++> "$testfile"
++if [[ ! -e "$testfile" ]]; then
++    echo "Cannot write to $ROOT/usr/"
++    exit 1
++fi
++rm -f "$testfile"
++
++ismounted() {
++    while read a m a; do
++        [[ "$m" = "$1" ]] && return 0
++    done < /proc/mounts
++    return 1
++}
++
++# clean up after ourselves no matter how we die.
++cleanup() {
++    echo "Something failed. Move back to the original state"
++    for dir in "$ROOT/bin" "$ROOT/sbin" "$ROOT/lib" "$ROOT/lib64" \
++	"$ROOT/usr/bin" "$ROOT/usr/sbin" "$ROOT/usr/lib" \
++        "$ROOT/usr/lib64"; do
++        [[ -d "${dir}.usrmove-new" ]] && rm -fr "${dir}.usrmove-new"
++        if [[ -d "${dir}.usrmove-old" ]]; then
++            mv "$dir" "${dir}.del~"
++            mv "${dir}.usrmove-old" "$dir"
++            rm -fr "${dir}.del~"
++        fi
++    done
++}
++
++trap 'ret=$?; [[ $ret -ne 0 ]] && cleanup;exit $ret;' EXIT
++trap 'exit 1;' SIGINT
++
++ismounted "$ROOT/usr" || CP_HARDLINK="-l"
++
++set -e
++
++# merge / and /usr in new dir in /usr
++for dir in bin sbin lib lib64; do
++    rm -rf "$ROOT/usr/${dir}.usrmove-new"
++    [[ -L "$ROOT/$dir" ]] && continue
++    [[ -d "$ROOT/$dir" ]] || continue
++    echo "Make a copy of \`$ROOT/usr/$dir'."
++    [[ -d "$ROOT/usr/$dir" ]] \
++        && cp -ax $CP_HARDLINK "$ROOT/usr/$dir" "$ROOT/usr/${dir}.usrmove-new"
++    echo "Merge the copy with \`$ROOT/$dir'."
++    [[ -d "$ROOT/usr/${dir}.usrmove-new" ]] \
++        || mkdir -p "$ROOT/usr/${dir}.usrmove-new"
++    cp -axT $CP_HARDLINK --backup --suffix=.usrmove~ "$ROOT/$dir" "$ROOT/usr/${dir}.usrmove-new"
++    echo "Clean up duplicates in \`$ROOT/usr/$dir'."
++    # delete all symlinks that have been backed up
++    find "$ROOT/usr/${dir}.usrmove-new" -type l -name '*.usrmove~' -delete || :
++    # replace symlink with backed up binary
++    find "$ROOT/usr/${dir}.usrmove-new" \
++        -name '*.usrmove~' \
++        -type f \
++        -exec bash -c 'p="{}";o=${p%%%%.usrmove~};
++                       [[ -L "$o" ]] && mv -f "$p" "$o"' ';' || :
++done
++# switch over merged dirs in /usr
++for dir in bin sbin lib lib64; do
++    [[ -d "$ROOT/usr/${dir}.usrmove-new" ]] || continue
++    echo "Switch to new \`$ROOT/usr/$dir'."
++    rm -fr "$ROOT/usr/${dir}.usrmove-old"
++    mv "$ROOT/usr/$dir" "$ROOT/usr/${dir}.usrmove-old"
++    mv "$ROOT/usr/${dir}.usrmove-new" "$ROOT/usr/$dir"
++done
++
++# replace dirs in / with links to /usr
++for dir in bin sbin lib lib64; do
++    [[ -L "$ROOT/$dir" ]] && continue
++    [[ -d "$ROOT/$dir" ]] || continue
++    echo "Create \`$ROOT/$dir' symlink."
++    rm -rf "$ROOT/${dir}.usrmove-old" || :
++    mv "$ROOT/$dir" "$ROOT/${dir}.usrmove-old"
++    ln -sfn usr/$dir "$ROOT/$dir"
++done
++
++echo "Clean up backup files."
++# everything seems to work; cleanup
++for dir in bin sbin lib lib64; do
++     # if we get killed in the middle of "rm -rf", ensure not to leave
++     # an incomplete directory, which is moved back by cleanup()
++    [[ -d "$ROOT/usr/${dir}.usrmove-old" ]] \
++        && mv "$ROOT/usr/${dir}.usrmove-old" "$ROOT/usr/${dir}.usrmove-old~"
++    [[ -d "$ROOT/${dir}.usrmove-old" ]] \
++        && mv "$ROOT/${dir}.usrmove-old" "$ROOT/${dir}.usrmove-old~"
++done
++
++for dir in bin sbin lib lib64; do
++    [[ -d "$ROOT/usr/${dir}.usrmove-old~" ]] \
++        && rm -rf "$ROOT/usr/${dir}.usrmove-old~" || :
++    [[ -d "$ROOT/${dir}.usrmove-old~" ]] \
++        && rm -rf "$ROOT/${dir}.usrmove-old~" || :
++done
++
++for dir in lib lib64; do
++    [[ -d "$ROOT/$dir" ]] || continue
++    for lib in "$ROOT"/usr/${dir}/lib*.so*.usrmove~; do
++        [[ -f $lib ]] || continue
++        mv $lib ${lib/.so/_so}
++    done
++done
++
++set +e
++
++echo "Run ldconfig."
++ldconfig -r "$ROOT"
++
++. $ROOT/etc/selinux/config
++if [ "$SELINUX" != "disabled" ] && [ -f /etc/selinux/${SELINUXTYPE}/contexts/files/file_contexts ]; then
++    echo "Fixing SELinux labels"
++    /usr/sbin/setfiles -r $ROOT -p /etc/selinux/${SELINUXTYPE}/contexts/files/file_contexts $ROOT/sbin $ROOT/bin $ROOT/lib $ROOT/lib64 $ROOT/usr/lib $ROOT/usr/lib64 $ROOT/etc/ld.so.cache $ROOT/var/cache/ldconfig || :
++fi
++
++if [ -d $ROOT/var/run ]; then
++    echo "Converting /var/run to symlink"
++    mv -f $ROOT/var/run $ROOT/var/run.runmove~
++    ln -sfn ../run $ROOT/var/run
++fi
++
++if [ -d $ROOT/var/lock ]; then
++    echo "Converting /var/lock to symlink"
++    mv -f $ROOT/var/lock $ROOT/var/lock.lockmove~
++    ln -sfn ../run/lock $ROOT/var/lock
++fi
++
++echo "Done."
++exit 0
+diff --git a/modules.d/30convertfs/do-convertfs.sh b/modules.d/30convertfs/do-convertfs.sh
+new file mode 100755
+index 0000000..99738e3
+--- /dev/null
++++ b/modules.d/30convertfs/do-convertfs.sh
+@@ -0,0 +1,11 @@
++#!/bin/bash
++# -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
++# ex: ts=8 sw=4 sts=4 et filetype=sh
++
++if getargbool 0 rd.convertfs; then
++    if getargbool 0 rd.debug; then
++        bash -x convertfs "$NEWROOT" 2>&1 | vinfo
++    else
++        convertfs "$NEWROOT" 2>&1 | vinfo
++    fi
++fi
+diff --git a/modules.d/30convertfs/module-setup.sh b/modules.d/30convertfs/module-setup.sh
+new file mode 100755
+index 0000000..48ffa3e
+--- /dev/null
++++ b/modules.d/30convertfs/module-setup.sh
+@@ -0,0 +1,20 @@
++#!/bin/bash
++# -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
++# ex: ts=8 sw=4 sts=4 et filetype=sh
++
++check() {
++    [[ $mount_needs ]] && return 1
++    return 255
++}
++
++depends() {
++    return 0
++}
++
++install() {
++    dracut_install bash
++    dracut_install find ldconfig mv rm cp ln 
++    inst_hook pre-pivot 99 "$moddir/do-convertfs.sh"
++    inst "$moddir/convertfs.sh" /usr/bin/convertfs
++}
++
+diff --git a/modules.d/30usrmove/do-usrmove.sh b/modules.d/30usrmove/do-usrmove.sh
+deleted file mode 100755
+index 6596a68..0000000
+--- a/modules.d/30usrmove/do-usrmove.sh
++++ /dev/null
+@@ -1,11 +0,0 @@
+-#!/bin/bash
+-# -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
+-# ex: ts=8 sw=4 sts=4 et filetype=sh
+-
+-if getargbool 0 rd.usrmove; then
+-    if getargbool 0 rd.debug; then
+-        bash -x usrmove-convert "$NEWROOT" 2>&1 | vinfo
+-    else
+-        usrmove-convert "$NEWROOT" 2>&1 | vinfo
+-    fi
+-fi
+diff --git a/modules.d/30usrmove/module-setup.sh b/modules.d/30usrmove/module-setup.sh
+deleted file mode 100755
+index 04b44ca..0000000
+--- a/modules.d/30usrmove/module-setup.sh
++++ /dev/null
+@@ -1,20 +0,0 @@
+-#!/bin/bash
+-# -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
+-# ex: ts=8 sw=4 sts=4 et filetype=sh
+-
+-check() {
+-    [[ $mount_needs ]] && return 1
+-    return 255
+-}
+-
+-depends() {
+-    return 0
+-}
+-
+-install() {
+-    dracut_install bash
+-    dracut_install find ldconfig mv rm cp ln 
+-    inst_hook pre-pivot 99 "$moddir/do-usrmove.sh"
+-    inst "$moddir/usrmove-convert.sh" /usr/bin/usrmove-convert
+-}
+-
+diff --git a/modules.d/30usrmove/usrmove-convert.sh b/modules.d/30usrmove/usrmove-convert.sh
+deleted file mode 100755
+index 8aa8588..0000000
+--- a/modules.d/30usrmove/usrmove-convert.sh
++++ /dev/null
+@@ -1,159 +0,0 @@
+-#!/bin/bash
+-# -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
+-# ex: ts=8 sw=4 sts=4 et filetype=sh
+-
+-ROOT="$1"
+-
+-if [[ ! -d "$ROOT" ]]; then
+-    echo "Usage: $0 <rootdir>"
+-    exit 1
+-fi
+-
+-if [[ "$ROOT" -ef / ]]; then
+-    echo "Can't convert the running system."
+-    echo "Please boot with 'usrmove' on the kernel command line,"
+-    echo "to update with the help of the initramfs,"
+-    echo "or run this script from a rescue system."
+-    exit 1
+-fi
+-
+-while [[ "$ROOT" != "${ROOT%/}" ]]; do
+-    ROOT=${ROOT%/}
+-done
+-
+-needconvert() {
+-    for dir in "$ROOT/bin" "$ROOT/sbin" "$ROOT/lib" "$ROOT/lib64"; do
+-        if [[ -e "$dir" ]]; then
+-            [[ -L "$dir" ]] || return 0
+-        fi
+-    done
+-    return 1
+-}
+-
+-if ! needconvert; then
+-    echo "Your system is already converted."
+-    exit 0
+-fi
+-
+-testfile="$ROOT/.usrmovecheck$$"
+-rm -f "$testfile"
+-> "$testfile"
+-if [[ ! -e "$testfile" ]]; then
+-    echo "Cannot write to $ROOT/"
+-    exit 1
+-fi
+-rm -f "$testfile"
+-
+-testfile="$ROOT/usr/.usrmovecheck$$"
+-rm -f "$testfile"
+-> "$testfile"
+-if [[ ! -e "$testfile" ]]; then
+-    echo "Cannot write to $ROOT/usr/"
+-    exit 1
+-fi
+-rm -f "$testfile"
+-
+-ismounted() {
+-    while read a m a; do
+-        [[ "$m" = "$1" ]] && return 0
+-    done < /proc/mounts
+-    return 1
+-}
+-
+-# clean up after ourselves no matter how we die.
+-cleanup() {
+-    echo "Something failed. Move back to the original state"
+-    for dir in "$ROOT/bin" "$ROOT/sbin" "$ROOT/lib" "$ROOT/lib64" \
+-	"$ROOT/usr/bin" "$ROOT/usr/sbin" "$ROOT/usr/lib" \
+-        "$ROOT/usr/lib64"; do
+-        [[ -d "${dir}.usrmove-new" ]] && rm -fr "${dir}.usrmove-new"
+-        if [[ -d "${dir}.usrmove-old" ]]; then
+-            mv "$dir" "${dir}.del~"
+-            mv "${dir}.usrmove-old" "$dir"
+-            rm -fr "${dir}.del~"
+-        fi
+-    done
+-}
+-
+-trap 'ret=$?; [[ $ret -ne 0 ]] && cleanup;exit $ret;' EXIT
+-trap 'exit 1;' SIGINT
+-
+-ismounted "$ROOT/usr" || CP_HARDLINK="-l"
+-
+-set -e
+-
+-# merge / and /usr in new dir in /usr
+-for dir in bin sbin lib lib64; do
+-    rm -rf "$ROOT/usr/${dir}.usrmove-new"
+-    [[ -L "$ROOT/$dir" ]] && continue
+-    [[ -d "$ROOT/$dir" ]] || continue
+-    echo "Make a copy of \`$ROOT/usr/$dir'."
+-    [[ -d "$ROOT/usr/$dir" ]] \
+-        && cp -ax $CP_HARDLINK "$ROOT/usr/$dir" "$ROOT/usr/${dir}.usrmove-new"
+-    echo "Merge the copy with \`$ROOT/$dir'."
+-    [[ -d "$ROOT/usr/${dir}.usrmove-new" ]] \
+-        || mkdir -p "$ROOT/usr/${dir}.usrmove-new"
+-    cp -axT $CP_HARDLINK --backup --suffix=.usrmove~ "$ROOT/$dir" "$ROOT/usr/${dir}.usrmove-new"
+-    echo "Clean up duplicates in \`$ROOT/usr/$dir'."
+-    # delete all symlinks that have been backed up
+-    find "$ROOT/usr/${dir}.usrmove-new" -type l -name '*.usrmove~' -delete || :
+-    # replace symlink with backed up binary
+-    find "$ROOT/usr/${dir}.usrmove-new" \
+-        -name '*.usrmove~' \
+-        -type f \
+-        -exec bash -c 'p="{}";o=${p%%%%.usrmove~};
+-                       [[ -L "$o" ]] && mv -f "$p" "$o"' ';' || :
+-done
+-# switch over merged dirs in /usr
+-for dir in bin sbin lib lib64; do
+-    [[ -d "$ROOT/usr/${dir}.usrmove-new" ]] || continue
+-    echo "Switch to new \`$ROOT/usr/$dir'."
+-    rm -fr "$ROOT/usr/${dir}.usrmove-old"
+-    mv "$ROOT/usr/$dir" "$ROOT/usr/${dir}.usrmove-old"
+-    mv "$ROOT/usr/${dir}.usrmove-new" "$ROOT/usr/$dir"
+-done
+-
+-# replace dirs in / with links to /usr
+-for dir in bin sbin lib lib64; do
+-    [[ -L "$ROOT/$dir" ]] && continue
+-    [[ -d "$ROOT/$dir" ]] || continue
+-    echo "Create \`$ROOT/$dir' symlink."
+-    rm -rf "$ROOT/${dir}.usrmove-old" || :
+-    mv "$ROOT/$dir" "$ROOT/${dir}.usrmove-old"
+-    ln -sfn usr/$dir "$ROOT/$dir"
+-done
+-
+-echo "Clean up backup files."
+-# everything seems to work; cleanup
+-for dir in bin sbin lib lib64; do
+-     # if we get killed in the middle of "rm -rf", ensure not to leave
+-     # an incomplete directory, which is moved back by cleanup()
+-    [[ -d "$ROOT/usr/${dir}.usrmove-old" ]] \
+-        && mv "$ROOT/usr/${dir}.usrmove-old" "$ROOT/usr/${dir}.usrmove-old~"
+-    [[ -d "$ROOT/${dir}.usrmove-old" ]] \
+-        && mv "$ROOT/${dir}.usrmove-old" "$ROOT/${dir}.usrmove-old~"
+-done
+-
+-for dir in bin sbin lib lib64; do
+-    [[ -d "$ROOT/usr/${dir}.usrmove-old~" ]] \
+-        && rm -rf "$ROOT/usr/${dir}.usrmove-old~" || :
+-    [[ -d "$ROOT/${dir}.usrmove-old~" ]] \
+-        && rm -rf "$ROOT/${dir}.usrmove-old~" || :
+-done
+-
+-for dir in lib lib64; do
+-    [[ -d "$ROOT/$dir" ]] || continue
+-    for lib in "$ROOT"/usr/${dir}/lib*.so*.usrmove~; do
+-        [[ -f $lib ]] || continue
+-        mv $lib ${lib/.so/_so}
+-    done
+-done
+-
+-set +e
+-
+-echo "Run ldconfig."
+-ldconfig -r "$ROOT"
+-#echo "Set autorelabel flag."
+-#> "$ROOT/.autorelabel"
+-echo "Done."
+-exit 0

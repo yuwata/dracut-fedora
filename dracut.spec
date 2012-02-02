@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 014
-Release: 77.git20120126%{?dist}.1
+Release: 80.git20120202%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel} > 6
@@ -100,6 +100,9 @@ Patch73: 0073-30usrmove-usrmove-convert.sh-rename-duplicate-librar.patch
 Patch74: 0074-dracut.spec-create-compat-symlink-instead-of-ghost.patch
 Patch75: 0075-fix-kernel-modules-search-for-s390.patch
 Patch76: 0076-fix-kernel-modules-search-for-s390.patch
+Patch77: 0077-30usrmove-usrmove-convert.sh-do-not-force-selinux-au.patch
+Patch78: 0078-dracut-functions-install-nosegneg-libs-additionally-.patch
+Patch79: 0079-renamed-usrmove-to-convertfs.patch
 
 
 BuildArch: noarch
@@ -309,7 +312,7 @@ rm -rf $RPM_BUILD_ROOT
 %{dracutlibdir}/modules.d/05busybox
 %{dracutlibdir}/modules.d/10i18n
 %{dracutlibdir}/modules.d/10rpmversion
-%{dracutlibdir}/modules.d/30usrmove
+%{dracutlibdir}/modules.d/30convertfs
 %{dracutlibdir}/modules.d/50plymouth
 %{dracutlibdir}/modules.d/90btrfs
 %{dracutlibdir}/modules.d/90crypt
@@ -384,6 +387,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Thu Feb 02 2012 Harald Hoyer <harald@redhat.com> 014-80.git20120202
+- update to latest git
+
 * Thu Jan 26 2012 Harald Hoyer <harald@redhat.com> 014-77.git20120126.1
 - rebuild for rawhide
 
