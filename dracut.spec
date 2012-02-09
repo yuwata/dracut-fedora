@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 015
-Release: 4.git20120209%{?dist}
+Release: 7.git20120209%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel} > 6
@@ -27,6 +27,9 @@ Source0: http://www.kernel.org/pub/linux/utils/boot/dracut/dracut-%{version}.tar
 Patch1: 0001-dracut-setup-clean-PATH-w-o-existing-one.patch
 Patch2: 0002-TEST-15-BTRFSRAID-write-diskimage-to-tmp-dir.patch
 Patch3: 0003-lsinitrd-silence-xz-test.patch
+Patch4: 0004-dracut-honor-binaries-in-sbin-first.patch
+Patch5: 0005-98usrmount-mount-usr.sh-remove-extra-slash.patch
+Patch6: 0006-99shutdown-shutdown-don-t-do-console_init-on-shutdow.patch
 
 
 BuildArch: noarch
@@ -310,6 +313,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Thu Feb 09 2012 Harald Hoyer <harald@redhat.com> 015-7.git20120209
+- update to latest git
+
 * Thu Feb 09 2012 Harald Hoyer <harald@redhat.com> 015-4.git20120209
 - update to latest git
 
