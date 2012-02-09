@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 015
-Release: 3.git20120208%{?dist}
+Release: 4.git20120209%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel} > 6
@@ -26,6 +26,7 @@ URL: https://dracut.wiki.kernel.org/
 Source0: http://www.kernel.org/pub/linux/utils/boot/dracut/dracut-%{version}.tar.bz2
 Patch1: 0001-dracut-setup-clean-PATH-w-o-existing-one.patch
 Patch2: 0002-TEST-15-BTRFSRAID-write-diskimage-to-tmp-dir.patch
+Patch3: 0003-lsinitrd-silence-xz-test.patch
 
 
 BuildArch: noarch
@@ -309,6 +310,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Thu Feb 09 2012 Harald Hoyer <harald@redhat.com> 015-4.git20120209
+- update to latest git
+
 * Wed Feb 08 2012 Harald Hoyer <harald@redhat.com> 015-3.git20120208
 - update to latest git
 
