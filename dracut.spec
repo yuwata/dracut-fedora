@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 015
-Release: 8.git20120210%{?dist}
+Release: 9.git20120210%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel} > 6
@@ -325,6 +325,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Sun Feb 12 2012 Kay Sievers <kay@redhat.com> - 015-9.git20120210
+- fix dependency loop in systemd service files
+
 * Fri Feb 10 2012 Harald Hoyer <harald@redhat.com> 015-8.git20120210
 - update to latest git
 
