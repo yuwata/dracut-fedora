@@ -326,6 +326,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Mon Feb 13 2012 Harald Hoyer <harald@redhat.com> 015-9.git20120213
+- update to latest git
+
 * Sun Feb 12 2012 Kay Sievers <kay@redhat.com> - 015-9.git20120210
 - fix dependency loop in systemd service files
 
