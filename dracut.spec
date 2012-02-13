@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 015
-Release: 9.git20120210%{?dist}
+Release: 9.git20120213%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel} > 6
@@ -31,6 +31,7 @@ Patch4: 0004-dracut-honor-binaries-in-sbin-first.patch
 Patch5: 0005-98usrmount-mount-usr.sh-remove-extra-slash.patch
 Patch6: 0006-99shutdown-shutdown-don-t-do-console_init-on-shutdow.patch
 Patch7: 0007-Backup-and-restore-run-initramfs-via-systemd-service.patch
+Patch8: 0008-shutdown-on-demand.patch
 
 
 BuildArch: noarch
@@ -231,7 +232,7 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{dracutlibdir}/modules.d
 %{dracutlibdir}/dracut-functions
 %{dracutlibdir}/dracut-logger
-%{dracutlibdir}/dracut-initramfs-backup
+%{dracutlibdir}/dracut-initramfs-restore
 %config(noreplace) /etc/dracut.conf
 %if 0%{?fedora} || 0%{?suse_version} || 0%{?rhel} > 6
 %config /etc/dracut.conf.d/01-dist.conf
