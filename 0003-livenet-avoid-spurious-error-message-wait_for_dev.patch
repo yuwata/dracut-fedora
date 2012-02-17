@@ -1,0 +1,27 @@
+From c1df00d2c62f9cd79957d62dda025964108f12de Mon Sep 17 00:00:00 2001
+From: Will Woods <wwoods@redhat.com>
+Date: Wed, 15 Feb 2012 13:36:09 -0500
+Subject: [PATCH] livenet: avoid spurious error message / wait_for_dev
+
+If the user didn't request a livenet boot, don't print an error
+and don't do wait_for_dev.
+
+Signed-off-by: Will Woods <wwoods@redhat.com>
+---
+ modules.d/90livenet/parse-livenet.sh |    3 +--
+ 1 files changed, 1 insertions(+), 2 deletions(-)
+
+diff --git a/modules.d/90livenet/parse-livenet.sh b/modules.d/90livenet/parse-livenet.sh
+index 042cc51..926dba2 100755
+--- a/modules.d/90livenet/parse-livenet.sh
++++ b/modules.d/90livenet/parse-livenet.sh
+@@ -15,8 +15,7 @@ if get_url_handler "$liveurl" >/dev/null; then
+     netroot="livenet:$liveurl"
+     root="livenet" # quiet complaints from init
+     rootok=1
++    wait_for_dev /dev/root
+ else
+     info "livenet: no url handler for $liveurl"
+ fi
+-
+-wait_for_dev /dev/root
