@@ -1,0 +1,22 @@
+From 97ce24ad8c97ca061675cf341301153a5314f851 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 29 Feb 2012 13:21:51 +0100
+Subject: [PATCH] 30convertfs/convertfs.sh: correct check for /usr/bin
+
+---
+ modules.d/30convertfs/convertfs.sh |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/modules.d/30convertfs/convertfs.sh b/modules.d/30convertfs/convertfs.sh
+index 036ec51..83cb68a 100755
+--- a/modules.d/30convertfs/convertfs.sh
++++ b/modules.d/30convertfs/convertfs.sh
+@@ -47,7 +47,7 @@ if ! needconvert; then
+     exit 0
+ fi
+ 
+-if [ -e "$ROOT/usr/bin" ]; then
++if ! [ -e "$ROOT/usr/bin" ]; then
+     echo "$ROOT/usr/bin does not exist"
+     exit 1
+ fi
