@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 017
-Release: 17.git20120229.2%{?dist}
+Release: 19.git20120301%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -40,6 +40,8 @@ Patch13: 0013-TODO-update.patch
 Patch14: 0014-98usrmount-mount-usr.sh-ignore-comments-in-fstab.patch
 Patch15: 0015-98usrmount-mount-usr.sh-check-if-we-have-NEWROOT-etc.patch
 Patch16: 0016-30convertfs-convertfs.sh-correct-check-for-usr-bin.patch
+Patch17: 0017-90crypt-parse-crypt.sh-simplify-rd.luks.uuid-testing.patch
+Patch18: 0018-dracut-functions.sh-install_kmod_with_fw-delay-.kern.patch
 
 
 BuildArch: noarch
@@ -343,6 +345,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Thu Mar 01 2012 Harald Hoyer <harald@redhat.com> 017-19.git20120301
+- fixed include of some kernel modules
+
 * Wed Feb 29 2012 Harald Hoyer <harald@redhat.com> 017-17.git20120229
 - update to latest git
 - fixes for convertfs (/usr-move)
