@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 017
-Release: 39.git20120308%{?dist}
+Release: 40.git20120308%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -62,6 +62,7 @@ Patch35: 0035-add-initqueue-env-and-online-hook.patch
 Patch36: 0036-TEST-20-NFS-test.sh-fsck-with-a.patch
 Patch37: 0037-95iscsi-iscsiroot.sh-fix-for-empty-root.patch
 Patch38: 0038-dracut.spec-add-98pollcdrom.patch
+Patch39: 0039-install-ctcm-network-module-on-s390.patch
 
 
 BuildArch: noarch
@@ -366,6 +367,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Thu Mar 08 2012 Harald Hoyer <harald@redhat.com> 017-40.git20120308
+- add s390 ctcm network kernel module
+
 * Thu Mar 08 2012 Harald Hoyer <harald@redhat.com> 017-39.git20120308
 - kill dhclient silently
 - cleanup and fix network config writeout to /run/initramfs/state
