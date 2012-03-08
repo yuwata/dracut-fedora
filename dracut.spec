@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 017
-Release: 22.git20120302%{?dist}
+Release: 39.git20120308%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -45,6 +45,23 @@ Patch18: 0018-dracut-functions.sh-install_kmod_with_fw-delay-.kern.patch
 Patch19: 0019-Fix-correct-nfs-path.patch
 Patch20: 0020-move-emergency_shell-to-dracut-lib.sh.patch
 Patch21: 0021-url-lib-make-nfs-support-optional.patch
+Patch22: 0022-40network-kill-dhclient.sh-kill-dhclient-silently.patch
+Patch23: 0023-write-ifcfg.sh-cleanups.patch
+Patch24: 0024-write-ifcfg.sh-add-UUID-.-and-save-the-lease-files-w.patch
+Patch25: 0025-fix-apply-live-updates-failing-because-of-lib-symlin.patch
+Patch26: 0026-40network-net-genrules.sh-move-ifup-in-the-initqueue.patch
+Patch27: 0027-dracut-functions.sh-check-for-.kernelmodseen-dir-bef.patch
+Patch28: 0028-ifup.sh-check-for-m-to-set-manualup.patch
+Patch29: 0029-get-rid-of-tmp-root.info.patch
+Patch30: 0030-TEST-20-NFS-use-ext3-on-server-and-fsck-after-kill.patch
+Patch31: 0031-add-initqueue-to-hookdirs-and-create-them-in-dracut-.patch
+Patch32: 0032-98pollcdrom-factored-out-the-ugly-cdrom-polling-in-t.patch
+Patch33: 0033-move-wait_for_loginit-to-dracut-lib.sh.patch
+Patch34: 0034-network-refactor-stuff-from-netroot-parse-ip-opts-to.patch
+Patch35: 0035-add-initqueue-env-and-online-hook.patch
+Patch36: 0036-TEST-20-NFS-test.sh-fsck-with-a.patch
+Patch37: 0037-95iscsi-iscsiroot.sh-fix-for-empty-root.patch
+Patch38: 0038-dracut.spec-add-98pollcdrom.patch
 
 
 BuildArch: noarch
@@ -294,6 +311,7 @@ rm -rf $RPM_BUILD_ROOT
 %{dracutlibdir}/modules.d/97masterkey
 %{dracutlibdir}/modules.d/98ecryptfs
 %{dracutlibdir}/modules.d/98integrity
+%{dracutlibdir}/modules.d/98pollcdrom
 %{dracutlibdir}/modules.d/98selinux
 %{dracutlibdir}/modules.d/98syslog
 %{dracutlibdir}/modules.d/98usrmount
@@ -348,6 +366,12 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Thu Mar 08 2012 Harald Hoyer <harald@redhat.com> 017-39.git20120308
+- kill dhclient silently
+- cleanup and fix network config writeout to /run/initramfs/state
+Resolves: rhbz#799989
+- various cleanups
+
 * Fri Mar 02 2012 Harald Hoyer <harald@redhat.com> 017-22.git20120302
 - nfs path fixes for live image over nfs
   root=live:nfs://10.10.10.10:/srv/all/install.img ip=dhcp rd.neednet
