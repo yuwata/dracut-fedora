@@ -5,7 +5,7 @@ Subject: [PATCH] 99fs-lib/module-setup.sh: removed "touch"
 
 ---
  modules.d/99fs-lib/module-setup.sh |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/modules.d/99fs-lib/module-setup.sh b/modules.d/99fs-lib/module-setup.sh
 index 9c900cc..344dcdf 100755

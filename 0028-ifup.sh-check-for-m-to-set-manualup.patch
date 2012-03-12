@@ -5,7 +5,7 @@ Subject: [PATCH] ifup.sh: check for "-m" to set manualup
 
 ---
  modules.d/40network/ifup.sh |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/modules.d/40network/ifup.sh b/modules.d/40network/ifup.sh
 index b138e8e..b55362c 100755

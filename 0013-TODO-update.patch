@@ -5,7 +5,7 @@ Subject: [PATCH] TODO: update
 
 ---
  TODO |   23 ++++++++++++++++-------
- 1 files changed, 16 insertions(+), 7 deletions(-)
+ 1 file changed, 16 insertions(+), 7 deletions(-)
 
 diff --git a/TODO b/TODO
 index e5abef0..6c27268 100644

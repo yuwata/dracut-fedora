@@ -5,7 +5,7 @@ Subject: [PATCH] 90crypt/parse-crypt.sh: simplify rd.luks.uuid testing
 
 ---
  modules.d/90crypt/parse-crypt.sh |   15 ++-------------
- 1 files changed, 2 insertions(+), 13 deletions(-)
+ 1 file changed, 2 insertions(+), 13 deletions(-)
 
 diff --git a/modules.d/90crypt/parse-crypt.sh b/modules.d/90crypt/parse-crypt.sh
 index 2ab3a9f..f96b59a 100755

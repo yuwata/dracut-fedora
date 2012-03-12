@@ -12,7 +12,7 @@ example: nfs.ko module in kernel-modules, but the nfs module
 should be able to load it later on.
 ---
  dracut-functions.sh |    4 ++--
- 1 files changed, 2 insertions(+), 2 deletions(-)
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/dracut-functions.sh b/dracut-functions.sh
 index c7337e9..20fc6e1 100755

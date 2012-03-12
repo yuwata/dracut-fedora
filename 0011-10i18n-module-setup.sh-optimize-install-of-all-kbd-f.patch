@@ -5,7 +5,7 @@ Subject: [PATCH] 10i18n/module-setup.sh: optimize install of all kbd files
 
 ---
  modules.d/10i18n/module-setup.sh |    4 ++--
- 1 files changed, 2 insertions(+), 2 deletions(-)
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/modules.d/10i18n/module-setup.sh b/modules.d/10i18n/module-setup.sh
 index a5a3388..b4c19e1 100755

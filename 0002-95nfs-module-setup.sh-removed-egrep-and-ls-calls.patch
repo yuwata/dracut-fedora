@@ -5,7 +5,7 @@ Subject: [PATCH] 95nfs/module-setup.sh: removed "egrep" and "ls" calls
 
 ---
  modules.d/95nfs/module-setup.sh |    6 +++++-
- 1 files changed, 5 insertions(+), 1 deletions(-)
+ 1 file changed, 5 insertions(+), 1 deletion(-)
 
 diff --git a/modules.d/95nfs/module-setup.sh b/modules.d/95nfs/module-setup.sh
 index 7aedb4d..7853783 100755

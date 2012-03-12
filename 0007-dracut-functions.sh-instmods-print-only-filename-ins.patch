@@ -8,7 +8,7 @@ do not print the full path, when we use "find" for kernel modules, but
 rather only the filename.
 ---
  dracut-functions.sh |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/dracut-functions.sh b/dracut-functions.sh
 index bd3203d..80714aa 100755

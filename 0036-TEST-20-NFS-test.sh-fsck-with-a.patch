@@ -5,7 +5,7 @@ Subject: [PATCH] TEST-20-NFS/test.sh: fsck with "-a"
 
 ---
  test/TEST-20-NFS/test.sh |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/test/TEST-20-NFS/test.sh b/test/TEST-20-NFS/test.sh
 index fcd424f..a6bde0e 100755

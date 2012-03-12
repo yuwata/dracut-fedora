@@ -6,7 +6,7 @@ Subject: [PATCH] dracut-functions.sh: instmods() removed special case for
 
 ---
  dracut-functions.sh |    8 +-------
- 1 files changed, 1 insertions(+), 7 deletions(-)
+ 1 file changed, 1 insertion(+), 7 deletions(-)
 
 diff --git a/dracut-functions.sh b/dracut-functions.sh
 index 81801e1..bd3203d 100755

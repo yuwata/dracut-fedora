@@ -5,7 +5,7 @@ Subject: [PATCH] 40network/net-genrules.sh: move ifup in the initqueue
 
 ---
  modules.d/40network/net-genrules.sh |   12 ++++++------
- 1 files changed, 6 insertions(+), 6 deletions(-)
+ 1 file changed, 6 insertions(+), 6 deletions(-)
 
 diff --git a/modules.d/40network/net-genrules.sh b/modules.d/40network/net-genrules.sh
 index 323d185..6c46d9a 100755

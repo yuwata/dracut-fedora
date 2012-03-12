@@ -8,7 +8,7 @@ supposed to go into e.g. /lib would get dropped if you had /updates/lib
 as an actual directory, but the target system had /lib->/usr/lib.
 ---
  modules.d/90dmsquash-live/apply-live-updates.sh |   20 ++++++++++++++------
- 1 files changed, 14 insertions(+), 6 deletions(-)
+ 1 file changed, 14 insertions(+), 6 deletions(-)
 
 diff --git a/modules.d/90dmsquash-live/apply-live-updates.sh b/modules.d/90dmsquash-live/apply-live-updates.sh
 index f840d1a..144e8b9 100755

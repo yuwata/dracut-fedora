@@ -5,7 +5,7 @@ Subject: [PATCH] 40network/kill-dhclient.sh: kill dhclient silently
 
 ---
  modules.d/40network/kill-dhclient.sh |    4 ++--
- 1 files changed, 2 insertions(+), 2 deletions(-)
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/modules.d/40network/kill-dhclient.sh b/modules.d/40network/kill-dhclient.sh
 index 2f834c1..78060f5 100755

@@ -5,7 +5,7 @@ Subject: [PATCH] dracut-functions.sh: get_fs_env() replaced egrep with shell
 
 ---
  dracut-functions.sh |    5 ++++-
- 1 files changed, 4 insertions(+), 1 deletions(-)
+ 1 file changed, 4 insertions(+), 1 deletion(-)
 
 diff --git a/dracut-functions.sh b/dracut-functions.sh
 index bb0c96f..9e9ee4e 100755

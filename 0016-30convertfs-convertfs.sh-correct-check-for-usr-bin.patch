@@ -5,7 +5,7 @@ Subject: [PATCH] 30convertfs/convertfs.sh: correct check for /usr/bin
 
 ---
  modules.d/30convertfs/convertfs.sh |   17 ++++++++++-------
- 1 files changed, 10 insertions(+), 7 deletions(-)
+ 1 file changed, 10 insertions(+), 7 deletions(-)
 
 diff --git a/modules.d/30convertfs/convertfs.sh b/modules.d/30convertfs/convertfs.sh
 index 036ec51..d1d25aa 100755

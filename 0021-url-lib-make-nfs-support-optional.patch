@@ -7,7 +7,7 @@ Only include /lib/nfs-lib.sh if it exists, and then only run
 add_url_handler if nfs-lib was imported.
 ---
  modules.d/45url-lib/url-lib.sh |    4 ++--
- 1 files changed, 2 insertions(+), 2 deletions(-)
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/modules.d/45url-lib/url-lib.sh b/modules.d/45url-lib/url-lib.sh
 index 1fc80a1..043a700 100755

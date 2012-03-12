@@ -5,7 +5,7 @@ Subject: [PATCH] Fix correct nfs path
 
 ---
  modules.d/45url-lib/url-lib.sh |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/modules.d/45url-lib/url-lib.sh b/modules.d/45url-lib/url-lib.sh
 index 383e7ac..1fc80a1 100755

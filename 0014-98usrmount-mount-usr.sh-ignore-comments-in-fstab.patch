@@ -5,7 +5,7 @@ Subject: [PATCH] 98usrmount/mount-usr.sh: ignore comments in fstab
 
 ---
  modules.d/98usrmount/mount-usr.sh |    1 +
- 1 files changed, 1 insertions(+), 0 deletions(-)
+ 1 file changed, 1 insertion(+)
 
 diff --git a/modules.d/98usrmount/mount-usr.sh b/modules.d/98usrmount/mount-usr.sh
 index 3e23b15..f9d049e 100755

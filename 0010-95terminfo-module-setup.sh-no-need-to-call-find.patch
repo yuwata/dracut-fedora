@@ -5,7 +5,7 @@ Subject: [PATCH] 95terminfo/module-setup.sh: no need to call "find"
 
 ---
  modules.d/95terminfo/module-setup.sh |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/modules.d/95terminfo/module-setup.sh b/modules.d/95terminfo/module-setup.sh
 index aec3582..32a3fe9 100755

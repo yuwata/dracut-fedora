@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 017
-Release: 40.git20120308%{?dist}
+Release: 43.git20120312%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -63,6 +63,9 @@ Patch36: 0036-TEST-20-NFS-test.sh-fsck-with-a.patch
 Patch37: 0037-95iscsi-iscsiroot.sh-fix-for-empty-root.patch
 Patch38: 0038-dracut.spec-add-98pollcdrom.patch
 Patch39: 0039-install-ctcm-network-module-on-s390.patch
+Patch40: 0040-img-lib-fix-unpack_img.patch
+Patch41: 0041-url-lib-clean-up-output.patch
+Patch42: 0042-Add-live.updates-to-livenet-module.patch
 
 
 BuildArch: noarch
@@ -367,6 +370,10 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Mon Mar 12 2012 Harald Hoyer <harald@redhat.com> 017-43.git20120312
+- live image: fixed image uncompression
+- live updates for livenet
+
 * Thu Mar 08 2012 Harald Hoyer <harald@redhat.com> 017-40.git20120308
 - add s390 ctcm network kernel module
 

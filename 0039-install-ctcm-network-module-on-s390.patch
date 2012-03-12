@@ -7,7 +7,7 @@ The ctcm module is not loaded automagically because it doesn't pass the
 "ether_type_trans" test in 40net/module-setup.sh, so load it explicitly.
 ---
  modules.d/95znet/module-setup.sh |    4 ++++
- 1 files changed, 4 insertions(+), 0 deletions(-)
+ 1 file changed, 4 insertions(+)
 
 diff --git a/modules.d/95znet/module-setup.sh b/modules.d/95znet/module-setup.sh
 index fbb79aa..b354947 100755

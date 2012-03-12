@@ -5,7 +5,7 @@ Subject: [PATCH] 30convertfs/convertfs.sh: use hardlinks for inter-/usr cp
 
 ---
  modules.d/30convertfs/convertfs.sh |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/modules.d/30convertfs/convertfs.sh b/modules.d/30convertfs/convertfs.sh
 index 69c3b3e..036ec51 100755

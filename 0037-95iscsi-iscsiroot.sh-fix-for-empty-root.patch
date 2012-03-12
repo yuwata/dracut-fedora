@@ -5,7 +5,7 @@ Subject: [PATCH] 95iscsi/iscsiroot.sh: fix for empty $root
 
 ---
  modules.d/95iscsi/iscsiroot.sh |   15 ++++++---------
- 1 files changed, 6 insertions(+), 9 deletions(-)
+ 1 file changed, 6 insertions(+), 9 deletions(-)
 
 diff --git a/modules.d/95iscsi/iscsiroot.sh b/modules.d/95iscsi/iscsiroot.sh
 index 1bd6dd3..7fa2715 100755

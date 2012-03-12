@@ -6,7 +6,7 @@ Subject: [PATCH] 98usrmount/mount-usr.sh: check, if we have
 
 ---
  modules.d/98usrmount/mount-usr.sh |    4 +++-
- 1 files changed, 3 insertions(+), 1 deletions(-)
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
 diff --git a/modules.d/98usrmount/mount-usr.sh b/modules.d/98usrmount/mount-usr.sh
 index f9d049e..39f75b9 100755

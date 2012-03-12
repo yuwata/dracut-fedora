@@ -5,7 +5,7 @@ Subject: [PATCH] dracut.spec: add 98pollcdrom
 
 ---
  dracut.spec |    1 +
- 1 files changed, 1 insertions(+), 0 deletions(-)
+ 1 file changed, 1 insertion(+)
 
 diff --git a/dracut.spec b/dracut.spec
 index 91b3451..0275af3 100644
