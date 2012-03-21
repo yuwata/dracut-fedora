@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 017
-Release: 43.git20120312%{?dist}
+Release: 59.git20120321%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -66,6 +66,22 @@ Patch39: 0039-install-ctcm-network-module-on-s390.patch
 Patch40: 0040-img-lib-fix-unpack_img.patch
 Patch41: 0041-url-lib-clean-up-output.patch
 Patch42: 0042-Add-live.updates-to-livenet-module.patch
+Patch43: 0043-README-added-github-and-sourceforge-git-links.patch
+Patch44: 0044-AUTHORS-update.patch
+Patch45: 0045-remove-dracut-gencmdline.patch
+Patch46: 0046-replace-xml-documentation-with-asciidoc.patch
+Patch47: 0047-precompile-doc.patch
+Patch48: 0048-TEST-10-RAID-wait-for-udev-settle-before-deconstruct.patch
+Patch49: 0049-NEWS-update.patch
+Patch50: 0050-remove-ctty.patch
+Patch51: 0051-remove-openvt-and-use-setsid-c-if-possible.patch
+Patch52: 0052-TEST-01-BASIC-add-setsid.patch
+Patch53: 0053-fix-execvp-No-such-file-or-directory-in-emergency_sh.patch
+Patch54: 0054-Make-sure-set-x-gets-turned-back-on-in-wait_for_logi.patch
+Patch55: 0055-Do-not-mount-bind-run-anymore.patch
+Patch56: 0056-98selinux-selinux-loadpolicy.sh-use-mount-rbind-for-.patch
+Patch57: 0057-Avoid-use-of-export-n.patch
+Patch58: 0058-provide-name-based-nbd-connects.patch
 
 
 BuildArch: noarch
@@ -83,8 +99,10 @@ BuildRequires: docbook-style-xsl docbook-dtds libxslt
 %endif
 
 %if 0%{?suse_version}
-BuildRequires: docbook-xsl-stylesheets libxslt
+-BuildRequires: docbook-xsl-stylesheets libxslt
 %endif
+
+BuildRequires: asciidoc
 
 %if 0%{?fedora} > 12 || 0%{?rhel}
 # no "provides", because dracut does not offer
@@ -117,11 +135,11 @@ Requires: hardlink
 Requires: gzip
 Requires: module-init-tools >= 3.7-9
 Requires: sed
-Requires: udev
+Requires: udev > 166
 %if 0%{?fedora} || 0%{?rhel} > 6
-Requires: util-linux >= 2.20
+Requires: util-linux >= 2.21
 %else
-Requires: util-linux-ng >= 2.17.2
+Requires: util-linux-ng >= 2.21
 %endif
 
 %if 0%{?fedora} || 0%{?rhel} > 6
@@ -204,7 +222,7 @@ git am -p1 %{patches}
 %endif
 
 %build
-make
+make all
 
 %install
 %if 0%{?fedora} || 0%{?rhel}
@@ -361,15 +379,16 @@ rm -rf $RPM_BUILD_ROOT
 
 %files tools
 %defattr(-,root,root,0755)
-%{_mandir}/man8/dracut-gencmdline.8*
 %{_mandir}/man8/dracut-catimages.8*
-%{_bindir}/dracut-gencmdline
 %{_bindir}/dracut-catimages
 %dir /boot/dracut
 %dir /var/lib/dracut
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Wed Mar 21 2012 Harald Hoyer <harald@redhat.com> 017-59.git20120321
+- new upstream version, which fixes various anaconda loader issues
+
 * Mon Mar 12 2012 Harald Hoyer <harald@redhat.com> 017-43.git20120312
 - live image: fixed image uncompression
 - live updates for livenet
