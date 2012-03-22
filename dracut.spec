@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 017
-Release: 59.git20120321%{?dist}
+Release: 62.git20120322%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -82,6 +82,9 @@ Patch55: 0055-Do-not-mount-bind-run-anymore.patch
 Patch56: 0056-98selinux-selinux-loadpolicy.sh-use-mount-rbind-for-.patch
 Patch57: 0057-Avoid-use-of-export-n.patch
 Patch58: 0058-provide-name-based-nbd-connects.patch
+Patch59: 0059-dracut.asc-set-level-down-for-the-manpage-includes.patch
+Patch60: 0060-shutdown-fix-PATH.patch
+Patch61: 0061-99base-init.sh-revert-the-cp-mv-change-for-run-initr.patch
 
 
 BuildArch: noarch
@@ -386,6 +389,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Thu Mar 22 2012 Harald Hoyer <harald@redhat.com> 017-62.git20120322
+- fixed /run prefix copying
+
 * Wed Mar 21 2012 Harald Hoyer <harald@redhat.com> 017-59.git20120321
 - new upstream version, which fixes various anaconda loader issues
 
