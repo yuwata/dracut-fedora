@@ -1,0 +1,26 @@
+From 0a35a80b934a0a5a34e3c23244aca0caa440e5d4 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 16 Apr 2012 13:10:22 +0200
+Subject: [PATCH] dracut.sh: log installed modules to
+ $initdir/lib/dracut/modules.txt
+
+---
+ dracut.sh |    5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/dracut.sh b/dracut.sh
+index 7f61143..1048e75 100755
+--- a/dracut.sh
++++ b/dracut.sh
+@@ -720,6 +720,11 @@ for moddir in "$dracutbasedir/modules.d"/[0-9][0-9]*; do
+     fi
+ done
+ unset moddir
++
++for i in $modules_loaded; do
++    echo "$i" >> $initdir/lib/dracut/modules.txt
++done
++
+ dinfo "*** Including modules done ***"
+ 
+ ## final stuff that has to happen

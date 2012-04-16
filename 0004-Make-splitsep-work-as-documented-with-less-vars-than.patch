@@ -1,0 +1,35 @@
+From f7cadaa843498c4b986f8a030fab39002ad108b6 Mon Sep 17 00:00:00 2001
+From: Will Woods <wwoods@redhat.com>
+Date: Thu, 5 Apr 2012 13:01:38 -0400
+Subject: [PATCH] Make splitsep work as documented with less vars than fields
+
+According to its comment in dracut-lib.sh:
+
+    splitsep ":" "one:all:the:rest" one two
+
+should set two="all:the:rest". But there's no check to see if the
+current field is the last field, so it just gets "all".
+---
+ modules.d/99base/dracut-lib.sh |    3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/modules.d/99base/dracut-lib.sh b/modules.d/99base/dracut-lib.sh
+index 1ecd286..e10a34d 100755
+--- a/modules.d/99base/dracut-lib.sh
++++ b/modules.d/99base/dracut-lib.sh
+@@ -224,13 +224,14 @@ splitsep() {
+     local sep="$1"; local str="$2"; shift 2
+     local tmp
+ 
+-    while [ -n "$str" -a -n "$*" ]; do
++    while [ -n "$str" -a "$#" -gt 1 ]; do
+         tmp="${str%%$sep*}"
+         eval "$1=${tmp}"
+         str="${str#$tmp}"
+         str="${str#$sep}"
+         shift
+     done
++    [ -n "$str" -a -n "$1" ] && eval "$1=$str"
+ 
+     return 0
+ }

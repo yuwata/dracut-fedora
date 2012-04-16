@@ -1,0 +1,53 @@
+From b8a81fb885c981d795a664ae8665e68d7359231a Mon Sep 17 00:00:00 2001
+From: Peter Rajnoha <prajnoha@redhat.com>
+Date: Tue, 10 Apr 2012 04:40:53 -0400
+Subject: [PATCH] lvm: disable lvmetad
+
+Currently dracut uses lvm.conf as found in the system and modifies only
+global/locking_type setting. As there's a new feature introduced - the lvmetad
+daemon, dracut should disable its use as well by setting "global/use_lvmetad=0"
+(patch attached).
+
+Otherwise, there's a warning message issued:
+
+dracut: WARNING: Failed to connect to lvmetad: No such file or directory.
+Falling back to internal scanning.
+
+@@ -, +, @@
+ modules.d/90lvm/lvm_scan.sh     |    2 ++
+ modules.d/90lvm/module-setup.sh |    1 +
+ 2 files changed, 3 insertions(+), 0 deletions(-)
+---
+ modules.d/90lvm/lvm_scan.sh     |    2 ++
+ modules.d/90lvm/module-setup.sh |    1 +
+ 2 files changed, 3 insertions(+)
+
+diff --git a/modules.d/90lvm/lvm_scan.sh b/modules.d/90lvm/lvm_scan.sh
+index 104565f..17c29bc 100755
+--- a/modules.d/90lvm/lvm_scan.sh
++++ b/modules.d/90lvm/lvm_scan.sh
+@@ -35,10 +35,12 @@ if [ ! -e /etc/lvm/lvm.conf ]; then
+         if [ -n $SNAPSHOT ]; then
+             echo 'global {';
+             echo '    locking_type = 1';
++            echo '    use_lvmetad = 0';
+             echo '}';
+         else
+             echo 'global {';
+             echo '    locking_type = 4';
++            echo '    use_lvmetad = 0';
+             echo '}';
+         fi
+     } > /etc/lvm/lvm.conf
+diff --git a/modules.d/90lvm/module-setup.sh b/modules.d/90lvm/module-setup.sh
+index 15c824d..2ce5c50 100755
+--- a/modules.d/90lvm/module-setup.sh
++++ b/modules.d/90lvm/module-setup.sh
+@@ -49,6 +49,7 @@ install() {
+             # FIXME: near-term hack to establish read-only locking;
+             # use command-line lvm.conf editor once it is available
+             sed -i -e 's/\(^[[:space:]]*\)locking_type[[:space:]]*=[[:space:]]*[[:digit:]]/\1locking_type = 4/' ${initdir}/etc/lvm/lvm.conf
++            sed -i -e 's/\(^[[:space:]]*\)use_lvmetad[[:space:]]*=[[:space:]]*[[:digit:]]/\1use_lvmetad = 0/' ${initdir}/etc/lvm/lvm.conf
+         fi
+     fi
+ 

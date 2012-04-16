@@ -1,0 +1,25 @@
+From d8f0e320c267af0ce373066f524eab618ce931af Mon Sep 17 00:00:00 2001
+From: Will Woods <wwoods@redhat.com>
+Date: Thu, 5 Apr 2012 13:01:35 -0400
+Subject: [PATCH] dracut-lib: add str_ends, to go along with str_starts
+
+---
+ modules.d/99base/dracut-lib.sh |    5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/modules.d/99base/dracut-lib.sh b/modules.d/99base/dracut-lib.sh
+index cb2e4dc..1ecd286 100755
+--- a/modules.d/99base/dracut-lib.sh
++++ b/modules.d/99base/dracut-lib.sh
+@@ -12,6 +12,11 @@ str_starts() {
+     [ "${1#$2*}" != "$1" ]
+ }
+ 
++# returns OK if $1 contains $2 at the end
++str_ends() {
++    [ "${1%*$2}" != "$1" ]
++}
++
+ # replaces all occurrences of 'search' in 'str' with 'replacement'
+ #
+ # str_replace str search replacement
