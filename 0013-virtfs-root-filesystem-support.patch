@@ -1,0 +1,169 @@
+From a7c9cbe1a21ecc306fce3127be0a4ad75c5fcfcb Mon Sep 17 00:00:00 2001
+From: Lennert Buytenhek <buytenh@wantstofly.org>
+Date: Sun, 15 Apr 2012 02:40:17 +0200
+Subject: [PATCH] virtfs root filesystem support
+
+Qemu/KVM provides virtfs, a paravirtualised filesystem that is
+implemented by running the Plan 9 folder sharing protocol over
+virtio.
+
+Make booting with root=virtfs:foobar use the virtfs filesystem
+with mount tag 'foobar' as root filesystem, to allow booting
+virtual machines off virtfs.
+
+Note that this only handles 9p over virtio (i.e. virtfs), and
+doesn't attempt to handle mounting 9p filesystems over TCP/IP,
+for example.
+
+Signed-off-by: Lennert Buytenhek <buytenh@wantstofly.org>
+---
+ dracut.spec                        |    1 +
+ modules.d/95virtfs/module-setup.sh |   27 +++++++++++++
+ modules.d/95virtfs/mount-virtfs.sh |   75 ++++++++++++++++++++++++++++++++++++
+ modules.d/95virtfs/parse-virtfs.sh |    9 +++++
+ 4 files changed, 112 insertions(+)
+ create mode 100755 modules.d/95virtfs/module-setup.sh
+ create mode 100755 modules.d/95virtfs/mount-virtfs.sh
+ create mode 100755 modules.d/95virtfs/parse-virtfs.sh
+
+diff --git a/dracut.spec b/dracut.spec
+index 074cb10..9cd08b7 100644
+--- a/dracut.spec
++++ b/dracut.spec
+@@ -270,6 +270,7 @@ rm -rf $RPM_BUILD_ROOT
+ %{dracutlibdir}/modules.d/95zfcp
+ %{dracutlibdir}/modules.d/95terminfo
+ %{dracutlibdir}/modules.d/95udev-rules
++%{dracutlibdir}/modules.d/95virtfs
+ %{dracutlibdir}/modules.d/96securityfs
+ %{dracutlibdir}/modules.d/97biosdevname
+ %{dracutlibdir}/modules.d/97masterkey
+diff --git a/modules.d/95virtfs/module-setup.sh b/modules.d/95virtfs/module-setup.sh
+new file mode 100755
+index 0000000..a6081c2
+--- /dev/null
++++ b/modules.d/95virtfs/module-setup.sh
+@@ -0,0 +1,27 @@
++#!/bin/bash
++# -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
++# ex: ts=8 sw=4 sts=4 et filetype=sh
++
++check() {
++    [[ $hostonly ]] || [[ $mount_needs ]] && {
++        for fs in ${host_fs_types[@]}; do
++            strstr "$fs" "\|9p" && return 0
++        done
++        return 1
++    }
++
++    return 0
++}
++
++depends() {
++    return 0
++}
++
++installkernel() {
++    instmods 9p 9pnet_virtio
++}
++
++install() {
++    inst_hook cmdline 95 "$moddir/parse-virtfs.sh"
++    inst_hook mount 99 "$moddir/mount-virtfs.sh"
++}
+diff --git a/modules.d/95virtfs/mount-virtfs.sh b/modules.d/95virtfs/mount-virtfs.sh
+new file mode 100755
+index 0000000..dfebf38
+--- /dev/null
++++ b/modules.d/95virtfs/mount-virtfs.sh
+@@ -0,0 +1,75 @@
++#!/bin/sh
++# -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
++# ex: ts=8 sw=4 sts=4 et filetype=sh
++
++type getarg >/dev/null 2>&1 || . /lib/dracut-lib.sh
++
++filter_rootopts() {
++    rootopts=$1
++    # strip ro and rw options
++    local OLDIFS="$IFS"
++    IFS=,
++    set -- $rootopts
++    IFS="$OLDIFS"
++    local v
++    while [ $# -gt 0 ]; do
++        case $1 in
++            rw|ro);;
++            defaults);;
++            *)
++                v="$v,${1}";;
++        esac
++        shift
++    done
++    rootopts=${v#,}
++    echo $rootopts
++}
++
++mount_root() {
++    local _ret
++
++    rootfs="9p"
++    rflags="trans=virtio,version=9p2000.L"
++
++    modprobe 9pnet_virtio
++
++    mount -t ${rootfs} -o "$rflags",ro "${root#virtfs:}" "$NEWROOT"
++
++    rootopts=
++    if getargbool 1 rd.fstab -n rd_NO_FSTAB \
++        && ! getarg rootflags \
++        && [ -f "$NEWROOT/etc/fstab" ] \
++        && ! [ -L "$NEWROOT/etc/fstab" ]; then
++        # if $NEWROOT/etc/fstab contains special mount options for
++        # the root filesystem,
++        # remount it with the proper options
++        rootopts="defaults"
++        while read dev mp fs opts rest; do
++            # skip comments
++            [ "${dev%%#*}" != "$dev" ] && continue
++
++            if [ "$mp" = "/" ]; then
++                rootopts=$opts
++                break
++            fi
++        done < "$NEWROOT/etc/fstab"
++
++        rootopts=$(filter_rootopts $rootopts)
++    fi
++
++    # we want rootflags (rflags) to take precedence so prepend rootopts to
++    # them; rflags is guaranteed to not be empty
++    rflags="${rootopts:+"${rootopts},"}${rflags}"
++
++    umount "$NEWROOT"
++
++    info "Remounting ${root#virtfs:} with -o ${rflags}"
++    mount -t ${rootfs} -o "$rflags" "${root#virtfs:}" "$NEWROOT" 2>&1 | vinfo
++
++    [ -f "$NEWROOT"/forcefsck ] && rm -f "$NEWROOT"/forcefsck 2>/dev/null
++    [ -f "$NEWROOT"/.autofsck ] && rm -f "$NEWROOT"/.autofsck 2>/dev/null
++}
++
++if [ -n "$root" -a -z "${root%%virtfs:*}" ]; then
++    mount_root
++fi
+diff --git a/modules.d/95virtfs/parse-virtfs.sh b/modules.d/95virtfs/parse-virtfs.sh
+new file mode 100755
+index 0000000..ce6de6d
+--- /dev/null
++++ b/modules.d/95virtfs/parse-virtfs.sh
+@@ -0,0 +1,9 @@
++#!/bin/sh
++# -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
++# ex: ts=8 sw=4 sts=4 et filetype=sh
++
++if [ "${root%%:*}" = "virtfs" ] ; then
++    modprobe 9pnet_virtio
++
++    rootok=1
++fi

@@ -1,0 +1,22 @@
+From bd66d2b59ab4077c48478e5c616d3ee31ebc9095 Mon Sep 17 00:00:00 2001
+From: Colin Guthrie <colin@mageia.org>
+Date: Sat, 14 Apr 2012 18:14:29 +0100
+Subject: [PATCH] man: Fix --add-fstab option in man page
+
+---
+ dracut.8.asc |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/dracut.8.asc b/dracut.8.asc
+index 24b7a8c..cadd740 100644
+--- a/dracut.8.asc
++++ b/dracut.8.asc
+@@ -247,7 +247,7 @@ provide a valid _/etc/fstab_.
+ **--fstab**::
+     Use _/etc/fstab_ instead of _/proc/self/mountinfo_.
+ 
+-**--add_fstab** _<filename>_ ::
++**--add-fstab** _<filename>_ ::
+     Add entries of _<filename>_ to the initramfs /etc/fstab.
+ 
+ **--mount** "_<device>_ _<mountpoint>_ _<filesystem type>_ _<filesystem options>_"::

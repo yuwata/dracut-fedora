@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 018
-Release: 12.git20120416%{?dist}
+Release: 22.git20120418%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -33,8 +33,18 @@ Patch6: 0006-rootfs-block-avoid-remount-when-options-don-t-change.patch
 Patch7: 0007-Debian-multiarch-support.patch
 Patch8: 0008-dracut.sh-log-installed-modules-to-initdir-lib-dracu.patch
 Patch9: 0009-lvm-disable-lvmetad.patch
-Patch10: 0010-virtfs-root-filesystem-support.patch
-Patch11: 0011-udev-rules-remove-01-ignore.rules.patch
+Patch10: 0010-udev-rules-remove-01-ignore.rules.patch
+Patch11: 0011-lsinitrd-support-symlinks.patch
+Patch12: 0012-dracut.cmdline.7.asc-document-resume-option.patch
+Patch13: 0013-virtfs-root-filesystem-support.patch
+Patch14: 0014-dracut.spec-do-not-include-IMA-and-selinux-modules-w.patch
+Patch15: 0015-Do-not-run-plymouth-hook-if-the-binary-is-missing.patch
+Patch16: 0016-man-Fix-add-fstab-option-in-man-page.patch
+Patch17: 0017-network-move-the-kill-dhclient.sh-hook-later.patch
+Patch18: 0018-udevd-moved-to-lib-systemd-systemd-udevd.patch
+Patch19: 0019-base-init.sh-mount-tmpfs-with-strictatime.patch
+Patch20: 0020-99shutdown-shutdown.sh-export-PATH.patch
+Patch21: 0021-Makefile-do-not-install-systemd-service-in-reboot.patch
 
 
 BuildArch: noarch
@@ -199,6 +209,14 @@ rm -fr $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/02fips-aesni
 # remove gentoo specific modules
 rm -fr $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/50gensplash
 
+%if %{defined _unitdir}
+# with systemd IMA and selinux modules do not make sense
+rm -fr $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/96securityfs
+rm -fr $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/97masterkey
+rm -fr $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/98integrity
+rm -fr $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/98selinux
+%endif
+
 mkdir -p $RPM_BUILD_ROOT/boot/dracut
 mkdir -p $RPM_BUILD_ROOT/var/lib/dracut/overlay
 mkdir -p $RPM_BUILD_ROOT%{_localstatedir}/log
@@ -283,13 +301,15 @@ rm -rf $RPM_BUILD_ROOT
 %{dracutlibdir}/modules.d/95terminfo
 %{dracutlibdir}/modules.d/95udev-rules
 %{dracutlibdir}/modules.d/95virtfs
+%if %{undefined _unitdir}
 %{dracutlibdir}/modules.d/96securityfs
-%{dracutlibdir}/modules.d/97biosdevname
 %{dracutlibdir}/modules.d/97masterkey
-%{dracutlibdir}/modules.d/98ecryptfs
-%{dracutlibdir}/modules.d/98integrity
-%{dracutlibdir}/modules.d/98pollcdrom
 %{dracutlibdir}/modules.d/98selinux
+%{dracutlibdir}/modules.d/98integrity
+%endif
+%{dracutlibdir}/modules.d/97biosdevname
+%{dracutlibdir}/modules.d/98ecryptfs
+%{dracutlibdir}/modules.d/98pollcdrom
 %{dracutlibdir}/modules.d/98syslog
 %{dracutlibdir}/modules.d/98usrmount
 %{dracutlibdir}/modules.d/99base
@@ -341,6 +361,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Wed Apr 18 2012 Harald Hoyer <harald@redhat.com> 018-22.git20120418
+- new upstream version
+
 * Mon Apr 16 2012 Harald Hoyer <harald@redhat.com> 018-12.git20120416
 - new upstream version, which fixes various anaconda loader issues
 

@@ -1,0 +1,31 @@
+From 97903dfc476ae0c5ccaa4ddef294e2da43411355 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Tue, 17 Apr 2012 12:06:51 +0200
+Subject: [PATCH] dracut.cmdline.7.asc: document "resume=" option
+
+---
+ dracut.cmdline.7.asc |   11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+diff --git a/dracut.cmdline.7.asc b/dracut.cmdline.7.asc
+index a1e06dd..c77fee5 100644
+--- a/dracut.cmdline.7.asc
++++ b/dracut.cmdline.7.asc
+@@ -64,6 +64,17 @@ rootfstype=ext3
+     do not honor special mount options for the root filesystem found in
+     _/etc/fstab_ of the real root.
+ 
++**resume=**_<path to resume partition>_
+++
++E.g.:
+++
++----
++resume=/dev/disk/by-path/pci-0000:00:1f.1-scsi-0:0:1:0-part1
++resume=/dev/disk/by-uuid/3f5ad593-4546-4a94-a374-bcfb68aa11f7
++resume=UUID=3f5ad593-4546-4a94-a374-bcfb68aa11f7
++----
++
++
+ Misc
+ ~~~~
+ **rd.driver.blacklist=**_<drivername>[,<drivername>,...]_::

@@ -1,0 +1,22 @@
+From 25ff71b0c756bf2036bec78557398946d45bcbd3 Mon Sep 17 00:00:00 2001
+From: Nikoli <nikoli@lavabit.com>
+Date: Tue, 17 Apr 2012 11:31:27 +0200
+Subject: [PATCH] lsinitrd: support symlinks
+
+---
+ lsinitrd.sh |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/lsinitrd.sh b/lsinitrd.sh
+index 1eaa37d..e6767dc 100755
+--- a/lsinitrd.sh
++++ b/lsinitrd.sh
+@@ -34,7 +34,7 @@ image="${1:-/boot/initramfs-$(uname -r).img}"
+ [[ -f "$image" ]]    || { echo "$image does not exist" ; exit 1 ; }
+ 
+ CAT=zcat
+-FILE_T=$(file "$image")
++FILE_T=$(file --dereference "$image")
+ 
+ if echo "test"|xz|xz -dc --single-stream >/dev/null 2>&1; then
+     XZ_SINGLE_STREAM="--single-stream"
