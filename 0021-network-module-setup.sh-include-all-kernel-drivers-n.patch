@@ -1,0 +1,22 @@
+From 76b83902dc28c8b7240c346b3e9a721712301bbf Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 18 Apr 2012 13:49:48 +0200
+Subject: [PATCH] network/module-setup.sh: include all kernel/drivers/net/phy
+ drivers
+
+---
+ modules.d/40network/module-setup.sh |    1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/modules.d/40network/module-setup.sh b/modules.d/40network/module-setup.sh
+index 97fc5cb..253a87e 100755
+--- a/modules.d/40network/module-setup.sh
++++ b/modules.d/40network/module-setup.sh
+@@ -61,6 +61,7 @@ installkernel() {
+     { find_kernel_modules_by_path drivers/net; find_kernel_modules_by_path drivers/s390/net; } \
+         | net_module_filter | instmods
+ 
++    instmods =drivers/net/phy
+     instmods ecb arc4
+     # bridge modules
+     instmods bridge stp llc

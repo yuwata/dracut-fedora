@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 018
-Release: 22.git20120418%{?dist}
+Release: 25.git20120419%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -40,11 +40,14 @@ Patch13: 0013-virtfs-root-filesystem-support.patch
 Patch14: 0014-dracut.spec-do-not-include-IMA-and-selinux-modules-w.patch
 Patch15: 0015-Do-not-run-plymouth-hook-if-the-binary-is-missing.patch
 Patch16: 0016-man-Fix-add-fstab-option-in-man-page.patch
-Patch17: 0017-network-move-the-kill-dhclient.sh-hook-later.patch
-Patch18: 0018-udevd-moved-to-lib-systemd-systemd-udevd.patch
-Patch19: 0019-base-init.sh-mount-tmpfs-with-strictatime.patch
-Patch20: 0020-99shutdown-shutdown.sh-export-PATH.patch
-Patch21: 0021-Makefile-do-not-install-systemd-service-in-reboot.patch
+Patch17: 0017-udevd-moved-to-lib-systemd-systemd-udevd.patch
+Patch18: 0018-base-init.sh-mount-tmpfs-with-strictatime.patch
+Patch19: 0019-99shutdown-shutdown.sh-export-PATH.patch
+Patch20: 0020-Makefile-do-not-install-systemd-service-in-reboot.patch
+Patch21: 0021-network-module-setup.sh-include-all-kernel-drivers-n.patch
+Patch22: 0022-add-pre-pivot-cleanup-hook.patch
+Patch23: 0023-move-cleanup-scripts-to-pre-pivot-cleanup-hook.patch
+Patch24: 0024-network-parse-ip-opts.sh-remove-check-for-netroot.patch
 
 
 BuildArch: noarch
@@ -361,6 +364,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Thu Apr 19 2012 Harald Hoyer <harald@redhat.com> 018-25.git20120419
+- fixed network for non-network root (like installer media)
+
 * Wed Apr 18 2012 Harald Hoyer <harald@redhat.com> 018-22.git20120418
 - new upstream version
 

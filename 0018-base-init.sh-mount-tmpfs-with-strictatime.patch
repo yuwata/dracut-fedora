@@ -1,0 +1,37 @@
+From 7f217d77266d4c9c283e7a6d4f576d412a1df9e5 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 18 Apr 2012 12:44:00 +0200
+Subject: [PATCH] base/init.sh: mount tmpfs with strictatime
+
+---
+ modules.d/99base/init.sh |    6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/modules.d/99base/init.sh b/modules.d/99base/init.sh
+index 0ea72e8..65bc88f 100755
+--- a/modules.d/99base/init.sh
++++ b/modules.d/99base/init.sh
+@@ -46,7 +46,7 @@ if [ "$RD_DEBUG" = "yes" ]; then
+ fi
+ 
+ if ! ismounted /dev; then
+-    mount -t devtmpfs -o mode=0755,nosuid devtmpfs /dev >/dev/null 
++    mount -t devtmpfs -o mode=0755,nosuid,strictatime devtmpfs /dev >/dev/null 
+ fi
+ 
+ # prepare the /dev directory
+@@ -62,12 +62,12 @@ fi
+ 
+ if ! ismounted /dev/shm; then
+     mkdir -m 0755 /dev/shm
+-    mount -t tmpfs -o mode=1777,nosuid,nodev tmpfs /dev/shm >/dev/null 
++    mount -t tmpfs -o mode=1777,nosuid,nodev,strictatime tmpfs /dev/shm >/dev/null 
+ fi
+ 
+ if ! ismounted /run; then
+     mkdir -m 0755 /newrun
+-    mount -t tmpfs -o mode=0755,nosuid,nodev tmpfs /newrun >/dev/null 
++    mount -t tmpfs -o mode=0755,nosuid,nodev,strictatime tmpfs /newrun >/dev/null 
+     cp -a /run/* /newrun >/dev/null 2>&1
+     mount --move /newrun /run
+     rm -fr /newrun
