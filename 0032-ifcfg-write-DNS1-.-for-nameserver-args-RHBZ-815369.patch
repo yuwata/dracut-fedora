@@ -1,0 +1,31 @@
+From eb6e141adb9ee06de1f0a960602526f0aa314817 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Tue, 24 Apr 2012 13:08:57 +0200
+Subject: [PATCH] ifcfg: write DNS1=... for nameserver= args (RHBZ#815369)
+
+If you're using a static network config, you'll want to keep your
+nameservers around when NM starts. Write DNS1 (and DNS2, DNS3, etc..)
+into the ifcfg file.
+
+Thanks to Mark Hamzy <hamzy@us.ibm.com>
+and Will Woods <wwoods@redhat.com> for the patch.
+---
+ modules.d/45ifcfg/write-ifcfg.sh |    5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/modules.d/45ifcfg/write-ifcfg.sh b/modules.d/45ifcfg/write-ifcfg.sh
+index c072a13..b81ac39 100755
+--- a/modules.d/45ifcfg/write-ifcfg.sh
++++ b/modules.d/45ifcfg/write-ifcfg.sh
+@@ -138,6 +138,11 @@ for netif in $IFACES ; do
+             } >> /tmp/ifcfg/ifcfg-$ethname
+         fi
+     fi
++    i=1
++    for ns in $(getargs nameserver); do
++        echo "DNS${i}=${ns}" >> /tmp/ifcfg/ifcfg-$netif
++        i=$((i+1))
++    done
+ done
+ 
+ # Pass network opts

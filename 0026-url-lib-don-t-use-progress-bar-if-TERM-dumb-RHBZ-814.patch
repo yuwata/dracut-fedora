@@ -1,0 +1,34 @@
+From dc1504121b1119f9d797aa276f040f3dfe9d56a3 Mon Sep 17 00:00:00 2001
+From: Will Woods <wwoods@redhat.com>
+Date: Fri, 20 Apr 2012 16:20:25 -0400
+Subject: [PATCH] url-lib: don't use --progress-bar if TERM=dumb (RHBZ#814713)
+
+Basically, s390 is the only place I've ever seen TERM=dumb, and it's too
+dumb to handle '\r', so --progress-bar produces waaaaay too much output.
+
+The normal progress meter only prints something once per second, so
+that's reasonable on terminals where '\r' doesn't work.
+
+See also: https://bugzilla.redhat.com/show_bug.cgi?id=814713
+---
+ modules.d/45url-lib/url-lib.sh |    7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/modules.d/45url-lib/url-lib.sh b/modules.d/45url-lib/url-lib.sh
+index 7930146..5721294 100755
+--- a/modules.d/45url-lib/url-lib.sh
++++ b/modules.d/45url-lib/url-lib.sh
+@@ -54,7 +54,12 @@ add_url_handler() {
+ 
+ export CURL_HOME="/run/initramfs/url-lib"
+ mkdir -p $CURL_HOME
+-curl_args="--location --retry 3 --fail --show-error --progress-bar"
++curl_args="--location --retry 3 --fail --show-error"
++
++# technically "dumb" can handle the progress bar, but the only thing I've ever
++# seen using TERM=dumb is s390 CMS, and it's too dumb for --progress-bar
++[ "$TERM" != "dumb" ] && curl_args="$curl_args --progress-bar"
++
+ curl_fetch_url() {
+     local url="$1" outloc="$2"
+     echo "$url" > /proc/self/fd/0

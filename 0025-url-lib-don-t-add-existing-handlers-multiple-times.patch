@@ -1,0 +1,27 @@
+From c6a91ec9928f7f09dd70ad597bf96ac60f6b652d Mon Sep 17 00:00:00 2001
+From: Will Woods <wwoods@redhat.com>
+Date: Fri, 20 Apr 2012 16:20:24 -0400
+Subject: [PATCH] url-lib: don't add existing handlers multiple times
+
+Every time url-lib gets imported we end up making the list of handlers
+longer with redundant entries. That's silly - we shouldn't add items
+that already exist.
+
+Note that this means you'll have to manipulate the handler list yourself
+if you want to change the position/priority of existing handlers.
+---
+ modules.d/45url-lib/url-lib.sh |    1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/modules.d/45url-lib/url-lib.sh b/modules.d/45url-lib/url-lib.sh
+index e305a68..7930146 100755
+--- a/modules.d/45url-lib/url-lib.sh
++++ b/modules.d/45url-lib/url-lib.sh
+@@ -43,6 +43,7 @@ add_url_handler() {
+     local schemes="$@" scheme=""
+     set --
+     for scheme in $schemes; do
++        [ "$(get_url_handler $scheme)" = "$handler" ] && continue
+         set -- "$@" "$scheme:$handler"
+     done
+     set -- $@ $url_handler_map # add new items to *front* of list

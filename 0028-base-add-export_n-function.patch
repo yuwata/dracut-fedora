@@ -1,0 +1,62 @@
+From 476eb1b345764a7317f32da52b9b36f26fdf51ba Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 23 Apr 2012 11:28:59 +0200
+Subject: [PATCH] base: add export_n() function
+
+resembles export -n for dash
+---
+ modules.d/99base/dracut-lib.sh |   13 +++++++++++++
+ modules.d/99base/init.sh       |   12 ++++--------
+ 2 files changed, 17 insertions(+), 8 deletions(-)
+
+diff --git a/modules.d/99base/dracut-lib.sh b/modules.d/99base/dracut-lib.sh
+index f46c4a7..a4aa20c 100755
+--- a/modules.d/99base/dracut-lib.sh
++++ b/modules.d/99base/dracut-lib.sh
+@@ -821,3 +821,16 @@ emergency_shell()
+         exit 1
+     fi
+ }
++
++# Retain the values of these variables but ensure that they are unexported
++# This is a POSIX-compliant equivalent of bash's "export -n"
++export_n()
++{
++    local var
++    local val
++    for var in "$@"; do
++        eval val=\$$var
++        unset $var
++        [ -n "$val" ] && eval $var=\"$val\"
++    done
++}
+diff --git a/modules.d/99base/init.sh b/modules.d/99base/init.sh
+index cb03137..aea739f 100755
+--- a/modules.d/99base/init.sh
++++ b/modules.d/99base/init.sh
+@@ -251,7 +251,6 @@ done
+     emergency_shell
+ }
+ 
+-
+ if [ $UDEVVERSION -lt 168 ]; then
+     # stop udev queue before killing it
+     udevadm control --stop-exec-queue
+@@ -268,13 +267,10 @@ else
+     udevadm info --cleanup-db
+ fi
+ 
+-# Retain the values of these variables but ensure that they are unexported
+-# This is a POSIX-compliant equivalent of bash's "export -n"
+-for var in root rflags fstype netroot NEWROOT; do
+-    eval tmp=\$$var
+-    unset $var
+-    [ -n "$tmp" ] && eval $var=\"$tmp\"
+-done
++debug_off # Turn off debugging for this section
++
++# unexport some vars
++export_n root rflags fstype netroot NEWROOT
+ 
+ export RD_TIMESTAMP
+ # Clean up the environment

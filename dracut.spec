@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 018
-Release: 25.git20120419%{?dist}
+Release: 33.git20120424%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -48,6 +48,14 @@ Patch21: 0021-network-module-setup.sh-include-all-kernel-drivers-n.patch
 Patch22: 0022-add-pre-pivot-cleanup-hook.patch
 Patch23: 0023-move-cleanup-scripts-to-pre-pivot-cleanup-hook.patch
 Patch24: 0024-network-parse-ip-opts.sh-remove-check-for-netroot.patch
+Patch25: 0025-url-lib-don-t-add-existing-handlers-multiple-times.patch
+Patch26: 0026-url-lib-don-t-use-progress-bar-if-TERM-dumb-RHBZ-814.patch
+Patch27: 0027-base-add-debug_on-and-debug_off-functions.patch
+Patch28: 0028-base-add-export_n-function.patch
+Patch29: 0029-base-dracut-lib.sh-add-arguments-for-source_hook-and.patch
+Patch30: 0030-merge-cleanup-and-pre-pivot-cleanup-hooks.patch
+Patch31: 0031-network-fix-ifup-and-netroot-calling.patch
+Patch32: 0032-ifcfg-write-DNS1-.-for-nameserver-args-RHBZ-815369.patch
 
 
 BuildArch: noarch
@@ -364,6 +372,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Tue Apr 24 2012 Harald Hoyer <harald@redhat.com> 018-33.git20120424
+- new upstream version
+
 * Thu Apr 19 2012 Harald Hoyer <harald@redhat.com> 018-25.git20120419
 - fixed network for non-network root (like installer media)
 
