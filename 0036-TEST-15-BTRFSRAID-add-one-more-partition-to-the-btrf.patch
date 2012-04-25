@@ -1,0 +1,55 @@
+From bea590954e873e915791d1c8610820159ab164c3 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 25 Apr 2012 14:23:12 +0200
+Subject: [PATCH] TEST-15-BTRFSRAID: add one more partition to the btrfs
+ raid10
+
+---
+ test/TEST-15-BTRFSRAID/create-root.sh |   12 +++++++++---
+ test/TEST-15-BTRFSRAID/test.sh        |    2 +-
+ 2 files changed, 10 insertions(+), 4 deletions(-)
+
+diff --git a/test/TEST-15-BTRFSRAID/create-root.sh b/test/TEST-15-BTRFSRAID/create-root.sh
+index 60dd319..3debf33 100755
+--- a/test/TEST-15-BTRFSRAID/create-root.sh
++++ b/test/TEST-15-BTRFSRAID/create-root.sh
+@@ -5,17 +5,23 @@ for x in 64-lvm.rules 70-mdadm.rules 99-mount-rules; do
+ done
+ udevadm control --reload-rules
+ # save a partition at the beginning for future flagging purposes
+-sfdisk -C 524288 -H 2 -S 32 -L /dev/sda <<EOF
++sfdisk -C 655600 -H 2 -S 32 -L /dev/sda <<EOF
+ ,16
++,,E
++;
++;
++,10240
+ ,10240
+ ,10240
+ ,10240
+ EOF
+-mkfs.btrfs -mraid10 -L root /dev/sda2 /dev/sda3 /dev/sda4
++mkfs.btrfs -draid10 -mraid10 -L root /dev/sda5 /dev/sda6 /dev/sda7 /dev/sda8
++udevadm settle
+ btrfs device scan
++udevadm settle
+ set -e
+ mkdir -p /sysroot 
+-mount /dev/sda4 /sysroot 
++mount -t btrfs /dev/sda8 /sysroot 
+ cp -a -t /sysroot /source/* 
+ umount /sysroot 
+ echo "dracut-root-block-created" >/dev/sda1
+diff --git a/test/TEST-15-BTRFSRAID/test.sh b/test/TEST-15-BTRFSRAID/test.sh
+index f64b2b2..b65e77a 100755
+--- a/test/TEST-15-BTRFSRAID/test.sh
++++ b/test/TEST-15-BTRFSRAID/test.sh
+@@ -20,7 +20,7 @@ test_setup() {
+     # Create the blank file to use as a root filesystem
+     DISKIMAGE=$TESTDIR/TEST-15-BTRFSRAID-root.img
+     rm -f $DISKIMAGE
+-    dd if=/dev/null of=$DISKIMAGE bs=1M seek=1024
++    dd if=/dev/null of=$DISKIMAGE bs=2M seek=1024
+ 
+     kernel=$KVERSION
+     # Create what will eventually be our root filesystem onto an overlay
