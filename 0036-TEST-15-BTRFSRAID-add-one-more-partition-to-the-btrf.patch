@@ -1,4 +1,4 @@
-From bea590954e873e915791d1c8610820159ab164c3 Mon Sep 17 00:00:00 2001
+From 5a81678219a2cbf6f39e47f85d2fcb525ac2143c Mon Sep 17 00:00:00 2001
 From: Harald Hoyer <harald@redhat.com>
 Date: Wed, 25 Apr 2012 14:23:12 +0200
 Subject: [PATCH] TEST-15-BTRFSRAID: add one more partition to the btrfs

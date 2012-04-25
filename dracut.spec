@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 018
-Release: 37.git20120425%{?dist}
+Release: 37.git20120425%{?dist}.1
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -376,6 +376,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Wed Apr 25 2012 Harald Hoyer <harald@redhat.com> 018-37.git20120425.1
+- fixup for multipath and iscsi host-only detection
+
 * Wed Apr 25 2012 Harald Hoyer <harald@redhat.com> 018-37.git20120425
 - fixed udevd location
 

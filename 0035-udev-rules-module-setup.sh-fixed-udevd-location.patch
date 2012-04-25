@@ -1,4 +1,4 @@
-From e78a0b55b28196c2075b388ca4da8de3face3baf Mon Sep 17 00:00:00 2001
+From 168952cea6130476a68c90aecab709cf24da5e52 Mon Sep 17 00:00:00 2001
 From: Harald Hoyer <harald@redhat.com>
 Date: Wed, 25 Apr 2012 12:22:15 +0200
 Subject: [PATCH] udev-rules/module-setup.sh: fixed udevd location
