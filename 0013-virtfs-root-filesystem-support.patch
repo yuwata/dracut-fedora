@@ -21,7 +21,7 @@ Signed-off-by: Lennert Buytenhek <buytenh@wantstofly.org>
  modules.d/95virtfs/module-setup.sh |   27 +++++++++++++
  modules.d/95virtfs/mount-virtfs.sh |   75 ++++++++++++++++++++++++++++++++++++
  modules.d/95virtfs/parse-virtfs.sh |    9 +++++
- 4 files changed, 112 insertions(+)
+ 4 Dateien geändert, 112 Zeilen hinzugefügt(+)
  create mode 100755 modules.d/95virtfs/module-setup.sh
  create mode 100755 modules.d/95virtfs/mount-virtfs.sh
  create mode 100755 modules.d/95virtfs/parse-virtfs.sh

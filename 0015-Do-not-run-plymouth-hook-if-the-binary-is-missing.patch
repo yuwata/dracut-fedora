@@ -8,7 +8,7 @@ strip plymouth from an initrd. Make this script a noop
 if that has happened.
 ---
  modules.d/50plymouth/plymouth-pretrigger.sh |   44 ++++++++++++++-------------
- 1 file changed, 23 insertions(+), 21 deletions(-)
+ 1 Datei geändert, 23 Zeilen hinzugefügt(+), 21 Zeilen entfernt(-)
 
 diff --git a/modules.d/50plymouth/plymouth-pretrigger.sh b/modules.d/50plymouth/plymouth-pretrigger.sh
 index 57955e7..50828af 100755

@@ -5,7 +5,7 @@ Subject: [PATCH] dracut-lib: add str_ends, to go along with str_starts
 
 ---
  modules.d/99base/dracut-lib.sh |    5 +++++
- 1 file changed, 5 insertions(+)
+ 1 Datei geändert, 5 Zeilen hinzugefügt(+)
 
 diff --git a/modules.d/99base/dracut-lib.sh b/modules.d/99base/dracut-lib.sh
 index cb2e4dc..1ecd286 100755

@@ -20,7 +20,7 @@ Falling back to internal scanning.
 ---
  modules.d/90lvm/lvm_scan.sh     |    2 ++
  modules.d/90lvm/module-setup.sh |    1 +
- 2 files changed, 3 insertions(+)
+ 2 Dateien geändert, 3 Zeilen hinzugefügt(+)
 
 diff --git a/modules.d/90lvm/lvm_scan.sh b/modules.d/90lvm/lvm_scan.sh
 index 104565f..17c29bc 100755

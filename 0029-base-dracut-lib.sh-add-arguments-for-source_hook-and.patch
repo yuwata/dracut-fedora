@@ -6,7 +6,7 @@ Subject: [PATCH] base/dracut-lib.sh: add arguments for source_hook() and
 
 ---
  modules.d/99base/dracut-lib.sh |   10 +++++++---
- 1 file changed, 7 insertions(+), 3 deletions(-)
+ 1 Datei geändert, 7 Zeilen hinzugefügt(+), 3 Zeilen entfernt(-)
 
 diff --git a/modules.d/99base/dracut-lib.sh b/modules.d/99base/dracut-lib.sh
 index a4aa20c..a6b8d1a 100755

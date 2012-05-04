@@ -6,7 +6,7 @@ Subject: [PATCH] dracut.spec: do not include IMA and selinux modules with
 
 ---
  dracut.spec |   16 +++++++++++++---
- 1 file changed, 13 insertions(+), 3 deletions(-)
+ 1 Datei geändert, 13 Zeilen hinzugefügt(+), 3 Zeilen entfernt(-)
 
 diff --git a/dracut.spec b/dracut.spec
 index 9cd08b7..9f64213 100644

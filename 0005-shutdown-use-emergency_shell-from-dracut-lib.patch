@@ -6,7 +6,7 @@ Subject: [PATCH] shutdown: use emergency_shell from dracut-lib
 ---
  modules.d/99base/dracut-lib.sh   |   10 ++++----
  modules.d/99shutdown/shutdown.sh |   47 +++-----------------------------------
- 2 files changed, 9 insertions(+), 48 deletions(-)
+ 2 Dateien geändert, 9 Zeilen hinzugefügt(+), 48 Zeilen entfernt(-)
 
 diff --git a/modules.d/99base/dracut-lib.sh b/modules.d/99base/dracut-lib.sh
 index e10a34d..a29d586 100755

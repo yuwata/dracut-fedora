@@ -5,7 +5,7 @@ Subject: [PATCH] 99shutdown/shutdown.sh: export PATH
 
 ---
  modules.d/99shutdown/shutdown.sh |    5 ++---
- 1 file changed, 2 insertions(+), 3 deletions(-)
+ 1 Datei geändert, 2 Zeilen hinzugefügt(+), 3 Zeilen entfernt(-)
 
 diff --git a/modules.d/99shutdown/shutdown.sh b/modules.d/99shutdown/shutdown.sh
 index 45345a4..aa0a81f 100755

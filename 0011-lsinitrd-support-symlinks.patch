@@ -5,7 +5,7 @@ Subject: [PATCH] lsinitrd: support symlinks
 
 ---
  lsinitrd.sh |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ 1 Datei geändert, 1 Zeile hinzugefügt(+), 1 Zeile entfernt(-)
 
 diff --git a/lsinitrd.sh b/lsinitrd.sh
 index 1eaa37d..e6767dc 100755

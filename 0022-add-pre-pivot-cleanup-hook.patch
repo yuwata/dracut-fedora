@@ -17,7 +17,7 @@ Signed-off-by: Dave Young <dyoung@redhat.com>
  dracut.asc               |    7 ++++++-
  dracut.cmdline.7.asc     |    2 +-
  modules.d/99base/init.sh |    7 ++++++-
- 5 files changed, 17 insertions(+), 4 deletions(-)
+ 5 Dateien geändert, 17 Zeilen hinzugefügt(+), 4 Zeilen entfernt(-)
 
 diff --git a/README.modules b/README.modules
 index 21461de..188d011 100644

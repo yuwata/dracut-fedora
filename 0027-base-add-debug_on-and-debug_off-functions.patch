@@ -6,7 +6,7 @@ Subject: [PATCH] base: add debug_on() and debug_off() functions
 ---
  modules.d/99base/dracut-lib.sh |   42 +++++++++++++++++++++++++++-------------
  modules.d/99base/init.sh       |    6 ++----
- 2 files changed, 31 insertions(+), 17 deletions(-)
+ 2 Dateien geändert, 31 Zeilen hinzugefügt(+), 17 Zeilen entfernt(-)
 
 diff --git a/modules.d/99base/dracut-lib.sh b/modules.d/99base/dracut-lib.sh
 index a29d586..f46c4a7 100755

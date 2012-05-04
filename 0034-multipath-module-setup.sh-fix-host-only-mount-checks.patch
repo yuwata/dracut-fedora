@@ -5,7 +5,7 @@ Subject: [PATCH] multipath/module-setup.sh: fix host-only/mount checks
 
 ---
  modules.d/90multipath/module-setup.sh |   16 +++++++---------
- 1 file changed, 7 insertions(+), 9 deletions(-)
+ 1 Datei geändert, 7 Zeilen hinzugefügt(+), 9 Zeilen entfernt(-)
 
 diff --git a/modules.d/90multipath/module-setup.sh b/modules.d/90multipath/module-setup.sh
 index 2bc1b41..2af112a 100755

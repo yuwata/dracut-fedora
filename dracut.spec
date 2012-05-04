@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 018
-Release: 37.git20120425%{?dist}.1
+Release: 40.git20120504%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -60,6 +60,9 @@ Patch33: 0033-iscsi-module-setup.sh-fix-host-only-mount-checks.patch
 Patch34: 0034-multipath-module-setup.sh-fix-host-only-mount-checks.patch
 Patch35: 0035-udev-rules-module-setup.sh-fixed-udevd-location.patch
 Patch36: 0036-TEST-15-BTRFSRAID-add-one-more-partition-to-the-btrf.patch
+Patch37: 0037-fix-_getcmdline-arg-duplicating-bug-with-etc-cmdline.patch
+Patch38: 0038-ifcfg-fix-resolv.conf.patch
+Patch39: 0039-TODO-update.patch
 
 
 BuildArch: noarch
@@ -376,6 +379,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Fri May 04 2012 Harald Hoyer <harald@redhat.com> 018-40.git20120504
+- new upstream version
+
 * Wed Apr 25 2012 Harald Hoyer <harald@redhat.com> 018-37.git20120425.1
 - fixup for multipath and iscsi host-only detection
 

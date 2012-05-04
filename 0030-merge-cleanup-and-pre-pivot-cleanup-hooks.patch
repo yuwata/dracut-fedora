@@ -14,7 +14,7 @@ Subject: [PATCH] merge "cleanup" and "pre-pivot-cleanup" hooks
  modules.d/95iscsi/module-setup.sh     |    2 +-
  modules.d/95nfs/module-setup.sh       |    2 +-
  modules.d/99base/init.sh              |    5 ++---
- 10 files changed, 13 insertions(+), 14 deletions(-)
+ 10 Dateien geändert, 13 Zeilen hinzugefügt(+), 14 Zeilen entfernt(-)
 
 diff --git a/README.modules b/README.modules
 index 188d011..64d533f 100644
