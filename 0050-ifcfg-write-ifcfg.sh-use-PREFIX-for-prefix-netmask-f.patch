@@ -1,0 +1,27 @@
+From 5bfbfbfc22b8b9e1d2c79342656dd4ce56a03b57 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 9 May 2012 14:58:52 +0200
+Subject: [PATCH] ifcfg/write-ifcfg.sh: use PREFIX for prefix netmask form
+
+https://bugzilla.redhat.com/show_bug.cgi?id=820185
+---
+ modules.d/45ifcfg/write-ifcfg.sh |    6 +++++-
+ 1 Datei geändert, 5 Zeilen hinzugefügt(+), 1 Zeile entfernt(-)
+
+diff --git a/modules.d/45ifcfg/write-ifcfg.sh b/modules.d/45ifcfg/write-ifcfg.sh
+index f612762..580fbd4 100755
+--- a/modules.d/45ifcfg/write-ifcfg.sh
++++ b/modules.d/45ifcfg/write-ifcfg.sh
+@@ -50,7 +50,11 @@ for netif in $IFACES ; do
+         # If we've booted with static ip= lines, the override file is there
+             [ -e /tmp/net.$netif.override ] && . /tmp/net.$netif.override
+             echo "IPADDR=$ip"
+-            echo "NETMASK=$mask"
++            if strstr "$mask" "."; then
++                echo "NETMASK=$mask"
++            else
++                echo "PREFIX=$mask"
++            fi
+             [ -n "$gw" ] && echo "GATEWAY=$gw"
+         fi
+     } > /tmp/ifcfg/ifcfg-$netif

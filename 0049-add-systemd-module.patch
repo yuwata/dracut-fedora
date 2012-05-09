@@ -1,0 +1,923 @@
+From 2c431e8ec4c9cb538c633e46888912ad83315ce0 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 9 May 2012 11:47:30 +0200
+Subject: [PATCH] add systemd module
+
+---
+ modules.d/98systemd/dracut-cmdline.sh          |   27 +++++
+ modules.d/98systemd/dracut-initqueue.service   |   27 +++++
+ modules.d/98systemd/dracut-initqueue.sh        |  111 ++++++++++++++++++
+ modules.d/98systemd/dracut-pre-pivot.service   |   27 +++++
+ modules.d/98systemd/dracut-pre-pivot.sh        |   54 +++++++++
+ modules.d/98systemd/dracut-pre-trigger.service |   28 +++++
+ modules.d/98systemd/dracut-pre-trigger.sh      |   20 ++++
+ modules.d/98systemd/dracut-pre-udev.service    |   27 +++++
+ modules.d/98systemd/dracut-pre-udev.sh         |   17 +++
+ modules.d/98systemd/emergency.service          |   30 +++++
+ modules.d/98systemd/module-setup.sh            |  150 ++++++++++++++++++++++++
+ modules.d/98systemd/rescue.service             |   31 +++++
+ modules.d/98systemd/switch-root.service        |   17 +++
+ modules.d/98systemd/switch-root.target         |   16 +++
+ test/TEST-02-SYSTEMD/99-idesymlinks.rules      |    8 ++
+ test/TEST-02-SYSTEMD/Makefile                  |   10 ++
+ test/TEST-02-SYSTEMD/create-root.sh            |   23 ++++
+ test/TEST-02-SYSTEMD/cryptroot-ask.sh          |    6 +
+ test/TEST-02-SYSTEMD/hard-off.sh               |    3 +
+ test/TEST-02-SYSTEMD/test-init.sh              |   20 ++++
+ test/TEST-02-SYSTEMD/test.sh                   |   95 +++++++++++++++
+ 21 Dateien geändert, 747 Zeilen hinzugefügt(+)
+ create mode 100755 modules.d/98systemd/dracut-cmdline.sh
+ create mode 100644 modules.d/98systemd/dracut-initqueue.service
+ create mode 100755 modules.d/98systemd/dracut-initqueue.sh
+ create mode 100644 modules.d/98systemd/dracut-pre-pivot.service
+ create mode 100755 modules.d/98systemd/dracut-pre-pivot.sh
+ create mode 100644 modules.d/98systemd/dracut-pre-trigger.service
+ create mode 100755 modules.d/98systemd/dracut-pre-trigger.sh
+ create mode 100644 modules.d/98systemd/dracut-pre-udev.service
+ create mode 100755 modules.d/98systemd/dracut-pre-udev.sh
+ create mode 100644 modules.d/98systemd/emergency.service
+ create mode 100755 modules.d/98systemd/module-setup.sh
+ create mode 100644 modules.d/98systemd/rescue.service
+ create mode 100644 modules.d/98systemd/switch-root.service
+ create mode 100644 modules.d/98systemd/switch-root.target
+ create mode 100644 test/TEST-02-SYSTEMD/99-idesymlinks.rules
+ create mode 100644 test/TEST-02-SYSTEMD/Makefile
+ create mode 100755 test/TEST-02-SYSTEMD/create-root.sh
+ create mode 100755 test/TEST-02-SYSTEMD/cryptroot-ask.sh
+ create mode 100755 test/TEST-02-SYSTEMD/hard-off.sh
+ create mode 100755 test/TEST-02-SYSTEMD/test-init.sh
+ create mode 100755 test/TEST-02-SYSTEMD/test.sh
+
+diff --git a/modules.d/98systemd/dracut-cmdline.sh b/modules.d/98systemd/dracut-cmdline.sh
+new file mode 100755
+index 0000000..26ca9c2
+--- /dev/null
++++ b/modules.d/98systemd/dracut-cmdline.sh
+@@ -0,0 +1,27 @@
++#!/bin/sh
++# -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
++# ex: ts=8 sw=4 sts=4 et filetype=sh
++
++NEWROOT="/sysroot"
++[ -d $NEWROOT ] || mkdir -p -m 0755 $NEWROOT
++[ -d /run/initramfs ] || mkdir -p -m 0755 /run/initramfs
++[ -d /run/lock ] || mkdir -p -m 0755 /run/lock
++
++exec </dev/console >/dev/console 2>&1
++
++if [ -f /dracut-state.sh ]; then
++    . /dracut-state.sh || :
++fi
++. /lib/dracut-lib.sh
++source_conf /etc/conf.d
++
++# run scriptlets to parse the command line
++getarg 'rd.break=cmdline' 'rdbreak=cmdline' && emergency_shell -n cmdline "Break before cmdline"
++source_hook cmdline
++
++[ -z "$root" ] && die "No or empty root= argument"
++[ -z "$rootok" ] && die "Don't know how to handle 'root=$root'"
++
++export root rflags fstype netroot NEWROOT
++
++export -p > /dracut-state.sh
+diff --git a/modules.d/98systemd/dracut-initqueue.service b/modules.d/98systemd/dracut-initqueue.service
+new file mode 100644
+index 0000000..b0c8509
+--- /dev/null
++++ b/modules.d/98systemd/dracut-initqueue.service
+@@ -0,0 +1,27 @@
++#  This file is part of systemd.
++#
++#  systemd is free software; you can redistribute it and/or modify it
++#  under the terms of the GNU Lesser General Public License as published by
++#  the Free Software Foundation; either version 2.1 of the License, or
++#  (at your option) any later version.
++
++# See systemd.special(7) for details
++
++[Unit]
++Description=Dracut initqueue hook
++DefaultDependencies=no
++After=systemd-udev-trigger.service
++
++[Service]
++Environment=HOME=/
++WorkingDirectory=/
++ExecStart=-/bin/dracut-initqueue
++Type=simple
++StandardInput=tty-force
++StandardOutput=inherit
++StandardError=inherit
++KillMode=process
++
++# Bash ignores SIGTERM, so we send SIGHUP instead, to ensure that bash
++# terminates cleanly.
++KillSignal=SIGHUP
+diff --git a/modules.d/98systemd/dracut-initqueue.sh b/modules.d/98systemd/dracut-initqueue.sh
+new file mode 100755
+index 0000000..402f536
+--- /dev/null
++++ b/modules.d/98systemd/dracut-initqueue.sh
+@@ -0,0 +1,111 @@
++#!/bin/sh
++# -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
++# ex: ts=8 sw=4 sts=4 et filetype=sh
++exec </dev/console >/dev/console 2>&1
++
++if [ -f /dracut-state.sh ]; then
++    . /dracut-state.sh || :
++fi
++. /lib/dracut-lib.sh
++source_conf /etc/conf.d
++source_hook pre-trigger
++
++getarg 'rd.break=initqueue' 'rdbreak=initqueue' && emergency_shell -n initqueue "Break before initqueue"
++
++RDRETRY=$(getarg rd.retry 'rd_retry=')
++RDRETRY=${RDRETRY:-20}
++RDRETRY=$(($RDRETRY*2))
++export RDRETRY
++
++main_loop=0
++export main_loop
++
++while :; do
++
++    check_finished && break
++
++    udevsettle
++
++    check_finished && break
++
++    if [ -f $hookdir/initqueue/work ]; then
++        rm $hookdir/initqueue/work
++    fi
++
++    for job in $hookdir/initqueue/*.sh; do
++        [ -e "$job" ] || break
++        job=$job . $job
++        check_finished && break 2
++    done
++
++    $UDEV_QUEUE_EMPTY >/dev/null 2>&1 || continue
++
++    for job in $hookdir/initqueue/settled/*.sh; do
++        [ -e "$job" ] || break
++        job=$job . $job
++        check_finished && break 2
++    done
++
++    $UDEV_QUEUE_EMPTY >/dev/null 2>&1 || continue
++
++    # no more udev jobs and queues empty.
++    sleep 0.5
++
++
++    if [ $main_loop -gt $(($RDRETRY/2)) ]; then
++        for job in $hookdir/initqueue/timeout/*.sh; do
++            [ -e "$job" ] || break
++            job=$job . $job
++            main_loop=0
++        done
++    fi
++
++    main_loop=$(($main_loop+1))
++    [ $main_loop -gt $RDRETRY ] \
++        && { flock -s 9 ; emergency_shell "Unable to process initqueue"; } 9>/.console_lock
++done
++
++unset job
++unset queuetriggered
++unset main_loop
++unset RDRETRY
++
++
++# pre-mount happens before we try to mount the root filesystem,
++# and happens once.
++getarg 'rd.break=pre-mount' 'rdbreak=pre-mount' && emergency_shell -n pre-mount "Break pre-mount"
++source_hook pre-mount
++
++
++getarg 'rd.break=mount' 'rdbreak=mount' && emergency_shell -n mount "Break mount"
++# mount scripts actually try to mount the root filesystem, and may
++# be sourced any number of times. As soon as one suceeds, no more are sourced.
++i=0
++while :; do
++    if ismounted "$NEWROOT"; then
++        usable_root "$NEWROOT" && break;
++        umount "$NEWROOT"
++    fi
++    for f in $hookdir/mount/*.sh; do
++        [ -f "$f" ] && . "$f"
++        if ismounted "$NEWROOT"; then
++            usable_root "$NEWROOT" && break;
++            warn "$NEWROOT has no proper rootfs layout, ignoring and removing offending mount hook"
++            umount "$NEWROOT"
++            rm -f "$f"
++        fi
++    done
++
++    i=$(($i+1))
++    [ $i -gt 20 ] \
++        && { flock -s 9 ; emergency_shell "Can't mount root filesystem"; } 9>/.console_lock
++done
++
++{
++    echo -n "Mounted root filesystem "
++    while read dev mp rest; do [ "$mp" = "$NEWROOT" ] && echo $dev; done < /proc/mounts
++} | vinfo
++
++systemctl switch-root
++
++export -p > /dracut-state.sh
+diff --git a/modules.d/98systemd/dracut-pre-pivot.service b/modules.d/98systemd/dracut-pre-pivot.service
+new file mode 100644
+index 0000000..112834a
+--- /dev/null
++++ b/modules.d/98systemd/dracut-pre-pivot.service
+@@ -0,0 +1,27 @@
++#  This file is part of systemd.
++#
++#  systemd is free software; you can redistribute it and/or modify it
++#  under the terms of the GNU Lesser General Public License as published by
++#  the Free Software Foundation; either version 2.1 of the License, or
++#  (at your option) any later version.
++
++# See systemd.special(7) for details
++
++[Unit]
++Description=Dracut pre-pivot and cleanup hook
++DefaultDependencies=no
++Before=switch-root.service
++
++[Service]
++Environment=HOME=/
++WorkingDirectory=/
++ExecStart=-/bin/dracut-pre-pivot
++Type=oneshot
++StandardInput=tty-force
++StandardOutput=inherit
++StandardError=inherit
++KillMode=process
++
++# Bash ignores SIGTERM, so we send SIGHUP instead, to ensure that bash
++# terminates cleanly.
++KillSignal=SIGHUP
+diff --git a/modules.d/98systemd/dracut-pre-pivot.sh b/modules.d/98systemd/dracut-pre-pivot.sh
+new file mode 100755
+index 0000000..5ee1dd0
+--- /dev/null
++++ b/modules.d/98systemd/dracut-pre-pivot.sh
+@@ -0,0 +1,54 @@
++#!/bin/sh
++# -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
++# ex: ts=8 sw=4 sts=4 et filetype=sh
++
++exec </dev/console >/dev/console 2>&1
++if [ -f /dracut-state.sh ]; then
++    . /dracut-state.sh || :
++fi
++. /lib/dracut-lib.sh
++source_conf /etc/conf.d
++
++# pre pivot scripts are sourced just before we doing cleanup and switch over
++# to the new root.
++getarg 'rd.break=pre-pivot' 'rdbreak=pre-pivot' && emergency_shell -n pre-pivot "Break pre-pivot"
++source_hook pre-pivot
++
++# pre pivot cleanup scripts are sourced just before we switch over to the new root.
++getarg 'rd.break=cleanup' 'rdbreak=cleanup' && emergency_shell -n cleanup "Break cleanup"
++source_hook cleanup
++
++# By the time we get here, the root filesystem should be mounted.
++# Try to find init. 
++for i in "$(getarg real_init=)" "$(getarg init=)" $(getargs rd.distroinit=) /sbin/init; do
++    [ -n "$i" ] || continue
++
++    __p=$(readlink -f "${NEWROOT}/${i}")
++    if [ -x "$__p" ]; then
++        INIT="$i"
++        break
++    fi
++done
++
++if [ -n "$INIT" ]; then
++    {
++        echo "NEWROOT=\"$NEWROOT\""
++        echo "NEWINIT=\"$INIT\""
++    } > /etc/switch-root.conf
++else
++    echo "Cannot find init!"
++    echo "Please check to make sure you passed a valid root filesystem!"
++    emergency_shell
++fi
++
++udevadm control --stop-exec-queue
++systemctl stop udevd.service
++udevadm info --cleanup-db
++
++# remove helper symlink
++[ -h /dev/root ] && rm -f /dev/root
++
++getarg rd.break rdbreak && emergency_shell -n switch_root "Break before switch_root"
++info "Switching root"
++
++export -p > /dracut-state.sh
+diff --git a/modules.d/98systemd/dracut-pre-trigger.service b/modules.d/98systemd/dracut-pre-trigger.service
+new file mode 100644
+index 0000000..080b1f5
+--- /dev/null
++++ b/modules.d/98systemd/dracut-pre-trigger.service
+@@ -0,0 +1,28 @@
++#  This file is part of systemd.
++#
++#  systemd is free software; you can redistribute it and/or modify it
++#  under the terms of the GNU Lesser General Public License as published by
++#  the Free Software Foundation; either version 2.1 of the License, or
++#  (at your option) any later version.
++
++# See systemd.special(7) for details
++
++[Unit]
++Description=Dracut pre-trigger hook
++DefaultDependencies=no
++After=systemd-udev.service
++Before=systemd-udev-trigger.service
++
++[Service]
++Environment=HOME=/
++WorkingDirectory=/
++ExecStart=-/bin/dracut-pre-trigger
++Type=oneshot
++StandardInput=tty-force
++StandardOutput=inherit
++StandardError=inherit
++KillMode=process
++
++# Bash ignores SIGTERM, so we send SIGHUP instead, to ensure that bash
++# terminates cleanly.
++KillSignal=SIGHUP
+diff --git a/modules.d/98systemd/dracut-pre-trigger.sh b/modules.d/98systemd/dracut-pre-trigger.sh
+new file mode 100755
+index 0000000..a6c66e4
+--- /dev/null
++++ b/modules.d/98systemd/dracut-pre-trigger.sh
+@@ -0,0 +1,20 @@
++#!/bin/sh
++# -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
++# ex: ts=8 sw=4 sts=4 et filetype=sh
++exec </dev/console >/dev/console 2>&1
++
++if [ -f /dracut-state.sh ]; then
++    . /dracut-state.sh || :
++fi
++. /lib/dracut-lib.sh
++source_conf /etc/conf.d
++
++getargbool 0 rd.udev.info -y rdudevinfo && udevadm control "$UDEV_LOG_PRIO_ARG=info"
++getargbool 0 rd.udev.debug -y rdudevdebug && udevadm control "$UDEV_LOG_PRIO_ARG=debug"
++udevproperty "hookdir=$hookdir"
++
++source_hook pre-trigger
++
++udevadm control --reload >/dev/null 2>&1 || :
++
++export -p > /dracut-state.sh
+diff --git a/modules.d/98systemd/dracut-pre-udev.service b/modules.d/98systemd/dracut-pre-udev.service
+new file mode 100644
+index 0000000..09a349d
+--- /dev/null
++++ b/modules.d/98systemd/dracut-pre-udev.service
+@@ -0,0 +1,27 @@
++#  This file is part of systemd.
++#
++#  systemd is free software; you can redistribute it and/or modify it
++#  under the terms of the GNU Lesser General Public License as published by
++#  the Free Software Foundation; either version 2.1 of the License, or
++#  (at your option) any later version.
++
++# See systemd.special(7) for details
++
++[Unit]
++Description=Dracut pre-trigger hook
++DefaultDependencies=no
++Before=systemd-udev.service
++
++[Service]
++Environment=HOME=/
++WorkingDirectory=/
++ExecStart=-/bin/dracut-pre-udev
++Type=oneshot
++StandardInput=tty-force
++StandardOutput=inherit
++StandardError=inherit
++KillMode=process
++
++# Bash ignores SIGTERM, so we send SIGHUP instead, to ensure that bash
++# terminates cleanly.
++KillSignal=SIGHUP
+diff --git a/modules.d/98systemd/dracut-pre-udev.sh b/modules.d/98systemd/dracut-pre-udev.sh
+new file mode 100755
+index 0000000..5740174
+--- /dev/null
++++ b/modules.d/98systemd/dracut-pre-udev.sh
+@@ -0,0 +1,17 @@
++#!/bin/sh
++# -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
++# ex: ts=8 sw=4 sts=4 et filetype=sh
++
++exec </dev/console >/dev/console 2>&1
++if [ -f /dracut-state.sh ]; then
++    . /dracut-state.sh || :
++fi
++. /lib/dracut-lib.sh
++source_conf /etc/conf.d
++
++# pre pivot scripts are sourced just before we doing cleanup and switch over
++# to the new root.
++getarg 'rd.break=pre-udev' 'rdbreak=pre-udev' && emergency_shell -n pre-udev "Break pre-udev"
++source_hook pre-udev
++
++export -p > /dracut-state.sh
+diff --git a/modules.d/98systemd/emergency.service b/modules.d/98systemd/emergency.service
+new file mode 100644
+index 0000000..ecebf96
+--- /dev/null
++++ b/modules.d/98systemd/emergency.service
+@@ -0,0 +1,30 @@
++#  This file is part of systemd.
++#
++#  systemd is free software; you can redistribute it and/or modify it
++#  under the terms of the GNU Lesser General Public License as published by
++#  the Free Software Foundation; either version 2.1 of the License, or
++#  (at your option) any later version.
++
++# See systemd.special(7) for details
++
++[Unit]
++Description=Emergency Shell
++DefaultDependencies=no
++Conflicts=shutdown.target
++Before=shutdown.target
++
++[Service]
++Environment=HOME=/
++WorkingDirectory=/
++ExecStart=-/bin/sh -i -l
++ExecStopPost=-/usr/bin/systemctl --fail --no-block switch-root 
++Type=idle
++StandardInput=tty-force
++StandardOutput=inherit
++StandardError=inherit
++KillMode=process
++IgnoreSIGPIPE=no
++
++# Bash ignores SIGTERM, so we send SIGHUP instead, to ensure that bash
++# terminates cleanly.
++KillSignal=SIGHUP
+diff --git a/modules.d/98systemd/module-setup.sh b/modules.d/98systemd/module-setup.sh
+new file mode 100755
+index 0000000..22e570f
+--- /dev/null
++++ b/modules.d/98systemd/module-setup.sh
+@@ -0,0 +1,150 @@
++#!/bin/bash
++# -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
++# ex: ts=8 sw=4 sts=4 et filetype=sh
++
++check() {
++    [[ $mount_needs ]] && return 1
++    [ -x /lib/systemd/systemd ] && return 255
++    return 1
++}
++
++depends() {
++    return 0
++}
++
++install() {
++
++    for i in \
++    systemd \
++    systemd-cgroups-agent \
++    systemd-initctl \
++    systemd-shutdownd \
++    systemd-shutdown \
++    systemd-modules-load \
++    systemd-remount-fs \
++    systemd-reply-password \
++    systemd-fsck \
++    systemd-timestamp \
++    systemd-ac-power \
++    systemd-sysctl \
++    systemd-udevd \
++    systemd-journald \
++    systemd-coredump \
++    systemd-vconsole-setup \
++    systemd-cryptsetup \
++    systemd-localed \
++    system/emergency.target \
++    system/sysinit.target \
++    system/basic.target \
++    system/halt.target \
++    system/kexec.target \
++    system/local-fs.target \
++    system/local-fs-pre.target \
++    system/remote-fs.target \
++    system/remote-fs-pre.target \
++    system/network.target \
++    system/nss-lookup.target \
++    system/nss-user-lookup.target \
++    system/poweroff.target \
++    system/reboot.target \
++    system/rescue.target \
++    system/rpcbind.target \
++    system/shutdown.target \
++    system/final.target \
++    system/sigpwr.target \
++    system/sockets.target \
++    system/swap.target \
++    system/systemd-initctl.socket \
++    system/systemd-shutdownd.socket \
++    system/bluetooth.target \
++    system/systemd-ask-password-console.path \
++    system/systemd-udev-control.socket \
++    system/systemd-udev-kernel.socket \
++    system/systemd-ask-password-plymouth.path \
++    system/systemd-journald.socket \
++    system/cryptsetup.target \
++    system/console-shell.service \
++    system/console-getty.service \
++    system/systemd-initctl.service \
++    system/systemd-shutdownd.service \
++    system/systemd-modules-load.service \
++    system/systemd-remount-fs.service \
++    system/systemd-ask-password-console.service \
++    system/halt.service \
++    system/poweroff.service \
++    system/reboot.service \
++    system/kexec.service \
++    system/fsck@.service \
++    system/systemd-udev.service \
++    system/systemd-udev-trigger.service \
++    system/systemd-udev-settle.service \
++    system/systemd-ask-password-plymouth.service \
++    system/systemd-journald.service \
++    system/systemd-vconsole-setup.service \
++    system/systemd-localed.service \
++    system/sysinit.target.wants/systemd-modules-load.service \
++    system/sysinit.target.wants/systemd-ask-password-console.path \
++    system/sysinit.target.wants/systemd-journald.service \
++    system/sysinit.target.wants/systemd-vconsole-setup.service \
++    system/sysinit.target.wants/cryptsetup.target \
++    system/sockets.target.wants/systemd-initctl.socket \
++    system/sockets.target.wants/systemd-shutdownd.socket \
++    system/sockets.target.wants/systemd-udev-control.socket \
++    system/sockets.target.wants/systemd-udev-kernel.socket \
++    system/sockets.target.wants/systemd-journald.socket \
++    system/basic.target.wants/systemd-udev.service \
++    system/basic.target.wants/systemd-udev-trigger.service \
++    system/local-fs.target.wants/systemd-remount-fs.service \
++    system/local-fs.target.wants/fsck-root.service \
++    system/local-fs.target.wants/tmp.mount \
++    system/ctrl-alt-del.target \
++    system/autovt@.service \
++    system/single.service \
++    system/syslog.socket \
++    system/syslog.target \
++    system/switch-root.target \
++    system/switch-root.service \
++    system/umount.target \
++    ;do
++        [ -e "/lib/systemd/$i" ] && dracut_install "/lib/systemd/$i"
++    done
++    for i in /etc/systemd/*.conf; do 
++        dracut_install "$i"
++    done
++
++    ln -fs /lib/systemd/systemd "$initdir/init"
++
++    {
++        echo "LogLevel=debug"
++        echo "LogTarget=console"
++    } >> "$initdir/etc/systemd/system.conf"
++
++    rm -f "$initdir/lib/systemd/system/emergency.service"
++    inst "$moddir/emergency.service" /lib/systemd/system/emergency.service
++    rm -f "$initdir/lib/systemd/system/rescue.service"
++    inst "$moddir/rescue.service" /lib/systemd/system/rescue.service
++    inst "$moddir/switch-root.target" /lib/systemd/system/switch-root.target
++    inst "$moddir/switch-root.service" /lib/systemd/system/switch-root.service
++    ln -s basic.target "$initdir/lib/systemd/system/default.target"
++
++    inst "$moddir/dracut-cmdline.sh" /lib/systemd/system-generators/dracut-cmdline.sh
++
++    inst "$moddir/dracut-pre-udev.sh" /bin/dracut-pre-udev
++    inst "$moddir/dracut-pre-udev.service" /lib/systemd/system/dracut-pre-udev.service
++    ln -s ../dracut-pre-udev.service "$initdir/lib/systemd/system/basic.target.wants/dracut-pre-udev.service"
++
++    inst "$moddir/dracut-pre-trigger.sh" /bin/dracut-pre-trigger
++    inst "$moddir/dracut-pre-trigger.service" /lib/systemd/system/dracut-pre-trigger.service
++    ln -s ../dracut-pre-trigger.service "$initdir/lib/systemd/system/basic.target.wants/dracut-pre-trigger.service"
++
++    inst "$moddir/dracut-initqueue.sh" /bin/dracut-initqueue
++    inst "$moddir/dracut-initqueue.service" /lib/systemd/system/dracut-initqueue.service
++    ln -s ../dracut-initqueue.service "$initdir/lib/systemd/system/basic.target.wants/dracut-initqueue.service"
++    
++    inst "$moddir/dracut-pre-pivot.sh" /bin/dracut-pre-pivot
++    inst "$moddir/dracut-pre-pivot.service" /lib/systemd/system/dracut-pre-pivot.service
++    mkdir -p "$initdir/lib/systemd/system/switch-root.target.wants"
++    ln -s ../dracut-pre-pivot.service "$initdir/lib/systemd/system/switch-root.target.wants/dracut-pre-pivot.service"
++    
++}
++
+diff --git a/modules.d/98systemd/rescue.service b/modules.d/98systemd/rescue.service
+new file mode 100644
+index 0000000..057f8b4
+--- /dev/null
++++ b/modules.d/98systemd/rescue.service
+@@ -0,0 +1,31 @@
++#  This file is part of systemd.
++#
++#  systemd is free software; you can redistribute it and/or modify it
++#  under the terms of the GNU Lesser General Public License as published by
++#  the Free Software Foundation; either version 2.1 of the License, or
++#  (at your option) any later version.
++
++# See systemd.special(7) for details
++
++[Unit]
++Description=Rescue Shell
++DefaultDependencies=no
++Conflicts=shutdown.target
++After=basic.target plymouth-start.service
++Before=shutdown.target
++
++[Service]
++Environment=HOME=/
++WorkingDirectory=/
++ExecStart=-/bin/sh -i -l
++#ExecStopPost=-/usr/bin/systemctl --fail --no-block switch-root /sysroot /sbin/init
++ExecStopPost=-/usr/bin/systemctl --fail --no-block switch-root
++Type=idle
++StandardInput=tty-force
++StandardOutput=inherit
++StandardError=inherit
++KillMode=process
++
++# Bash ignores SIGTERM, so we send SIGHUP instead, to ensure that bash
++# terminates cleanly.
++KillSignal=SIGHUP
+diff --git a/modules.d/98systemd/switch-root.service b/modules.d/98systemd/switch-root.service
+new file mode 100644
+index 0000000..f72739e
+--- /dev/null
++++ b/modules.d/98systemd/switch-root.service
+@@ -0,0 +1,17 @@
++#  This file is part of systemd.
++#
++#  systemd is free software; you can redistribute it and/or modify it
++#  under the terms of the GNU Lesser General Public License as published by
++#  the Free Software Foundation; either version 2.1 of the License, or
++#  (at your option) any later version.
++
++[Unit]
++Description=Switch Root
++DefaultDependencies=no
++Requires=shutdown.target final.target
++After=shutdown.target final.target
++
++[Service]
++Type=oneshot
++EnvironmentFile=/etc/switch-root.conf
++ExecStart=/usr/bin/systemctl --force switch-root ${NEWROOT} ${NEWINIT}
+diff --git a/modules.d/98systemd/switch-root.target b/modules.d/98systemd/switch-root.target
+new file mode 100644
+index 0000000..d0d60e1
+--- /dev/null
++++ b/modules.d/98systemd/switch-root.target
+@@ -0,0 +1,16 @@
++#  This file is part of systemd.
++#
++#  systemd is free software; you can redistribute it and/or modify it
++#  under the terms of the GNU Lesser General Public License as published by
++#  the Free Software Foundation; either version 2.1 of the License, or
++#  (at your option) any later version.
++
++# See systemd.special(7) for details
++
++[Unit]
++Description=Switch Root
++DefaultDependencies=no
++Requires=switch-root.service
++After=switch-root.service
++AllowIsolate=yes
++
+diff --git a/test/TEST-02-SYSTEMD/99-idesymlinks.rules b/test/TEST-02-SYSTEMD/99-idesymlinks.rules
+new file mode 100644
+index 0000000..d557790
+--- /dev/null
++++ b/test/TEST-02-SYSTEMD/99-idesymlinks.rules
+@@ -0,0 +1,8 @@
++ACTION=="add|change", SUBSYSTEM=="block", ENV{DEVTYPE}=="disk", KERNEL=="hda", SYMLINK+="sda"
++ACTION=="add|change", SUBSYSTEM=="block", ENV{DEVTYPE}=="partition", KERNEL=="hda*", SYMLINK+="sda$env{MINOR}"
++ACTION=="add|change", SUBSYSTEM=="block", ENV{DEVTYPE}=="disk", KERNEL=="hdb", SYMLINK+="sdb"
++ACTION=="add|change", SUBSYSTEM=="block", ENV{DEVTYPE}=="partition", KERNEL=="hdb*", SYMLINK+="sdb$env{MINOR}"
++ACTION=="add|change", SUBSYSTEM=="block", ENV{DEVTYPE}=="disk", KERNEL=="hdc", SYMLINK+="sdc"
++ACTION=="add|change", SUBSYSTEM=="block", ENV{DEVTYPE}=="partition", KERNEL=="hdc*", SYMLINK+="sdc$env{MINOR}"
++ACTION=="add|change", SUBSYSTEM=="block", ENV{DEVTYPE}=="disk", KERNEL=="hdd", SYMLINK+="sdd"
++ACTION=="add|change", SUBSYSTEM=="block", ENV{DEVTYPE}=="partition", KERNEL=="hdd*", SYMLINK+="sdd$env{MINOR}"
+diff --git a/test/TEST-02-SYSTEMD/Makefile b/test/TEST-02-SYSTEMD/Makefile
+new file mode 100644
+index 0000000..bc0ddb6
+--- /dev/null
++++ b/test/TEST-02-SYSTEMD/Makefile
+@@ -0,0 +1,10 @@
++all:
++	@make -s --no-print-directory -C ../.. all
++	@basedir=../.. testdir=../ ./test.sh --all
++setup:
++	@make --no-print-directory -C ../.. all
++	@basedir=../.. testdir=../ ./test.sh --setup
++clean:
++	@basedir=../.. testdir=../ ./test.sh --clean
++run:
++	@basedir=../.. testdir=../ ./test.sh --run
+diff --git a/test/TEST-02-SYSTEMD/create-root.sh b/test/TEST-02-SYSTEMD/create-root.sh
+new file mode 100755
+index 0000000..0e91ab5
+--- /dev/null
++++ b/test/TEST-02-SYSTEMD/create-root.sh
+@@ -0,0 +1,23 @@
++#!/bin/sh
++# don't let udev and this script step on eachother's toes
++for x in 64-lvm.rules 70-mdadm.rules 99-mount-rules; do
++    > "/etc/udev/rules.d/$x"
++done
++rm /etc/lvm/lvm.conf
++udevadm control --reload-rules
++set -e
++# save a partition at the beginning for future flagging purposes
++sfdisk -C 1280 -H 2 -S 32 -L /dev/sda <<EOF
++,16
++,
++EOF
++
++mkfs.ext3 -L dracut /dev/sda2
++mkdir -p /root
++mount /dev/sda2 /root
++cp -a -t /root /source/*
++mkdir -p /root/run
++umount /root
++echo "dracut-root-block-created" >/dev/sda1
++poweroff -f
++
+diff --git a/test/TEST-02-SYSTEMD/cryptroot-ask.sh b/test/TEST-02-SYSTEMD/cryptroot-ask.sh
+new file mode 100755
+index 0000000..db27c5b
+--- /dev/null
++++ b/test/TEST-02-SYSTEMD/cryptroot-ask.sh
+@@ -0,0 +1,6 @@
++#!/bin/sh
++
++[ -b /dev/mapper/$2 ] && exit 0
++echo -n test >/keyfile
++/sbin/cryptsetup luksOpen $1 $2 </keyfile
++
+diff --git a/test/TEST-02-SYSTEMD/hard-off.sh b/test/TEST-02-SYSTEMD/hard-off.sh
+new file mode 100755
+index 0000000..12c3d5a
+--- /dev/null
++++ b/test/TEST-02-SYSTEMD/hard-off.sh
+@@ -0,0 +1,3 @@
++#!/bin/sh
++getarg rd.shell || poweroff -f
++getarg failme && poweroff -f
+diff --git a/test/TEST-02-SYSTEMD/test-init.sh b/test/TEST-02-SYSTEMD/test-init.sh
+new file mode 100755
+index 0000000..ff17b6b
+--- /dev/null
++++ b/test/TEST-02-SYSTEMD/test-init.sh
+@@ -0,0 +1,20 @@
++#!/bin/sh
++export PATH=/sbin:/bin:/usr/sbin:/usr/bin
++strstr() { [ "${1#*$2*}" != "$1" ]; }
++CMDLINE=$(while read line; do echo $line;done < /proc/cmdline)
++plymouth --quit
++exec </dev/console >/dev/console 2>&1
++echo "dracut-root-block-success" >/dev/sda1
++export TERM=linux
++export PS1='initramfs-test:\w\$ '
++[ -f /etc/mtab ] || ln -sfn /proc/mounts /etc/mtab
++[ -f /etc/fstab ] || ln -sfn /proc/mounts /etc/fstab
++stty sane
++echo "made it to the rootfs!"
++if strstr "$CMDLINE" "rd.shell"; then
++	strstr "$(setsid --help)" "control" && CTTY="-c"
++	setsid $CTTY sh -i
++fi
++echo "Powering down."
++mount -n -o remount,ro /
++poweroff -f
+diff --git a/test/TEST-02-SYSTEMD/test.sh b/test/TEST-02-SYSTEMD/test.sh
+new file mode 100755
+index 0000000..fe3bfd1
+--- /dev/null
++++ b/test/TEST-02-SYSTEMD/test.sh
+@@ -0,0 +1,95 @@
++#!/bin/bash
++TEST_DESCRIPTION="root filesystem on a ext3 filesystem"
++
++KVERSION=${KVERSION-$(uname -r)}
++
++# Uncomment this to debug failures
++#DEBUGFAIL="rd.shell"
++test_run() {
++    $testdir/run-qemu \
++	-hda $TESTDIR/root.ext3 \
++	-m 256M -nographic \
++	-net none -kernel /boot/vmlinuz-$KVERSION \
++	-append "root=LABEL=dracut rw loglevel=77 systemd.log_level=debug systemd.log_target=console rd.retry=3 rd.info console=ttyS0,115200n81 selinux=0 rd.debug $DEBUGFAIL" \
++	-initrd $TESTDIR/initramfs.testing
++    grep -m 1 -q dracut-root-block-success $TESTDIR/root.ext3 || return 1
++}
++
++test_setup() {
++    rm -f $TESTDIR/root.ext3
++    # Create the blank file to use as a root filesystem
++    dd if=/dev/null of=$TESTDIR/root.ext3 bs=1M seek=40
++
++    kernel=$KVERSION
++    # Create what will eventually be our root filesystem onto an overlay
++    (
++	initdir=$TESTDIR/overlay/source
++	mkdir -p $initdir
++	. $basedir/dracut-functions.sh
++	dracut_install sh df free ls shutdown poweroff stty cat ps ln ip route \
++	    mount dmesg ifconfig dhclient mkdir cp ping dhclient \
++	    umount strace less setsid
++	for _terminfodir in /lib/terminfo /etc/terminfo /usr/share/terminfo; do
++            [ -f ${_terminfodir}/l/linux ] && break
++	done
++	dracut_install -o ${_terminfodir}/l/linux
++	inst "$basedir/modules.d/40network/dhclient-script" "/sbin/dhclient-script"
++	inst "$basedir/modules.d/40network/ifup" "/sbin/ifup"
++	dracut_install grep
++	inst ./test-init.sh /sbin/init
++	find_binary plymouth >/dev/null && dracut_install plymouth
++	(cd "$initdir"; mkdir -p dev sys proc etc var/run tmp )
++	cp -a /etc/ld.so.conf* $initdir/etc
++	sudo ldconfig -r "$initdir"
++    )
++
++    # second, install the files needed to make the root filesystem
++    (
++	initdir=$TESTDIR/overlay
++	. $basedir/dracut-functions.sh
++	dracut_install sfdisk mkfs.ext3 poweroff cp umount
++	inst_hook initqueue 01 ./create-root.sh
++	inst_simple ./99-idesymlinks.rules /etc/udev/rules.d/99-idesymlinks.rules
++    )
++
++    # create an initramfs that will create the target root filesystem.
++    # We do it this way so that we do not risk trashing the host mdraid
++    # devices, volume groups, encrypted partitions, etc.
++    $basedir/dracut.sh -l -i $TESTDIR/overlay / \
++	-m "dash udev-rules base rootfs-block kernel-modules" \
++	-d "piix ide-gd_mod ata_piix ext3 sd_mod" \
++        --nomdadmconf \
++	-f $TESTDIR/initramfs.makeroot $KVERSION || return 1
++    rm -rf $TESTDIR/overlay
++    # Invoke KVM and/or QEMU to actually create the target filesystem.
++
++    $testdir/run-qemu \
++	-hda $TESTDIR/root.ext3 \
++	-m 256M -nographic -net none \
++	-kernel "/boot/vmlinuz-$kernel" \
++	-append "root=/dev/dracut/root rw rootfstype=ext3 quiet console=ttyS0,115200n81 selinux=0" \
++	-initrd $TESTDIR/initramfs.makeroot  || return 1
++    grep -m 1 -q dracut-root-block-created $TESTDIR/root.ext3 || return 1
++
++
++    (
++	initdir=$TESTDIR/overlay
++	. $basedir/dracut-functions.sh
++	dracut_install poweroff shutdown
++	inst_hook emergency 000 ./hard-off.sh
++	inst_simple ./99-idesymlinks.rules /etc/udev/rules.d/99-idesymlinks.rules
++    )
++    sudo $basedir/dracut.sh -l -i $TESTDIR/overlay / \
++	-a "debug systemd" \
++	-o "network" \
++	-d "piix ide-gd_mod ata_piix ext3 sd_mod" \
++	-f $TESTDIR/initramfs.testing $KVERSION || return 1
++
++#	-o "plymouth network md dmraid multipath fips caps crypt btrfs resume dmsquash-live dm"
++}
++
++test_cleanup() {
++    return 0
++}
++
++. $testdir/test-functions

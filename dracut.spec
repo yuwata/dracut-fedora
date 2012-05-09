@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 018
-Release: 40.git20120504%{?dist}
+Release: 52.git20120509%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -63,6 +63,18 @@ Patch36: 0036-TEST-15-BTRFSRAID-add-one-more-partition-to-the-btrf.patch
 Patch37: 0037-fix-_getcmdline-arg-duplicating-bug-with-etc-cmdline.patch
 Patch38: 0038-ifcfg-fix-resolv.conf.patch
 Patch39: 0039-TODO-update.patch
+Patch40: 0040-removed-old-udev-vol_id.patch
+Patch41: 0041-plymouth-plymouth-pretrigger.sh-check-for-tty-dev-ex.patch
+Patch42: 0042-dracut.spec-require-file.patch
+Patch43: 0043-test-TEST-01-BASIC-test.sh-fix-cleanup-of-overlay-di.patch
+Patch44: 0044-plymouth-plymouth-pretrigger.sh-get-consoledev-from-.patch
+Patch45: 0045-base-init.sh-set-DRACUT_QUIET-only-in-dracut-lib.sh.patch
+Patch46: 0046-base-dracut-lib.sh-export-UDEVVERSION.patch
+Patch47: 0047-dracut.sh-install-var-run-and-var-lock.patch
+Patch48: 0048-rootfs-block-block-genrules.sh-install-systemd-mount.patch
+Patch49: 0049-add-systemd-module.patch
+Patch50: 0050-ifcfg-write-ifcfg.sh-use-PREFIX-for-prefix-netmask-f.patch
+Patch51: 0051-dracut.spec-add-98systemd-module.patch
 
 
 BuildArch: noarch
@@ -116,6 +128,7 @@ Requires: hardlink
 Requires: gzip xz
 Requires: module-init-tools >= 3.7-9
 Requires: sed
+Requires: file
 Requires: udev > 166
 %if 0%{?fedora} || 0%{?rhel} > 6
 Requires: util-linux >= 2.21
@@ -329,6 +342,7 @@ rm -rf $RPM_BUILD_ROOT
 %{dracutlibdir}/modules.d/98ecryptfs
 %{dracutlibdir}/modules.d/98pollcdrom
 %{dracutlibdir}/modules.d/98syslog
+%{dracutlibdir}/modules.d/98systemd
 %{dracutlibdir}/modules.d/98usrmount
 %{dracutlibdir}/modules.d/99base
 %{dracutlibdir}/modules.d/99fs-lib
@@ -379,6 +393,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Wed May 09 2012 Harald Hoyer <harald@redhat.com> 018-52.git20120509
+- new upstream version
+
 * Fri May 04 2012 Harald Hoyer <harald@redhat.com> 018-40.git20120504
 - new upstream version
 

@@ -1,0 +1,21 @@
+From f6a58604a0f47b353f2ac1790fd37b1b312418b2 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 7 May 2012 16:28:44 +0200
+Subject: [PATCH] dracut.spec: require "file"
+
+---
+ dracut.spec |    1 +
+ 1 Datei geändert, 1 Zeile hinzugefügt(+)
+
+diff --git a/dracut.spec b/dracut.spec
+index 9f64213..77b197e 100644
+--- a/dracut.spec
++++ b/dracut.spec
+@@ -76,6 +76,7 @@ Requires: hardlink
+ Requires: gzip xz
+ Requires: module-init-tools >= 3.7-9
+ Requires: sed
++Requires: file
+ Requires: udev > 166
+ %if 0%{?fedora} || 0%{?rhel} > 6
+ Requires: util-linux >= 2.21
