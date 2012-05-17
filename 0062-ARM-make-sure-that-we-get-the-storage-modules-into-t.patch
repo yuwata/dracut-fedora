@@ -1,0 +1,27 @@
+From 5e00cf513bdd46de5492145ebee6fb35fa3e6173 Mon Sep 17 00:00:00 2001
+From: Dennis Gilmore <dennis@ausil.us>
+Date: Thu, 17 May 2012 01:30:38 -0500
+Subject: [PATCH 62/62] ARM: make sure that we get the storage modules into
+ the initramfs
+
+---
+ modules.d/90kernel-modules/module-setup.sh |    3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/modules.d/90kernel-modules/module-setup.sh b/modules.d/90kernel-modules/module-setup.sh
+index 26f4784..fd8b92c 100755
+--- a/modules.d/90kernel-modules/module-setup.sh
++++ b/modules.d/90kernel-modules/module-setup.sh
+@@ -35,6 +35,9 @@ installkernel() {
+         hostonly='' instmods pcmcia firewire-ohci
+         hostonly='' instmods usb_storage sdhci sdhci-pci
+ 
++        # arm specific modules
++        hostonly='' instmods sdhci_esdhc_imx mmci sdhci_tegra mvsdio omap sdhci_dove ahci_platform pata_imx sata_mv
++
+         # install keyboard support
+         hostonly='' instmods atkbd i8042 usbhid hid-apple hid-sunplus hid-cherry hid-logitech hid-logitech-dj hid-microsoft ehci-hcd ohci-hcd uhci-hcd
+         # install unix socket support
+-- 
+1.7.10.1
+

@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 018
-Release: 52.git20120509%{?dist}
+Release: 53.git20120509%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -75,7 +75,7 @@ Patch48: 0048-rootfs-block-block-genrules.sh-install-systemd-mount.patch
 Patch49: 0049-add-systemd-module.patch
 Patch50: 0050-ifcfg-write-ifcfg.sh-use-PREFIX-for-prefix-netmask-f.patch
 Patch51: 0051-dracut.spec-add-98systemd-module.patch
-
+Patch52: 0062-ARM-make-sure-that-we-get-the-storage-modules-into-t.patch
 
 BuildArch: noarch
 BuildRequires: dash bash git
@@ -393,6 +393,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Thu May 17 2012 Dennis Gilmore <dennis@ausil.us> 018-53.git20120509
+- add patch to pull in arm storage modules
+
 * Wed May 09 2012 Harald Hoyer <harald@redhat.com> 018-52.git20120509
 - new upstream version
 
