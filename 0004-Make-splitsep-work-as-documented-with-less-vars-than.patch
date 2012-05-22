@@ -11,7 +11,7 @@ should set two="all:the:rest". But there's no check to see if the
 current field is the last field, so it just gets "all".
 ---
  modules.d/99base/dracut-lib.sh |    3 ++-
- 1 Datei geändert, 2 Zeilen hinzugefügt(+), 1 Zeile entfernt(-)
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
 diff --git a/modules.d/99base/dracut-lib.sh b/modules.d/99base/dracut-lib.sh
 index 1ecd286..e10a34d 100755

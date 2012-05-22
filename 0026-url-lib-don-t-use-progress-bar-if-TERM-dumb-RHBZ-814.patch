@@ -12,7 +12,7 @@ that's reasonable on terminals where '\r' doesn't work.
 See also: https://bugzilla.redhat.com/show_bug.cgi?id=814713
 ---
  modules.d/45url-lib/url-lib.sh |    7 ++++++-
- 1 Datei geändert, 6 Zeilen hinzugefügt(+), 1 Zeile entfernt(-)
+ 1 file changed, 6 insertions(+), 1 deletion(-)
 
 diff --git a/modules.d/45url-lib/url-lib.sh b/modules.d/45url-lib/url-lib.sh
 index 7930146..5721294 100755

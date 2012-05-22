@@ -11,7 +11,7 @@ error messages.
 ---
  modules.d/40network/net-genrules.sh |    3 +++
  modules.d/40network/net-lib.sh      |    3 +++
- 2 Dateien geändert, 6 Zeilen hinzugefügt(+)
+ 2 files changed, 6 insertions(+)
 
 diff --git a/modules.d/40network/net-genrules.sh b/modules.d/40network/net-genrules.sh
 index 84fd3ac..b3d5584 100755

@@ -5,7 +5,7 @@ Subject: [PATCH] rootfs-block/block-genrules.sh: install systemd mount unit
 
 ---
  modules.d/95rootfs-block/block-genrules.sh |   17 +++++++++++++++++
- 1 Datei geändert, 17 Zeilen hinzugefügt(+)
+ 1 file changed, 17 insertions(+)
 
 diff --git a/modules.d/95rootfs-block/block-genrules.sh b/modules.d/95rootfs-block/block-genrules.sh
 index 1e6827a..fe6e331 100755

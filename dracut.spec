@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 018
-Release: 53.git20120509%{?dist}
+Release: 74.git20120522%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -75,7 +75,29 @@ Patch48: 0048-rootfs-block-block-genrules.sh-install-systemd-mount.patch
 Patch49: 0049-add-systemd-module.patch
 Patch50: 0050-ifcfg-write-ifcfg.sh-use-PREFIX-for-prefix-netmask-f.patch
 Patch51: 0051-dracut.spec-add-98systemd-module.patch
-Patch52: 0062-ARM-make-sure-that-we-get-the-storage-modules-into-t.patch
+Patch52: 0052-Fail-to-boot-if-mediacheck-fails-817419.patch
+Patch53: 0053-Makefile-call-git2spec.pl-with-LANG-C.patch
+Patch54: 0054-ifcfg-write-ifcfg.sh-add-s390-specific-configuration.patch
+Patch55: 0055-systemd-adapt-to-new-switch-root-mechanism.patch
+Patch56: 0056-base-module-setup.sh-link-proc-self-mounts-to-initdi.patch
+Patch57: 0057-systemd-dracut-pre-pivot.sh-s-udevd.service-systemd-.patch
+Patch58: 0058-systemd-switch-root.target-run-target-before-switch-.patch
+Patch59: 0059-systemd-switch-root.service-do-not-require-shutdown-.patch
+Patch60: 0060-systemd-store-switch-root.conf-in-run-initramfs.patch
+Patch61: 0061-Makefile-install-dracut-service-files-from-systemd-d.patch
+Patch62: 0062-90kernel-modules-module-setup.sh-install-xhci-hcd.patch
+Patch63: 0063-check-kernel-module-existance.patch
+Patch64: 0064-check-install-files-passed-by-cmdline.patch
+Patch65: 0065-dracut-fstab-sys-Wait-for-devices-specified-using-mo.patch
+Patch66: 0066-TEST-01-BASIC-sync-after-creating-the-root-disk.patch
+Patch67: 0067-add-option-printsize.patch
+Patch68: 0068-check-ifenslave-instead-of-brctl-in-parse-bond.sh.patch
+Patch69: 0069-ARM-make-sure-that-we-get-the-storage-modules-into-t.patch
+Patch70: 0070-Use-the-right-argument-for-dasd-module-options.patch
+Patch71: 0071-Translate-dasd-arg-contents-into-proper-dasd.conf.patch
+Patch72: 0072-Normalize-dasd-argument-content-for-dasd.conf.patch
+Patch73: 0073-ifcfg-write-ifcfg.sh-fixed-IFS-resetting.patch
+
 
 BuildArch: noarch
 BuildRequires: dash bash git
@@ -353,6 +375,7 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_sharedstatedir}/initramfs
 %if %{defined _unitdir}
 %{_unitdir}/*.service
+%{_unitdir}/*.target
 %{_unitdir}/*/*.service
 %endif
 
@@ -393,6 +416,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Tue May 22 2012 Harald Hoyer <harald@redhat.com> 018-74.git20120522
+- new upstream version
+
 * Thu May 17 2012 Dennis Gilmore <dennis@ausil.us> 018-53.git20120509
 - add patch to pull in arm storage modules
 

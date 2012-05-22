@@ -5,7 +5,7 @@ Subject: [PATCH] udev-rules/module-setup.sh: fixed udevd location
 
 ---
  modules.d/95udev-rules/module-setup.sh |   24 ++++++++----------------
- 1 Datei geändert, 8 Zeilen hinzugefügt(+), 16 Zeilen entfernt(-)
+ 1 file changed, 8 insertions(+), 16 deletions(-)
 
 diff --git a/modules.d/95udev-rules/module-setup.sh b/modules.d/95udev-rules/module-setup.sh
 index cc42eb7..b4acce3 100755

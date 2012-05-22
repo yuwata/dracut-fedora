@@ -6,7 +6,7 @@ Subject: [PATCH] base/init.sh: set DRACUT_QUIET only in dracut-lib.sh
 ---
  modules.d/99base/dracut-lib.sh |    3 +++
  modules.d/99base/init.sh       |    6 ------
- 2 Dateien geändert, 3 Zeilen hinzugefügt(+), 6 Zeilen entfernt(-)
+ 2 files changed, 3 insertions(+), 6 deletions(-)
 
 diff --git a/modules.d/99base/dracut-lib.sh b/modules.d/99base/dracut-lib.sh
 index ddb6954..e46e456 100755

@@ -1,0 +1,128 @@
+From f72318243c7e5145393b2c9830779426a124cf83 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Tue, 15 May 2012 18:57:29 +0200
+Subject: [PATCH] systemd: adapt to new switch-root mechanism
+
+---
+ modules.d/98systemd/dracut-initqueue.sh |    3 ++-
+ modules.d/98systemd/dracut-pre-pivot.sh |   15 ++++-----------
+ modules.d/98systemd/emergency.service   |    2 +-
+ modules.d/98systemd/module-setup.sh     |   10 +++++-----
+ modules.d/98systemd/rescue.service      |    2 +-
+ test/TEST-02-SYSTEMD/test.sh            |    2 +-
+ 6 files changed, 14 insertions(+), 20 deletions(-)
+
+diff --git a/modules.d/98systemd/dracut-initqueue.sh b/modules.d/98systemd/dracut-initqueue.sh
+index 402f536..5b6994d 100755
+--- a/modules.d/98systemd/dracut-initqueue.sh
++++ b/modules.d/98systemd/dracut-initqueue.sh
+@@ -106,6 +106,7 @@ done
+     while read dev mp rest; do [ "$mp" = "$NEWROOT" ] && echo $dev; done < /proc/mounts
+ } | vinfo
+ 
+-systemctl switch-root
+ 
+ export -p > /dracut-state.sh
++
++systemctl isolate switch-root.target
+diff --git a/modules.d/98systemd/dracut-pre-pivot.sh b/modules.d/98systemd/dracut-pre-pivot.sh
+index 5ee1dd0..0d717a6 100755
+--- a/modules.d/98systemd/dracut-pre-pivot.sh
++++ b/modules.d/98systemd/dracut-pre-pivot.sh
+@@ -20,26 +20,19 @@ source_hook cleanup
+ 
+ # By the time we get here, the root filesystem should be mounted.
+ # Try to find init. 
+-for i in "$(getarg real_init=)" "$(getarg init=)" $(getargs rd.distroinit=) /sbin/init; do
++
++for i in "$(getarg real_init=)" "$(getarg init=)"; do
+     [ -n "$i" ] || continue
+ 
+     __p=$(readlink -f "${NEWROOT}/${i}")
+     if [ -x "$__p" ]; then
+         INIT="$i"
++        echo "NEWINIT=\"$INIT\"" > /etc/switch-root.conf
+         break
+     fi
+ done
+ 
+-if [ -n "$INIT" ]; then
+-    {
+-        echo "NEWROOT=\"$NEWROOT\""
+-        echo "NEWINIT=\"$INIT\""
+-    } > /etc/switch-root.conf
+-else
+-    echo "Cannot find init!"
+-    echo "Please check to make sure you passed a valid root filesystem!"
+-    emergency_shell
+-fi
++echo "NEWROOT=\"$NEWROOT\"" >> /etc/switch-root.conf
+ 
+ udevadm control --stop-exec-queue
+ systemctl stop udevd.service
+diff --git a/modules.d/98systemd/emergency.service b/modules.d/98systemd/emergency.service
+index ecebf96..7c705c4 100644
+--- a/modules.d/98systemd/emergency.service
++++ b/modules.d/98systemd/emergency.service
+@@ -17,7 +17,7 @@ Before=shutdown.target
+ Environment=HOME=/
+ WorkingDirectory=/
+ ExecStart=-/bin/sh -i -l
+-ExecStopPost=-/usr/bin/systemctl --fail --no-block switch-root 
++ExecStopPost=-/usr/bin/systemctl --fail --no-block default
+ Type=idle
+ StandardInput=tty-force
+ StandardOutput=inherit
+diff --git a/modules.d/98systemd/module-setup.sh b/modules.d/98systemd/module-setup.sh
+index 22e570f..c045af5 100755
+--- a/modules.d/98systemd/module-setup.sh
++++ b/modules.d/98systemd/module-setup.sh
+@@ -114,10 +114,10 @@ install() {
+ 
+     ln -fs /lib/systemd/systemd "$initdir/init"
+ 
+-    {
+-        echo "LogLevel=debug"
+-        echo "LogTarget=console"
+-    } >> "$initdir/etc/systemd/system.conf"
++#    {
++#        echo "LogLevel=debug"
++#        echo "LogTarget=console"
++#    } >> "$initdir/etc/systemd/system.conf"
+ 
+     rm -f "$initdir/lib/systemd/system/emergency.service"
+     inst "$moddir/emergency.service" /lib/systemd/system/emergency.service
+@@ -145,6 +145,6 @@ install() {
+     inst "$moddir/dracut-pre-pivot.service" /lib/systemd/system/dracut-pre-pivot.service
+     mkdir -p "$initdir/lib/systemd/system/switch-root.target.wants"
+     ln -s ../dracut-pre-pivot.service "$initdir/lib/systemd/system/switch-root.target.wants/dracut-pre-pivot.service"
+-    
++    > "$initdir/etc/machine-id" 
+ }
+ 
+diff --git a/modules.d/98systemd/rescue.service b/modules.d/98systemd/rescue.service
+index 057f8b4..652308c 100644
+--- a/modules.d/98systemd/rescue.service
++++ b/modules.d/98systemd/rescue.service
+@@ -19,7 +19,7 @@ Environment=HOME=/
+ WorkingDirectory=/
+ ExecStart=-/bin/sh -i -l
+ #ExecStopPost=-/usr/bin/systemctl --fail --no-block switch-root /sysroot /sbin/init
+-ExecStopPost=-/usr/bin/systemctl --fail --no-block switch-root
++ExecStopPost=-/usr/bin/systemctl --fail --no-block default
+ Type=idle
+ StandardInput=tty-force
+ StandardOutput=inherit
+diff --git a/test/TEST-02-SYSTEMD/test.sh b/test/TEST-02-SYSTEMD/test.sh
+index fe3bfd1..334b636 100755
+--- a/test/TEST-02-SYSTEMD/test.sh
++++ b/test/TEST-02-SYSTEMD/test.sh
+@@ -10,7 +10,7 @@ test_run() {
+ 	-hda $TESTDIR/root.ext3 \
+ 	-m 256M -nographic \
+ 	-net none -kernel /boot/vmlinuz-$KVERSION \
+-	-append "root=LABEL=dracut rw loglevel=77 systemd.log_level=debug systemd.log_target=console rd.retry=3 rd.info console=ttyS0,115200n81 selinux=0 rd.debug $DEBUGFAIL" \
++	-append "root=LABEL=dracut rw loglevel=77 systemd.log_level=debug systemd.log_target=console rd.retry=3 rd.info console=ttyS0,115200n81 selinux=0 rd.debug init=/sbin/init $DEBUGFAIL" \
+ 	-initrd $TESTDIR/initramfs.testing
+     grep -m 1 -q dracut-root-block-success $TESTDIR/root.ext3 || return 1
+ }

@@ -15,7 +15,7 @@ Detect and optimize for this case so that the filesystem is only
 mounted once.
 ---
  modules.d/95rootfs-block/mount-root.sh |   12 ++++++++----
- 1 Datei geändert, 8 Zeilen hinzugefügt(+), 4 Zeilen entfernt(-)
+ 1 file changed, 8 insertions(+), 4 deletions(-)
 
 diff --git a/modules.d/95rootfs-block/mount-root.sh b/modules.d/95rootfs-block/mount-root.sh
 index 2c89431..aef99ae 100755

@@ -1,0 +1,34 @@
+From cfe32ef5ba0be76fecd024b702997d1f46d45e2d Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 16 May 2012 11:51:26 +0200
+Subject: [PATCH] TEST-01-BASIC: sync after creating the root disk
+
+---
+ test/TEST-01-BASIC/create-root.sh |    1 +
+ test/TEST-01-BASIC/test.sh        |    2 +-
+ 2 files changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/test/TEST-01-BASIC/create-root.sh b/test/TEST-01-BASIC/create-root.sh
+index 0e91ab5..046bfb9 100755
+--- a/test/TEST-01-BASIC/create-root.sh
++++ b/test/TEST-01-BASIC/create-root.sh
+@@ -19,5 +19,6 @@ cp -a -t /root /source/*
+ mkdir -p /root/run
+ umount /root
+ echo "dracut-root-block-created" >/dev/sda1
++sync
+ poweroff -f
+ 
+diff --git a/test/TEST-01-BASIC/test.sh b/test/TEST-01-BASIC/test.sh
+index 36d2693..46e75c7 100755
+--- a/test/TEST-01-BASIC/test.sh
++++ b/test/TEST-01-BASIC/test.sh
+@@ -48,7 +48,7 @@ test_setup() {
+     (
+ 	initdir=$TESTDIR/overlay
+ 	. $basedir/dracut-functions.sh
+-	dracut_install sfdisk mkfs.ext3 poweroff cp umount
++	dracut_install sfdisk mkfs.ext3 poweroff cp umount sync
+ 	inst_hook initqueue 01 ./create-root.sh
+ 	inst_simple ./99-idesymlinks.rules /etc/udev/rules.d/99-idesymlinks.rules
+     )

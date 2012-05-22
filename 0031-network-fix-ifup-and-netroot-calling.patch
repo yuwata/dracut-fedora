@@ -9,7 +9,7 @@ Subject: [PATCH] network: fix ifup and netroot calling
  modules.d/40network/net-genrules.sh    |    6 ---
  modules.d/40network/net-lib.sh         |    4 --
  modules.d/40network/netroot.sh         |   27 ++-----------
- 5 Dateien geändert, 48 Zeilen hinzugefügt(+), 86 Zeilen entfernt(-)
+ 5 files changed, 48 insertions(+), 86 deletions(-)
 
 diff --git a/modules.d/40network/dhclient-script.sh b/modules.d/40network/dhclient-script.sh
 index 52e4900..dd893c1 100755

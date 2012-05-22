@@ -5,7 +5,7 @@ Subject: [PATCH] plymouth/plymouth-pretrigger.sh: check for tty dev existence
 
 ---
  modules.d/50plymouth/plymouth-pretrigger.sh |    4 ++--
- 1 Datei geändert, 2 Zeilen hinzugefügt(+), 2 Zeilen entfernt(-)
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/modules.d/50plymouth/plymouth-pretrigger.sh b/modules.d/50plymouth/plymouth-pretrigger.sh
 index 50828af..8fa0aec 100755

@@ -5,7 +5,7 @@ Subject: [PATCH] base/dracut-lib.sh: export UDEVVERSION
 
 ---
  modules.d/99base/dracut-lib.sh |    4 ++--
- 1 Datei geändert, 2 Zeilen hinzugefügt(+), 2 Zeilen entfernt(-)
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/modules.d/99base/dracut-lib.sh b/modules.d/99base/dracut-lib.sh
 index e46e456..2fe8a5e 100755

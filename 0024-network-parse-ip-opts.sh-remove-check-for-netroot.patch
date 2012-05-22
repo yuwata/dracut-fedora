@@ -7,7 +7,7 @@ with anaconda and all other kind of stuff, we might want network, even
 for root not on the network
 ---
  modules.d/40network/parse-ip-opts.sh |    8 --------
- 1 Datei geändert, 8 Zeilen entfernt(-)
+ 1 file changed, 8 deletions(-)
 
 diff --git a/modules.d/40network/parse-ip-opts.sh b/modules.d/40network/parse-ip-opts.sh
 index 97702a2..5637a9a 100755

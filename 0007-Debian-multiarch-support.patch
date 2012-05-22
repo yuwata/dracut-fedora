@@ -23,7 +23,7 @@ directory:
  modules.d/95nfs/module-setup.sh        |    6 +-----
  modules.d/95udev-rules/module-setup.sh |    4 +---
  modules.d/98syslog/module-setup.sh     |    8 +++-----
- 12 Dateien geändert, 58 Zeilen hinzugefügt(+), 42 Zeilen entfernt(-)
+ 12 files changed, 58 insertions(+), 42 deletions(-)
 
 diff --git a/dracut-functions.sh b/dracut-functions.sh
 index 910f2d8..f5611dc 100755

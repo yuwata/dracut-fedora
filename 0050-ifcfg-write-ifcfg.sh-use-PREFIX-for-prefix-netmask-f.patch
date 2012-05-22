@@ -6,7 +6,7 @@ Subject: [PATCH] ifcfg/write-ifcfg.sh: use PREFIX for prefix netmask form
 https://bugzilla.redhat.com/show_bug.cgi?id=820185
 ---
  modules.d/45ifcfg/write-ifcfg.sh |    6 +++++-
- 1 Datei geändert, 5 Zeilen hinzugefügt(+), 1 Zeile entfernt(-)
+ 1 file changed, 5 insertions(+), 1 deletion(-)
 
 diff --git a/modules.d/45ifcfg/write-ifcfg.sh b/modules.d/45ifcfg/write-ifcfg.sh
 index f612762..580fbd4 100755

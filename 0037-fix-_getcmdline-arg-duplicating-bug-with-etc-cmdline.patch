@@ -13,7 +13,7 @@ This is a serious problem if you have (e.g.) "ip=eth0:dhcp" in
 you have two configurations for eth0.
 ---
  modules.d/99base/dracut-lib.sh |    1 +
- 1 Datei geändert, 1 Zeile hinzugefügt(+)
+ 1 file changed, 1 insertion(+)
 
 diff --git a/modules.d/99base/dracut-lib.sh b/modules.d/99base/dracut-lib.sh
 index a6b8d1a..ddb6954 100755

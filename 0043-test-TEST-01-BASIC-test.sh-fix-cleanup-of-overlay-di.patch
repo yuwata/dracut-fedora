@@ -5,7 +5,7 @@ Subject: [PATCH] test/TEST-01-BASIC/test.sh: fix cleanup of overlay dir
 
 ---
  test/TEST-01-BASIC/test.sh |    2 +-
- 1 Datei geändert, 1 Zeile hinzugefügt(+), 1 Zeile entfernt(-)
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/test/TEST-01-BASIC/test.sh b/test/TEST-01-BASIC/test.sh
 index 6187144..36d2693 100755

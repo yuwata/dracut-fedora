@@ -5,7 +5,7 @@ Subject: [PATCH] dracut.spec: add 98systemd module
 
 ---
  dracut.spec |    1 +
- 1 Datei geändert, 1 Zeile hinzugefügt(+)
+ 1 file changed, 1 insertion(+)
 
 diff --git a/dracut.spec b/dracut.spec
 index 77b197e..73c66b5 100644

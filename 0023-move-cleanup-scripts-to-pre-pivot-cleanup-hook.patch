@@ -17,7 +17,7 @@ Signed-off-by: Dave Young <dyoung@redhat.com>
  modules.d/90multipath/module-setup.sh |    2 +-
  modules.d/95iscsi/module-setup.sh     |    2 +-
  modules.d/95nfs/module-setup.sh       |    2 +-
- 5 Dateien geändert, 5 Zeilen hinzugefügt(+), 5 Zeilen entfernt(-)
+ 5 files changed, 5 insertions(+), 5 deletions(-)
 
 diff --git a/modules.d/40network/module-setup.sh b/modules.d/40network/module-setup.sh
 index 253a87e..c2ad815 100755

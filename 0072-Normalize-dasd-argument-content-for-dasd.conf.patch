@@ -1,0 +1,38 @@
+From 965d14726abc7506e046f86dbf53a8644439e25b Mon Sep 17 00:00:00 2001
+From: Jesse Keating <jkeating@redhat.com>
+Date: Fri, 18 May 2012 14:50:20 -0700
+Subject: [PATCH] Normalize dasd argument content for dasd.conf
+
+Also overwrite any existing files, contents from CMSCONFFILE override
+any boot arguments.
+---
+ modules.d/80cms/cmssetup.sh     |    4 ++--
+ modules.d/80cms/module-setup.sh |    2 +-
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/modules.d/80cms/cmssetup.sh b/modules.d/80cms/cmssetup.sh
+index 6aa456c..995bfa7 100755
+--- a/modules.d/80cms/cmssetup.sh
++++ b/modules.d/80cms/cmssetup.sh
+@@ -169,8 +169,8 @@ processcmsfile()
+     fi
+ 
+     if [[ $DASD ]]; then
+-	echo $DASD >> /etc/dasd.conf
+-	echo "options dasd_mod dasd=$DASD" >> /etc/modprobe.d/dasd_mod.conf
++	echo $DASD | normalize_dasd_arg > /etc/dasd.conf
++	echo "options dasd_mod dasd=$DASD" > /etc/modprobe.d/dasd_mod.conf
+ 	dasd_cio_free
+     fi
+ 
+diff --git a/modules.d/80cms/module-setup.sh b/modules.d/80cms/module-setup.sh
+index 5cce1b4..15dce89 100755
+--- a/modules.d/80cms/module-setup.sh
++++ b/modules.d/80cms/module-setup.sh
+@@ -34,5 +34,5 @@ install() {
+     inst_libdir_file "gconv/*"
+ #inst /usr/lib/locale/locale-archive
+ 
+-    dracut_install cmsfs-fuse fusermount ulockmgr_server bash tr insmod rmmod cat
++    dracut_install cmsfs-fuse fusermount ulockmgr_server bash tr insmod rmmod cat normalize_dasd_arg
+ }

@@ -7,7 +7,7 @@ resembles export -n for dash
 ---
  modules.d/99base/dracut-lib.sh |   13 +++++++++++++
  modules.d/99base/init.sh       |   12 ++++--------
- 2 Dateien geändert, 17 Zeilen hinzugefügt(+), 8 Zeilen entfernt(-)
+ 2 files changed, 17 insertions(+), 8 deletions(-)
 
 diff --git a/modules.d/99base/dracut-lib.sh b/modules.d/99base/dracut-lib.sh
 index f46c4a7..a4aa20c 100755

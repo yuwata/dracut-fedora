@@ -6,7 +6,7 @@ Subject: [PATCH] network/module-setup.sh: include all kernel/drivers/net/phy
 
 ---
  modules.d/40network/module-setup.sh |    1 +
- 1 Datei geändert, 1 Zeile hinzugefügt(+)
+ 1 file changed, 1 insertion(+)
 
 diff --git a/modules.d/40network/module-setup.sh b/modules.d/40network/module-setup.sh
 index 97fc5cb..253a87e 100755

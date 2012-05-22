@@ -5,7 +5,7 @@ Subject: [PATCH] dracut.cmdline.7.asc: document "resume=" option
 
 ---
  dracut.cmdline.7.asc |   11 +++++++++++
- 1 Datei geändert, 11 Zeilen hinzugefügt(+)
+ 1 file changed, 11 insertions(+)
 
 diff --git a/dracut.cmdline.7.asc b/dracut.cmdline.7.asc
 index a1e06dd..c77fee5 100644

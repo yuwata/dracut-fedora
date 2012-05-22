@@ -1,0 +1,43 @@
+From b0772db56a532e19379ddd4369f3668d3192908c Mon Sep 17 00:00:00 2001
+From: Jesse Keating <jkeating@redhat.com>
+Date: Fri, 18 May 2012 14:06:54 -0700
+Subject: [PATCH] Translate dasd arg contents into proper dasd.conf
+
+This uses a (new) s390utils utility to normalize the range we might get
+in a dasd argument and generates a properly formatted output for
+dasd.conf.
+---
+ modules.d/95dasd/module-setup.sh |    2 +-
+ modules.d/95dasd/parse-dasd.sh   |    4 ++--
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/modules.d/95dasd/module-setup.sh b/modules.d/95dasd/module-setup.sh
+index 88dfc6d..74efc7b 100755
+--- a/modules.d/95dasd/module-setup.sh
++++ b/modules.d/95dasd/module-setup.sh
+@@ -18,7 +18,7 @@ installkernel() {
+ 
+ install() {
+     inst_hook cmdline 30 "$moddir/parse-dasd.sh"
+-    dracut_install tr dasdinfo dasdconf.sh
++    dracut_install tr dasdinfo dasdconf.sh normalize_dasd_arg
+     if [[ $hostonly ]]; then
+         inst /etc/dasd.conf
+     fi
+diff --git a/modules.d/95dasd/parse-dasd.sh b/modules.d/95dasd/parse-dasd.sh
+index 4aeecd5..b3d18fa 100755
+--- a/modules.d/95dasd/parse-dasd.sh
++++ b/modules.d/95dasd/parse-dasd.sh
+@@ -1,10 +1,10 @@
+ #!/bin/sh
+ # -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
+ # ex: ts=8 sw=4 sts=4 et filetype=sh
+-for dasd_arg in $(getargs rd.dasd 'rd_DASD='); do
++for dasd_arg in $(getargs rd.dasd= rd_DASD= DASD=); do
+     (
+         IFS=","
+         set $dasd_arg
+-        echo "$@" >> /etc/dasd.conf
++        echo "$@" | normalize_dasd_arg >> /etc/dasd.conf
+     )
+ done

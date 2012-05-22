@@ -6,7 +6,7 @@ Subject: [PATCH] dracut.sh: log installed modules to
 
 ---
  dracut.sh |    5 +++++
- 1 Datei geändert, 5 Zeilen hinzugefügt(+)
+ 1 file changed, 5 insertions(+)
 
 diff --git a/dracut.sh b/dracut.sh
 index 7f61143..1048e75 100755

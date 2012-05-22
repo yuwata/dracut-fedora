@@ -10,7 +10,7 @@ Subject: [PATCH] removed old udev "vol_id"
  modules.d/90mdraid/module-setup.sh                       |   14 ++++++--------
  modules.d/95udev-rules/59-persistent-storage-volid.rules |    7 -------
  modules.d/95udev-rules/module-setup.sh                   |    9 ++-------
- 6 Dateien geändert, 10 Zeilen hinzugefügt(+), 38 Zeilen entfernt(-)
+ 6 files changed, 10 insertions(+), 38 deletions(-)
  delete mode 100644 modules.d/95udev-rules/59-persistent-storage-volid.rules
 
 diff --git a/dracut-functions.sh b/dracut-functions.sh

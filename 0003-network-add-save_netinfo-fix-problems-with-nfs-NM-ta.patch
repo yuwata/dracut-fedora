@@ -13,7 +13,7 @@ copies the dhclient files into place.
 ---
  modules.d/40network/net-lib.sh |   16 ++++++++++++++++
  modules.d/40network/netroot.sh |   10 ++--------
- 2 Dateien geändert, 18 Zeilen hinzugefügt(+), 8 Zeilen entfernt(-)
+ 2 files changed, 18 insertions(+), 8 deletions(-)
 
 diff --git a/modules.d/40network/net-lib.sh b/modules.d/40network/net-lib.sh
 index a7abe81..c0f73da 100644

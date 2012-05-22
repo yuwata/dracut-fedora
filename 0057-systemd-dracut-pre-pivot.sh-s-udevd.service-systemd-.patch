@@ -1,0 +1,23 @@
+From 022c5a802f2cbba9fd11903ed616cee7648b2f63 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 16 May 2012 11:20:59 +0200
+Subject: [PATCH] systemd/dracut-pre-pivot.sh:
+ s/udevd.service/systemd-udev.service/
+
+---
+ modules.d/98systemd/dracut-pre-pivot.sh |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/modules.d/98systemd/dracut-pre-pivot.sh b/modules.d/98systemd/dracut-pre-pivot.sh
+index 0d717a6..272b293 100755
+--- a/modules.d/98systemd/dracut-pre-pivot.sh
++++ b/modules.d/98systemd/dracut-pre-pivot.sh
+@@ -35,7 +35,7 @@ done
+ echo "NEWROOT=\"$NEWROOT\"" >> /etc/switch-root.conf
+ 
+ udevadm control --stop-exec-queue
+-systemctl stop udevd.service
++systemctl stop systemd-udev.service
+ udevadm info --cleanup-db
+ 
+ # remove helper symlink

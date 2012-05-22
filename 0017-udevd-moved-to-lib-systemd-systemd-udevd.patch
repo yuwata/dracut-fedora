@@ -7,7 +7,7 @@ Subject: [PATCH] udevd moved to /lib/systemd/systemd-udevd
  dracut.conf.d/fedora.conf.example      |    1 +
  modules.d/95udev-rules/module-setup.sh |   10 +++++++++-
  modules.d/99base/init.sh               |    2 +-
- 3 Dateien geändert, 11 Zeilen hinzugefügt(+), 2 Zeilen entfernt(-)
+ 3 files changed, 11 insertions(+), 2 deletions(-)
 
 diff --git a/dracut.conf.d/fedora.conf.example b/dracut.conf.d/fedora.conf.example
 index 02a530e..617d967 100644

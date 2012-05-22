@@ -6,7 +6,7 @@ Subject: [PATCH] ifcfg: fix resolv.conf
 /etc/net.*.resolv.conf is not a useful filename; copy it to resolv.conf
 ---
  modules.d/45ifcfg/write-ifcfg.sh |    2 +-
- 1 Datei geändert, 1 Zeile hinzugefügt(+), 1 Zeile entfernt(-)
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/modules.d/45ifcfg/write-ifcfg.sh b/modules.d/45ifcfg/write-ifcfg.sh
 index b81ac39..f612762 100755

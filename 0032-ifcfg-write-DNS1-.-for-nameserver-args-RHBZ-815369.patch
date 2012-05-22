@@ -11,7 +11,7 @@ Thanks to Mark Hamzy <hamzy@us.ibm.com>
 and Will Woods <wwoods@redhat.com> for the patch.
 ---
  modules.d/45ifcfg/write-ifcfg.sh |    5 +++++
- 1 Datei geändert, 5 Zeilen hinzugefügt(+)
+ 1 file changed, 5 insertions(+)
 
 diff --git a/modules.d/45ifcfg/write-ifcfg.sh b/modules.d/45ifcfg/write-ifcfg.sh
 index c072a13..b81ac39 100755

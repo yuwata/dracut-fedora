@@ -6,7 +6,7 @@ Subject: [PATCH] Makefile: do not install systemd service in reboot
 shutdown is enough. It is pulled in on reboot.
 ---
  Makefile |    3 ---
- 1 Datei geändert, 3 Zeilen entfernt(-)
+ 1 file changed, 3 deletions(-)
 
 diff --git a/Makefile b/Makefile
 index c62aae1..5ce1778 100644

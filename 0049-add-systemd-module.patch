@@ -25,7 +25,7 @@ Subject: [PATCH] add systemd module
  test/TEST-02-SYSTEMD/hard-off.sh               |    3 +
  test/TEST-02-SYSTEMD/test-init.sh              |   20 ++++
  test/TEST-02-SYSTEMD/test.sh                   |   95 +++++++++++++++
- 21 Dateien geändert, 747 Zeilen hinzugefügt(+)
+ 21 files changed, 747 insertions(+)
  create mode 100755 modules.d/98systemd/dracut-cmdline.sh
  create mode 100644 modules.d/98systemd/dracut-initqueue.service
  create mode 100755 modules.d/98systemd/dracut-initqueue.sh
