@@ -1,0 +1,207 @@
+From fe1484f3db0c7fe7fe8e6d5cc1e6e4d8f0b17052 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 6 Jun 2012 18:20:35 +0200
+Subject: [PATCH] modules are now only handled with /sys/modules and
+ modules.dep
+
+No more "find" and /proc/modules checking. We now rely entirely on
+depmod and modules.dep
+---
+ TODO                                 |    3 +-
+ dracut-functions.sh                  |   56 +++++++-----------------------
+ dracut.sh                            |    5 +++
+ modules.d/50plymouth/module-setup.sh |   62 +++++++++++++++++++++++++---------
+ 4 files changed, 65 insertions(+), 61 deletions(-)
+
+diff --git a/TODO b/TODO
+index acbb0a2..095ec97 100644
+--- a/TODO
++++ b/TODO
+@@ -17,7 +17,8 @@ INITRAMFS TODO
+ 
+ GENERATOR TODO
+ 
+-- remove /proc/modules use /sys/module
++- add interpreter/plugin-scripts to be sourced at the beginning or end (can use dracut-functions)
++- provide "installkernel" and "new-kernel-pkg"
+ - add mechanism for module specific command line options
+ - pkg-config integration, to make it easy for other packages to use us.
+ - add recovery image creator (mkrecovery)
+diff --git a/dracut-functions.sh b/dracut-functions.sh
+index 8aba88d..6a72fce 100755
+--- a/dracut-functions.sh
++++ b/dracut-functions.sh
+@@ -1053,7 +1053,7 @@ install_kmod_with_fw() {
+             fi
+         done
+         if [[ $_found != yes ]]; then
+-            if ! grep -qe "\<${_modname//-/_}\>" /proc/modules; then
++            if ! [[ -d $(echo /sys/module/${_modname//-/_}|{ read a b; echo $a; }) ]]; then
+                 dinfo "Possible missing firmware \"${_fw}\" for kernel module" \
+                     "\"${_modname}.ko\""
+             else
+@@ -1086,54 +1086,21 @@ for_each_kmod_dep() {
+     )
+ }
+ 
+-# filter kernel modules to install certain modules that meet specific
+-# requirements.
+-# $1 = search only in subdirectory of /kernel/$1
+-# $2 = function to call with module name to filter.
+-#      This function will be passed the full path to the module to test.
+-# The behaviour of this function can vary depending on whether $hostonly is set.
+-# If it is, we will only look at modules that are already in memory.
+-# If it is not, we will look at all kernel modules
+-# This function returns the full filenames of modules that match $1
+-filter_kernel_modules_by_path () (
+-    local _modname _filtercmd
+-    if ! [[ $hostonly ]]; then
+-        _filtercmd='find "$srcmods/kernel/$1" "$srcmods/extra"'
+-        _filtercmd+=' "$srcmods/weak-updates" -name "*.ko" -o -name "*.ko.gz"'
+-        _filtercmd+=' -o -name "*.ko.xz"'
+-        _filtercmd+=' 2>/dev/null'
+-    else
+-        _filtercmd='cut -d " " -f 1 </proc/modules|xargs modinfo -F filename '
+-        _filtercmd+='-k $kernel 2>/dev/null'
+-    fi
+-    for _modname in $(eval $_filtercmd); do
+-        case $_modname in
+-            *.ko) "$2" "$_modname" && echo "$_modname";;
+-            *.ko.gz) gzip -dc "$_modname" > $initdir/$$.ko
+-                $2 $initdir/$$.ko && echo "$_modname"
+-                rm -f $initdir/$$.ko
+-                ;;
+-            *.ko.xz) xz -dc "$_modname" > $initdir/$$.ko
+-                $2 $initdir/$$.ko && echo "$_modname"
+-                rm -f $initdir/$$.ko
+-                ;;
+-        esac
+-    done
+-)
++
+ find_kernel_modules_by_path () (
+     if ! [[ $hostonly ]]; then
+-        find "$srcmods/kernel/$1" "$srcmods/extra" "$srcmods/weak-updates" \
+-          -name "*.ko" -o -name "*.ko.gz" -o -name "*.ko.xz" 2>/dev/null
++        while read a rest; do
++            if [[ "${a##kernel}" != "$a" ]]; then
++                [[ "${a##kernel/$1}" != "$a" ]] || continue
++            fi
++            echo $srcmods/${a%:}
++        done < $srcmods/modules.dep
+     else
+-        cut -d " " -f 1 </proc/modules \
++        ( cd /sys/module; echo *; ) \
+         | xargs modinfo -F filename -k $kernel 2>/dev/null
+     fi
+ )
+ 
+-filter_kernel_modules () {
+-    filter_kernel_modules_by_path  drivers  "$1"
+-}
+-
+ find_kernel_modules () {
+     find_kernel_modules_by_path  drivers
+ }
+@@ -1180,8 +1147,9 @@ instmods() {
+                 fi
+                 # If we are building a host-specific initramfs and this
+                 # module is not already loaded, move on to the next one.
+-                [[ $hostonly ]] && ! grep -qe "\<${_mod//-/_}\>" /proc/modules \
+-                    && ! echo $add_drivers | grep -qe "\<${_mod}\>" \
++                [[ $hostonly ]] \
++                    && ! [[ -d $(echo /sys/module/${_mod//-/_}|{ read a b; echo $a; }) ]] \
++                    && ! [[ "$add_drivers" =~ " ${_mod} " ]] \
+                     && return
+ 
+                 # We use '-d' option in modprobe only if modules prefix path
+diff --git a/dracut.sh b/dracut.sh
+index 49ea503..78e7ac8 100755
+--- a/dracut.sh
++++ b/dracut.sh
+@@ -555,6 +555,11 @@ srcmods="/lib/modules/$kernel/"
+ }
+ export srcmods
+ 
++[[ -f $srcmods/modules.dep ]] || {
++    dfatal "$srcmods/modules.dep is missing. Did you run depmod?"
++    exit 1
++}
++
+ if [[ -f $outfile && ! $force ]]; then
+     dfatal "Will not override existing initramfs ($outfile) without --force"
+     exit 1
+diff --git a/modules.d/50plymouth/module-setup.sh b/modules.d/50plymouth/module-setup.sh
+index 8a675ec..69f1bc7 100755
+--- a/modules.d/50plymouth/module-setup.sh
++++ b/modules.d/50plymouth/module-setup.sh
+@@ -14,23 +14,53 @@ depends() {
+ installkernel() {
+     local _modname
+     # Include KMS capable drm drivers
+-    for _modname in $(find "$srcmods/kernel/drivers/gpu/drm" "$srcmods/extra" \( -name '*.ko' -o -name '*.ko.gz' -o -name '*.ko.xz' \) 2>/dev/null); do
+-        case $_modname in
+-            *.ko)      grep -q drm_crtc_init $_modname ;;
+-            *.ko.gz)  zgrep -q drm_crtc_init $_modname ;;
+-            *.ko.xz) xzgrep -q drm_crtc_init $_modname ;;
+-        esac
+-        if test $? -eq 0; then
+-            # if the hardware is present, include module even if it is not currently loaded,
+-            # as we could e.g. be in the installer; nokmsboot boot parameter will disable
+-            # loading of the driver if needed
+-            if [[ $hostonly ]] && modinfo -F alias $_modname | sed -e 's,\?,\.,g' -e 's,\*,\.\*,g' \
+-                                  | grep -qxf - /sys/bus/pci/devices/*/modalias; then
+-                hostonly='' instmods $_modname
+-                continue
+-            fi
+-            instmods $_modname
++
++    drm_module_filter() {
++        local _drm_drivers='drm_crtc_init'
++        local _ret
++        # subfunctions inherit following FDs
++        local _merge=8 _side2=9
++        function nmf1() {
++            local _fname _fcont
++            while read _fname; do
++                case "$_fname" in
++                    *.ko)    _fcont="$(<        $_fname)" ;;
++                    *.ko.gz) _fcont="$(gzip -dc $_fname)" ;;
++                    *.ko.xz) _fcont="$(xz -dc   $_fname)" ;;
++                esac
++                [[   $_fcont =~ $_drm_drivers
++                && ! $_fcont =~ iw_handler_get_spy ]] \
++                && echo "$_fname"
++            done
++        }
++        function rotor() {
++            local _f1 _f2
++            while read _f1; do
++                echo "$_f1"
++                if read _f2; then
++                    echo "$_f2" 1>&${_side2}
++                fi
++            done | nmf1 1>&${_merge}
++        }
++        # Use two parallel streams to filter alternating modules.
++        set +x
++        eval "( ( rotor ) ${_side2}>&1 | nmf1 ) ${_merge}>&1"
++        _ret=$?
++        [[ $debug ]] && set -x
++        return $_ret
++    }
++
++    for _modname in $(find_kernel_modules_by_path drivers/gpu/drm \
++        | drm_module_filter) ; do
++        # if the hardware is present, include module even if it is not currently loaded,
++        # as we could e.g. be in the installer; nokmsboot boot parameter will disable
++        # loading of the driver if needed
++        if [[ $hostonly ]] && modinfo -F alias $_modname | sed -e 's,\?,\.,g' -e 's,\*,\.\*,g' \
++            | grep -qxf - /sys/bus/pci/devices/*/modalias; then
++            hostonly='' instmods $_modname
++            continue
+         fi
++        instmods $_modname
+     done
+ }
+ 

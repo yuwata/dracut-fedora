@@ -1,0 +1,85 @@
+From 4d76a85df17b600553af1f58ced1dc7bea8a0e7c Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Tue, 5 Jun 2012 20:23:35 +0200
+Subject: [PATCH] dasd_mod: change rd.dasd to dasd_mod kernel parameter
+
+---
+ dracut.cmdline.7.asc                   |    9 ++-------
+ modules.d/95dasd_mod/parse-dasd-mod.sh |   34 --------------------------------
+ 2 files changed, 2 insertions(+), 41 deletions(-)
+
+diff --git a/dracut.cmdline.7.asc b/dracut.cmdline.7.asc
+index 8a74cf5..9fa0ee8 100644
+--- a/dracut.cmdline.7.asc
++++ b/dracut.cmdline.7.asc
+@@ -434,14 +434,9 @@ NBD
+ 
+ DASD
+ ~~~~
+-**rd.dasd_mod.dasd=**....::
++**rd.dasd=**....::
+     same syntax as the kernel module parameter (s390 only)
+ 
+-**rd.dasd=**_<dasd_adaptor device bus ID>_[,readonly=_X_][,use_diag=_X_][,erplog=_X_]::
+-    activate DASD device with the given adaptor device bus ID and setting the
+-    sysfs attributes to the specified values. This parameter can be specified
+-    multiple times.
+-
+ ZFCP
+ ~~~~
+ **rd.zfcp=**_<zfcp adaptor device bus ID>_,_<WWPN>_,_<FCPLUN>_::
+@@ -510,7 +505,7 @@ rdbreak:: rd.break
+ 
+ rd_CCW:: rd.ccw
+ 
+-rd_DASD_MOD:: rd.dasd_mod.dasd
++rd_DASD_MOD:: rd.dasd
+ 
+ rd_DASD:: rd.dasd
+ 
+diff --git a/modules.d/95dasd_mod/parse-dasd-mod.sh b/modules.d/95dasd_mod/parse-dasd-mod.sh
+index 7b197d1..c37aca8 100755
+--- a/modules.d/95dasd_mod/parse-dasd-mod.sh
++++ b/modules.d/95dasd_mod/parse-dasd-mod.sh
+@@ -3,41 +3,7 @@
+ # ex: ts=8 sw=4 sts=4 et filetype=sh
+ mod_args=""
+ 
+-convert_dasd_param() {
+-    local bus_id params
+-    params=""
+-    bus_id=$1; shift
+-    while [ $# -gt 0 ]; do
+-        case "$1" in
+-            use_diag\=1)
+-                params="$params,diag"
+-                ;;
+-            readonly\=1)
+-                params="$params,ro"
+-                ;;
+-            erplog\=1)
+-                params="$params,erplog"
+-                ;;
+-            failfast\=1)
+-                params="$params,failfast"
+-                ;;
+-        esac
+-        shift
+-    done
+-    params="${params#*,}"
+-    if [ -n "$params" ]; then
+-        echo "$bus_id($params)"
+-    else
+-        echo "$bus_id"
+-    fi
+-}
+-
+ for dasd_arg in $(getargs rd.dasd= rd_DASD= DASD=); do
+-    OLD_IFS=$IFS
+-    IFS=","
+-    set -- $dasd_arg
+-    IFS=$OLD_IFS
+-    dasd_arg=$(convert_dasd_param "$@")
+     mod_args="$mod_args,$dasd_arg"
+ done
+ 
