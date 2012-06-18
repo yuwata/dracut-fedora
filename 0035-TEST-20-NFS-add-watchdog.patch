@@ -1,0 +1,62 @@
+From 483b1e3aa83c5bd56b2f2c75144b0a8c276d5bec Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 18 Jun 2012 19:13:09 +0200
+Subject: [PATCH] TEST-20-NFS: add watchdog
+
+---
+ test/TEST-20-NFS/server-init.sh |    2 +-
+ test/TEST-20-NFS/test.sh        |   10 ++++++----
+ 2 files changed, 7 insertions(+), 5 deletions(-)
+
+diff --git a/test/TEST-20-NFS/server-init.sh b/test/TEST-20-NFS/server-init.sh
+index 26a2abd..a60a013 100755
+--- a/test/TEST-20-NFS/server-init.sh
++++ b/test/TEST-20-NFS/server-init.sh
+@@ -31,6 +31,6 @@ dhcpd -cf /etc/dhcpd.conf -lf /var/lib/dhcpd/dhcpd.leases
+ #sh -i
+ # Wait forever for the VM to die
+ echo "Serving NFS mounts"
+-while sleep 60; do sleep 60; done
++while sleep 30; do >/dev/watchdog; done
+ mount -n -o remount,ro /
+ poweroff -f
+diff --git a/test/TEST-20-NFS/test.sh b/test/TEST-20-NFS/test.sh
+index a6bde0e..ea65c2a 100755
+--- a/test/TEST-20-NFS/test.sh
++++ b/test/TEST-20-NFS/test.sh
+@@ -18,6 +18,7 @@ run_server() {
+ 	-net nic,macaddr=52:54:00:12:34:56,model=e1000 \
+ 	-net socket,listen=127.0.0.1:12320 \
+ 	-serial $SERIAL \
++        -watchdog ib700 -watchdog-action poweroff \
+ 	-kernel /boot/vmlinuz-$KVERSION \
+ 	-append "root=/dev/sda rw quiet console=ttyS0,115200n81 selinux=0" \
+ 	-initrd $TESTDIR/initramfs.server \
+@@ -53,6 +54,7 @@ client_test() {
+   	-net nic,macaddr=$mac,model=e1000 \
+ 	-net socket,connect=127.0.0.1:12320 \
+   	-kernel /boot/vmlinuz-$KVERSION \
++        -watchdog ib700 -watchdog-action poweroff \
+   	-append "$cmdline $DEBUGFAIL rd.debug rd.retry=10 rd.info quiet  ro console=ttyS0,115200n81 selinux=0" \
+   	-initrd $TESTDIR/initramfs.testing
+ 
+@@ -307,15 +309,15 @@ test_setup() {
+ 
+     # Make server's dracut image
+     $basedir/dracut.sh -l -i $TESTDIR/overlay / \
+-	-m "dash udev-rules base rootfs-block debug kernel-modules" \
+-	-d "piix ide-gd_mod ata_piix ext3 sd_mod e1000" \
++	-m "dash udev-rules base rootfs-block debug kernel-modules watchdog" \
++	-d "piix ide-gd_mod ata_piix ext3 sd_mod e1000 ib700wdt" \
+ 	-f $TESTDIR/initramfs.server $KVERSION || return 1
+ 
+     # Make client's dracut image
+     $basedir/dracut.sh -l -i $TESTDIR/overlay / \
+ 	-o "plymouth" \
+-	-a "debug" \
+-	-d "piix ide-gd_mod ata_piix sd_mod e1000 nfs sunrpc" \
++	-a "debug watchdog" \
++	-d "piix ide-gd_mod ata_piix sd_mod e1000 nfs sunrpc ib700wdt" \
+ 	-f $TESTDIR/initramfs.testing $KVERSION || return 1
+ }
+ 

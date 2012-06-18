@@ -1,0 +1,36 @@
+From 8fab6e0463e0b0c70327c2733911098aa56137a7 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Tue, 12 Jun 2012 14:40:43 +0200
+Subject: [PATCH] resolve conflict between cms network rules and default rules
+
+---
+ modules.d/40network/net-genrules.sh |    2 +-
+ modules.d/80cms/cmssetup.sh         |    2 ++
+ 2 files changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/modules.d/40network/net-genrules.sh b/modules.d/40network/net-genrules.sh
+index 2d3dff2..99d0fe5 100755
+--- a/modules.d/40network/net-genrules.sh
++++ b/modules.d/40network/net-genrules.sh
+@@ -53,7 +53,7 @@ fix_bootif() {
+ 
+     # Default: We don't know the interface to use, handle all
+     else
+-        printf 'SUBSYSTEM=="net", RUN+="%s"\n' "/sbin/initqueue --onetime $ifup"
++        printf 'SUBSYSTEM=="net", RUN+="%s"\n' "/sbin/initqueue --onetime $ifup" > /etc/udev/rules.d/61-default-net.rules
+     fi
+ 
+ } > /etc/udev/rules.d/60-net.rules
+diff --git a/modules.d/80cms/cmssetup.sh b/modules.d/80cms/cmssetup.sh
+index 41c853c..2208803 100755
+--- a/modules.d/80cms/cmssetup.sh
++++ b/modules.d/80cms/cmssetup.sh
+@@ -166,6 +166,8 @@ processcmsfile()
+         fi
+ 
+ 	printf 'SUBSYSTEM=="net", ACTION=="add", DRIVERS=="%s", KERNELS=="%s", ENV{INTERFACE}=="?*", RUN+="/sbin/initqueue --onetime --unique --name cmsifup-$env{INTERFACE} /sbin/cmsifup $env{INTERFACE}"\n' "$driver" "$devbusid" > /etc/udev/rules.d/99-cms.rules
++        # remove the default net rules
++        rm -f /etc/udev/rules.d/61-default-net.rules
+ 	[[ -f /etc/udev/rules.d/60-net.rules ]] \
+ 	    || printf 'SUBSYSTEM=="net", ACTION=="online", RUN+="/sbin/initqueue --onetime --env netif=$env{INTERFACE} source_hook initqueue/online"\n' >> /etc/udev/rules.d/99-cms.rules
+ 

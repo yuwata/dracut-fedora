@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 019
-Release: 16.git20120611%{?dist}
+Release: 40.git20120618%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -39,6 +39,30 @@ Patch12: 0012-dracut.sh-mkdir-of-libdirs-at-then-end.patch
 Patch13: 0013-dm-check-for-presence-of-dmsetup.patch
 Patch14: 0014-mdraid-md-shutdown.sh-check-for-presence-of-mdadm.patch
 Patch15: 0015-network-ifup.sh-default-to-dhcp-for-BOOTIF.patch
+Patch16: 0016-dracut.sh-mkdir-initdir-lib-dracut.patch
+Patch17: 0017-fix-ifup-for-static-ipv6.patch
+Patch18: 0018-ifcfg-fix-output-for-ipv6-static-addressing.patch
+Patch19: 0019-add-PARTUUID-as-root-PARTUUID-partition-uuid-paramet.patch
+Patch20: 0020-Debian-multiarch-support.patch
+Patch21: 0021-dracut-functions.sh-fixup-inst_libdir_file-again.patch
+Patch22: 0022-dracut.sh-output-unknown-argument.patch
+Patch23: 0023-dracut.sh-unset-some-variables.patch
+Patch24: 0024-nfs-extend-libnss-wildcard.patch
+Patch25: 0025-TEST-50-MULTINIC-install-correct-nss-libs.patch
+Patch26: 0026-Revert-network-ifup.sh-default-to-dhcp-for-BOOTIF.patch
+Patch27: 0027-Revert-network-ifup.sh-do-not-default-to-dhcp-for-in.patch
+Patch28: 0028-resolve-conflict-between-cms-network-rules-and-defau.patch
+Patch29: 0029-fixed-instmods-return-code-and-set-pipefail-globally.patch
+Patch30: 0030-Set-some-global-variables-in-dracut-functions.sh.patch
+Patch31: 0031-iscsi-module-setup.sh-only-install-s390-driver-on-s3.patch
+Patch32: 0032-plymouth-fixed-inst_libdir_file-call.patch
+Patch33: 0033-add-04watchdog-dracut-module.patch
+Patch34: 0034-TEST-01-BASIC-add-watchdog.patch
+Patch35: 0035-TEST-20-NFS-add-watchdog.patch
+Patch36: 0036-TEST-50-MULTINIC-add-watchdog.patch
+Patch37: 0037-TEST-20-NFS-libnss-cleanup.patch
+Patch38: 0038-TEST-50-MULTINIC-libnss-cleanup.patch
+Patch39: 0039-disable-TEST-16-DMSQUASH-for-now.patch
 
 
 BuildArch: noarch
@@ -270,6 +294,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man5/dracut.conf.5*
 %{dracutlibdir}/modules.d/00bootchart
 %{dracutlibdir}/modules.d/00dash
+%{dracutlibdir}/modules.d/04watchdog
 %{dracutlibdir}/modules.d/05busybox
 %{dracutlibdir}/modules.d/10i18n
 %{dracutlibdir}/modules.d/30convertfs
@@ -358,6 +383,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Mon Jun 18 2012 Harald Hoyer <harald@redhat.com> 019-40.git20120618
+- new upstream version
+
 * Mon Jun 11 2012 Harald Hoyer <harald@redhat.com> 019-16.git20120611
 - new upstream version
 

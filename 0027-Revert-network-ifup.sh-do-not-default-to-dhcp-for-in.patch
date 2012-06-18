@@ -1,0 +1,33 @@
+From c9aa3cc950ebec597e51cbc0899777c2a99ca276 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 15 Jun 2012 11:56:05 +0200
+Subject: [PATCH] Revert "network/ifup.sh: do not default to dhcp, for
+ interfaces without ip=..."
+
+This reverts commit ede0532c580fdbace548511b07857fb2e004b299.
+---
+ modules.d/40network/ifup.sh |   11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+diff --git a/modules.d/40network/ifup.sh b/modules.d/40network/ifup.sh
+index 245b450..31eb966 100755
+--- a/modules.d/40network/ifup.sh
++++ b/modules.d/40network/ifup.sh
+@@ -216,6 +216,17 @@ if [ "$netif" = "$vlanname" ] && [ ! -e /tmp/net.$vlanname.up ]; then
+     ip link add dev "$vlanname" link "$phydevice" type vlan id "$(get_vid $vlanname; echo $?)"
+ fi
+ 
++# No ip lines default to dhcp
++ip=$(getarg ip)
++
++if [ -z "$ip" ]; then
++    if [ "$netroot" = "dhcp6" ]; then
++        do_dhcp -6
++    else
++        do_dhcp -4
++    fi
++fi
++
+ # Specific configuration, spin through the kernel command line
+ # looking for ip= lines
+ for p in $(getargs ip=); do

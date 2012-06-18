@@ -1,0 +1,28 @@
+From f9ad49c2a59d1c452a2137a6332ff77afcde1be3 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 15 Jun 2012 11:55:59 +0200
+Subject: [PATCH] Revert "network/ifup.sh: default to dhcp for BOOTIF"
+
+This reverts commit bebb12fd0ec3cbb88006e384a9a277391a2f3a37.
+---
+ modules.d/40network/ifup.sh |    7 -------
+ 1 file changed, 7 deletions(-)
+
+diff --git a/modules.d/40network/ifup.sh b/modules.d/40network/ifup.sh
+index ae434a8..245b450 100755
+--- a/modules.d/40network/ifup.sh
++++ b/modules.d/40network/ifup.sh
+@@ -216,13 +216,6 @@ if [ "$netif" = "$vlanname" ] && [ ! -e /tmp/net.$vlanname.up ]; then
+     ip link add dev "$vlanname" link "$phydevice" type vlan id "$(get_vid $vlanname; echo $?)"
+ fi
+ 
+-# BOOTIF= defaults to dhcpv4
+-bootif=$(getargs BOOTIF=)
+-if [ -n "$bootif" ] ; then
+-    do_dhcp -4
+-    exit 0
+-fi
+-
+ # Specific configuration, spin through the kernel command line
+ # looking for ip= lines
+ for p in $(getargs ip=); do

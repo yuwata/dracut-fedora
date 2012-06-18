@@ -1,0 +1,34 @@
+From 7828692f97c2db3af36ad8ac3e75b60cfd971875 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 15 Jun 2012 09:34:00 +0200
+Subject: [PATCH] dracut-functions.sh: fixup  inst_libdir_file() again
+
+---
+ dracut-functions.sh |    8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/dracut-functions.sh b/dracut-functions.sh
+index 38367b4..7439131 100755
+--- a/dracut-functions.sh
++++ b/dracut-functions.sh
+@@ -705,16 +705,16 @@ inst_libdir_file() {
+         local _pattern=$2
+         shift 2
+         for _dir in $libdirs; do
+-            for _i in $_dir/$@; do
++            for _i in "$@"; do
+                 for _f in "$_dir"/$_i; do
+-                    [[ "$_i" =~ $_pattern ]] || continue
+-                    [[ -e "$_i" ]] && dracut_install "$_i"
++                    [[ "$_f" =~ $_pattern ]] || continue
++                    [[ -e "$_f" ]] && dracut_install "$_f"
+                 done
+             done
+         done
+     else
+         for _dir in $libdirs; do
+-            for _i in $_dir/$@; do
++            for _i in "$@"; do
+                 for _f in "$_dir"/$_i; do
+                     [[ -e "$_f" ]] && dracut_install "$_f"
+                 done

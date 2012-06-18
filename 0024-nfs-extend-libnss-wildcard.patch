@@ -1,0 +1,22 @@
+From 9f6baa127aa6a4fb6cec9a6ef4e8d5b3299362b0 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 15 Jun 2012 11:12:08 +0200
+Subject: [PATCH] nfs: extend libnss wildcard
+
+---
+ modules.d/95nfs/module-setup.sh |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/modules.d/95nfs/module-setup.sh b/modules.d/95nfs/module-setup.sh
+index bf87762..fb4dc9c 100755
+--- a/modules.d/95nfs/module-setup.sh
++++ b/modules.d/95nfs/module-setup.sh
+@@ -52,7 +52,7 @@ install() {
+     _nsslibs=${_nsslibs#|}
+     _nsslibs=${_nsslibs%|}
+ 
+-    inst_libdir_file -n "$_nsslibs" "libnss*.so"
++    inst_libdir_file -n "$_nsslibs" 'libnss*.so*'
+ 
+     inst_hook cmdline 90 "$moddir/parse-nfsroot.sh"
+     inst_hook pre-udev 99 "$moddir/nfs-start-rpc.sh"

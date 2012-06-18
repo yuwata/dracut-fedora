@@ -1,0 +1,109 @@
+From 8d95b8b338d65188c517b3bda8a4697867c6ef01 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 18 Jun 2012 12:52:39 +0200
+Subject: [PATCH] Set some global variables in dracut-functions.sh
+
+---
+ dracut-functions.sh |   34 +++++++++++++++++++++++++++++++---
+ dracut.sh           |   22 ----------------------
+ 2 files changed, 31 insertions(+), 25 deletions(-)
+
+diff --git a/dracut-functions.sh b/dracut-functions.sh
+index 68c81f2..1137919 100755
+--- a/dracut-functions.sh
++++ b/dracut-functions.sh
+@@ -20,6 +20,9 @@
+ # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ #
+ 
++# Generic substring function.  If $2 is in $1, return 0.
++strstr() { [ "${1#*$2*}" != "$1" ]; }
++
+ if ! [[ $dracutbasedir ]]; then
+     dracutbasedir=${BASH_SOURCE[0]%/*}
+     [[ $dracutbasedir = "dracut-functions" ]] && dracutbasedir="."
+@@ -27,6 +30,34 @@ if ! [[ $dracutbasedir ]]; then
+     dracutbasedir="$(readlink -f $dracutbasedir)"
+ fi
+ 
++# Detect lib paths
++if ! [[ $libdirs ]] ; then
++    if strstr "$(ldd /bin/sh)" "/lib64/" &>/dev/null \
++        && [[ -d /lib64 ]]; then
++        libdirs+=" /lib64"
++        [[ -d /usr/lib64 ]] && libdirs+=" /usr/lib64"
++    else
++        libdirs+=" /lib"
++        [[ -d /usr/lib ]] && libdirs+=" /usr/lib"
++    fi
++    export libdirs
++fi
++
++if ! [[ $kernel ]]; then
++    kernel=$(uname -r)
++    export kernel
++fi
++
++srcmods="/lib/modules/$kernel/"
++[[ $drivers_dir ]] && {
++    if vercmp $(modprobe --version | cut -d' ' -f3) lt 3.7; then
++        dfatal 'To use --kmoddir option module-init-tools >= 3.7 is required.'
++        exit 1
++    fi
++    srcmods="$drivers_dir"
++}
++export srcmods
++
+ if ! type dinfo >/dev/null 2>&1; then
+     . "$dracutbasedir/dracut-logger.sh"
+     dlog_init
+@@ -41,9 +72,6 @@ fi
+     export hookdirs
+ }
+ 
+-# Generic substring function.  If $2 is in $1, return 0.
+-strstr() { [ "${1#*$2*}" != "$1" ]; }
+-
+ # Create all subdirectories for given path without creating the last element.
+ # $1 = path
+ mksubdirs() { mkdir -m 0755 -p ${1%/*}; }
+diff --git a/dracut.sh b/dracut.sh
+index 919f78e..5600ec0 100755
+--- a/dracut.sh
++++ b/dracut.sh
+@@ -531,18 +531,6 @@ ddebug "Executing $0 $dracut_args"
+     exit 0
+ }
+ 
+-# Detect lib paths
+-if ! [[ $libdirs ]] ; then
+-    if strstr "$(ldd /bin/sh)" "/lib64/" &>/dev/null \
+-        && [[ -d /lib64 ]]; then
+-        libdirs+=" /lib64"
+-        [[ -d /usr/lib64 ]] && libdirs+=" /usr/lib64"
+-    else
+-        libdirs+=" /lib"
+-        [[ -d /usr/lib ]] && libdirs+=" /usr/lib"
+-    fi
+-fi
+-
+ # This is kinda legacy -- eventually it should go away.
+ case $dracutmodules in
+     ""|auto) dracutmodules="all" ;;
+@@ -550,16 +538,6 @@ esac
+ 
+ abs_outfile=$(readlink -f "$outfile") && outfile="$abs_outfile"
+ 
+-srcmods="/lib/modules/$kernel/"
+-[[ $drivers_dir ]] && {
+-    if vercmp $(modprobe --version | cut -d' ' -f3) lt 3.7; then
+-        dfatal 'To use --kmoddir option module-init-tools >= 3.7 is required.'
+-        exit 1
+-    fi
+-    srcmods="$drivers_dir"
+-}
+-export srcmods
+-
+ [[ -f $srcmods/modules.dep ]] || {
+     dfatal "$srcmods/modules.dep is missing. Did you run depmod?"
+     exit 1

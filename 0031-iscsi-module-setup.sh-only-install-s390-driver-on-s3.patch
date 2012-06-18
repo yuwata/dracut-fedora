@@ -1,0 +1,33 @@
+From 4f9f76cd629cfe7c31586eb2bfd0d4c61322db86 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 18 Jun 2012 13:26:55 +0200
+Subject: [PATCH] iscsi/module-setup.sh: only install s390 driver on s390 arch
+
+---
+ modules.d/95iscsi/module-setup.sh |    5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/modules.d/95iscsi/module-setup.sh b/modules.d/95iscsi/module-setup.sh
+index bfd9d73..fefc240 100755
+--- a/modules.d/95iscsi/module-setup.sh
++++ b/modules.d/95iscsi/module-setup.sh
+@@ -37,6 +37,8 @@ depends() {
+ }
+ 
+ installkernel() {
++    local _arch=$(uname -m)
++
+     instmods iscsi_tcp iscsi_ibft crc32c bnx2i iscsi_boot_sysfs qla4xxx cxgb3i cxgb4i be2iscsi
+     iscsi_module_filter() {
+         local _iscsifuncs='iscsi_register_transport'
+@@ -47,8 +49,9 @@ installkernel() {
+             *.ko.xz) [[ $(xz -dc   <$_f) =~ $_iscsifuncs ]] && echo "$_f" ;;
+             esac
+         done
++        return 0;
+     }
+-    { find_kernel_modules_by_path drivers/scsi; find_kernel_modules_by_path drivers/s390/scsi; } \
++    { find_kernel_modules_by_path drivers/scsi; if [ "$_arch" = "s390" -o "$_arch" = "s390x" ]; then find_kernel_modules_by_path drivers/s390/scsi; fi;} \
+     | iscsi_module_filter  |  instmods
+ }
+ 
