@@ -1,0 +1,23 @@
+From c7896f125183bbae0ef1403fb8aa5e46adf464ac Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 20 Jun 2012 18:29:42 +0200
+Subject: [PATCH] dracut-shutdown.service: fixed ordering to be before
+ shutdown.target
+
+---
+ dracut-shutdown.service |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/dracut-shutdown.service b/dracut-shutdown.service
+index 6756355..f96418b 100644
+--- a/dracut-shutdown.service
++++ b/dracut-shutdown.service
+@@ -8,7 +8,7 @@
+ [Unit]
+ Description=Restore /run/initramfs
+ After=getty@tty1.service prefdm.service
+-Before=reboot.service
++Before=reboot.service shutdown.target
+ DefaultDependencies=no
+ ConditionPathExists=/run/initramfs/.need_shutdown
+ ConditionPathExists=!/run/initramfs/bin/sh

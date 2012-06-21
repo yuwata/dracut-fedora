@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 019
-Release: 40.git20120618%{?dist}
+Release: 57.git20120620%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -63,6 +63,23 @@ Patch36: 0036-TEST-50-MULTINIC-add-watchdog.patch
 Patch37: 0037-TEST-20-NFS-libnss-cleanup.patch
 Patch38: 0038-TEST-50-MULTINIC-libnss-cleanup.patch
 Patch39: 0039-disable-TEST-16-DMSQUASH-for-now.patch
+Patch40: 0040-check-for-arch-before-installing-drivers-s390.patch
+Patch41: 0041-dracut-shutdown.service-fixed-ordering-to-be-before-.patch
+Patch42: 0042-systemd-output-all-service-output-to-the-journal-als.patch
+Patch43: 0043-systemd-module-setup.sh-add-old-udev-systemd-service.patch
+Patch44: 0044-systemd-fix-emergency.service-and-rescue.service.patch
+Patch45: 0045-systemd-do-not-redirect-to-dev-console.patch
+Patch46: 0046-systemd-do-not-flock-for-console.patch
+Patch47: 0047-systemd-dracut-pre-pivot.sh-stop-old-udev-services.patch
+Patch48: 0048-systemd-dracut-cmdline-make-dracut-cmdline-a-service.patch
+Patch49: 0049-systemd-dracut-pre-pivot.sh-remove-trailing-space.patch
+Patch50: 0050-systemd-dracut-pre-udev.service-fixed-description.patch
+Patch51: 0051-systemd-fixed-ordering-of-services.patch
+Patch52: 0052-systemd-fixed-I-O-of-services.patch
+Patch53: 0053-base-dracut-lib.sh-change-output-of-info-and-warn-fo.patch
+Patch54: 0054-base-dracut-lib.sh-for-systemd-start-emergency.servi.patch
+Patch55: 0055-dracut.conf.d-fedora.conf.example-make-systemd-defau.patch
+Patch56: 0056-dracut.spec-require-systemd-44-15.patch
 
 
 BuildArch: noarch
@@ -120,6 +137,7 @@ Requires: file
 Requires: udev > 166
 %if 0%{?fedora} || 0%{?rhel} > 6
 Requires: util-linux >= 2.21
+Requires: systemd >= 44-15
 %else
 Requires: util-linux-ng >= 2.21
 %endif
@@ -383,6 +401,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Thu Jun 21 2012 Harald Hoyer <harald@redhat.com> 019-57.git20120620
+- systemd is now the default init in the initramfs
+
 * Mon Jun 18 2012 Harald Hoyer <harald@redhat.com> 019-40.git20120618
 - new upstream version
 

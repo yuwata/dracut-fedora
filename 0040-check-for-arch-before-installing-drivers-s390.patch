@@ -1,0 +1,36 @@
+From 361306c131a31c85d4b7ce40e33d6cbb589cb8b4 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 20 Jun 2012 18:28:35 +0200
+Subject: [PATCH] check for arch before installing drivers/s390
+
+---
+ modules.d/40network/module-setup.sh   |    2 +-
+ modules.d/90multipath/module-setup.sh |    2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/modules.d/40network/module-setup.sh b/modules.d/40network/module-setup.sh
+index 4ed8d03..a8efbc5 100755
+--- a/modules.d/40network/module-setup.sh
++++ b/modules.d/40network/module-setup.sh
+@@ -61,7 +61,7 @@ installkernel() {
+         return $_ret
+     }
+ 
+-    { find_kernel_modules_by_path drivers/net; find_kernel_modules_by_path drivers/s390/net; } \
++    { find_kernel_modules_by_path drivers/net; if [ "$_arch" = "s390" -o "$_arch" = "s390x" ]; then find_kernel_modules_by_path drivers/s390/net; fi; } \
+         | net_module_filter | instmods
+ 
+     instmods =drivers/net/phy
+diff --git a/modules.d/90multipath/module-setup.sh b/modules.d/90multipath/module-setup.sh
+index bf71fdc..0e8857c 100755
+--- a/modules.d/90multipath/module-setup.sh
++++ b/modules.d/90multipath/module-setup.sh
+@@ -44,7 +44,7 @@ installkernel() {
+         done
+     }
+ 
+-    ( find_kernel_modules_by_path drivers/scsi; find_kernel_modules_by_path drivers/s390/scsi ;
++    ( find_kernel_modules_by_path drivers/scsi; if [ "$_arch" = "s390" -o "$_arch" = "s390x" ]; then find_kernel_modules_by_path drivers/s390/scsi; fi;
+       find_kernel_modules_by_path drivers/md )  |  mp_mod_filter  |  instmods
+     _ret=$?
+     [[ $debug ]] && set -x

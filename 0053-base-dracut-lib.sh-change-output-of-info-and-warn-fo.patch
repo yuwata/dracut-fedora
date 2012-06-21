@@ -1,0 +1,58 @@
+From d9087a2d85dd65e1e33c8c2247d4fccfd7fbc5da Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 21 Jun 2012 01:09:38 +0200
+Subject: [PATCH] base/dracut-lib.sh: change output of info() and warn() for
+ systemd
+
+---
+ modules.d/99base/dracut-lib.sh |   36 +++++++++++++++++++++++++-----------
+ 1 file changed, 25 insertions(+), 11 deletions(-)
+
+diff --git a/modules.d/99base/dracut-lib.sh b/modules.d/99base/dracut-lib.sh
+index 8cfd7b3..e0c4c19 100755
+--- a/modules.d/99base/dracut-lib.sh
++++ b/modules.d/99base/dracut-lib.sh
+@@ -323,18 +323,32 @@ check_quiet() {
+     fi
+ }
+ 
+-warn() {
+-    check_quiet
+-    echo "<28>dracut Warning: $@" > /dev/kmsg
+-    echo "dracut Warning: $@" >&2
+-}
++if [ ! -x /lib/systemd/systemd ]; then
+ 
+-info() {
+-    check_quiet
+-    echo "<30>dracut: $@" > /dev/kmsg
+-    [ "$DRACUT_QUIET" != "yes" ] && \
+-        echo "dracut: $@"
+-}
++    warn() {
++        check_quiet
++        echo "<28>dracut Warning: $@" > /dev/kmsg
++        echo "dracut Warning: $@" >&2
++    }
++
++    info() {
++        check_quiet
++        echo "<30>dracut: $@" > /dev/kmsg
++        [ "$DRACUT_QUIET" != "yes" ] && \
++            echo "dracut: $@"
++    }
++
++else
++
++    warn() {
++        echo "Warning: $@" >&2
++    }
++
++    info() {
++        echo "$@"
++    }
++
++fi
+ 
+ vwarn() {
+     while read line; do

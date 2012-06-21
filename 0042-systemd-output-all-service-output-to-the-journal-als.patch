@@ -1,0 +1,104 @@
+From 9f037266ee5b8da70e04b48bd69d8c2f602bbd4d Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 20 Jun 2012 18:34:35 +0200
+Subject: [PATCH] systemd: output all service output to the journal also
+
+---
+ modules.d/98systemd/dracut-initqueue.service   |    4 ++--
+ modules.d/98systemd/dracut-pre-pivot.service   |    4 ++--
+ modules.d/98systemd/dracut-pre-trigger.service |    4 ++--
+ modules.d/98systemd/dracut-pre-udev.service    |    4 ++--
+ modules.d/98systemd/emergency.service          |    4 ++--
+ modules.d/98systemd/rescue.service             |    4 ++--
+ 6 files changed, 12 insertions(+), 12 deletions(-)
+
+diff --git a/modules.d/98systemd/dracut-initqueue.service b/modules.d/98systemd/dracut-initqueue.service
+index b0c8509..c87e6a0 100644
+--- a/modules.d/98systemd/dracut-initqueue.service
++++ b/modules.d/98systemd/dracut-initqueue.service
+@@ -17,8 +17,8 @@ Environment=HOME=/
+ WorkingDirectory=/
+ ExecStart=-/bin/dracut-initqueue
+ Type=simple
+-StandardInput=tty-force
+-StandardOutput=inherit
++StandardInput=tty
++StandardOutput=journal+console
+ StandardError=inherit
+ KillMode=process
+ 
+diff --git a/modules.d/98systemd/dracut-pre-pivot.service b/modules.d/98systemd/dracut-pre-pivot.service
+index 410e03e..0e04cb4 100644
+--- a/modules.d/98systemd/dracut-pre-pivot.service
++++ b/modules.d/98systemd/dracut-pre-pivot.service
+@@ -17,8 +17,8 @@ Environment=HOME=/
+ WorkingDirectory=/
+ ExecStart=-/bin/dracut-pre-pivot
+ Type=oneshot
+-StandardInput=tty-force
+-StandardOutput=inherit
++StandardInput=tty
++StandardOutput=journal+console
+ StandardError=inherit
+ KillMode=process
+ 
+diff --git a/modules.d/98systemd/dracut-pre-trigger.service b/modules.d/98systemd/dracut-pre-trigger.service
+index 080b1f5..18eb8fc 100644
+--- a/modules.d/98systemd/dracut-pre-trigger.service
++++ b/modules.d/98systemd/dracut-pre-trigger.service
+@@ -18,8 +18,8 @@ Environment=HOME=/
+ WorkingDirectory=/
+ ExecStart=-/bin/dracut-pre-trigger
+ Type=oneshot
+-StandardInput=tty-force
+-StandardOutput=inherit
++StandardInput=tty
++StandardOutput=journal+console
+ StandardError=inherit
+ KillMode=process
+ 
+diff --git a/modules.d/98systemd/dracut-pre-udev.service b/modules.d/98systemd/dracut-pre-udev.service
+index 09a349d..2447fc8 100644
+--- a/modules.d/98systemd/dracut-pre-udev.service
++++ b/modules.d/98systemd/dracut-pre-udev.service
+@@ -17,8 +17,8 @@ Environment=HOME=/
+ WorkingDirectory=/
+ ExecStart=-/bin/dracut-pre-udev
+ Type=oneshot
+-StandardInput=tty-force
+-StandardOutput=inherit
++StandardInput=tty
++StandardOutput=journal+console
+ StandardError=inherit
+ KillMode=process
+ 
+diff --git a/modules.d/98systemd/emergency.service b/modules.d/98systemd/emergency.service
+index 7c705c4..86fc13f 100644
+--- a/modules.d/98systemd/emergency.service
++++ b/modules.d/98systemd/emergency.service
+@@ -19,8 +19,8 @@ WorkingDirectory=/
+ ExecStart=-/bin/sh -i -l
+ ExecStopPost=-/usr/bin/systemctl --fail --no-block default
+ Type=idle
+-StandardInput=tty-force
+-StandardOutput=inherit
++StandardInput=tty
++StandardOutput=journal+console
+ StandardError=inherit
+ KillMode=process
+ IgnoreSIGPIPE=no
+diff --git a/modules.d/98systemd/rescue.service b/modules.d/98systemd/rescue.service
+index 652308c..afd04f7 100644
+--- a/modules.d/98systemd/rescue.service
++++ b/modules.d/98systemd/rescue.service
+@@ -21,8 +21,8 @@ ExecStart=-/bin/sh -i -l
+ #ExecStopPost=-/usr/bin/systemctl --fail --no-block switch-root /sysroot /sbin/init
+ ExecStopPost=-/usr/bin/systemctl --fail --no-block default
+ Type=idle
+-StandardInput=tty-force
+-StandardOutput=inherit
++StandardInput=tty
++StandardOutput=journal+console
+ StandardError=inherit
+ KillMode=process
+ 

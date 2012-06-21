@@ -1,0 +1,33 @@
+From 3d3ddf082b6b61ae559520ff039f7592a58e88b2 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 21 Jun 2012 01:03:22 +0200
+Subject: [PATCH] systemd: do not flock for console
+
+---
+ modules.d/98systemd/dracut-initqueue.sh |    6 ++----
+ 1 file changed, 2 insertions(+), 4 deletions(-)
+
+diff --git a/modules.d/98systemd/dracut-initqueue.sh b/modules.d/98systemd/dracut-initqueue.sh
+index 830dbee..03f1c9b 100755
+--- a/modules.d/98systemd/dracut-initqueue.sh
++++ b/modules.d/98systemd/dracut-initqueue.sh
+@@ -59,8 +59,7 @@ while :; do
+     fi
+ 
+     main_loop=$(($main_loop+1))
+-    [ $main_loop -gt $RDRETRY ] \
+-        && { flock -s 9 ; emergency_shell "Could not boot."; } 9>/.console_lock
++    [ $main_loop -gt $RDRETRY ] && emergency_shell "Could not boot."
+ done
+ 
+ unset job
+@@ -95,8 +94,7 @@ while :; do
+     done
+ 
+     i=$(($i+1))
+-    [ $i -gt 20 ] \
+-        && { flock -s 9 ; emergency_shell "Can't mount root filesystem"; } 9>/.console_lock
++    [ $i -gt 20 ] && emergency_shell "Can't mount root filesystem"
+ done
+ 
+ {

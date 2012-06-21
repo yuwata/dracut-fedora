@@ -1,0 +1,22 @@
+From f82659c552b453f832c84c808e4e721c18be6a24 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 21 Jun 2012 01:06:30 +0200
+Subject: [PATCH] systemd/dracut-pre-pivot.sh: remove trailing space
+
+---
+ modules.d/98systemd/dracut-pre-pivot.sh |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/modules.d/98systemd/dracut-pre-pivot.sh b/modules.d/98systemd/dracut-pre-pivot.sh
+index 6685210..38e9c3c 100755
+--- a/modules.d/98systemd/dracut-pre-pivot.sh
++++ b/modules.d/98systemd/dracut-pre-pivot.sh
+@@ -18,7 +18,7 @@ getarg 'rd.break=cleanup' 'rdbreak=cleanup' && emergency_shell -n cleanup "Break
+ source_hook cleanup
+ 
+ # By the time we get here, the root filesystem should be mounted.
+-# Try to find init. 
++# Try to find init.
+ 
+ for i in "$(getarg real_init=)" "$(getarg init=)"; do
+     [ -n "$i" ] || continue
