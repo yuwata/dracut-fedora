@@ -1,0 +1,24 @@
+From cc51bc6fdbe3962d5ca81808ed685ddc41770935 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 21 Jun 2012 10:50:36 +0200
+Subject: [PATCH] systemd/dracut-pre-pivot.sh: copy service files to
+ /run/systemd/system
+
+and remove the last info, so that the journal is not restarted again.
+---
+ modules.d/98systemd/dracut-pre-pivot.sh |    3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/modules.d/98systemd/dracut-pre-pivot.sh b/modules.d/98systemd/dracut-pre-pivot.sh
+index 38e9c3c..89d7e6d 100755
+--- a/modules.d/98systemd/dracut-pre-pivot.sh
++++ b/modules.d/98systemd/dracut-pre-pivot.sh
+@@ -45,6 +45,7 @@ udevadm info --cleanup-db
+ [ -h /dev/root ] && rm -f /dev/root
+ 
+ getarg rd.break rdbreak && emergency_shell -n switch_root "Break before switch_root"
+-info "Switching root"
++
++cp -avr /lib/systemd/system/dracut*.service /run/systemd/system/
+ 
+ export -p > /dracut-state.sh

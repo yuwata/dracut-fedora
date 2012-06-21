@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 019
-Release: 57.git20120620%{?dist}
+Release: 62.git20120621%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -80,6 +80,11 @@ Patch53: 0053-base-dracut-lib.sh-change-output-of-info-and-warn-fo.patch
 Patch54: 0054-base-dracut-lib.sh-for-systemd-start-emergency.servi.patch
 Patch55: 0055-dracut.conf.d-fedora.conf.example-make-systemd-defau.patch
 Patch56: 0056-dracut.spec-require-systemd-44-15.patch
+Patch57: 0057-dracut-functions.sh-use-ln-r-instead-of-shell-functi.patch
+Patch58: 0058-systemd-remove-unneeded-systemd-services.patch
+Patch59: 0059-fixed-i18n-for-systemd-and-include-more-config-files.patch
+Patch60: 0060-systemd-remove-old-udev-services.patch
+Patch61: 0061-systemd-dracut-pre-pivot.sh-copy-service-files-to-ru.patch
 
 
 BuildArch: noarch
@@ -401,6 +406,11 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Thu Jun 21 2012 Harald Hoyer <harald@redhat.com> 019-62.git20120621
+- do not require pkg-config for systemd
+- i18n fixes
+- less systemd services in the initramfs
+
 * Thu Jun 21 2012 Harald Hoyer <harald@redhat.com> 019-57.git20120620
 - systemd is now the default init in the initramfs
 

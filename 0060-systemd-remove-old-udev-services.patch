@@ -1,0 +1,79 @@
+From 55cb17c677d6e4658b4356cf5a594acfec01366b Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 21 Jun 2012 10:50:01 +0200
+Subject: [PATCH] systemd: remove old udev services
+
+---
+ modules.d/98systemd/dracut-initqueue.service   |    4 ++--
+ modules.d/98systemd/dracut-pre-trigger.service |    6 +++---
+ modules.d/98systemd/dracut-pre-udev.service    |    2 +-
+ modules.d/98systemd/module-setup.sh            |   11 +----------
+ 4 files changed, 7 insertions(+), 16 deletions(-)
+
+diff --git a/modules.d/98systemd/dracut-initqueue.service b/modules.d/98systemd/dracut-initqueue.service
+index 4f86eaf..31fe9e4 100644
+--- a/modules.d/98systemd/dracut-initqueue.service
++++ b/modules.d/98systemd/dracut-initqueue.service
+@@ -10,8 +10,8 @@
+ [Unit]
+ Description=Dracut initqueue hook
+ DefaultDependencies=no
+-After=systemd-udev-trigger.service udev-trigger.service
+-Wants=systemd-udev-trigger.service udev-trigger.service
++After=systemd-udev-trigger.service
++Wants=systemd-udev-trigger.service
+ 
+ [Service]
+ Environment=HOME=/
+diff --git a/modules.d/98systemd/dracut-pre-trigger.service b/modules.d/98systemd/dracut-pre-trigger.service
+index 234839c..b06d17f 100644
+--- a/modules.d/98systemd/dracut-pre-trigger.service
++++ b/modules.d/98systemd/dracut-pre-trigger.service
+@@ -10,9 +10,9 @@
+ [Unit]
+ Description=Dracut pre-trigger hook
+ DefaultDependencies=no
+-Before=systemd-udev-trigger.service udev-trigger.service dracut-initqueue.service
+-After=dracut-pre-udev.service systemd-udev.service udev.service
+-Wants=dracut-pre-udev.service systemd-udev.service udev.service
++Before=systemd-udev-trigger.service dracut-initqueue.service
++After=dracut-pre-udev.service systemd-udev.service
++Wants=dracut-pre-udev.service systemd-udev.service
+ 
+ [Service]
+ Environment=HOME=/
+diff --git a/modules.d/98systemd/dracut-pre-udev.service b/modules.d/98systemd/dracut-pre-udev.service
+index 11be61b..d867b38 100644
+--- a/modules.d/98systemd/dracut-pre-udev.service
++++ b/modules.d/98systemd/dracut-pre-udev.service
+@@ -10,7 +10,7 @@
+ [Unit]
+ Description=Dracut pre-udev hook
+ DefaultDependencies=no
+-Before=systemd-udev.service udev.service dracut-pre-trigger.service
++Before=systemd-udev.service dracut-pre-trigger.service
+ After=dracut-cmdline.service
+ Wants=dracut-cmdline.service
+ 
+diff --git a/modules.d/98systemd/module-setup.sh b/modules.d/98systemd/module-setup.sh
+index 4c68a9a..a6e2365 100755
+--- a/modules.d/98systemd/module-setup.sh
++++ b/modules.d/98systemd/module-setup.sh
+@@ -85,16 +85,7 @@ install() {
+         $systemdsystemunitdir/syslog.target \
+         $systemdsystemunitdir/initrd-switch-root.target \
+         $systemdsystemunitdir/initrd-switch-root.service \
+-        $systemdsystemunitdir/umount.target \
+-        $systemdsystemunitdir/udev-control.socket \
+-        $systemdsystemunitdir/udev-kernel.socket \
+-        $systemdsystemunitdir/udev.service \
+-        $systemdsystemunitdir/udev-settle.service \
+-        $systemdsystemunitdir/udev-trigger.service \
+-        $systemdsystemunitdir/basic.target.wants/udev.service \
+-        $systemdsystemunitdir/basic.target.wants/udev-trigger.service \
+-        $systemdsystemunitdir/sockets.target.wants/udev-control.socket \
+-        $systemdsystemunitdir/sockets.target.wants/udev-kernel.socket
++        $systemdsystemunitdir/umount.target
+ 
+     for i in /etc/systemd/*.conf; do
+         dracut_install "$i"
