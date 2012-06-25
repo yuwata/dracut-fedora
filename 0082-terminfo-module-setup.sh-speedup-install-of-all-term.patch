@@ -1,0 +1,25 @@
+From cb8d852cdcfda3774a0c5aee15dd85511ab21fa1 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 22 Jun 2012 15:29:04 +0200
+Subject: [PATCH] terminfo/module-setup.sh: speedup install() of all terminfo
+
+---
+ modules.d/95terminfo/module-setup.sh |    6 ++----
+ 1 file changed, 2 insertions(+), 4 deletions(-)
+
+diff --git a/modules.d/95terminfo/module-setup.sh b/modules.d/95terminfo/module-setup.sh
+index 32a3fe9..e1914a5 100755
+--- a/modules.d/95terminfo/module-setup.sh
++++ b/modules.d/95terminfo/module-setup.sh
+@@ -10,9 +10,7 @@ install() {
+     done
+ 
+     if [ -d ${_terminfodir} ]; then
+-        for f in ${_terminfodir}/*/*; do
+-            inst_simple $f
+-        done
++        inst_dir "$_terminfodir"
++        cp --reflink=auto --sparse=auto -prfL -t "${initdir}/${_terminfodir%/*}" "$_terminfodir"
+     fi
+ }
+-

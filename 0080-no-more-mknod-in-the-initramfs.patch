@@ -1,0 +1,62 @@
+From 070433429368aa721af68a250279483dea0b19fd Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 22 Jun 2012 15:27:40 +0200
+Subject: [PATCH] no more "mknod" in the initramfs!!
+
+---
+ modules.d/50gensplash/gensplash-pretrigger.sh |    4 ----
+ modules.d/50plymouth/plymouth-pretrigger.sh   |    6 ------
+ modules.d/99base/init.sh                      |    2 --
+ 3 files changed, 12 deletions(-)
+
+diff --git a/modules.d/50gensplash/gensplash-pretrigger.sh b/modules.d/50gensplash/gensplash-pretrigger.sh
+index 074aa78..b697438 100755
+--- a/modules.d/50gensplash/gensplash-pretrigger.sh
++++ b/modules.d/50gensplash/gensplash-pretrigger.sh
+@@ -3,10 +3,6 @@
+ # ex: ts=8 sw=4 sts=4 et filetype=sh
+ 
+ if getargbool 1 rd.splash -n rd_NO_SPLASH; then
+-    [ -c /dev/null ] || mknod /dev/null c 1 3
+-    [ -c /dev/console ] || mknod /dev/console c 5 1
+-    [ -c /dev/tty0 ] || mknod /dev/tty0 c 4 0
+-
+     info "Starting Gentoo Splash"
+ 
+     [ -x /lib/udev/console_init ] && /lib/udev/console_init /dev/tty0
+diff --git a/modules.d/50plymouth/plymouth-pretrigger.sh b/modules.d/50plymouth/plymouth-pretrigger.sh
+index 483cc70..5cc9112 100755
+--- a/modules.d/50plymouth/plymouth-pretrigger.sh
++++ b/modules.d/50plymouth/plymouth-pretrigger.sh
+@@ -4,18 +4,12 @@
+ 
+ if [ -x /bin/plymouthd ]; then
+     if getargbool 1 plymouth.enable && getargbool 1 rd.plymouth -n rd_NO_PLYMOUTH; then
+-        [ -c /dev/null ] || mknod -m 0666 /dev/null c 1 3
+         # first trigger graphics subsystem
+         udevadm trigger --action=add --attr-match=class=0x030000 >/dev/null 2>&1
+         # first trigger graphics and tty subsystem
+         udevadm trigger --action=add --subsystem-match=graphics --subsystem-match=drm --subsystem-match=tty >/dev/null 2>&1
+ 
+         udevadm settle --timeout=30 2>&1 | vinfo
+-        [ -c /dev/zero ] || mknod -m 0666 /dev/zero c 1 5
+-        [ -c /dev/tty0 ] || mknod -m 0620 /dev/tty0 c 4 0
+-        [ -e /dev/systty ] || ln -s tty0 /dev/systty
+-        [ -c /dev/fb0 ] || mknod -m 0660 /dev/fb0 c 29 0
+-        [ -e /dev/fb ] || ln -s fb0 /dev/fb
+ 
+         info "Starting plymouth daemon"
+         mkdir -m 0755 /run/plymouth
+diff --git a/modules.d/99base/init.sh b/modules.d/99base/init.sh
+index 5c693e4..d395a99 100755
+--- a/modules.d/99base/init.sh
++++ b/modules.d/99base/init.sh
+@@ -22,8 +22,6 @@ RD_DEBUG=""
+ 
+ trap "emergency_shell Signal caught!" 0
+ 
+-[ -c /dev/null ] || mknod -m 0666 /dev/null c 1 3
+-
+ # mount some important things
+ [ ! -d /proc/self ] && \
+     mount -t proc -o nosuid,noexec,nodev proc /proc >/dev/null 2>&1

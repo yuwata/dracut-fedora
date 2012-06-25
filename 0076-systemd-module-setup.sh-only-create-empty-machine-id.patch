@@ -1,0 +1,25 @@
+From af83b70cf27150d981844f508b55d50dd0cbc6c1 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 22 Jun 2012 15:19:32 +0200
+Subject: [PATCH] systemd/module-setup.sh: only create empty machine-id if non
+ existing
+
+---
+ modules.d/98systemd/module-setup.sh |    4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/modules.d/98systemd/module-setup.sh b/modules.d/98systemd/module-setup.sh
+index a6e2365..206f341 100755
+--- a/modules.d/98systemd/module-setup.sh
++++ b/modules.d/98systemd/module-setup.sh
+@@ -101,7 +101,9 @@ install() {
+             /etc/vconsole.conf \
+             /etc/locale.conf
+     else
+-        > "$initdir/etc/machine-id"
++        if ! [[ -e "$initdir/etc/machine-id" ]]; then
++            > "$initdir/etc/machine-id"
++        fi
+     fi
+ 
+     ln -fs $systemdutildir/systemd "$initdir/init"

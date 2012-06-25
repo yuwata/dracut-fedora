@@ -1,0 +1,26 @@
+From 0dd85327dfbb788a5b23820a7413c4e1e96deafe Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 22 Jun 2012 15:21:11 +0200
+Subject: [PATCH] i18n/module-setup.sh:install_all_kbd(): speedup install
+
+---
+ modules.d/10i18n/module-setup.sh |    6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/modules.d/10i18n/module-setup.sh b/modules.d/10i18n/module-setup.sh
+index d1854c2..7c8cd66 100755
+--- a/modules.d/10i18n/module-setup.sh
++++ b/modules.d/10i18n/module-setup.sh
+@@ -92,9 +92,9 @@ install() {
+     install_all_kbd() {
+         local rel f
+ 
+-        find $(eval echo ${kbddir}/{${KBDSUBDIRS}}) -type f -print | \
+-            while read f; do
+-            inst_simple $f
++        for _src in $(eval echo ${kbddir}/{${KBDSUBDIRS}}); do
++            inst_dir "$_src"
++            cp --reflink=auto --sparse=auto -prfL -t "${initdir}/${_src%/*}" "$_src"
+         done
+ 
+         # remove unnecessary files

@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 019
-Release: 62.git20120621%{?dist}
+Release: 92.git20120625%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -85,6 +85,36 @@ Patch58: 0058-systemd-remove-unneeded-systemd-services.patch
 Patch59: 0059-fixed-i18n-for-systemd-and-include-more-config-files.patch
 Patch60: 0060-systemd-remove-old-udev-services.patch
 Patch61: 0061-systemd-dracut-pre-pivot.sh-copy-service-files-to-ru.patch
+Patch62: 0062-network-support-vlan-tagged-bonding.patch
+Patch63: 0063-systemd-emergency.service-remove-Type-idle.patch
+Patch64: 0064-systemd-add-ConditionPathExists-etc-initrd-release-t.patch
+Patch65: 0065-dracut-functions.sh-replace-strstr.patch
+Patch66: 0066-dracut-functions.sh-mksubdirs-check-for-dir-existenc.patch
+Patch67: 0067-dracut-functions.sh-cp-with-reflink-auto-and-sparse-.patch
+Patch68: 0068-Add-qemu-kernel-modules-if-we-detect-a-qemu-instance.patch
+Patch69: 0069-dracut-functions.sh-inst_simple-do-inst_symlink-for-.patch
+Patch70: 0070-dracut-functions.sh-inst_decompress-simplify-functio.patch
+Patch71: 0071-dracut-functions.sh-find_kernel_modules_by_path-use-.patch
+Patch72: 0072-dracut.sh-speedup-strip.patch
+Patch73: 0073-profile.py-do-not-count-negative-timestamp-differenc.patch
+Patch74: 0074-fs-lib-fs-lib.sh-removed-test-mounting-of-btrfs-and-.patch
+Patch75: 0075-base-module-setup.sh-use-force-for-ln.patch
+Patch76: 0076-systemd-module-setup.sh-only-create-empty-machine-id.patch
+Patch77: 0077-systemd-module-setup.sh-ln-with-force.patch
+Patch78: 0078-i18n-module-setup.sh-install_all_kbd-speedup-install.patch
+Patch79: 0079-bootchart-module-setup.sh-no-need-for-mknod-anymore.patch
+Patch80: 0080-no-more-mknod-in-the-initramfs.patch
+Patch81: 0081-udev-rules-module-setup.sh-ln-with-force.patch
+Patch82: 0082-terminfo-module-setup.sh-speedup-install-of-all-term.patch
+Patch83: 0083-network-module-setup.sh-fixed-installkernel-return-c.patch
+Patch84: 0084-iscsi-module-setup.sh-speedup-installkernel.patch
+Patch85: 0085-plymouth-module-setup.sh-installkernel-fix-return-co.patch
+Patch86: 0086-kernel-modules-module-setup.sh-installkernel-fix-ret.patch
+Patch87: 0087-multipath-module-setup.sh-installkernel-fix-return-c.patch
+Patch88: 0088-modules.d-module-setup.sh-no-more-sourcing-of-dracut.patch
+Patch89: 0089-dracut-logger.sh-use-for-numeric-comparisons.patch
+Patch90: 0090-dracut-logger.sh-empty-functions-for-log-funcs-which.patch
+Patch91: 0091-dracut.sh-do-not-copy-devices-nodes-mknod-them.patch
 
 
 BuildArch: noarch
@@ -333,6 +363,7 @@ rm -rf $RPM_BUILD_ROOT
 %{dracutlibdir}/modules.d/90lvm
 %{dracutlibdir}/modules.d/90mdraid
 %{dracutlibdir}/modules.d/90multipath
+%{dracutlibdir}/modules.d/90qemu
 %{dracutlibdir}/modules.d/91crypt-gpg
 %{dracutlibdir}/modules.d/95debug
 %{dracutlibdir}/modules.d/95resume
@@ -375,6 +406,7 @@ rm -rf $RPM_BUILD_ROOT
 %{dracutlibdir}/modules.d/95fcoe
 %{dracutlibdir}/modules.d/95iscsi
 %{dracutlibdir}/modules.d/90livenet
+%{dracutlibdir}/modules.d/90qemu-net
 %{dracutlibdir}/modules.d/95nbd
 %{dracutlibdir}/modules.d/95nfs
 %{dracutlibdir}/modules.d/95ssh-client
@@ -406,6 +438,16 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Mon Jun 25 2012 Harald Hoyer <harald@redhat.com> 019-92.git20120625
+- support vlan tagged binding
+- speedup initramfs emergency service
+- speedup image creation
+- fix installkernel() return codes
+Resolves: rhbz#833256
+- add qemu and qemu-net modules to add qemu drivers even in host-only
+- speedup btrfs and xfs fsck (nop)
+- no more mknod in the initramfs (fixes plymouth on s390)
+
 * Thu Jun 21 2012 Harald Hoyer <harald@redhat.com> 019-62.git20120621
 - do not require pkg-config for systemd
 - i18n fixes

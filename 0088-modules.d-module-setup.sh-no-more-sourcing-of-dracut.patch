@@ -1,0 +1,127 @@
+From 6a767ee403095cdeb67b7cb5f69e8586ad19650a Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 22 Jun 2012 15:33:42 +0200
+Subject: [PATCH] modules.d/*/module-setup.sh: no more sourcing of
+ dracutfunctions
+
+---
+ modules.d/90btrfs/module-setup.sh     |    3 ---
+ modules.d/90crypt/module-setup.sh     |    2 --
+ modules.d/90dmraid/module-setup.sh    |    3 ---
+ modules.d/90lvm/module-setup.sh       |    3 ---
+ modules.d/90mdraid/module-setup.sh    |    3 ---
+ modules.d/90multipath/module-setup.sh |    3 ---
+ modules.d/95iscsi/module-setup.sh     |    4 ----
+ modules.d/95nbd/module-setup.sh       |    1 -
+ 8 files changed, 22 deletions(-)
+
+diff --git a/modules.d/90btrfs/module-setup.sh b/modules.d/90btrfs/module-setup.sh
+index 135abc6..7d8fae0 100755
+--- a/modules.d/90btrfs/module-setup.sh
++++ b/modules.d/90btrfs/module-setup.sh
+@@ -8,9 +8,6 @@ check() {
+     # no point in trying to support it in the initramfs.
+     type -P btrfs >/dev/null || return 1
+ 
+-    . $dracutfunctions
+-    [[ $debug ]] && set -x
+-
+     [[ $hostonly ]] || [[ $mount_needs ]] && {
+         local _found
+         for fs in ${host_fs_types[@]}; do
+diff --git a/modules.d/90crypt/module-setup.sh b/modules.d/90crypt/module-setup.sh
+index 5082434..16d6f89 100755
+--- a/modules.d/90crypt/module-setup.sh
++++ b/modules.d/90crypt/module-setup.sh
+@@ -7,8 +7,6 @@ check() {
+     # if cryptsetup is not installed, then we cannot support encrypted devices.
+     type -P cryptsetup >/dev/null || return 1
+ 
+-    . $dracutfunctions
+-
+     check_crypt() {
+         local dev=$1 fs=$2
+         [[ $fs = "crypto_LUKS" ]] || return 1
+diff --git a/modules.d/90dmraid/module-setup.sh b/modules.d/90dmraid/module-setup.sh
+index 5ce7051..dad54a4 100755
+--- a/modules.d/90dmraid/module-setup.sh
++++ b/modules.d/90dmraid/module-setup.sh
+@@ -8,9 +8,6 @@ check() {
+     # in trying to support it in the initramfs.
+     type -P dmraid >/dev/null || return 1
+ 
+-    . $dracutfunctions
+-    [[ $debug ]] && set -x
+-
+     check_dmraid() {
+         local dev=$1 fs=$2 holder DEVPATH DM_NAME
+         [[ "$fs" = "${fs%%_raid_member}" ]] && return 1
+diff --git a/modules.d/90lvm/module-setup.sh b/modules.d/90lvm/module-setup.sh
+index 2ce5c50..5182b79 100755
+--- a/modules.d/90lvm/module-setup.sh
++++ b/modules.d/90lvm/module-setup.sh
+@@ -7,9 +7,6 @@ check() {
+     # No point trying to support lvm if the binaries are missing
+     type -P lvm >/dev/null || return 1
+ 
+-    . $dracutfunctions
+-    [[ $debug ]] && set -x
+-
+     check_lvm() {
+         local DM_VG_NAME DM_LV_NAME DM_UDEV_DISABLE_DISK_RULES_FLAG
+         eval $(udevadm info --query=property --name=$1|egrep '(DM_VG_NAME|DM_LV_NAME|DM_UDEV_DISABLE_DISK_RULES_FLAG)=')
+diff --git a/modules.d/90mdraid/module-setup.sh b/modules.d/90mdraid/module-setup.sh
+index 350aff8..56f881e 100755
+--- a/modules.d/90mdraid/module-setup.sh
++++ b/modules.d/90mdraid/module-setup.sh
+@@ -7,9 +7,6 @@ check() {
+     # No mdadm?  No mdraid support.
+     type -P mdadm >/dev/null || return 1
+ 
+-    . $dracutfunctions
+-    [[ $debug ]] && set -x
+-
+     check_mdraid() {
+         local dev=$1 fs=$2 holder DEVPATH MD_UUID
+         [[ "$fs" = "${fs%%_raid_member}" ]] && return 1
+diff --git a/modules.d/90multipath/module-setup.sh b/modules.d/90multipath/module-setup.sh
+index 8791560..bfa4bf8 100755
+--- a/modules.d/90multipath/module-setup.sh
++++ b/modules.d/90multipath/module-setup.sh
+@@ -7,9 +7,6 @@ check() {
+     # if there's no multipath binary, no go.
+     type -P multipath >/dev/null || return 1
+ 
+-    . $dracutfunctions
+-    [[ $debug ]] && set -x
+-
+     is_mpath() {
+         local _dev
+         _dev=$(get_maj_min $1)
+diff --git a/modules.d/95iscsi/module-setup.sh b/modules.d/95iscsi/module-setup.sh
+index 5f935d7..1787f92 100755
+--- a/modules.d/95iscsi/module-setup.sh
++++ b/modules.d/95iscsi/module-setup.sh
+@@ -10,10 +10,6 @@ check() {
+     # If hostonly was requested, fail the check if we are not actually
+     # booting from root.
+ 
+-    . $dracutfunctions
+-
+-    [[ $debug ]] && set -x
+-
+     is_iscsi() (
+         local _dev
+         _dev=$(get_maj_min $1)
+diff --git a/modules.d/95nbd/module-setup.sh b/modules.d/95nbd/module-setup.sh
+index c0f71cc..092aade 100755
+--- a/modules.d/95nbd/module-setup.sh
++++ b/modules.d/95nbd/module-setup.sh
+@@ -11,7 +11,6 @@ check() {
+     # mounted on, fail the hostonly check.
+     [[ $hostonly ]] || [[ $mount_needs ]] && {
+         is_nbd() { [[ -b /dev/block/$1 && $1 == 43:* ]] ;}
+-        . $dracutfunctions
+ 
+         _rootdev=$(find_root_block_device)
+         [[ -b /dev/block/$_rootdev ]] || return 1

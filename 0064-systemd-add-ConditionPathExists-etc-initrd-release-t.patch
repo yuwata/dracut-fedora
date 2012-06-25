@@ -1,0 +1,74 @@
+From d17e0fcd431e823c3f93bbcff8e853578d6bfdc9 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 21 Jun 2012 14:10:41 +0200
+Subject: [PATCH] systemd: add ConditionPathExists=/etc/initrd-release to
+ services
+
+---
+ modules.d/98systemd/dracut-cmdline.service     |    1 +
+ modules.d/98systemd/dracut-initqueue.service   |    1 +
+ modules.d/98systemd/dracut-pre-pivot.service   |    1 +
+ modules.d/98systemd/dracut-pre-trigger.service |    1 +
+ modules.d/98systemd/dracut-pre-udev.service    |    1 +
+ 5 files changed, 5 insertions(+)
+
+diff --git a/modules.d/98systemd/dracut-cmdline.service b/modules.d/98systemd/dracut-cmdline.service
+index 938ccbe..c84f62b 100644
+--- a/modules.d/98systemd/dracut-cmdline.service
++++ b/modules.d/98systemd/dracut-cmdline.service
+@@ -23,6 +23,7 @@ StandardInput=null
+ StandardOutput=syslog
+ StandardError=syslog+console
+ KillMode=process
++ConditionPathExists=/etc/initrd-release
+ 
+ # Bash ignores SIGTERM, so we send SIGHUP instead, to ensure that bash
+ # terminates cleanly.
+diff --git a/modules.d/98systemd/dracut-initqueue.service b/modules.d/98systemd/dracut-initqueue.service
+index 31fe9e4..4fde539 100644
+--- a/modules.d/98systemd/dracut-initqueue.service
++++ b/modules.d/98systemd/dracut-initqueue.service
+@@ -22,6 +22,7 @@ StandardInput=null
+ StandardOutput=syslog
+ StandardError=syslog+console
+ KillMode=process
++ConditionPathExists=/etc/initrd-release
+ 
+ # Bash ignores SIGTERM, so we send SIGHUP instead, to ensure that bash
+ # terminates cleanly.
+diff --git a/modules.d/98systemd/dracut-pre-pivot.service b/modules.d/98systemd/dracut-pre-pivot.service
+index e61750b..38d252d 100644
+--- a/modules.d/98systemd/dracut-pre-pivot.service
++++ b/modules.d/98systemd/dracut-pre-pivot.service
+@@ -21,6 +21,7 @@ StandardInput=null
+ StandardOutput=syslog
+ StandardError=syslog+console
+ KillMode=process
++ConditionPathExists=/etc/initrd-release
+ 
+ # Bash ignores SIGTERM, so we send SIGHUP instead, to ensure that bash
+ # terminates cleanly.
+diff --git a/modules.d/98systemd/dracut-pre-trigger.service b/modules.d/98systemd/dracut-pre-trigger.service
+index b06d17f..97c505d 100644
+--- a/modules.d/98systemd/dracut-pre-trigger.service
++++ b/modules.d/98systemd/dracut-pre-trigger.service
+@@ -23,6 +23,7 @@ StandardInput=null
+ StandardOutput=syslog
+ StandardError=syslog+console
+ KillMode=process
++ConditionPathExists=/etc/initrd-release
+ 
+ # Bash ignores SIGTERM, so we send SIGHUP instead, to ensure that bash
+ # terminates cleanly.
+diff --git a/modules.d/98systemd/dracut-pre-udev.service b/modules.d/98systemd/dracut-pre-udev.service
+index d867b38..9b83e3e 100644
+--- a/modules.d/98systemd/dracut-pre-udev.service
++++ b/modules.d/98systemd/dracut-pre-udev.service
+@@ -23,6 +23,7 @@ StandardInput=null
+ StandardOutput=syslog
+ StandardError=syslog+console
+ KillMode=process
++ConditionPathExists=/etc/initrd-release
+ 
+ # Bash ignores SIGTERM, so we send SIGHUP instead, to ensure that bash
+ # terminates cleanly.

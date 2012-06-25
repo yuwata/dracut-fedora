@@ -1,0 +1,26 @@
+From f550ba07400662633295c9681a80787fc44e61fa Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 22 Jun 2012 08:59:22 +0200
+Subject: [PATCH] dracut-functions.sh: cp with --reflink=auto and
+ --sparse=auto
+
+cp will use COW data copy most of the time. So, it's even better than
+hardlink, because we don't have to care about hardlinks, when modifying
+files in post.
+---
+ dracut-functions.sh |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/dracut-functions.sh b/dracut-functions.sh
+index 3b562e7..b9ce688 100755
+--- a/dracut-functions.sh
++++ b/dracut-functions.sh
+@@ -435,7 +435,7 @@ inst_simple() {
+         inst "${_src%/*}/.${_src##*/}.hmac" "${target%/*}/.${target##*/}.hmac"
+     fi
+     ddebug "Installing $_src"
+-    cp --sparse=always -pfL "$_src" "${initdir}/$target"
++    cp --reflink=auto --sparse=auto -pfL "$_src" "${initdir}/$target"
+ }
+ 
+ # find symlinks linked to given library file

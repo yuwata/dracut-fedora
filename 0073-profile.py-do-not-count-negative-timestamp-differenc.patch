@@ -1,0 +1,23 @@
+From b5f5a081d1b6c4c1890a26e637b10234164ab388 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 22 Jun 2012 15:14:27 +0200
+Subject: [PATCH] profile.py: do not count negative timestamp differences
+
+---
+ profile.py |    3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/profile.py b/profile.py
+index e1d0cab..7f98a13 100644
+--- a/profile.py
++++ b/profile.py
+@@ -36,7 +36,8 @@ def gen_times(t):
+         fx=float(x[0])
+         if oldx:
+             #print fx - float(oldx[0]), x[0], x[1], oldx[0], oldx[1]
+-            yield (fx - float(oldx[0]), oldx[1])
++            if ((fx - float(oldx[0])) > 0):
++                    yield (fx - float(oldx[0]), oldx[1])
+ 
+         oldx = x
+ 

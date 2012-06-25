@@ -1,0 +1,79 @@
+From a6b48b4c239d8ebacf545c27aa801ba0f8762a2b Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 22 Jun 2012 14:50:06 +0200
+Subject: [PATCH] Add qemu kernel modules, if we detect a qemu instance
+
+Regardless of the host-only setting, add all know kernel driver for qemu
+instances to support changing the virtual hardware.
+---
+ dracut.spec                          |    2 ++
+ modules.d/90qemu-net/module-setup.sh |   16 ++++++++++++++++
+ modules.d/90qemu/module-setup.sh     |   16 ++++++++++++++++
+ 3 files changed, 34 insertions(+)
+ create mode 100755 modules.d/90qemu-net/module-setup.sh
+ create mode 100755 modules.d/90qemu/module-setup.sh
+
+diff --git a/dracut.spec b/dracut.spec
+index 982a66d..b19d15b 100644
+--- a/dracut.spec
++++ b/dracut.spec
+@@ -271,6 +271,7 @@ rm -rf $RPM_BUILD_ROOT
+ %{dracutlibdir}/modules.d/90lvm
+ %{dracutlibdir}/modules.d/90mdraid
+ %{dracutlibdir}/modules.d/90multipath
++%{dracutlibdir}/modules.d/90qemu
+ %{dracutlibdir}/modules.d/91crypt-gpg
+ %{dracutlibdir}/modules.d/95debug
+ %{dracutlibdir}/modules.d/95resume
+@@ -313,6 +314,7 @@ rm -rf $RPM_BUILD_ROOT
+ %{dracutlibdir}/modules.d/95fcoe
+ %{dracutlibdir}/modules.d/95iscsi
+ %{dracutlibdir}/modules.d/90livenet
++%{dracutlibdir}/modules.d/90qemu-net
+ %{dracutlibdir}/modules.d/95nbd
+ %{dracutlibdir}/modules.d/95nfs
+ %{dracutlibdir}/modules.d/95ssh-client
+diff --git a/modules.d/90qemu-net/module-setup.sh b/modules.d/90qemu-net/module-setup.sh
+new file mode 100755
+index 0000000..3d61792
+--- /dev/null
++++ b/modules.d/90qemu-net/module-setup.sh
+@@ -0,0 +1,16 @@
++#!/bin/bash
++# -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
++# ex: ts=8 sw=4 sts=4 et filetype=sh
++
++check() {
++    vm=$(systemd-detect-virt --vm)
++    (($? != 0)) && return 255
++    [[ $vm = "qemu" ]] && return 0
++    [[ $vm = "kvm" ]] && return 0
++    return 255
++}
++
++installkernel() {
++    # qemu specific modules
++    hostonly='' instmods virtio_net e1000 8139cp pcnet32 e100 ne2k_pci
++}
+diff --git a/modules.d/90qemu/module-setup.sh b/modules.d/90qemu/module-setup.sh
+new file mode 100755
+index 0000000..094f5a3
+--- /dev/null
++++ b/modules.d/90qemu/module-setup.sh
+@@ -0,0 +1,16 @@
++#!/bin/bash
++# -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
++# ex: ts=8 sw=4 sts=4 et filetype=sh
++
++check() {
++    vm=$(systemd-detect-virt --vm)
++    (($? != 0)) && return 255
++    [[ $vm = "qemu" ]] && return 0
++    [[ $vm = "kvm" ]] && return 0
++    return 255
++}
++
++installkernel() {
++        # qemu specific modules
++        hostonly='' instmods virtio_blk virtio virtio_ring virtio_pci ata_piix ata_generic pata_acpi cdrom sr_mod ahci virtio_scsi
++}

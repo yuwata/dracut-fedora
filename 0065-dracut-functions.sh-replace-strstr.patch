@@ -1,0 +1,23 @@
+From bc616b4d5660d8d79465202bdc3a1b43b4ea3ba1 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 22 Jun 2012 08:57:20 +0200
+Subject: [PATCH] dracut-functions.sh: replace strstr()
+
+the new strstr() is faster, when compared
+---
+ dracut-functions.sh |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/dracut-functions.sh b/dracut-functions.sh
+index d4a766b..ace5a0b 100755
+--- a/dracut-functions.sh
++++ b/dracut-functions.sh
+@@ -21,7 +21,7 @@
+ #
+ 
+ # Generic substring function.  If $2 is in $1, return 0.
+-strstr() { [ "${1#*$2*}" != "$1" ]; }
++strstr() { [[ $1 = *$2* ]]; }
+ 
+ if ! [[ $dracutbasedir ]]; then
+     dracutbasedir=${BASH_SOURCE[0]%/*}

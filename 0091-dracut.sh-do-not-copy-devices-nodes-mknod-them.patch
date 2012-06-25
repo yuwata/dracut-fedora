@@ -1,0 +1,27 @@
+From fabe8a8c29ff657e29f3c33bf6c564cfd0ee613f Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 22 Jun 2012 15:49:25 +0200
+Subject: [PATCH] dracut.sh: do not copy devices nodes, mknod them
+
+---
+ dracut.sh |    7 +++----
+ 1 file changed, 3 insertions(+), 4 deletions(-)
+
+diff --git a/dracut.sh b/dracut.sh
+index cc3669a..0fb0a18 100755
+--- a/dracut.sh
++++ b/dracut.sh
+@@ -714,10 +714,9 @@ if [[ $kernel_only != yes ]]; then
+         mkdir -m 0755 -p ${initdir}/lib/dracut/hooks/$_d
+     done
+     if [[ "$UID" = "0" ]]; then
+-        for i in /dev/kmsg /dev/null /dev/console; do
+-            [ -e $i ] || continue
+-            cp -a $i $initdir/dev
+-        done
++        [ -c ${initdir}/dev/null ] || mknod ${initdir}/dev/null c 1 3
++        [ -c ${initdir}/dev/kmsg ] || mknod ${initdir}/dev/kmsg c 1 11
++        [ -c ${initdir}/dev/console ] || mknod ${initdir}/dev/console c 5 1
+     fi
+ fi
+ 

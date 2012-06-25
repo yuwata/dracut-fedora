@@ -1,0 +1,39 @@
+From 8e41fb1dfd47f99d374bf7190344400e6bb1d018 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 22 Jun 2012 15:13:47 +0200
+Subject: [PATCH] dracut.sh: speedup "strip"
+
+---
+ dracut.sh |   12 +++++-------
+ 1 file changed, 5 insertions(+), 7 deletions(-)
+
+diff --git a/dracut.sh b/dracut.sh
+index 5600ec0..cc3669a 100755
+--- a/dracut.sh
++++ b/dracut.sh
+@@ -844,7 +844,7 @@ fi
+ 
+ # strip binaries
+ if [[ $do_strip = yes ]] ; then
+-    for p in strip grep find; do
++    for p in strip xargs find; do
+         if ! type -P $p >/dev/null; then
+             derror "Could not find '$p'. You should run $0 with '--nostrip'."
+             do_strip=no
+@@ -853,12 +853,10 @@ if [[ $do_strip = yes ]] ; then
+ fi
+ 
+ if [[ $do_strip = yes ]] ; then
+-    for f in $(find "$initdir" -type f \
+-        \( -perm -0100 -or -perm -0010 -or -perm -0001 \
+-           -or -path '*/lib/modules/*.ko' \) ); do
+-        dinfo "Stripping $f"
+-        strip -g "$f" 2>/dev/null|| :
+-    done
++    find "$initdir" -type f \
++         \( -perm -0100 -or -perm -0010 -or -perm -0001 \
++        -or -path '*/lib/modules/*.ko' \) -print0 \
++        | xargs -0 strip -g 2>/dev/null
+ fi
+ 
+ type hardlink &>/dev/null && {

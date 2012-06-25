@@ -1,0 +1,22 @@
+From e3295047b101a9a92c8548909cd18b2675bc9977 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 21 Jun 2012 13:51:49 +0200
+Subject: [PATCH] systemd/emergency.service: remove Type=idle
+
+Type=idle might cause a 3 second delay.
+---
+ modules.d/98systemd/emergency.service |    1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/modules.d/98systemd/emergency.service b/modules.d/98systemd/emergency.service
+index 431e2b0..b79af22 100644
+--- a/modules.d/98systemd/emergency.service
++++ b/modules.d/98systemd/emergency.service
+@@ -18,7 +18,6 @@ ExecStartPre=-/bin/plymouth quit
+ ExecStartPre=-/bin/echo -e '\n\nEntering emergency mode. Exit the shell to continue.\nType "journalctl" to view system logs.\n'
+ ExecStart=-/bin/sh -i -l
+ ExecStopPost=-/bin/rm -f /.console_lock
+-Type=idle
+ StandardInput=tty-force
+ StandardOutput=inherit
+ StandardError=inherit
