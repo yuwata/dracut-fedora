@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 020
-Release: 21.git20120702%{?dist}
+Release: 22.git20120702%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -49,6 +49,7 @@ Patch17: 0017-TEST-02-SYSTEMD-enlarge-the-root-disk.patch
 Patch18: 0018-dracut-functions.sh-create-initdir-if-it-does-not-ex.patch
 Patch19: 0019-dracut-install.c-for-lazy-install-shebangs-do-not-ch.patch
 Patch20: 0020-usrmount-mount-usr.sh-give-emergency_shell-if-usr-mo.patch
+Patch21: 0021-dracut-functions.sh-forgot-set-version-kernel-for-mo.patch
 
 
 BuildRequires: dash bash git
@@ -372,6 +373,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Mon Jul 02 2012 Harald Hoyer <harald@redhat.com> 020-22.git20120702
+- fixed kernel modules install
+
 * Mon Jul 02 2012 Harald Hoyer <harald@redhat.com> 020-21.git20120702
 - moved /usr/bin/dracut-install to /usr/lib
 - more speedups
