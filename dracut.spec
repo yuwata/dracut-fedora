@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 020
-Release: 22.git20120702%{?dist}
+Release: 51.git20120706%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -50,6 +50,35 @@ Patch18: 0018-dracut-functions.sh-create-initdir-if-it-does-not-ex.patch
 Patch19: 0019-dracut-install.c-for-lazy-install-shebangs-do-not-ch.patch
 Patch20: 0020-usrmount-mount-usr.sh-give-emergency_shell-if-usr-mo.patch
 Patch21: 0021-dracut-functions.sh-forgot-set-version-kernel-for-mo.patch
+Patch22: 0022-dracut-functions.sh-find_kernel_modules_by_path-fixe.patch
+Patch23: 0023-base-init.sh-error-out-early-if-dev-proc-or-sys-cann.patch
+Patch24: 0024-add-lsinitrd-and-mkinitrd-man-pages.patch
+Patch25: 0025-manpages-simplify-AUTHORS.patch
+Patch26: 0026-dracut.sh-use-getopt-to-parse-arguments.patch
+Patch27: 0027-usrmount-mount-usr.sh-check-the-right-path-with-ismo.patch
+Patch28: 0028-TEST-03-USR-MOUNT-change-test-to-use-a-seperate-disk.patch
+Patch29: 0029-TEST-30-ISCSI-put-back-in-hard-off.sh-for-tests.patch
+Patch30: 0030-lsinitrd.sh-print-usage-for-h.patch
+Patch31: 0031-lsinitrd.sh-get-rid-of-awk-call.patch
+Patch32: 0032-lsinitrd.sh-fixed-version-file-extraction.patch
+Patch33: 0033-Makefile-mkinitrd-man-page-install-typo.patch
+Patch34: 0034-fips-change-module-list.patch
+Patch35: 0035-i18n-module-setup.sh-s-error-info-if-no-keymap-is-co.patch
+Patch36: 0036-fips-add-instmods-silent-check-mode-c-s.patch
+Patch37: 0037-install-user-group-adm-for-journal.patch
+Patch38: 0038-network-factor-out-parse_ifname_opts-for-ifname-genr.patch
+Patch39: 0039-systemd-exit-with-sane-state.patch
+Patch40: 0040-dracut.asc-add-lsinitrd-and-mkinitrd.patch
+Patch41: 0041-dracut.8.asc-fixup-NOTE-sections.patch
+Patch42: 0042-dracut.cmdline.7.asc-fixup.patch
+Patch43: 0043-network-do-not-rename-other-interfaces-and-document-.patch
+Patch44: 0044-mkinitrd.8.asc-mark-paragraph-as-important.patch
+Patch45: 0045-network-ifname-genrules.sh-check-for-multiple-ifname.patch
+Patch46: 0046-dracut.sh-keep-vim-syntax-highlighting-happy.patch
+Patch47: 0047-systemd-check-that-prefix-does-not-contain-run.patch
+Patch48: 0048-fixed-bash-sh-requirements.patch
+Patch49: 0049-dracut.spec-dracut.conf.d-fedora.conf.example-no-das.patch
+Patch50: 0050-systemd-module-setup.sh-also-include-systemd-udevd-u.patch
 
 
 BuildRequires: dash bash git
@@ -212,6 +241,9 @@ rm -fr $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/01fips
 rm -fr $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/02fips-aesni
 %endif
 
+# we do not support dash in the initramfs
+rm -fr $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/00dash
+
 # remove gentoo specific modules
 rm -fr $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/50gensplash
 
@@ -277,11 +309,12 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 %dir /etc/dracut.conf.d
 %{_mandir}/man8/dracut.8*
+%{_mandir}/man8/mkinitrd.8*
 %{_mandir}/man7/dracut.kernel.7*
 %{_mandir}/man7/dracut.cmdline.7*
 %{_mandir}/man5/dracut.conf.5*
+%{_mandir}/man1/lsinitrd.1*
 %{dracutlibdir}/modules.d/00bootchart
-%{dracutlibdir}/modules.d/00dash
 %{dracutlibdir}/modules.d/04watchdog
 %{dracutlibdir}/modules.d/05busybox
 %{dracutlibdir}/modules.d/10i18n
@@ -373,6 +406,11 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Fri Jul 06 2012 Harald Hoyer <harald@redhat.com> 020-51.git20120706
+- cope with systemd-udevd unit renaming
+- fixed network renaming
+- removed dash module
+
 * Mon Jul 02 2012 Harald Hoyer <harald@redhat.com> 020-22.git20120702
 - fixed kernel modules install
 
