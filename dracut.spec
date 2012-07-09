@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 020
-Release: 55.git20120709%{?dist}
+Release: 57.git20120709%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -83,6 +83,8 @@ Patch51: 0051-dracut.conf.d-fedora.conf.example-removed-readonly-f.patch
 Patch52: 0052-dracut-functions.sh-bail-out-if-initdir-is-not-set.patch
 Patch53: 0053-dracut.sh-corrected-error-messages-if-mktemp-failed.patch
 Patch54: 0054-require-systemd-186.patch
+Patch55: 0055-systemd-udev-trigger.service-and-systemd-udev-settle.patch
+Patch56: 0056-TEST-30-ISCSI-convert-to-ext3.patch
 
 
 BuildRequires: dash bash git
@@ -410,6 +412,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Mon Jul 09 2012 Harald Hoyer <harald@redhat.com> 020-57.git20120709
+- more fixups for systemd-udevd unit renaming
+
 * Mon Jul 09 2012 Harald Hoyer <harald@redhat.com> 020-55.git20120709
 - require systemd >= 186
 - more fixups for systemd-udevd unit renaming
