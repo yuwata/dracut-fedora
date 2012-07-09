@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 020
-Release: 51.git20120706%{?dist}
+Release: 52.git20120709%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -79,6 +79,7 @@ Patch47: 0047-systemd-check-that-prefix-does-not-contain-run.patch
 Patch48: 0048-fixed-bash-sh-requirements.patch
 Patch49: 0049-dracut.spec-dracut.conf.d-fedora.conf.example-no-das.patch
 Patch50: 0050-systemd-module-setup.sh-also-include-systemd-udevd-u.patch
+Patch51: 0051-dracut.conf.d-fedora.conf.example-removed-readonly-f.patch
 
 
 BuildRequires: dash bash git
@@ -406,6 +407,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Mon Jul 09 2012 Harald Hoyer <harald@redhat.com> 020-52.git20120709
+- fixed prefix in 01-dist.conf
+
 * Fri Jul 06 2012 Harald Hoyer <harald@redhat.com> 020-51.git20120706
 - cope with systemd-udevd unit renaming
 - fixed network renaming
