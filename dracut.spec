@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 020
-Release: 57.git20120709%{?dist}
+Release: 64.git20120709%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -85,6 +85,13 @@ Patch53: 0053-dracut.sh-corrected-error-messages-if-mktemp-failed.patch
 Patch54: 0054-require-systemd-186.patch
 Patch55: 0055-systemd-udev-trigger.service-and-systemd-udev-settle.patch
 Patch56: 0056-TEST-30-ISCSI-convert-to-ext3.patch
+Patch57: 0057-02caps-do-not-create-bin-sh-link.patch
+Patch58: 0058-dhclient-initqueue-hook-fix.patch
+Patch59: 0059-Makefile-do-not-install-service-from-98systemd.-They.patch
+Patch60: 0060-plymouth-Use-latest-plymouth-s-populate-script.patch
+Patch61: 0061-test-export-initdir.patch
+Patch62: 0062-test-new-test-TEST-99-RPM.patch
+Patch63: 0063-resume-move-resume-process-to-initqueue.patch
 
 
 BuildRequires: dash bash git
@@ -369,9 +376,8 @@ rm -rf $RPM_BUILD_ROOT
 %attr(0644,root,root) %ghost %config(missingok,noreplace) %{_localstatedir}/log/dracut.log
 %dir %{_sharedstatedir}/initramfs
 %if %{defined _unitdir}
-%{_unitdir}/*.service
-%{_unitdir}/*.target
-%{_unitdir}/*/*.service
+%{_unitdir}/dracut-shutdown.service
+%{_unitdir}/shutdown.target.wants/dracut-shutdown.service
 %endif
 
 %files network
@@ -412,6 +418,12 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Mon Jul 09 2012 Harald Hoyer <harald@redhat.com> 020-64.git20120709
+- fixed plymouth install
+- fixed resume
+- fixed dhcp
+- no dracut systemd services installed in the system
+
 * Mon Jul 09 2012 Harald Hoyer <harald@redhat.com> 020-57.git20120709
 - more fixups for systemd-udevd unit renaming
 
