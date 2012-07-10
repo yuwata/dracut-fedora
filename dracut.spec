@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 020
-Release: 70.git20120710%{?dist}
+Release: 72.git20120710%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -98,6 +98,8 @@ Patch66: 0066-plymouth-add-plymouth-wait-quit.service-to-initrd.patch
 Patch67: 0067-TEST-01-BASIC-turn-on-systemd-debugging.patch
 Patch68: 0068-TEST-01-BASIC-enable-selinux.patch
 Patch69: 0069-install-dracut-install.c-redirect-stderr-to-stdout-a.patch
+Patch70: 0070-systemd-initrd-switch-root.service-stop-journald-rat.patch
+Patch71: 0071-systemd-install-all-dracut-units-in-etc-and-let-the-.patch
 
 
 BuildRequires: dash bash git
@@ -424,6 +426,10 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Tue Jul 10 2012 Harald Hoyer <harald@redhat.com> 020-72.git20120710
+- stop journal rather than restart
+- copy over dracut services to /run/systemd/system
+
 * Tue Jul 10 2012 Harald Hoyer <harald@redhat.com> 020-70.git20120710
 - more systemd unit fixups
 - restart systemd-journald in switch-root post
