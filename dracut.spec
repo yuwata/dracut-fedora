@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 020
-Release: 64.git20120709%{?dist}
+Release: 70.git20120710%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -92,6 +92,12 @@ Patch60: 0060-plymouth-Use-latest-plymouth-s-populate-script.patch
 Patch61: 0061-test-export-initdir.patch
 Patch62: 0062-test-new-test-TEST-99-RPM.patch
 Patch63: 0063-resume-move-resume-process-to-initqueue.patch
+Patch64: 0064-TEST-99-RPM-test-trap.patch
+Patch65: 0065-systemd-service-cleanup.patch
+Patch66: 0066-plymouth-add-plymouth-wait-quit.service-to-initrd.patch
+Patch67: 0067-TEST-01-BASIC-turn-on-systemd-debugging.patch
+Patch68: 0068-TEST-01-BASIC-enable-selinux.patch
+Patch69: 0069-install-dracut-install.c-redirect-stderr-to-stdout-a.patch
 
 
 BuildRequires: dash bash git
@@ -418,6 +424,11 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Tue Jul 10 2012 Harald Hoyer <harald@redhat.com> 020-70.git20120710
+- more systemd unit fixups
+- restart systemd-journald in switch-root post
+- fixed dracut-install loader ldd error message
+
 * Mon Jul 09 2012 Harald Hoyer <harald@redhat.com> 020-64.git20120709
 - fixed plymouth install
 - fixed resume
