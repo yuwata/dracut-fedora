@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 020
-Release: 72.git20120710%{?dist}
+Release: 83.git20120711%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -100,6 +100,17 @@ Patch68: 0068-TEST-01-BASIC-enable-selinux.patch
 Patch69: 0069-install-dracut-install.c-redirect-stderr-to-stdout-a.patch
 Patch70: 0070-systemd-initrd-switch-root.service-stop-journald-rat.patch
 Patch71: 0071-systemd-install-all-dracut-units-in-etc-and-let-the-.patch
+Patch72: 0072-test-server-init.sh-redirect-stdin-out-err-to-dev-co.patch
+Patch73: 0073-systemd-initrd-switch-root.target-add-ConditionPathE.patch
+Patch74: 0074-kernel-modules-module-setup.sh-also-install-lib-modp.patch
+Patch75: 0075-nfs-install-modprobe-config-file.patch
+Patch76: 0076-test-add-support-for-make-V-1-TESTS-01-20-40-check.patch
+Patch77: 0077-dracut-shutdown.service-s-reboot.service-systemd-reb.patch
+Patch78: 0078-test-TEST-04-FULL-SYSTEMD-full-test-with-systemd-and.patch
+Patch79: 0079-test-silence-make-all.patch
+Patch80: 0080-systemd-fixed-initrd-switch-root.service.patch
+Patch81: 0081-dracut.sh-for-include-copy-also-the-symbolic-links.patch
+Patch82: 0082-install-dracut-install.c-check-for-empty-or-destdir.patch
 
 
 BuildRequires: dash bash git
@@ -426,6 +437,14 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Wed Jul 11 2012 Harald Hoyer <harald@redhat.com> 020-83.git20120711
+- more systemd journal fixes
+- nfs module fix
+- install also /lib/modprobe.d/*
+- fixed dracut-shutdown service
+- safeguards for dracut-install
+- for --include also copy symlinks
+
 * Tue Jul 10 2012 Harald Hoyer <harald@redhat.com> 020-72.git20120710
 - stop journal rather than restart
 - copy over dracut services to /run/systemd/system
