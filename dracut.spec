@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 020
-Release: 83.git20120711%{?dist}
+Release: 84.git20120711%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -111,6 +111,7 @@ Patch79: 0079-test-silence-make-all.patch
 Patch80: 0080-systemd-fixed-initrd-switch-root.service.patch
 Patch81: 0081-dracut.sh-for-include-copy-also-the-symbolic-links.patch
 Patch82: 0082-install-dracut-install.c-check-for-empty-or-destdir.patch
+Patch83: 0083-systemd-initrd-switch-root.service-add-back-force-to.patch
 
 
 BuildRequires: dash bash git
@@ -437,6 +438,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Wed Jul 11 2012 Harald Hoyer <harald@redhat.com> 020-84.git20120711
+- add back "--force" to switch-root, otherwise systemd umounts /run
+
 * Wed Jul 11 2012 Harald Hoyer <harald@redhat.com> 020-83.git20120711
 - more systemd journal fixes
 - nfs module fix
