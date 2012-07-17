@@ -1,0 +1,20 @@
+From f31049c17f76048799017de52cb65c8906070b3e Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 12 Jul 2012 08:56:36 +0200
+Subject: [PATCH] systemd/service-to-run.sh: do not copy the target subdirs
+
+---
+ modules.d/98systemd/service-to-run.sh |    3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/modules.d/98systemd/service-to-run.sh b/modules.d/98systemd/service-to-run.sh
+index 797958e..e09acc5 100755
+--- a/modules.d/98systemd/service-to-run.sh
++++ b/modules.d/98systemd/service-to-run.sh
+@@ -1,4 +1,5 @@
+ #!/bin/sh
+ mkdir -p /run/systemd/system/
+-cp -a -t /run/systemd/system/ /etc/systemd/system/*
++cp -d -t /run/systemd/system/ /etc/systemd/system/*
++exit 0
+ 

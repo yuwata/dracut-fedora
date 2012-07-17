@@ -1,0 +1,45 @@
+From 030ade759004cb2bf81148bfdcd0ef821f7bd429 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 16 Jul 2012 10:13:53 +0200
+Subject: [PATCH] Fixes for systemd-187, which does the right thing for
+ switch-root
+
+---
+ dracut.spec                                    |    2 +-
+ modules.d/98systemd/initrd-switch-root.service |    4 +---
+ 2 files changed, 2 insertions(+), 4 deletions(-)
+
+diff --git a/dracut.spec b/dracut.spec
+index c17860d..0e853fd 100644
+--- a/dracut.spec
++++ b/dracut.spec
+@@ -84,7 +84,7 @@ Requires: file
+ Requires: udev > 166
+ %if 0%{?fedora} || 0%{?rhel} > 6
+ Requires: util-linux >= 2.21
+-Requires: systemd >= 186
++Conflicts: systemd <= 187
+ %else
+ Requires: util-linux-ng >= 2.21
+ %endif
+diff --git a/modules.d/98systemd/initrd-switch-root.service b/modules.d/98systemd/initrd-switch-root.service
+index f9fd10b..7b59e15 100644
+--- a/modules.d/98systemd/initrd-switch-root.service
++++ b/modules.d/98systemd/initrd-switch-root.service
+@@ -11,15 +11,13 @@ DefaultDependencies=no
+ ConditionPathExists=/etc/initrd-release
+ OnFailure=emergency.service
+ After=initrd-switch-root.target
+-Before=systemd-journal-flush.service
+-Before=sysinit.target local-fs.target swap.target emergency.service emergency.target
+ 
+ [Service]
+ Type=oneshot
+ EnvironmentFile=/run/initramfs/switch-root.conf
+ # we have to use "--force" here, otherwise systemd would umount /run
+ ExecStart=/usr/bin/systemctl --force switch-root ${NEWROOT} ${NEWINIT}
+-ExecStopPost=-/usr/bin/systemctl stop systemd-journald.service ; /bin/rm -f /run/initramfs/switch-root.conf
++ExecStopPost=-/bin/rm -f /run/initramfs/switch-root.conf
+ StandardInput=null
+ StandardOutput=null
+ StandardError=null

@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 020
-Release: 84.git20120711%{?dist}
+Release: 96.git20120717%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -112,6 +112,18 @@ Patch80: 0080-systemd-fixed-initrd-switch-root.service.patch
 Patch81: 0081-dracut.sh-for-include-copy-also-the-symbolic-links.patch
 Patch82: 0082-install-dracut-install.c-check-for-empty-or-destdir.patch
 Patch83: 0083-systemd-initrd-switch-root.service-add-back-force-to.patch
+Patch84: 0084-watchdog-watchdog-stop.sh-forgot-to-add-script.patch
+Patch85: 0085-systemd-initrd-switch-root.service-add-some-more-dep.patch
+Patch86: 0086-systemd-service-to-run.sh-do-not-copy-the-target-sub.patch
+Patch87: 0087-test-TEST-04-FULL-SYSTEMD-default-to-basic.target-an.patch
+Patch88: 0088-kernel-modules-module-setup.sh-add-hid_generic-to-ke.patch
+Patch89: 0089-Fixes-for-systemd-187-which-does-the-right-thing-for.patch
+Patch90: 0090-dracut.spec-add-suse-version-ifdefs.patch
+Patch91: 0091-dracut-functions.sh-output-more-info-if-dependency-m.patch
+Patch92: 0092-Fix-fips-module-list.patch
+Patch93: 0093-systemd-dracut-pre-pivot.service-force-clean-stop-of.patch
+Patch94: 0094-systemd-initrd-switch-root.service-call-switch-root-.patch
+Patch95: 0095-dracut.conf.d-fedora.conf.example-disable-systemd-fo.patch
 
 
 BuildRequires: dash bash git
@@ -168,7 +180,6 @@ Requires: file
 Requires: udev > 166
 %if 0%{?fedora} || 0%{?rhel} > 6
 Requires: util-linux >= 2.21
-Requires: systemd >= 186
 %else
 Requires: util-linux-ng >= 2.21
 %endif
@@ -195,7 +206,7 @@ Provides:  dracut-generic = %{version}-%{release}
 This package requires everything which is needed to build a generic
 all purpose initramfs with network support with dracut.
 
-%if 0%{?fedora} || 0%{?rhel} >= 6
+%if 0%{?fedora} || 0%{?rhel} >= 6 || 0%{?suse_version}
 %package fips
 Summary: Dracut modules to build a dracut initramfs with an integrity check
 Requires: %{name} = %{version}-%{release}
@@ -269,7 +280,7 @@ make install DESTDIR=$RPM_BUILD_ROOT \
 
 echo "DRACUT_VERSION=%{version}-%{release}" > $RPM_BUILD_ROOT/%{dracutlibdir}/dracut-version.sh
 
-%if 0%{?fedora} == 0 && 0%{?rhel} == 0
+%if 0%{?fedora} == 0 && 0%{?rhel} == 0 && 0%{?suse_version} == 0
 rm -fr $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/01fips
 rm -fr $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/02fips-aesni
 %endif
@@ -294,7 +305,7 @@ mkdir -p $RPM_BUILD_ROOT%{_localstatedir}/log
 touch $RPM_BUILD_ROOT%{_localstatedir}/log/dracut.log
 mkdir -p $RPM_BUILD_ROOT%{_sharedstatedir}/initramfs
 
-%if 0%{?fedora} || 0%{?rhel}
+%if 0%{?fedora} || 0%{?rhel} || 0%{?suse_version}
 install -m 0644 dracut.conf.d/fedora.conf.example $RPM_BUILD_ROOT/etc/dracut.conf.d/01-dist.conf
 install -m 0644 dracut.conf.d/fips.conf.example $RPM_BUILD_ROOT/etc/dracut.conf.d/40-fips.conf
 %endif
@@ -342,11 +353,13 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 %dir /etc/dracut.conf.d
 %{_mandir}/man8/dracut.8*
+%if 0%{?fedora} > 12 || 0%{?rhel} >= 6 || 0%{?suse_version} > 9999
 %{_mandir}/man8/mkinitrd.8*
+%{_mandir}/man1/lsinitrd.1*
+%endif
 %{_mandir}/man7/dracut.kernel.7*
 %{_mandir}/man7/dracut.cmdline.7*
 %{_mandir}/man5/dracut.conf.5*
-%{_mandir}/man1/lsinitrd.1*
 %{dracutlibdir}/modules.d/00bootchart
 %{dracutlibdir}/modules.d/04watchdog
 %{dracutlibdir}/modules.d/05busybox
@@ -413,7 +426,7 @@ rm -rf $RPM_BUILD_ROOT
 %{dracutlibdir}/modules.d/45ifcfg
 %{dracutlibdir}/modules.d/95znet
 
-%if 0%{?fedora} || 0%{?rhel}
+%if 0%{?fedora} || 0%{?rhel} || 0%{?suse_version}
 %files fips
 %defattr(-,root,root,0755)
 %{dracutlibdir}/modules.d/01fips
@@ -438,6 +451,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Tue Jul 17 2012 Harald Hoyer <harald@redhat.com> 020-96.git20120717
+- disabled systemd in the initramfs, until it works correctly
+
 * Wed Jul 11 2012 Harald Hoyer <harald@redhat.com> 020-84.git20120711
 - add back "--force" to switch-root, otherwise systemd umounts /run
 
