@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 020
-Release: 96.git20120717%{?dist}
+Release: 97.git20120717%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -451,6 +451,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Wed Jul 18 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 020-97.git20120717
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
+
 * Tue Jul 17 2012 Harald Hoyer <harald@redhat.com> 020-96.git20120717
 - disabled systemd in the initramfs, until it works correctly
 
