@@ -9,7 +9,7 @@
 %endif
 
 Name: dracut
-Version: 021
+Version: 022
 Release: 1%{?dist}
 
 Summary: Initramfs generator using udev
@@ -357,6 +357,10 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Fri Jul 20 2012 Harald Hoyer <harald@redhat.com> 022-1
+- version 022
+- host-only kernel modules fix
+
 * Fri Jul 20 2012 Harald Hoyer <harald@redhat.com> 021-1
 - version 21
 - systemd in the initramfs reenabled
