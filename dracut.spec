@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 022
-Release: 2.git20120720%{?dist}
+Release: 5.git20120723%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -30,6 +30,9 @@ URL: https://dracut.wiki.kernel.org/
 # http://git.kernel.org/?p=boot/dracut/dracut.git;a=snapshot;h=%{version};sf=tgz
 Source0: http://www.kernel.org/pub/linux/utils/boot/dracut/dracut-%{version}.tar.bz2
 Patch1: 0001-resume-move-resume-in-the-initqueue-finished-hook.patch
+Patch2: 0002-dracut.8-add-more-description-about-calling-dracut.patch
+Patch3: 0003-AUTHORS-update.patch
+Patch4: 0004-dracut.sh-add-N-option-for-no-hostonly.patch
 
 
 BuildRequires: dash bash git
@@ -358,6 +361,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Mon Jul 23 2012 Harald Hoyer <harald@redhat.com> 022-5.git20120723
+- dracut.8: added more documentation about executing dracut
+
 * Fri Jul 20 2012 Harald Hoyer <harald@redhat.com> 022-2.git20120720
 - fixed some race condition for resume from hibernation
 
