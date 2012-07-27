@@ -1,0 +1,22 @@
+From 15f0b1f62446cb1a28166f3d53d63f00557f42a8 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Amadeusz=20=C5=BBo=C5=82nowski?= <aidecoe@aidecoe.name>
+Date: Thu, 26 Jul 2012 11:38:04 +0200
+Subject: [PATCH] 90multipath: added kpartx.rules; multipath.rules - different
+ prefix
+
+---
+ modules.d/90multipath/module-setup.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/modules.d/90multipath/module-setup.sh b/modules.d/90multipath/module-setup.sh
+index 98748d3..862a8ed 100755
+--- a/modules.d/90multipath/module-setup.sh
++++ b/modules.d/90multipath/module-setup.sh
+@@ -86,6 +86,6 @@ install() {
+ 
+     inst_hook pre-trigger 02 "$moddir/multipathd.sh"
+     inst_hook cleanup   02 "$moddir/multipathd-stop.sh"
+-    inst_rules 40-multipath.rules
++    inst_rules 40-multipath.rules 65-multipath.rules 66-kpartx.rules
+ }
+ 

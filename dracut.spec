@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 022
-Release: 5.git20120723%{?dist}
+Release: 63.git20120727%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -33,6 +33,64 @@ Patch1: 0001-resume-move-resume-in-the-initqueue-finished-hook.patch
 Patch2: 0002-dracut.8-add-more-description-about-calling-dracut.patch
 Patch3: 0003-AUTHORS-update.patch
 Patch4: 0004-dracut.sh-add-N-option-for-no-hostonly.patch
+Patch5: 0005-add-documentation-for-systemd-services-in-the-initra.patch
+Patch6: 0006-kernel-modules-module-setup.sh-fix-modprobe.d-instal.patch
+Patch7: 0007-lvm-lvm_scan.sh-udevadm-settle-after-lvm-scan.patch
+Patch8: 0008-kernel-modules-module-setup.sh-just-optionally-insta.patch
+Patch9: 0009-i18n-10-console.rules-move-console_init-to-the-initq.patch
+Patch10: 0010-dracut-functions.sh-small-error-print-correction.patch
+Patch11: 0011-get-rid-of-basename.patch
+Patch12: 0012-90crypt-recognize-.img-as-loop-key-container.patch
+Patch13: 0013-90crypt-enhance-crypt-lib-keydev-mounting.patch
+Patch14: 0014-91crypt-loop-open-root-device-with-a-key-inside-encr.patch
+Patch15: 0015-91crypt-loop-use-initqueue-for-cleanup-strategy.patch
+Patch16: 0016-91crypt-loop-replace-basename-calls-with-string-matc.patch
+Patch17: 0017-deprecate-old-command-line-options.patch
+Patch18: 0018-require-kpartx-and-partx-for-some-modules.patch
+Patch19: 0019-iscsiroot.sh-do-not-source-etc-conf.d.patch
+Patch20: 0020-dracut.asc-add-doc-about-journalctl.patch
+Patch21: 0021-network-module-setup.sh-instmods-af_packet.patch
+Patch22: 0022-Makefile-honor-CFLAGS.patch
+Patch23: 0023-TODO-update.patch
+Patch24: 0024-qemu-module-setup.sh-provide-alternative-for-systemd.patch
+Patch25: 0025-Remove-object-file-from-repo-install-hashmap.o.patch
+Patch26: 0026-Makefile-use-implicit-rules-for-install-dracut-insta.patch
+Patch27: 0027-95fstab-sys-Skip-mounted-filesystem.patch
+Patch28: 0028-90multipath-check-Regexp-fix-to-match-multipath-part.patch
+Patch29: 0029-dmsquash-live-do-not-eject-medium-for-live_ram.patch
+Patch30: 0030-Remove-obsolete-gentoo-conf-file.patch
+Patch31: 0031-Config-file-for-systemd-on-Gentoo.patch
+Patch32: 0032-gentoo.conf-set-udevdir.patch
+Patch33: 0033-90kernel-modules-remove-unused-variables-in-install.patch
+Patch34: 0034-90multipath-added-kpartx.rules-multipath.rules-diffe.patch
+Patch35: 0035-Makefile-fixed-dracut-install-make-target.patch
+Patch36: 0036-multipath-module-setup.sh-add-dm-dependency.patch
+Patch37: 0037-Makefile-use-symlink-for-topsrcdir-dracut-install.patch
+Patch38: 0038-systemd-dracut-cmdline.sh-output-dracut-version.patch
+Patch39: 0039-95rootfs-block-fix-left-fsck-rel.-checks.patch
+Patch40: 0040-98usrmount-use-rw-and-ro-options-instead-of-rd.usrmo.patch
+Patch41: 0041-98usrmount-print-mount-options.patch
+Patch42: 0042-98usrmount-x-_usr_found-x-removed-redundant-x.patch
+Patch43: 0043-dracut-lib-new-functions-listlist-and-are_lists_eq.patch
+Patch44: 0044-apply-ro-and-rw-options-from-cmdline-to-mount.patch
+Patch45: 0045-modules.d-99base-mount-hook.sh-is-not-used-removed.patch
+Patch46: 0046-PATCH-add-support-for-xfs-reiserfs-separate-journal-.patch
+Patch47: 0047-dracut-functions.sh-add-find_mp_fstype.patch
+Patch48: 0048-rootfs-block-module-setup.sh-add-support-for-xfs-rei.patch
+Patch49: 0049-dracut-functions.sh-corrected-usage-comment-of-find_.patch
+Patch50: 0050-ro_mnt-option-at-build-time-to-force-ro-mount-of-and.patch
+Patch51: 0051-mv-rootfs-block-module-setup.sh-search_option-in-dra.patch
+Patch52: 0052-README.testsuite-updated-with-requirements-for-TEST-.patch
+Patch53: 0053-base-module-setup.sh-removed-mount-hook.patch
+Patch54: 0054-parse-root-opts-first-check-for-ro-later-for-rw.patch
+Patch55: 0055-nfs-module-setup.sh-check-for-rpc.rpc-before-running.patch
+Patch56: 0056-Added-cifs.patch
+Patch57: 0057-plymouth-do-not-start-plymouth-via-dracut-for-system.patch
+Patch58: 0058-gentoo.conf-enable-ro_mnt.patch
+Patch59: 0059-dracut-functions.sh-inst_rule_programs-fixed-IMPORT-.patch
+Patch60: 0060-install-dracut-install.c-convert-destrootdir-to-real.patch
+Patch61: 0061-dracut-functions.sh-inst_rule_programs-fix-error-mes.patch
+Patch62: 0062-dracut.spec-add-cifs-module.patch
 
 
 BuildRequires: dash bash git
@@ -86,6 +144,7 @@ Requires: gzip xz
 Requires: module-init-tools >= 3.7-9
 Requires: sed
 Requires: file
+Requires: kpartx
 Requires: udev > 166
 %if 0%{?fedora} || 0%{?rhel} > 6
 Requires: util-linux >= 2.21
@@ -263,6 +322,7 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 %dir /etc/dracut.conf.d
 %{_mandir}/man8/dracut.8*
+%{_mandir}/man8/*service.8*
 %if 0%{?fedora} > 12 || 0%{?rhel} >= 6 || 0%{?suse_version} > 9999
 %{_mandir}/man8/mkinitrd.8*
 %{_mandir}/man1/lsinitrd.1*
@@ -289,6 +349,7 @@ rm -rf $RPM_BUILD_ROOT
 %{dracutlibdir}/modules.d/90multipath
 %{dracutlibdir}/modules.d/90qemu
 %{dracutlibdir}/modules.d/91crypt-gpg
+%{dracutlibdir}/modules.d/91crypt-loop
 %{dracutlibdir}/modules.d/95debug
 %{dracutlibdir}/modules.d/95resume
 %{dracutlibdir}/modules.d/95rootfs-block
@@ -330,6 +391,7 @@ rm -rf $RPM_BUILD_ROOT
 %{dracutlibdir}/modules.d/95iscsi
 %{dracutlibdir}/modules.d/90livenet
 %{dracutlibdir}/modules.d/90qemu-net
+%{dracutlibdir}/modules.d/95cifs
 %{dracutlibdir}/modules.d/95nbd
 %{dracutlibdir}/modules.d/95nfs
 %{dracutlibdir}/modules.d/95ssh-client
@@ -361,6 +423,10 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Fri Jul 27 2012 Harald Hoyer <harald@redhat.com> 022-63.git20120727
+- fixed dracut-install bug if /var/tmp contains a symlink
+- fixed some partx issues
+
 * Mon Jul 23 2012 Harald Hoyer <harald@redhat.com> 022-5.git20120723
 - dracut.8: added more documentation about executing dracut
 

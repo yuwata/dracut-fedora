@@ -1,0 +1,21 @@
+From 585fd00624d0799c2511d9f0f384a2aee9dc8a3b Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 25 Jul 2012 15:20:37 +0200
+Subject: [PATCH] TODO: update
+
+---
+ TODO | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/TODO b/TODO
+index 4fc7728..61be5d5 100644
+--- a/TODO
++++ b/TODO
+@@ -6,6 +6,7 @@ Items are ordered in priority.
+ 
+ INITRAMFS TODO
+ 
++- add sosreport
+ - generate systemd unit dracut-initramfs-restore in /run/systemd dynamically
+ - put "root=" parsing hooks in separate hook dir
+ - call "root=" parsing hooks after getting new rootpath from dhcp

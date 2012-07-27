@@ -1,0 +1,86 @@
+From c072e131622f41ed90cf0d1510c96dd7cb0aad7a Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Tue, 24 Jul 2012 14:12:36 +0200
+Subject: [PATCH] get rid of "basename"
+
+---
+ dracut-functions.sh                    | 12 ++++++------
+ lsinitrd.sh                            |  2 +-
+ modules.d/95udev-rules/module-setup.sh |  2 +-
+ 3 files changed, 8 insertions(+), 8 deletions(-)
+
+diff --git a/dracut-functions.sh b/dracut-functions.sh
+index 7f834f0..14c100d 100755
+--- a/dracut-functions.sh
++++ b/dracut-functions.sh
+@@ -710,12 +710,12 @@ inst_rule_programs() {
+                 _bin=${udevdir}/$_prog
+             else
+                 _bin=$(find_binary "$_prog") || {
+-                    dinfo "Skipping program $_prog using in udev rule $(basename $1) as it cannot be found"
++                    dinfo "Skipping program $_prog using in udev rule $(${1##*/}) as it cannot be found"
+                     continue;
+                 }
+             fi
+ 
+-            #dinfo "Installing $_bin due to it's use in the udev rule $(basename $1)"
++            #dinfo "Installing $_bin due to it's use in the udev rule $(${1##*/})"
+             dracut_install "$_bin"
+         done
+     fi
+@@ -725,12 +725,12 @@ inst_rule_programs() {
+                 _bin=${udevdir}/$_prog
+             else
+                 _bin=$(find_binary "$_prog") || {
+-                    dinfo "Skipping program $_prog using in udev rule $(basename $1) as it cannot be found"
++                    dinfo "Skipping program $_prog using in udev rule $(${1##*/}) as it cannot be found"
+                     continue;
+                 }
+             fi
+ 
+-            #dinfo "Installing $_bin due to it's use in the udev rule $(basename $1)"
++            #dinfo "Installing $_bin due to it's use in the udev rule $(${1##*/})"
+             dracut_install "$_bin"
+         done
+     fi
+@@ -740,12 +740,12 @@ inst_rule_programs() {
+                 _bin=${udevdir}/$_prog
+             else
+                 _bin=$(find_binary "$_prog") || {
+-                    dinfo "Skipping program $_prog using in udev rule $(basename $1) as it cannot be found"
++                    dinfo "Skipping program $_prog using in udev rule $(${1##*/}) as it cannot be found"
+                     continue;
+                 }
+             fi
+ 
+-            #dinfo "Installing $_bin due to it's use in the udev rule $(basename $1)"
++            #dinfo "Installing $_bin due to it's use in the udev rule $(${1##*/})"
+             dracut_install "$_bin"
+         done
+     fi
+diff --git a/lsinitrd.sh b/lsinitrd.sh
+index a844932..3d6084d 100755
+--- a/lsinitrd.sh
++++ b/lsinitrd.sh
+@@ -21,7 +21,7 @@
+ 
+ usage()
+ {
+-    echo "Usage: $(basename $0) [-s] [<initramfs file> [<filename>]]"
++    echo "Usage: $(${0##*/}) [-s] [<initramfs file> [<filename>]]"
+ }
+ 
+ [[ $# -le 2 ]] || { usage ; exit 1 ; }
+diff --git a/modules.d/95udev-rules/module-setup.sh b/modules.d/95udev-rules/module-setup.sh
+index 90d4336..2e3c955 100755
+--- a/modules.d/95udev-rules/module-setup.sh
++++ b/modules.d/95udev-rules/module-setup.sh
+@@ -8,7 +8,7 @@ install() {
+     # Fixme: would be nice if we didn't have to know which rules to grab....
+     # ultimately, /lib/initramfs/rules.d or somesuch which includes links/copies
+     # of the rules we want so that we just copy those in would be best
+-    dracut_install udevadm cat uname basename blkid \
++    dracut_install udevadm cat uname blkid \
+         /etc/udev/udev.conf /etc/group
+ 
+     [ -d ${initdir}/lib/systemd ] || mkdir -p ${initdir}/lib/systemd

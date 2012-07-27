@@ -1,0 +1,51 @@
+From c9a81c1f911792f68ce1921f192e7e930f312535 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 26 Jul 2012 18:59:36 +0200
+Subject: [PATCH] plymouth: do not start plymouth via dracut for systemd in
+ the initramfs
+
+---
+ modules.d/50plymouth/module-setup.sh        | 4 ----
+ modules.d/50plymouth/plymouth-newroot.sh    | 2 +-
+ modules.d/50plymouth/plymouth-pretrigger.sh | 2 +-
+ 3 files changed, 2 insertions(+), 6 deletions(-)
+
+diff --git a/modules.d/50plymouth/module-setup.sh b/modules.d/50plymouth/module-setup.sh
+index 14d9e59..10aa0da 100755
+--- a/modules.d/50plymouth/module-setup.sh
++++ b/modules.d/50plymouth/module-setup.sh
+@@ -76,9 +76,5 @@ install() {
+     inst_hook pre-trigger 10 "$moddir"/plymouth-pretrigger.sh
+     inst_hook emergency 50 "$moddir"/plymouth-emergency.sh
+     dracut_install readlink
+-
+-    if [[ -x $systemdutildir/systemd ]]; then
+-        dracut_install -o $systemdsystemunitdir/plymouth-quit-wait.service
+-    fi
+ }
+ 
+diff --git a/modules.d/50plymouth/plymouth-newroot.sh b/modules.d/50plymouth/plymouth-newroot.sh
+index e03e98d..ffbabf1 100755
+--- a/modules.d/50plymouth/plymouth-newroot.sh
++++ b/modules.d/50plymouth/plymouth-newroot.sh
+@@ -2,6 +2,6 @@
+ # -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
+ # ex: ts=8 sw=4 sts=4 et filetype=sh
+ 
+-if [ -x /bin/plymouth ]; then
++if [ -x /bin/plymouth ! -x /lib/systemd/systemd ]; then
+     /bin/plymouth --newroot=$NEWROOT
+ fi
+diff --git a/modules.d/50plymouth/plymouth-pretrigger.sh b/modules.d/50plymouth/plymouth-pretrigger.sh
+index ddb8ddb..c52cf83 100755
+--- a/modules.d/50plymouth/plymouth-pretrigger.sh
++++ b/modules.d/50plymouth/plymouth-pretrigger.sh
+@@ -2,7 +2,7 @@
+ # -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
+ # ex: ts=8 sw=4 sts=4 et filetype=sh
+ 
+-if [ -x /bin/plymouthd ]; then
++if [ -x /bin/plymouthd -a ! -x /lib/systemd/systemd ]; then
+     if getargbool 1 plymouth.enable && getargbool 1 rd.plymouth -d -n rd_NO_PLYMOUTH; then
+         # first trigger graphics subsystem
+         udevadm trigger --action=add --attr-match=class=0x030000 >/dev/null 2>&1

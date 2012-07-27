@@ -1,0 +1,22 @@
+From f67a1f7f64bbc48edbcf76a09cac0573ea626653 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Amadeusz=20=C5=BBo=C5=82nowski?= <aidecoe@aidecoe.name>
+Date: Thu, 26 Jul 2012 09:35:58 +0200
+Subject: [PATCH] gentoo.conf: set udevdir
+
+---
+ dracut.conf.d/gentoo.conf.example | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/dracut.conf.d/gentoo.conf.example b/dracut.conf.d/gentoo.conf.example
+index f5aa8ed..411f9a0 100644
+--- a/dracut.conf.d/gentoo.conf.example
++++ b/dracut.conf.d/gentoo.conf.example
+@@ -1,6 +1,8 @@
+ # /etc/dracut.conf.d/gentoo-openrc.conf
+ # Dracut config file customized for Gentoo Base System release 2
+ 
++udevdir=/lib/udev
++
+ #
+ # Modules
+ #

@@ -1,0 +1,21 @@
+From bf7883ebcaccc0bf95303098e36896cc4872d468 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 25 Jul 2012 14:56:08 +0200
+Subject: [PATCH] network/module-setup.sh: instmods af_packet
+
+---
+ modules.d/40network/module-setup.sh | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/modules.d/40network/module-setup.sh b/modules.d/40network/module-setup.sh
+index c69d81a..0ffdd07 100755
+--- a/modules.d/40network/module-setup.sh
++++ b/modules.d/40network/module-setup.sh
+@@ -73,6 +73,7 @@ installkernel() {
+     instmods bonding
+     # vlan
+     instmods 8021q
++    instmods af_packet
+ }
+ 
+ install() {

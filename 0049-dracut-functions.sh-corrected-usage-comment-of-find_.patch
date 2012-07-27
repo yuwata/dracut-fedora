@@ -1,0 +1,31 @@
+From ec5e5ae27a986f6bc3d273ba037533b72ab069e9 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 26 Jul 2012 17:05:24 +0200
+Subject: [PATCH] dracut-functions.sh: corrected usage comment of
+ find_mp_fstype()
+
+---
+ dracut-functions.sh | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/dracut-functions.sh b/dracut-functions.sh
+index 0332351..df450ef 100755
+--- a/dracut-functions.sh
++++ b/dracut-functions.sh
+@@ -357,13 +357,13 @@ find_dev_fstype() {
+     return 1
+ }
+ 
+-# find_dev_fstype <device>
+-# Echo the filesystem type for a given device.
++# find_mp_fstype <mountpoint>
++# Echo the filesystem type for a given mountpoint.
+ # /proc/self/mountinfo is taken as the primary source of information
+ # and /etc/fstab is used as a fallback.
+ # No newline is appended!
+ # Example:
+-# $ find_dev_fstype /dev/sda2;echo
++# $ find_mp_fstype /;echo
+ # ext4
+ find_mp_fstype() {
+     local _x _mpt _majmin _dev _fs _maj _min

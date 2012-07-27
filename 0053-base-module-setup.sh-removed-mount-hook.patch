@@ -1,0 +1,21 @@
+From 96c6fa920255a3bf4e7cd7c974aa13814d74beb6 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 26 Jul 2012 17:35:25 +0200
+Subject: [PATCH] base/module-setup.sh: removed mount-hook
+
+---
+ modules.d/99base/module-setup.sh | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/modules.d/99base/module-setup.sh b/modules.d/99base/module-setup.sh
+index dde1285..097607a 100755
+--- a/modules.d/99base/module-setup.sh
++++ b/modules.d/99base/module-setup.sh
+@@ -39,7 +39,6 @@ install() {
+     dracut_install switch_root || dfatal "Failed to install switch_root"
+ 
+     inst_simple "$moddir/dracut-lib.sh" "/lib/dracut-lib.sh"
+-    inst_script "$moddir/mount-hook.sh" "/usr/bin/mount-hook"
+     inst_hook cmdline 10 "$moddir/parse-root-opts.sh"
+     mkdir -p "${initdir}/var"
+     [ -x /lib/systemd/systemd-timestamp ] && inst /lib/systemd/systemd-timestamp

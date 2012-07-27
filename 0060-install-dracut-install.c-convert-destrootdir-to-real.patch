@@ -1,0 +1,40 @@
+From 78021eace175745792f04345efe2d42218f0bb59 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 26 Jul 2012 19:21:06 +0200
+Subject: [PATCH] install/dracut-install.c: convert destrootdir to realpath
+
+otherwise we get strange errors if it ends with a slash and does not
+exist.
+---
+ install/dracut-install.c | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/install/dracut-install.c b/install/dracut-install.c
+index 9351472..e79065d 100644
+--- a/install/dracut-install.c
++++ b/install/dracut-install.c
+@@ -517,6 +517,7 @@ Install SOURCE to DEST in DESTROOTDIR with all needed dependencies.\n\
+   -h --help           Show this help\n\
+ \n\
+ Example:\n\
++# mkdir -p /var/tmp/test-root\n\
+ # %s -D /var/tmp/test-root --ldd -a sh tr\n\
+ # tree /var/tmp/test-root\n\
+ /var/tmp/test-root\n\
+@@ -742,8 +743,16 @@ int main(int argc, char **argv)
+         if (strcmp(destrootdir, "/") == 0) {
+                 log_error("Environment DESTROOTDIR or argument -D is set to '/'!");
+                 usage(EXIT_FAILURE);
++        }
+ 
++        i = destrootdir;
++        destrootdir = realpath(destrootdir, NULL);
++        if (!destrootdir) {
++                log_error("Environment DESTROOTDIR or argument -D is set to '%s': %m", i);
++                r = EXIT_FAILURE;
++                goto finish;
+         }
++        free(i);
+ 
+         items = hashmap_new(string_hash_func, string_compare_func);
+         items_failed = hashmap_new(string_hash_func, string_compare_func);

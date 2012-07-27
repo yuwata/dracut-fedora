@@ -1,0 +1,30 @@
+From 63c65b984a2baddf2a7046e65e8719f6485ec10e Mon Sep 17 00:00:00 2001
+From: Chao Wang <chaowang@redhat.com>
+Date: Thu, 26 Jul 2012 11:24:26 +0800
+Subject: [PATCH] 90multipath: check() - Regexp fix to match multipath
+ partition.
+
+A multipath partition's uuid will be presented like:
+ # cat /sys/dev/block/$_dev/dm/uuid
+ part1-mpath-360060e801047103004f2c4b300000008
+
+So in this case, change the match regexp from '^mpath-' to 'mpath-'.
+
+Signed-off-by: Chao Wang <chaowang@redhat.com>
+---
+ modules.d/90multipath/module-setup.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/modules.d/90multipath/module-setup.sh b/modules.d/90multipath/module-setup.sh
+index b14f829..98748d3 100755
+--- a/modules.d/90multipath/module-setup.sh
++++ b/modules.d/90multipath/module-setup.sh
+@@ -11,7 +11,7 @@ check() {
+         local _dev
+         _dev=$(get_maj_min $1)
+         [ -e /sys/dev/block/$_dev/dm/uuid ] || return 1
+-        [[ $(cat /sys/dev/block/$_dev/dm/uuid) =~ ^mpath- ]] && return 0
++        [[ $(cat /sys/dev/block/$_dev/dm/uuid) =~ mpath- ]] && return 0
+         return 1
+     }
+ 

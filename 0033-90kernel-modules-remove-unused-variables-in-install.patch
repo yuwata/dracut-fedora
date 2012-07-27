@@ -1,0 +1,25 @@
+From 823311ea3b7bd74570e56a804b7dc166d6b74e27 Mon Sep 17 00:00:00 2001
+From: Cong Wang <xiyou.wangcong@gmail.com>
+Date: Thu, 26 Jul 2012 15:39:13 +0800
+Subject: [PATCH] 90kernel-modules: remove unused variables in install()
+
+The local variables in install() are unused, can be removed.
+
+Cc: Harald Hoyer <harald@redhat.com>
+Signed-off-by: Cong Wang <xiyou.wangcong@gmail.com>
+---
+ modules.d/90kernel-modules/module-setup.sh | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/modules.d/90kernel-modules/module-setup.sh b/modules.d/90kernel-modules/module-setup.sh
+index 1632367..5018dc1 100755
+--- a/modules.d/90kernel-modules/module-setup.sh
++++ b/modules.d/90kernel-modules/module-setup.sh
+@@ -75,7 +75,6 @@ installkernel() {
+ }
+ 
+ install() {
+-    local _f i
+     [ -f /etc/modprobe.conf ] && dracut_install /etc/modprobe.conf
+     dracut_install -o /{etc,lib}/modprobe.d/*.conf
+     inst_hook cmdline 01 "$moddir/parse-kernel.sh"

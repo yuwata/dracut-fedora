@@ -1,0 +1,77 @@
+From 24ba78cb77b3a8ce50902da1795a2d3cdac11691 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 26 Jul 2012 11:50:50 +0200
+Subject: [PATCH] Makefile: fixed dracut-install make target
+
+---
+ Makefile    | 27 +++++++++++++++++----------
+ dracut.spec |  1 +
+ 2 files changed, 18 insertions(+), 10 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index d013cbc..0dbc6eb 100644
+--- a/Makefile
++++ b/Makefile
+@@ -33,17 +33,24 @@ manpages = $(man1pages) $(man5pages) $(man7pages) $(man8pages)
+ 
+ .PHONY: install clean archive rpm testimage test all check AUTHORS doc
+ 
+-DRACUT_INSTALL_BIN = install/dracut-install
+-
+-DRACUT_INSTALL_OBJECTS = \
+-        install/dracut-install.o \
+-        install/hashmap.o\
+-        install/log.o \
+-        install/util.o
++DRACUT_INSTALL_BIN = dracut-install
+ 
+ all: syncheck dracut-version.sh $(DRACUT_INSTALL_BIN)
+ 
+-$(DRACUT_INSTALL_BIN): $(DRACUT_INSTALL_OBJECTS)
++DRACUT_INSTALL_SOURCE = \
++        install/dracut-install.c \
++        install/hashmap.c\
++        install/log.c \
++        install/util.c
++
++DRACUT_INSTALL_HEADER = \
++        install/hashmap.h \
++        install/log.h \
++        install/macro.h \
++        install/util.h
++
++$(DRACUT_INSTALL_BIN): $(DRACUT_INSTALL_SOURCE) $(DRACUT_INSTALL_HEADER)
++	$(CC) $(CFLAGS) $(LDFLAGS) -o $(DRACUT_INSTALL_BIN) $(DRACUT_INSTALL_SOURCE)
+ 
+ indent:
+ 	indent -i8 -nut -br -linux -l120 install/dracut-install.c
+@@ -95,7 +102,7 @@ install: doc dracut-version.sh
+ 		ln -s ../dracut-shutdown.service \
+ 		$(DESTDIR)$(systemdsystemunitdir)/shutdown.target.wants/dracut-shutdown.service; \
+ 	fi
+-	if [ -x $(DRACUT_INSTALL_BIN) ]; then \
++	if [ -f $(DRACUT_INSTALL_BIN) ]; then \
+ 		install -m 0755 $(DRACUT_INSTALL_BIN) $(DESTDIR)$(pkglibdir)/dracut-install; \
+ 	fi
+ 
+@@ -108,7 +115,7 @@ clean:
+ 	$(RM) */*/*~
+ 	$(RM) test-*.img
+ 	$(RM) dracut-*.rpm dracut-*.tar.bz2
+-	$(RM) $(DRACUT_INSTALL_BIN) $(DRACUT_INSTALL_OBJECTS)
++	$(RM) $(DRACUT_INSTALL_BIN) 
+ 	$(RM) $(manpages) dracut.html
+ 	$(MAKE) -C test clean
+ 
+diff --git a/dracut.spec b/dracut.spec
+index 0d4062f..d960506 100644
+--- a/dracut.spec
++++ b/dracut.spec
+@@ -286,6 +286,7 @@ rm -rf $RPM_BUILD_ROOT
+ %{dracutlibdir}/modules.d/90multipath
+ %{dracutlibdir}/modules.d/90qemu
+ %{dracutlibdir}/modules.d/91crypt-gpg
++%{dracutlibdir}/modules.d/91crypt-loop
+ %{dracutlibdir}/modules.d/95debug
+ %{dracutlibdir}/modules.d/95resume
+ %{dracutlibdir}/modules.d/95rootfs-block

@@ -1,0 +1,19 @@
+From 25706eafacfa284e53ebb3d96b195697fb81041d Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 26 Jul 2012 17:26:31 +0200
+Subject: [PATCH] README.testsuite updated with requirements for
+ TEST-04-SYSTEMD
+
+---
+ README.testsuite | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/README.testsuite b/README.testsuite
+index 62fe503..cbc2ab7 100644
+--- a/README.testsuite
++++ b/README.testsuite
+@@ -9,3 +9,4 @@ netbsd-iscsi
+ nbd
+ dhcp
+ iscsi-initiator-utils
++TEST-04-FULL-SYSTEMD: systemd >= 187

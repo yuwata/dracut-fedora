@@ -1,0 +1,35 @@
+From 372c9b9647f039fa02779ca4fae3118c5f08e6f1 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 26 Jul 2012 09:25:28 +0200
+Subject: [PATCH] dmsquash-live: do not eject medium for live_ram
+
+---
+ modules.d/90dmsquash-live/dmsquash-live-root.sh | 1 -
+ modules.d/90dmsquash-live/module-setup.sh       | 2 +-
+ 2 files changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/modules.d/90dmsquash-live/dmsquash-live-root.sh b/modules.d/90dmsquash-live/dmsquash-live-root.sh
+index 15f166b..f8bfca6 100755
+--- a/modules.d/90dmsquash-live/dmsquash-live-root.sh
++++ b/modules.d/90dmsquash-live/dmsquash-live-root.sh
+@@ -167,7 +167,6 @@ if [ -e "$SQUASHED" ] ; then
+         dd if=$SQUASHED of=/squashed.img bs=512 2> /dev/null
+         umount -n /run/initramfs/live
+         echo "Done copying live image to RAM."
+-        eject -p $livedev || :
+         SQUASHED="/squashed.img"
+     fi
+ 
+diff --git a/modules.d/90dmsquash-live/module-setup.sh b/modules.d/90dmsquash-live/module-setup.sh
+index 05603a5..3339e1d 100755
+--- a/modules.d/90dmsquash-live/module-setup.sh
++++ b/modules.d/90dmsquash-live/module-setup.sh
+@@ -21,7 +21,7 @@ installkernel() {
+ 
+ install() {
+     dracut_install umount dmsetup blkid dd losetup grep blockdev
+-    dracut_install -o eject checkisomd5
++    dracut_install -o checkisomd5
+     inst_hook cmdline 30 "$moddir/parse-dmsquash-live.sh"
+     inst_hook pre-udev 30 "$moddir/dmsquash-live-genrules.sh"
+     inst_hook pre-udev 30 "$moddir/dmsquash-liveiso-genrules.sh"
