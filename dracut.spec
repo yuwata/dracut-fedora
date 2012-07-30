@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 022
-Release: 97.git20120730%{?dist}
+Release: 99.git20120730%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -125,6 +125,8 @@ Patch93: 0093-crypt-crypt-run-generator.sh-do-not-add-already-exis.patch
 Patch94: 0094-dmraid-mdraid-lvm-udev-don-t-process-DM_MULTIPATH_DE.patch
 Patch95: 0095-TODO-update.patch
 Patch96: 0096-TEST-10-RAID-test.sh-comment-debug-options.patch
+Patch97: 0097-removed-finished-ask-password.sh.patch
+Patch98: 0098-crypt-crypt-run-generator.sh-check-if-crypttab-exist.patch
 
 
 BuildRequires: dash bash git
@@ -458,6 +460,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Mon Jul 30 2012 Harald Hoyer <harald@redhat.com> 022-99.git20120730
+- removed install of missing finished-ask-password.sh
+
 * Mon Jul 30 2012 Harald Hoyer <harald@redhat.com> 022-97.git20120730
 - moved crypt setup to systemd units
 
