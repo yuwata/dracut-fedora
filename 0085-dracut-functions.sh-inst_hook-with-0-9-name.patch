@@ -1,0 +1,22 @@
+From 5a84ac3fe36e706c88f7231fe3e4e1d2b11359e3 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 30 Jul 2012 17:00:27 +0200
+Subject: [PATCH] dracut-functions.sh: inst_hook() with [0-9]-<name>
+
+---
+ dracut-functions.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/dracut-functions.sh b/dracut-functions.sh
+index 04b4c7a..a299bbb 100755
+--- a/dracut-functions.sh
++++ b/dracut-functions.sh
+@@ -837,7 +837,7 @@ inst_hook() {
+         dfatal "No such hook type $1. Aborting initrd creation."
+         exit 1
+     fi
+-    inst_simple "$3" "/lib/dracut/hooks/${1}/${2}${3##*/}"
++    inst_simple "$3" "/lib/dracut/hooks/${1}/${2}-${3##*/}"
+ }
+ 
+ # install any of listed files

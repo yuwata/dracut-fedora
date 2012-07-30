@@ -1,0 +1,22 @@
+From f7f37923900507c5149ef86f4d459089d7d5f5e0 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 27 Jul 2012 12:18:08 +0200
+Subject: [PATCH] iscsi/iscsiroot.sh: force link initiatorname
+
+---
+ modules.d/95iscsi/iscsiroot.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/modules.d/95iscsi/iscsiroot.sh b/modules.d/95iscsi/iscsiroot.sh
+index 92414ee..1a8cc8d 100755
+--- a/modules.d/95iscsi/iscsiroot.sh
++++ b/modules.d/95iscsi/iscsiroot.sh
+@@ -128,7 +128,7 @@ handle_netroot()
+     fi
+ 
+     echo "InitiatorName='$iscsi_initiator'" > /run/initiatorname.iscsi
+-    ln -s /run/initiatorname.iscsi /dev/.initiatorname.iscsi
++    ln -fs /run/initiatorname.iscsi /dev/.initiatorname.iscsi
+ 
+ # FIXME $iscsi_protocol??
+ 

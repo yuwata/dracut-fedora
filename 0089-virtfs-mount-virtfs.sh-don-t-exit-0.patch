@@ -1,0 +1,18 @@
+From cf62cc435f6785261d3ea8731f154e1898c35cc1 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 30 Jul 2012 17:06:23 +0200
+Subject: [PATCH] virtfs/mount-virtfs.sh: don't exit != 0
+
+---
+ modules.d/95virtfs/mount-virtfs.sh | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/modules.d/95virtfs/mount-virtfs.sh b/modules.d/95virtfs/mount-virtfs.sh
+index dfebf38..7c07b46 100755
+--- a/modules.d/95virtfs/mount-virtfs.sh
++++ b/modules.d/95virtfs/mount-virtfs.sh
+@@ -73,3 +73,4 @@ mount_root() {
+ if [ -n "$root" -a -z "${root%%virtfs:*}" ]; then
+     mount_root
+ fi
++:

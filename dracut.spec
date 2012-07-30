@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 022
-Release: 63.git20120727%{?dist}
+Release: 97.git20120730%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -91,6 +91,40 @@ Patch59: 0059-dracut-functions.sh-inst_rule_programs-fixed-IMPORT-.patch
 Patch60: 0060-install-dracut-install.c-convert-destrootdir-to-real.patch
 Patch61: 0061-dracut-functions.sh-inst_rule_programs-fix-error-mes.patch
 Patch62: 0062-dracut.spec-add-cifs-module.patch
+Patch63: 0063-Makefile-add-dependencies-for-dracut-install-generat.patch
+Patch64: 0064-gitignore-install-dracut-install.patch
+Patch65: 0065-cifs-parse-cifsroot.sh-do-not-unset-netroot-we-need-.patch
+Patch66: 0066-fixed-install-locations-for-udev-rules-and-change-to.patch
+Patch67: 0067-README.testsuite-add-instructions-on-how-to-run-the-.patch
+Patch68: 0068-iscsi-iscsiroot.sh-force-link-initiatorname.patch
+Patch69: 0069-cifs-parse-cifsroot.sh-fixed-more-root-netroot-parsi.patch
+Patch70: 0070-i18n-console_init.sh-skip-if-we-use-systemd-and-use-.patch
+Patch71: 0071-fixed-i18n-and-plymouth-for-systemd.patch
+Patch72: 0072-add-af_packet-kernel-module-to-network-testsuite-tes.patch
+Patch73: 0073-i18n-terminfo-module-setup.sh-fixed-cp-t-calls.patch
+Patch74: 0074-TODO-update.patch
+Patch75: 0075-kernel-modules-module-setup.sh-move-drivers-filesyst.patch
+Patch76: 0076-dracut.sh-put-drivers-and-filesystems-back-in-export.patch
+Patch77: 0077-add-comment-for-getargbool.patch
+Patch78: 0078-dracut-lib-add-find_mount-use-it-to-implement-ismoun.patch
+Patch79: 0079-dracut-functions-_x-should-exist-no-need-to-test.patch
+Patch80: 0080-dracut.sh-test-if-we-can-lazy-resolve-with-ldd.patch
+Patch81: 0081-plymouth-plymouth-newroot.sh-fixed-pre-pivot-hook.patch
+Patch82: 0082-dracut.spec-add-Requires-kbd-kbd-misc.patch
+Patch83: 0083-set-DRACUT_SYSTEMD-for-systemd-mode-in-the-initramfs.patch
+Patch84: 0084-kernel-modules-module-setup.sh-add-missing-fi.patch
+Patch85: 0085-dracut-functions.sh-inst_hook-with-0-9-name.patch
+Patch86: 0086-i18n-parse-i18n.sh-remove-udev-rules.patch
+Patch87: 0087-base-dracut-lib.sh-fixed-ismounted-mountpoint.patch
+Patch88: 0088-systemd-module-setup.sh-install-systemd-udev-rules.patch
+Patch89: 0089-virtfs-mount-virtfs.sh-don-t-exit-0.patch
+Patch90: 0090-plymouth-plymouth-newroot.sh-don-t-exit-0-for-source.patch
+Patch91: 0091-plymouth-plymouth-pretrigger.sh-don-t-exit-0-for-a-s.patch
+Patch92: 0092-crypt-add-systemd-crypt-support.patch
+Patch93: 0093-crypt-crypt-run-generator.sh-do-not-add-already-exis.patch
+Patch94: 0094-dmraid-mdraid-lvm-udev-don-t-process-DM_MULTIPATH_DE.patch
+Patch95: 0095-TODO-update.patch
+Patch96: 0096-TEST-10-RAID-test.sh-comment-debug-options.patch
 
 
 BuildRequires: dash bash git
@@ -146,6 +180,7 @@ Requires: sed
 Requires: file
 Requires: kpartx
 Requires: udev > 166
+Requires: kbd kbd-misc
 %if 0%{?fedora} || 0%{?rhel} > 6
 Requires: util-linux >= 2.21
 Conflicts: systemd < 187
@@ -423,6 +458,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Mon Jul 30 2012 Harald Hoyer <harald@redhat.com> 022-97.git20120730
+- moved crypt setup to systemd units
+
 * Fri Jul 27 2012 Harald Hoyer <harald@redhat.com> 022-63.git20120727
 - fixed dracut-install bug if /var/tmp contains a symlink
 - fixed some partx issues

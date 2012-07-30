@@ -1,0 +1,18 @@
+From fc6b272f4126164c93abafe0c8198d1b16eace3f Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Amadeusz=20=C5=BBo=C5=82nowski?= <aidecoe@aidecoe.name>
+Date: Fri, 27 Jul 2012 09:34:17 +0200
+Subject: [PATCH] gitignore install/dracut-install
+
+---
+ .gitignore | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/.gitignore b/.gitignore
+index 3693783..44ede87 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -11,3 +11,4 @@ test*.img
+ /.buildpath
+ /.project
+ /dracut-version.sh
++/install/dracut-install

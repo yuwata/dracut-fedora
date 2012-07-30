@@ -1,0 +1,21 @@
+From 4976edb1a670d588cfb7d9bd88ad687151489650 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 30 Jul 2012 13:58:58 +0200
+Subject: [PATCH] dracut.spec: add Requires: kbd kbd-misc
+
+---
+ dracut.spec | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/dracut.spec b/dracut.spec
+index f225bb6..573c3c8 100644
+--- a/dracut.spec
++++ b/dracut.spec
+@@ -83,6 +83,7 @@ Requires: sed
+ Requires: file
+ Requires: kpartx
+ Requires: udev > 166
++Requires: kbd kbd-misc
+ %if 0%{?fedora} || 0%{?rhel} > 6
+ Requires: util-linux >= 2.21
+ Conflicts: systemd < 187

@@ -1,0 +1,148 @@
+From 24a38bc1cbe461c344ce61c7e10b6d51d5689c93 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 27 Jul 2012 11:55:31 +0200
+Subject: [PATCH] fixed install locations for udev rules and change to
+ IMPORT{builtin}
+
+---
+ modules.d/90btrfs/module-setup.sh                  | 3 ++-
+ modules.d/90dmraid/module-setup.sh                 | 3 ++-
+ modules.d/90mdraid/module-setup.sh                 | 6 ++++--
+ modules.d/90multipath/module-setup.sh              | 5 +++--
+ modules.d/95udev-rules/59-persistent-storage.rules | 8 ++++----
+ modules.d/95udev-rules/61-persistent-storage.rules | 2 +-
+ modules.d/99base/module-setup.sh                   | 4 +++-
+ 7 files changed, 19 insertions(+), 12 deletions(-)
+
+diff --git a/modules.d/90btrfs/module-setup.sh b/modules.d/90btrfs/module-setup.sh
+index 22f3f1c..d2e559f 100755
+--- a/modules.d/90btrfs/module-setup.sh
++++ b/modules.d/90btrfs/module-setup.sh
+@@ -33,6 +33,7 @@ install() {
+     inst_rules "$moddir/80-btrfs.rules"
+     inst_script "$moddir/btrfs_finished.sh" /sbin/btrfs_finished
+     inst_script "$moddir/btrfs_timeout.sh" /sbin/btrfs_timeout
+-    dracut_install btrfs btrfsck
++    dracut_install btrfsck
++    inst $(command -v btrfs) /sbin/btrfs
+ }
+ 
+diff --git a/modules.d/90dmraid/module-setup.sh b/modules.d/90dmraid/module-setup.sh
+index 10c732c..eb949dc 100755
+--- a/modules.d/90dmraid/module-setup.sh
++++ b/modules.d/90dmraid/module-setup.sh
+@@ -52,7 +52,8 @@ depends() {
+ install() {
+     local _i
+     dracut_install dmraid
+-    dracut_install -o partx kpartx
++    dracut_install -o kpartx
++    inst $(command -v partx) /sbin/partx
+ 
+     inst "$moddir/dmraid.sh" /sbin/dmraid_scan
+ 
+diff --git a/modules.d/90mdraid/module-setup.sh b/modules.d/90mdraid/module-setup.sh
+index 7b3c759..8522756 100755
+--- a/modules.d/90mdraid/module-setup.sh
++++ b/modules.d/90mdraid/module-setup.sh
+@@ -43,8 +43,10 @@ installkernel() {
+ }
+ 
+ install() {
+-    dracut_install mdadm cat
+-    dracut_install -o mdmon partx
++    dracut_install cat
++    dracut_install -o mdmon
++    inst $(command -v partx) /sbin/partx
++    inst $(command -v mdadm) /sbin/mdadm
+ 
+      # XXX: mdmon really needs to run as non-root?
+      #      If so, write only the user it needs in the initrd's /etc/passwd (and maybe /etc/group)
+diff --git a/modules.d/90multipath/module-setup.sh b/modules.d/90multipath/module-setup.sh
+index f9c1f81..31d1108 100755
+--- a/modules.d/90multipath/module-setup.sh
++++ b/modules.d/90multipath/module-setup.sh
+@@ -73,7 +73,6 @@ install() {
+     dracut_install -o  \
+         dmsetup \
+         kpartx \
+-        partx \
+         mpath_wait \
+         multipath  \
+         multipathd \
+@@ -83,10 +82,12 @@ install() {
+         /etc/multipath.conf \
+         /etc/multipath/*
+ 
++    inst $(command -v partx) /sbin/partx
++
+     inst_libdir_file "libmultipath*" "multipath/*"
+ 
+     inst_hook pre-trigger 02 "$moddir/multipathd.sh"
+     inst_hook cleanup   02 "$moddir/multipathd-stop.sh"
+-    inst_rules 40-multipath.rules 65-multipath.rules 66-kpartx.rules
++    inst_rules 40-multipath.rules 62-multipath.rules 65-multipath.rules 66-kpartx.rules
+ }
+ 
+diff --git a/modules.d/95udev-rules/59-persistent-storage.rules b/modules.d/95udev-rules/59-persistent-storage.rules
+index 2b83e72..b7d069b 100644
+--- a/modules.d/95udev-rules/59-persistent-storage.rules
++++ b/modules.d/95udev-rules/59-persistent-storage.rules
+@@ -1,8 +1,8 @@
+ SUBSYSTEM!="block", GOTO="ps_end"
+ ACTION!="add|change", GOTO="ps_end"
+ 
+-KERNEL=="cciss[0-9]*", IMPORT{program}="/sbin/blkid -o udev -p $tempnode"
+-KERNEL=="nbd[0-9]*", IMPORT{program}="/sbin/blkid -o udev -p $tempnode"
++KERNEL=="cciss[0-9]*", IMPORT{builtin}="blkid"
++KERNEL=="nbd[0-9]*", IMPORT{builtin}="blkid"
+ 
+ 
+ KERNEL!="md[0-9]*|md_d[0-9]*|md/*", KERNEL!="md*", GOTO="md_end"
+@@ -19,7 +19,7 @@ ATTR{md/array_state}=="|clear|inactive", GOTO="md_end"
+ LABEL="md_ignore_state"
+ 
+ IMPORT{program}="/sbin/mdadm --detail --export $tempnode"
+-IMPORT{program}="/sbin/blkid -o udev -p $tempnode"
++IMPORT{builtin}="blkid"
+ OPTIONS+="link_priority=100"
+ OPTIONS+="watch"
+ LABEL="md_end"
+@@ -32,7 +32,7 @@ ENV{DM_NAME}!="?*", GOTO="ps_end"
+ ENV{DM_UDEV_DISABLE_OTHER_RULES_FLAG}=="1", GOTO="ps_end"
+ ENV{DM_UUID}=="CRYPT-TEMP-?*", GOTO="ps_end"
+ ENV{DM_UUID}!="?*", ENV{DM_NAME}=="temporary-cryptsetup-?*", GOTO="ps_end"
+-IMPORT{program}="/sbin/blkid -o udev -p $tempnode"
++IMPORT{builtin}="blkid"
+ 
+ 
+ LABEL="ps_end"
+diff --git a/modules.d/95udev-rules/61-persistent-storage.rules b/modules.d/95udev-rules/61-persistent-storage.rules
+index 9cfdb0b..1136849 100644
+--- a/modules.d/95udev-rules/61-persistent-storage.rules
++++ b/modules.d/95udev-rules/61-persistent-storage.rules
+@@ -10,7 +10,7 @@ GOTO="pss_end"
+ 
+ LABEL="do_pss"
+ # by-path (parent device path)
+-ENV{DEVTYPE}=="disk", ENV{ID_PATH}=="", DEVPATH!="*/virtual/*", IMPORT{program}="path_id %p"
++ENV{DEVTYPE}=="disk", ENV{ID_PATH}=="", DEVPATH!="*/virtual/*", IMPORT{builtin}="path_id"
+ ENV{DEVTYPE}=="disk", ENV{ID_PATH}=="?*", SYMLINK+="disk/by-path/$env{ID_PATH}"
+ ENV{DEVTYPE}=="partition", ENV{ID_PATH}=="?*", SYMLINK+="disk/by-path/$env{ID_PATH}-part%n"
+ 
+diff --git a/modules.d/99base/module-setup.sh b/modules.d/99base/module-setup.sh
+index 097607a..22ab277 100755
+--- a/modules.d/99base/module-setup.sh
++++ b/modules.d/99base/module-setup.sh
+@@ -13,8 +13,10 @@ depends() {
+ 
+ install() {
+     local _d
+-    dracut_install mount mknod mkdir modprobe pidof sleep chroot \
++    dracut_install mount mknod mkdir pidof sleep chroot \
+         sed ls flock cp mv dmesg rm ln rmmod mkfifo umount readlink setsid
++    inst $(command -v modprobe) /sbin/modprobe
++
+     dracut_install -o less
+     if [ ! -e "${initdir}/bin/sh" ]; then
+         dracut_install bash

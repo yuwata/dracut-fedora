@@ -1,0 +1,35 @@
+From 95a5b23a388a2e49dee10283727e6dded8f1c9c2 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 27 Jul 2012 15:34:54 +0200
+Subject: [PATCH] i18n,terminfo/module-setup.sh: fixed "cp -t" calls
+
+---
+ modules.d/10i18n/module-setup.sh     | 2 +-
+ modules.d/95terminfo/module-setup.sh | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/modules.d/10i18n/module-setup.sh b/modules.d/10i18n/module-setup.sh
+index a1cf1c8..cf5ad96 100755
+--- a/modules.d/10i18n/module-setup.sh
++++ b/modules.d/10i18n/module-setup.sh
+@@ -96,7 +96,7 @@ install() {
+ 
+         for _src in $(eval echo ${kbddir}/{${KBDSUBDIRS}}); do
+             inst_dir "$_src"
+-            cp --reflink=auto --sparse=auto -prfL -t "${initdir}/${_src%/*}" "$_src"
++            cp --reflink=auto --sparse=auto -prfL -t "${initdir}/${_src}" "$_src"/*
+         done
+ 
+         # remove unnecessary files
+diff --git a/modules.d/95terminfo/module-setup.sh b/modules.d/95terminfo/module-setup.sh
+index e1914a5..5e5c269 100755
+--- a/modules.d/95terminfo/module-setup.sh
++++ b/modules.d/95terminfo/module-setup.sh
+@@ -11,6 +11,6 @@ install() {
+ 
+     if [ -d ${_terminfodir} ]; then
+         inst_dir "$_terminfodir"
+-        cp --reflink=auto --sparse=auto -prfL -t "${initdir}/${_terminfodir%/*}" "$_terminfodir"
++        cp --reflink=auto --sparse=auto -prfL -t "${initdir}/${_terminfodir}" "$_terminfodir"/*
+     fi
+ }

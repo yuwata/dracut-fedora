@@ -1,0 +1,159 @@
+From aefea76cf85a19781447880d2a82e4da3a25d068 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 30 Jul 2012 14:35:26 +0200
+Subject: [PATCH] set DRACUT_SYSTEMD for systemd mode in the initramfs
+
+---
+ modules.d/10i18n/console_init.sh            | 2 +-
+ modules.d/10i18n/parse-i18n.sh              | 2 +-
+ modules.d/50plymouth/plymouth-newroot.sh    | 2 +-
+ modules.d/50plymouth/plymouth-pretrigger.sh | 2 +-
+ modules.d/90crypt/parse-crypt.sh            | 3 +++
+ modules.d/98systemd/dracut-cmdline.sh       | 3 ++-
+ modules.d/98systemd/dracut-initqueue.sh     | 1 +
+ modules.d/98systemd/dracut-pre-pivot.sh     | 1 +
+ modules.d/98systemd/dracut-pre-trigger.sh   | 1 +
+ modules.d/98systemd/dracut-pre-udev.sh      | 2 +-
+ modules.d/99base/dracut-lib.sh              | 2 +-
+ 11 files changed, 14 insertions(+), 7 deletions(-)
+
+diff --git a/modules.d/10i18n/console_init.sh b/modules.d/10i18n/console_init.sh
+index 24eaad8..8817f95 100755
+--- a/modules.d/10i18n/console_init.sh
++++ b/modules.d/10i18n/console_init.sh
+@@ -2,7 +2,7 @@
+ # -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
+ # ex: ts=8 sw=4 sts=4 et filetype=sh
+ 
+-[ -x /lib/systemd/systemd ] && exit 0
++[ -n "$DRACUT_SYSTEMD" ] && exit 0
+ 
+ if [ -x /lib/systemd/systemd-vconsole-setup ]; then
+     /lib/systemd/systemd-vconsole-setup "$@"
+diff --git a/modules.d/10i18n/parse-i18n.sh b/modules.d/10i18n/parse-i18n.sh
+index b353296..90152cf 100755
+--- a/modules.d/10i18n/parse-i18n.sh
++++ b/modules.d/10i18n/parse-i18n.sh
+@@ -35,7 +35,7 @@ if [ -f /etc/locale.conf ]; then
+     export LC_ALL
+ fi
+ 
+-if [ -x /lib/systemd/systemd ]; then
++if [ -n "$DRACUT_SYSTEMD" ]; then
+     rm -f /{etc,lib}/udev/rules.d/10-console.rules
+     rm -f /lib/udev/console_init
+ fi
+diff --git a/modules.d/50plymouth/plymouth-newroot.sh b/modules.d/50plymouth/plymouth-newroot.sh
+index c5f1e56..58ac11f 100755
+--- a/modules.d/50plymouth/plymouth-newroot.sh
++++ b/modules.d/50plymouth/plymouth-newroot.sh
+@@ -2,5 +2,5 @@
+ # -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
+ # ex: ts=8 sw=4 sts=4 et filetype=sh
+ 
+-[ -x /bin/plymouth -a ! -x /lib/systemd/systemd ] || exit 0
++[ -x /bin/plymouth -a -z "$DRACUT_SYSTEMD" ] || exit 0
+ /bin/plymouth --newroot=$NEWROOT
+diff --git a/modules.d/50plymouth/plymouth-pretrigger.sh b/modules.d/50plymouth/plymouth-pretrigger.sh
+index b282069..e536564 100755
+--- a/modules.d/50plymouth/plymouth-pretrigger.sh
++++ b/modules.d/50plymouth/plymouth-pretrigger.sh
+@@ -2,7 +2,7 @@
+ # -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
+ # ex: ts=8 sw=4 sts=4 et filetype=sh
+ 
+-[ -x /bin/plymouthd -a ! -x /lib/systemd/systemd ] || exit 0
++[ -x /bin/plymouthd -a ! -n "$DRACUT_SYSTEMD" ] || exit 0
+ 
+ if getargbool 1 plymouth.enable && getargbool 1 rd.plymouth -d -n rd_NO_PLYMOUTH; then
+         # first trigger graphics subsystem
+diff --git a/modules.d/90crypt/parse-crypt.sh b/modules.d/90crypt/parse-crypt.sh
+index a2b157f..e20e6e0 100755
+--- a/modules.d/90crypt/parse-crypt.sh
++++ b/modules.d/90crypt/parse-crypt.sh
+@@ -1,6 +1,9 @@
+ #!/bin/sh
+ # -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
+ # ex: ts=8 sw=4 sts=4 et filetype=sh
++
++[ -n "$DRACUT_SYSTEMD" ] && exit 0
++
+ if ! getargbool 1 rd.luks -d -n rd_NO_LUKS; then
+     info "rd.luks=0: removing cryptoluks activation"
+     rm -f /etc/udev/rules.d/70-luks.rules
+diff --git a/modules.d/98systemd/dracut-cmdline.sh b/modules.d/98systemd/dracut-cmdline.sh
+index 927b99a..a366381 100755
+--- a/modules.d/98systemd/dracut-cmdline.sh
++++ b/modules.d/98systemd/dracut-cmdline.sh
+@@ -2,7 +2,8 @@
+ # -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
+ # ex: ts=8 sw=4 sts=4 et filetype=sh
+ 
+-NEWROOT="/sysroot"
++export DRACUT_SYSTEMD=1
++export NEWROOT="/sysroot"
+ [ -d $NEWROOT ] || mkdir -p -m 0755 $NEWROOT
+ [ -d /run/initramfs ] || mkdir -p -m 0755 /run/initramfs
+ [ -d /run/lock ] || mkdir -p -m 0755 /run/lock
+diff --git a/modules.d/98systemd/dracut-initqueue.sh b/modules.d/98systemd/dracut-initqueue.sh
+index 112d2a8..1ee6be1 100755
+--- a/modules.d/98systemd/dracut-initqueue.sh
++++ b/modules.d/98systemd/dracut-initqueue.sh
+@@ -2,6 +2,7 @@
+ # -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
+ # ex: ts=8 sw=4 sts=4 et filetype=sh
+ 
++export DRACUT_SYSTEMD=1
+ if [ -f /dracut-state.sh ]; then
+     . /dracut-state.sh 2>/dev/null
+ fi
+diff --git a/modules.d/98systemd/dracut-pre-pivot.sh b/modules.d/98systemd/dracut-pre-pivot.sh
+index 3fd7957..1ffa6aa 100755
+--- a/modules.d/98systemd/dracut-pre-pivot.sh
++++ b/modules.d/98systemd/dracut-pre-pivot.sh
+@@ -2,6 +2,7 @@
+ # -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
+ # ex: ts=8 sw=4 sts=4 et filetype=sh
+ 
++export DRACUT_SYSTEMD=1
+ if [ -f /dracut-state.sh ]; then
+     . /dracut-state.sh 2>/dev/null
+ fi
+diff --git a/modules.d/98systemd/dracut-pre-trigger.sh b/modules.d/98systemd/dracut-pre-trigger.sh
+index 9850124..20a3f64 100755
+--- a/modules.d/98systemd/dracut-pre-trigger.sh
++++ b/modules.d/98systemd/dracut-pre-trigger.sh
+@@ -2,6 +2,7 @@
+ # -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
+ # ex: ts=8 sw=4 sts=4 et filetype=sh
+ 
++export DRACUT_SYSTEMD=1
+ if [ -f /dracut-state.sh ]; then
+     . /dracut-state.sh 2>/dev/null
+ fi
+diff --git a/modules.d/98systemd/dracut-pre-udev.sh b/modules.d/98systemd/dracut-pre-udev.sh
+index 2566ab9..9a4dc61 100755
+--- a/modules.d/98systemd/dracut-pre-udev.sh
++++ b/modules.d/98systemd/dracut-pre-udev.sh
+@@ -1,7 +1,7 @@
+ #!/bin/sh
+ # -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
+ # ex: ts=8 sw=4 sts=4 et filetype=sh
+-
++export DRACUT_SYSTEMD=1
+ if [ -f /dracut-state.sh ]; then
+     . /dracut-state.sh 2>/dev/null
+ fi
+diff --git a/modules.d/99base/dracut-lib.sh b/modules.d/99base/dracut-lib.sh
+index 813cead..b4ef59a 100755
+--- a/modules.d/99base/dracut-lib.sh
++++ b/modules.d/99base/dracut-lib.sh
+@@ -358,7 +358,7 @@ check_quiet() {
+     fi
+ }
+ 
+-if [ ! -x /lib/systemd/systemd ]; then
++if [ -z "$DRACUT_SYSTEMD" ]; then
+ 
+     warn() {
+         check_quiet

@@ -1,0 +1,85 @@
+From 3e51b2f6fc9cca431815fb5561727c5ce9b4e148 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 27 Jul 2012 14:15:48 +0200
+Subject: [PATCH] fixed i18n and plymouth for systemd
+
+---
+ modules.d/10i18n/parse-i18n.sh              | 11 ++++-------
+ modules.d/50plymouth/plymouth-newroot.sh    |  5 ++---
+ modules.d/50plymouth/plymouth-pretrigger.sh | 28 ++++++++++++++--------------
+ 3 files changed, 20 insertions(+), 24 deletions(-)
+
+diff --git a/modules.d/10i18n/parse-i18n.sh b/modules.d/10i18n/parse-i18n.sh
+index 5530136..b353296 100755
+--- a/modules.d/10i18n/parse-i18n.sh
++++ b/modules.d/10i18n/parse-i18n.sh
+@@ -35,10 +35,7 @@ if [ -f /etc/locale.conf ]; then
+     export LC_ALL
+ fi
+ 
+-# FIXME: fix systemd-vconsole-setup
+-#if [ -x /lib/systemd/systemd-vconsole-setup ]; then
+-#    /lib/systemd/systemd-vconsole-setup
+-#    rm -f /{etc,lib}/udev/rules.d/10-console.rules
+-#    rm -f /lib/udev/console_init
+-#    ln -s /lib/systemd/systemd-vconsole-setup /lib/udev/console_init
+-#fi
++if [ -x /lib/systemd/systemd ]; then
++    rm -f /{etc,lib}/udev/rules.d/10-console.rules
++    rm -f /lib/udev/console_init
++fi
+diff --git a/modules.d/50plymouth/plymouth-newroot.sh b/modules.d/50plymouth/plymouth-newroot.sh
+index ffbabf1..2ffc929 100755
+--- a/modules.d/50plymouth/plymouth-newroot.sh
++++ b/modules.d/50plymouth/plymouth-newroot.sh
+@@ -2,6 +2,5 @@
+ # -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
+ # ex: ts=8 sw=4 sts=4 et filetype=sh
+ 
+-if [ -x /bin/plymouth ! -x /lib/systemd/systemd ]; then
+-    /bin/plymouth --newroot=$NEWROOT
+-fi
++[ -x /bin/plymouth ! -x /lib/systemd/systemd ] || exit 0
++/bin/plymouth --newroot=$NEWROOT
+diff --git a/modules.d/50plymouth/plymouth-pretrigger.sh b/modules.d/50plymouth/plymouth-pretrigger.sh
+index c52cf83..b282069 100755
+--- a/modules.d/50plymouth/plymouth-pretrigger.sh
++++ b/modules.d/50plymouth/plymouth-pretrigger.sh
+@@ -2,23 +2,23 @@
+ # -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
+ # ex: ts=8 sw=4 sts=4 et filetype=sh
+ 
+-if [ -x /bin/plymouthd -a ! -x /lib/systemd/systemd ]; then
+-    if getargbool 1 plymouth.enable && getargbool 1 rd.plymouth -d -n rd_NO_PLYMOUTH; then
++[ -x /bin/plymouthd -a ! -x /lib/systemd/systemd ] || exit 0
++
++if getargbool 1 plymouth.enable && getargbool 1 rd.plymouth -d -n rd_NO_PLYMOUTH; then
+         # first trigger graphics subsystem
+-        udevadm trigger --action=add --attr-match=class=0x030000 >/dev/null 2>&1
++    udevadm trigger --action=add --attr-match=class=0x030000 >/dev/null 2>&1
+         # first trigger graphics and tty subsystem
+-        udevadm trigger --action=add --subsystem-match=graphics --subsystem-match=drm --subsystem-match=tty >/dev/null 2>&1
++    udevadm trigger --action=add --subsystem-match=graphics --subsystem-match=drm --subsystem-match=tty >/dev/null 2>&1
+ 
+-        udevadm settle --timeout=30 2>&1 | vinfo
++    udevadm settle --timeout=30 2>&1 | vinfo
+ 
+-        info "Starting plymouth daemon"
+-        mkdir -m 0755 /run/plymouth
+-        read consoledev rest < /sys/class/tty/console/active
+-        consoledev=${consoledev:-tty0}
+-        [ -x /lib/udev/console_init -a -e "/dev/$consoledev" ] && /lib/udev/console_init "/dev/$consoledev"
+-        [ -x /bin/plymouthd ] && /bin/plymouthd --attach-to-session --pid-file /run/plymouth/pid
+-        /bin/plymouth --show-splash 2>&1 | vinfo
++    info "Starting plymouth daemon"
++    mkdir -m 0755 /run/plymouth
++    read consoledev rest < /sys/class/tty/console/active
++    consoledev=${consoledev:-tty0}
++    [ -x /lib/udev/console_init -a -e "/dev/$consoledev" ] && /lib/udev/console_init "/dev/$consoledev"
++    [ -x /bin/plymouthd ] && /bin/plymouthd --attach-to-session --pid-file /run/plymouth/pid
++    /bin/plymouth --show-splash 2>&1 | vinfo
+         # reset tty after plymouth messed with it
+-        [ -x /lib/udev/console_init -a -e "/dev/$consoledev" ] && /lib/udev/console_init "/dev/$consoledev"
+-    fi
++    [ -x /lib/udev/console_init -a -e "/dev/$consoledev" ] && /lib/udev/console_init "/dev/$consoledev"
+ fi
