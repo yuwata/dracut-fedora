@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 023
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -30,6 +30,7 @@ URL: https://dracut.wiki.kernel.org/
 # http://git.kernel.org/?p=boot/dracut/dracut.git;a=snapshot;h=%{version};sf=tgz
 Source0: http://www.kernel.org/pub/linux/utils/boot/dracut/dracut-%{version}.tar.bz2
 
+Patch1:  0001-include-the-omap_hsmmc-module-on-arm.patch
 
 BuildRequires: dash bash git
 
@@ -362,6 +363,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut/overlay
 
 %changelog
+* Wed Aug 01 2012 Dennis Gilmore <dennis@ausil.us> - 023-2
+- add patch to include omap_hsmmc for arm
+
 * Wed Aug 01 2012 Harald Hoyer <harald@redhat.com> 023-1
 - version 023
 
