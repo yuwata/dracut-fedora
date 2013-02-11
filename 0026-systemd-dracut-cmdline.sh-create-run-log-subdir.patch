@@ -1,0 +1,21 @@
+From 54665349ec6546b7926f198bca665547299fe348 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 8 Feb 2013 14:18:25 +0100
+Subject: [PATCH] systemd/dracut-cmdline.sh: create /run/log subdir
+
+---
+ modules.d/98systemd/dracut-cmdline.sh | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/modules.d/98systemd/dracut-cmdline.sh b/modules.d/98systemd/dracut-cmdline.sh
+index bfe2e43..c32d5df 100755
+--- a/modules.d/98systemd/dracut-cmdline.sh
++++ b/modules.d/98systemd/dracut-cmdline.sh
+@@ -7,6 +7,7 @@ export NEWROOT="/sysroot"
+ [ -d $NEWROOT ] || mkdir -p -m 0755 $NEWROOT
+ [ -d /run/initramfs ] || mkdir -p -m 0755 /run/initramfs
+ [ -d /run/lock ] || mkdir -p -m 0755 /run/lock
++[ -d /run/log ] || mkdir -p -m 0755 /run/log
+ 
+ if [ -f /dracut-state.sh ]; then
+     . /dracut-state.sh 2>/dev/null

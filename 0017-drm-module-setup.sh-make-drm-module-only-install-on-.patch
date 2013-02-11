@@ -1,0 +1,23 @@
+From 8a3c4957fc90a6cd9415e57592ef0771bb5e8524 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 8 Feb 2013 14:12:59 +0100
+Subject: [PATCH] drm/module-setup.sh: make drm module only install on
+ dependency
+
+---
+ modules.d/50drm/module-setup.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/modules.d/50drm/module-setup.sh b/modules.d/50drm/module-setup.sh
+index 47fe9a6..e471c11 100644
+--- a/modules.d/50drm/module-setup.sh
++++ b/modules.d/50drm/module-setup.sh
+@@ -3,7 +3,7 @@
+ # ex: ts=8 sw=4 sts=4 et filetype=sh
+ 
+ check() {
+-    return 0
++    return 255
+ }
+ 
+ depends() {

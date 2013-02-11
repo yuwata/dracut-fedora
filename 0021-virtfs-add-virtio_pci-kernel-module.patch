@@ -1,0 +1,22 @@
+From c2117747fdbb0efbfde9d8bc56a41898b50b8092 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 8 Feb 2013 14:15:46 +0100
+Subject: [PATCH] virtfs: add virtio_pci kernel module
+
+---
+ modules.d/95virtfs/module-setup.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/modules.d/95virtfs/module-setup.sh b/modules.d/95virtfs/module-setup.sh
+index ce8a4f8..0b961a8 100755
+--- a/modules.d/95virtfs/module-setup.sh
++++ b/modules.d/95virtfs/module-setup.sh
+@@ -32,7 +32,7 @@ depends() {
+ }
+ 
+ installkernel() {
+-    instmods 9p 9pnet_virtio
++    instmods 9p 9pnet_virtio virtio_pci
+ }
+ 
+ install() {

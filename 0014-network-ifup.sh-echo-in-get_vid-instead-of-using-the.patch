@@ -1,0 +1,37 @@
+From 39135af15558c9a2af6fcf18a391fb9b120fb5b1 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 6 Feb 2013 17:56:46 +0100
+Subject: [PATCH] network/ifup.sh: echo in get_vid() instead of using the
+ return value
+
+The return value is module 256, so VLAN ids > 255 could not be returned.
+---
+ modules.d/40network/ifup.sh | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/modules.d/40network/ifup.sh b/modules.d/40network/ifup.sh
+index 4216fa6..582278f 100755
+--- a/modules.d/40network/ifup.sh
++++ b/modules.d/40network/ifup.sh
+@@ -223,10 +223,10 @@ fi
+ get_vid() {
+     case "$1" in
+     vlan*)
+-        return ${1#vlan}
++        echo ${1#vlan}
+         ;;
+     *.*)
+-        return ${1##*.}
++        echo ${1##*.}
+         ;;
+     esac
+ }
+@@ -238,7 +238,7 @@ if [ "$netif" = "$vlanname" ] && [ ! -e /tmp/net.$vlanname.up ]; then
+     else
+         linkup "$phydevice"
+     fi
+-    ip link add dev "$vlanname" link "$phydevice" type vlan id "$(get_vid $vlanname; echo $?)"
++    ip link add dev "$vlanname" link "$phydevice" type vlan id "$(get_vid $vlanname)"
+ fi
+ 
+ # setup nameserver

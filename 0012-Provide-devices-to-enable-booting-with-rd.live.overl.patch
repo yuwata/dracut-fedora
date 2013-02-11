@@ -1,0 +1,53 @@
+From 579f3853848634ac5ecad1c8b2449f92446e2b84 Mon Sep 17 00:00:00 2001
+From: Frederick Grose <fgrose@sugarlabs.org>
+Date: Sun, 27 Jan 2013 14:47:17 -0500
+Subject: [PATCH] Provide devices to enable booting with
+ rd.live.overlay.readonly=1
+
+---
+ modules.d/90dmsquash-live/dmsquash-live-root.sh | 24 ++++++++++++++++++++----
+ 1 file changed, 20 insertions(+), 4 deletions(-)
+
+diff --git a/modules.d/90dmsquash-live/dmsquash-live-root.sh b/modules.d/90dmsquash-live/dmsquash-live-root.sh
+index f302d44..0b1ed20 100755
+--- a/modules.d/90dmsquash-live/dmsquash-live-root.sh
++++ b/modules.d/90dmsquash-live/dmsquash-live-root.sh
+@@ -110,18 +110,34 @@ do_live_overlay() {
+         umount -l /run/initramfs/overlayfs || :
+     fi
+ 
+-    if [ -z "$setup" ]; then
+-        if [ -n "$devspec" -a -n "$pathspec" ]; then
++    if [ -z "$setup" -o -n "$readonly_overlay" ]; then
++        if [ -n "$setup" ]; then
++            warn "Using temporary overlay."
++        elif [ -n "$devspec" -a -n "$pathspec" ]; then
+             warn "Unable to find persistent overlay; using temporary"
+             sleep 5
+         fi
+ 
+         dd if=/dev/null of=/overlay bs=1024 count=1 seek=$((512*1024)) 2> /dev/null
+-        losetup $OVERLAY_LOOPDEV /overlay
++        if [ -n "$setup" -a -n "$readonly_overlay" ]; then
++            RO_OVERLAY_LOOPDEV=$( losetup -f )
++            losetup $RO_OVERLAY_LOOPDEV /overlay
++        else
++            losetup $OVERLAY_LOOPDEV /overlay
++        fi
+     fi
+ 
+     # set up the snapshot
+-    echo 0 `blockdev --getsz $BASE_LOOPDEV` snapshot $BASE_LOOPDEV $OVERLAY_LOOPDEV p 8 | dmsetup create $readonly_overlay live-rw
++    sz=$(blockdev --getsz $BASE_LOOPDEV)
++    if [ -n "$readonly_overlay" ]; then
++        echo 0 $sz snapshot $BASE_LOOPDEV $OVERLAY_LOOPDEV p 8 | dmsetup create $readonly_overlay live-ro
++        base="/dev/mapper/live-ro"
++        over=$RO_OVERLAY_LOOPDEV
++    else
++        base=$BASE_LOOPDEV
++        over=$OVERLAY_LOOPDEV
++    fi
++    echo 0 $sz snapshot $base $over p 8 | dmsetup create live-rw
+ }
+ 
+ # live cd helper function

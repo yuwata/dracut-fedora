@@ -1,0 +1,26 @@
+From a04f3077cd2356b162bac8fd4bfb4be2aaa765ee Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 8 Feb 2013 14:54:38 +0100
+Subject: [PATCH] systemd/dracut-pre-pivot.sh: remove /dev/root symlink after
+ shell
+
+---
+ modules.d/98systemd/dracut-pre-pivot.sh | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/modules.d/98systemd/dracut-pre-pivot.sh b/modules.d/98systemd/dracut-pre-pivot.sh
+index 2eed4bb..f27d220 100755
+--- a/modules.d/98systemd/dracut-pre-pivot.sh
++++ b/modules.d/98systemd/dracut-pre-pivot.sh
+@@ -36,9 +36,9 @@ done
+ 
+ echo "NEWROOT=\"$NEWROOT\"" >> /run/initramfs/switch-root.conf
+ 
++getarg rd.break -d rdbreak && emergency_shell -n switch_root "Break before switch_root"
++
+ # remove helper symlink
+ [ -h /dev/root ] && rm -f /dev/root
+ 
+-getarg rd.break -d rdbreak && emergency_shell -n switch_root "Break before switch_root"
+-
+ exit 0

@@ -1,0 +1,23 @@
+From 22137f9cac5ceb1a1d0ff8c5cab3d7bb8b582e33 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 8 Feb 2013 14:18:54 +0100
+Subject: [PATCH] systemd/dracut-pre-trigger.sh: enable rd.break=pre-trigger
+ debug shell
+
+---
+ modules.d/98systemd/dracut-pre-trigger.sh | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/modules.d/98systemd/dracut-pre-trigger.sh b/modules.d/98systemd/dracut-pre-trigger.sh
+index deaf0f2..35b0c5f 100755
+--- a/modules.d/98systemd/dracut-pre-trigger.sh
++++ b/modules.d/98systemd/dracut-pre-trigger.sh
+@@ -17,6 +17,8 @@ udevproperty "hookdir=$hookdir"
+ 
+ source_hook pre-trigger
+ 
++getarg 'rd.break=pre-trigger' 'rdbreak=pre-trigger' && emergency_shell -n pre-trigger "Break pre-trigger"
++
+ udevadm control --reload >/dev/null 2>&1 || :
+ 
+ export -p > /dracut-state.sh

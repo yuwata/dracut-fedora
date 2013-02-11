@@ -1,0 +1,26 @@
+From ff52ca1b5769358beec63e0151f211ef68277590 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 8 Feb 2013 14:13:34 +0100
+Subject: [PATCH] btrfs/80-btrfs.rules: remove modprobe of btrfs module
+
+this should be automatically modprobed by the kernel on demand
+---
+ modules.d/90btrfs/80-btrfs.rules | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/modules.d/90btrfs/80-btrfs.rules b/modules.d/90btrfs/80-btrfs.rules
+index e74f9a6..f4a3787 100644
+--- a/modules.d/90btrfs/80-btrfs.rules
++++ b/modules.d/90btrfs/80-btrfs.rules
+@@ -1,11 +1,9 @@
+ SUBSYSTEM!="block", GOTO="btrfs_end"
+ ACTION!="add|change", GOTO="btrfs_end"
+ ENV{ID_FS_TYPE}!="btrfs", GOTO="btrfs_end"
+-RUN+="/sbin/modprobe btrfs"
+ RUN+="/sbin/btrfs device scan $env{DEVNAME}"
+ 
+ RUN+="/sbin/initqueue --finished --unique --name btrfs_finished /sbin/btrfs_finished"
+ RUN+="/sbin/initqueue --timeout --onetime --unique --name btrfs_timeout /sbin/btrfs_timeout"
+ 
+ LABEL="btrfs_end"
+-

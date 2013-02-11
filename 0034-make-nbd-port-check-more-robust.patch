@@ -1,0 +1,26 @@
+From c6a71c7b8a2fdfb4d946553dee2068ef484858c3 Mon Sep 17 00:00:00 2001
+From: Wim Muskee <wimmuskee@gmail.com>
+Date: Sat, 9 Feb 2013 12:54:20 +0100
+Subject: [PATCH] make nbd port check more robust
+
+The following change makes the check for the nbd port or named export
+more robust.
+I wasn't sure whether to include sed in the dracut_install() of
+module-setup.sh since net already does that (and nbd depends on that).
+---
+ modules.d/95nbd/nbdroot.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/modules.d/95nbd/nbdroot.sh b/modules.d/95nbd/nbdroot.sh
+index 4d06425..b176a16 100755
+--- a/modules.d/95nbd/nbdroot.sh
++++ b/modules.d/95nbd/nbdroot.sh
+@@ -31,7 +31,7 @@ nbdflags=${root%%:*}
+ nbdopts=${root#*:}
+ 
+ # If nbdport not an integer, then assume name based import
+-if [ "${nbdport%[0-9]}" = "$nbdport" ]; then
++if [ ! -z $(echo "$nbdport" | sed 's/[0-9]//g') ]; then
+     nbdport="-N $nbdport"
+ fi
+ 

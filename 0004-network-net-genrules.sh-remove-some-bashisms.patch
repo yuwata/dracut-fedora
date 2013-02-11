@@ -1,0 +1,42 @@
+From 14fcfbec3e57dee8aaf18128a41033185584b203 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 30 Jan 2013 17:22:25 +0100
+Subject: [PATCH] network/net-genrules.sh: remove some bashisms
+
+---
+ modules.d/40network/net-genrules.sh | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/modules.d/40network/net-genrules.sh b/modules.d/40network/net-genrules.sh
+index 133c457..f4652b9 100755
+--- a/modules.d/40network/net-genrules.sh
++++ b/modules.d/40network/net-genrules.sh
+@@ -24,24 +24,24 @@ fi
+     # bridge: attempt only the defined interface
+     if [ -e /tmp/bridge.info ]; then
+         . /tmp/bridge.info
+-        IFACES+=" ${ethnames%% *}"
++        IFACES="$IFACES ${ethnames%% *}"
+     fi
+ 
+     # bond: attempt only the defined interface (override bridge defines)
+     if [ -e /tmp/bond.info ]; then
+         . /tmp/bond.info
+         # It is enough to fire up only one
+-        IFACES+=" ${bondslaves%% *}"
++        IFACES="$IFACES ${bondslaves%% *}"
+     fi
+ 
+     if [ -e /tmp/team.info ]; then
+         . /tmp/team.info
+-        IFACES+=" ${teamslaves}"
++        IFACES="$IFACES ${teamslaves}"
+     fi
+ 
+     if [ -e /tmp/vlan.info ]; then
+         . /tmp/vlan.info
+-        IFACES+=" $phydevice"
++        IFACES="$IFACES $phydevice"
+     fi
+ 
+     if [ -z "$IFACES" ]; then
