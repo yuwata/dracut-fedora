@@ -1,0 +1,247 @@
+From 2fa6fd3aaa3015ad80b2b16f68c9b6de6724f202 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 11 Mar 2013 15:59:13 +0100
+Subject: [PATCH] add 51-dracut-rescue-postinst.sh
+
+also fixup 51-dracut-rescue.install to read in dracut conf
+---
+ 51-dracut-rescue-postinst.sh      | 58 +++++++++++++++++++++++++++++++++++++++
+ 51-dracut-rescue.install          | 58 ++++++++++++++++++++++++++++-----------
+ dracut.conf.d/fedora.conf.example |  1 +
+ dracut.spec                       | 18 ++++++++----
+ 4 files changed, 114 insertions(+), 21 deletions(-)
+ create mode 100755 51-dracut-rescue-postinst.sh
+
+diff --git a/51-dracut-rescue-postinst.sh b/51-dracut-rescue-postinst.sh
+new file mode 100755
+index 0000000..5c0fe2c
+--- /dev/null
++++ b/51-dracut-rescue-postinst.sh
+@@ -0,0 +1,58 @@
++#!/bin/bash
++# -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
++# ex: ts=8 sw=4 sts=4 et filetype=sh
++
++export LANG=C
++
++KERNEL_VERSION="$1"
++KERNEL_IMAGE="$2"
++
++[[ -f /etc/os-release ]] && . /etc/os-release
++[[ -f /etc/machine-id ]] && read MACHINE_ID < /etc/machine-id
++
++INITRDFILE="/boot/initramfs-${MACHINE_ID}-rescue.img"
++[[ -f $INITRDFILE ]] && exit 0
++
++dropindirs_sort()
++{
++    suffix=$1; shift
++    args=("$@")
++    files=$(
++        while (( $# > 0 )); do
++            for i in ${1}/*${suffix}; do
++                [[ -f $i ]] && echo ${i##*/}
++            done
++            shift
++        done | sort -Vu
++    )
++
++    for f in $files; do
++        for d in "${args[@]}"; do
++            if [[ -f "$d/$f" ]]; then
++                echo "$d/$f"
++                continue 2
++            fi
++        done
++    done
++}
++
++# source our config dir
++for f in $(dropindirs_sort ".conf" "/etc/dracut.conf.d" "/usr/lib/dracut/dracut.conf.d"); do
++    [[ -e $f ]] && . "$f"
++done
++
++[[ $dracut_rescue_image != "yes" ]] && exit 0
++
++dracut --no-hostonly  -a "rescue" "$INITRDFILE" "$KERNEL_VERSION"
++((ret+=$?))
++
++cp "$KERNEL_IMAGE" "${KERNEL_IMAGE%/*}/vmlinuz-${MACHINE_ID}-rescue"
++((ret+=$?))
++
++KERNEL_IMAGE="${KERNEL_IMAGE%/*}/vmlinuz-${MACHINE_ID}-rescue"
++
++new-kernel-image --install "$KERNEL_VERSION" --kernel-image "$KERNEL_IMAGE" --initrdfile "$INITRDFILE" --banner "$PRETTY_NAME Rescue"
++
++((ret+=$?))
++
++exit $ret
+diff --git a/51-dracut-rescue.install b/51-dracut-rescue.install
+index e5781d3..94f064c 100755
+--- a/51-dracut-rescue.install
++++ b/51-dracut-rescue.install
+@@ -1,4 +1,4 @@
+-#!/bin/sh
++#!/bin/bash
+ # -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
+ # ex: ts=8 sw=4 sts=4 et filetype=sh
+ 
+@@ -6,8 +6,29 @@ export LANG=C
+ 
+ COMMAND="$1"
+ KERNEL_VERSION="$2"
+-BOOT_DIR_ABS="$3"
+-BOOT_DIR="${3#/boot}"
++
++dropindirs_sort()
++{
++    suffix=$1; shift
++    args=("$@")
++    files=$(
++        while (( $# > 0 )); do
++            for i in ${1}/*${suffix}; do
++                [[ -f $i ]] && echo ${i##*/}
++            done
++            shift
++        done | sort -Vu
++    )
++
++    for f in $files; do
++        for d in "${args[@]}"; do
++            if [[ -f "$d/$f" ]]; then
++                echo "$d/$f"
++                continue 2
++            fi
++        done
++    done
++}
+ 
+ [[ -f /etc/os-release ]] && . /etc/os-release
+ [[ -f /etc/machine-id ]] && read MACHINE_ID < /etc/machine-id
+@@ -21,17 +42,30 @@ if ! [[ $BOOT_OPTIONS ]]; then
+     exit 1
+ fi
+ 
+-LOADER_ENTRY="/boot/loader/entries/${MACHINE_ID}-00-${KERNEL_VERSION}-rescue.conf"
++LOADER_ENTRY="/boot/loader/entries/${MACHINE_ID}-0-rescue.conf"
++BOOT_DIR="/${MACHINE_ID}/0-rescue"
++BOOT_DIR_ABS="/boot${BOOT_DIR}"
+ 
+ ret=0
+ 
+ case "$COMMAND" in
+     add)
+-        for i in "/boot/loader/entries/${MACHINE_ID}-00-"*"-rescue.conf"; do
++        for i in "/boot/loader/entries/${MACHINE_ID}-0-rescue.conf"; do
+             [[ -f $i ]] && exit 0
+         done
+ 
+-	dracut --no-hostonly  -a "rescue" "$3"/initrd-rescue "$2"
++        # source our config dir
++        for f in $(dropindirs_sort ".conf" "/etc/dracut.conf.d" "/usr/lib/dracut/dracut.conf.d"); do
++            [[ -e $f ]] && . "$f"
++        done
++
++        [[ $dracut_rescue_image != "yes" ]] && exit 0
++
++        if ! cp --preserve "$KERNEL_IMAGE" "$BOOT_DIR_ABS"/linux; then
++            echo "Can't copy '$KERNEL_IMAGE to '$BOOT_DIR_ABS/linux'!" >&2
++        fi
++
++        dracut --no-hostonly  -a "rescue" "$BOOT_DIR_ABS"/initrd "$2"
+         ((ret+=$?))
+ 
+         {
+@@ -40,21 +74,13 @@ case "$COMMAND" in
+             echo "machine-id $MACHINE_ID"
+             echo "options    ${BOOT_OPTIONS[@]} rd.auto=1"
+             echo "linux      $BOOT_DIR/linux"
+-            echo "initrd     $BOOT_DIR/initrd-rescue"
++            echo "initrd     $BOOT_DIR/initrd"
+         } > $LOADER_ENTRY
+         ((ret+=$?))
+-
+-        if (( $ret == 0 )); then
+-            command -v yumdb &>/dev/null && \
+-                yumdb set installonly keep kernel-$KERNEL_VERSION >/dev/null
+-        fi
+-
+         ;;
+ 
+     remove)
+-        [[ -f $LOADER_ENTRY ]] || exit 0
+-
+-        rm -f "$LOADER_ENTRY" "$3"/initrd-rescue
++        exit 0
+         ;;
+ 
+     *)
+diff --git a/dracut.conf.d/fedora.conf.example b/dracut.conf.d/fedora.conf.example
+index 8448fc3..ba7857c 100644
+--- a/dracut.conf.d/fedora.conf.example
++++ b/dracut.conf.d/fedora.conf.example
+@@ -13,3 +13,4 @@ systemdsystemunitdir=/usr/lib/systemd/system
+ udevdir=/usr/lib/udev
+ add_dracutmodules+=" systemd "
+ hostonly="yes"
++dracut_rescue_image="yes"
+diff --git a/dracut.spec b/dracut.spec
+index 14ce0d0..940d364 100644
+--- a/dracut.spec
++++ b/dracut.spec
+@@ -84,6 +84,7 @@ Requires: file
+ Requires: kpartx
+ Requires: udev > 166
+ Requires: kbd kbd-misc
++
+ %if 0%{?fedora} || 0%{?rhel} > 6
+ Requires: util-linux >= 2.21
+ Conflicts: systemd < 198
+@@ -234,8 +235,14 @@ rm $RPM_BUILD_ROOT%{_bindir}/mkinitrd
+ rm $RPM_BUILD_ROOT%{_bindir}/lsinitrd
+ %endif
+ 
+-mkdir -p $RPM_BUILD_ROOT/etc/logrotate.d
+-install -m 0644 dracut.logrotate $RPM_BUILD_ROOT/etc/logrotate.d/dracut_log
++# FIXME: remove after F19
++%if 0%{?fedora} || 0%{?rhel} > 6
++mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/kernel/postinst.d
++install -m 0755 51-dracut-rescue-postinst.sh $RPM_BUILD_ROOT%{_sysconfdir}/kernel/postinst.d/51-dracut-rescue-postinst.sh
++%endif
++
++mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/logrotate.d
++install -m 0644 dracut.logrotate $RPM_BUILD_ROOT%{_sysconfdir}/logrotate.d/dracut_log
+ 
+ # create compat symlink
+ mkdir -p $RPM_BUILD_ROOT/sbin
+@@ -262,11 +269,11 @@ rm -rf $RPM_BUILD_ROOT
+ %{dracutlibdir}/dracut-logger.sh
+ %{dracutlibdir}/dracut-initramfs-restore
+ %{dracutlibdir}/dracut-install
+-%config(noreplace) /etc/dracut.conf
++%config(noreplace) %{_sysconfdir}/dracut.conf
+ %if 0%{?fedora} || 0%{?suse_version} || 0%{?rhel}
+ %{dracutlibdir}/dracut.conf.d/01-dist.conf
+ %endif
+-%dir /etc/dracut.conf.d
++%dir %{_sysconfdir}/dracut.conf.d
+ %dir %{dracutlibdir}/dracut.conf.d
+ %{_mandir}/man8/dracut.8*
+ %{_mandir}/man8/*service.8*
+@@ -329,7 +336,7 @@ rm -rf $RPM_BUILD_ROOT
+ %{dracutlibdir}/modules.d/99fs-lib
+ %{dracutlibdir}/modules.d/99img-lib
+ %{dracutlibdir}/modules.d/99shutdown
+-%config(noreplace) /etc/logrotate.d/dracut_log
++%config(noreplace) %{_sysconfdir}/logrotate.d/dracut_log
+ %attr(0644,root,root) %ghost %config(missingok,noreplace) %{_localstatedir}/log/dracut.log
+ %dir %{_sharedstatedir}/initramfs
+ %if %{defined _unitdir}
+@@ -339,6 +346,7 @@ rm -rf $RPM_BUILD_ROOT
+ %if 0%{?fedora} || 0%{?rhel} > 6
+ %{_prefix}/lib/kernel/install.d/50-dracut.install
+ %{_prefix}/lib/kernel/install.d/51-dracut-rescue.install
++%{_sysconfdir}/kernel/postinst.d/51-dracut-rescue-postinst.sh
+ %endif
+ 
+ %files network
