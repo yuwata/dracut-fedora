@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 026
-Release: 15.git20130311%{?dist}
+Release: 19.git20130313%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -43,6 +43,10 @@ Patch11: 0011-lsinitrd.sh-removed-trailing.patch
 Patch12: 0012-make-host_fs_types-a-hashmap.patch
 Patch13: 0013-dracut.sh-add-swap-partitions-to-host-only-setup.patch
 Patch14: 0014-add-51-dracut-rescue-postinst.sh.patch
+Patch15: 0015-dracut.spec-add-nohostonly-and-norescue-subpackages.patch
+Patch16: 0016-lsinitrd.sh-simplify-check-for-boot-loader-spec-dirs.patch
+Patch17: 0017-51-dracut-rescue.install-create-directory-if-it-does.patch
+Patch18: 0018-systemd-local-fs.target-is-now-root-fs.target-and-in.patch
 
 
 BuildRequires: dash bash git
@@ -102,7 +106,8 @@ Requires: kbd kbd-misc
 
 %if 0%{?fedora} || 0%{?rhel} > 6
 Requires: util-linux >= 2.21
-Conflicts: systemd < 198
+Conflicts: systemd < 198-4
+Conflicts: grubby < 8.23
 %else
 Requires: util-linux-ng >= 2.21
 %endif
@@ -167,6 +172,22 @@ Requires: libcap
 %description caps
 This package requires everything which is needed to build an
 initramfs with dracut, which drops capabilities.
+
+%package nohostonly
+Summary: dracut configuration to turn off hostonly image generation
+Requires: %{name} = %{version}-%{release}
+
+%description nohostonly
+This package provides the configuration to turn off the host specific initramfs
+generation with dracut.
+
+%package norescue
+Summary: dracut configuration to turn off rescue image generation
+Requires: %{name} = %{version}-%{release}
+
+%description norescue
+This package provides the configuration to turn off the rescue initramfs
+generation with dracut.
 
 %package tools
 Summary: dracut tools to build the local initramfs
@@ -250,10 +271,13 @@ rm $RPM_BUILD_ROOT%{_bindir}/mkinitrd
 rm $RPM_BUILD_ROOT%{_bindir}/lsinitrd
 %endif
 
-# FIXME: remove after F19
 %if 0%{?fedora} || 0%{?rhel} > 6
+# FIXME: remove after F19
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/kernel/postinst.d
 install -m 0755 51-dracut-rescue-postinst.sh $RPM_BUILD_ROOT%{_sysconfdir}/kernel/postinst.d/51-dracut-rescue-postinst.sh
+
+echo 'hostonly="no"' > $RPM_BUILD_ROOT%{dracutlibdir}/dracut.conf.d/02-nohostonly.conf
+echo 'dracut_rescue_image="no"' > $RPM_BUILD_ROOT%{dracutlibdir}/dracut.conf.d/02-norescue.conf
 %endif
 
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/logrotate.d
@@ -402,7 +426,19 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut
 %dir /var/lib/dracut/overlay
 
+%files nohostonly
+%defattr(-,root,root,0755)
+%{dracutlibdir}/dracut.conf.d/02-nohostonly.conf
+
+%files norescue
+%defattr(-,root,root,0755)
+%{dracutlibdir}/dracut.conf.d/02-norescue.conf
+
 %changelog
+* Wed Mar 13 2013 Harald Hoyer <harald@redhat.com> 026-19.git20130313
+- fix switch-root and local-fs.target problem
+- add norescue and nohostonly subpackages
+
 * Mon Mar 11 2013 Harald Hoyer <harald@redhat.com> 026-15.git20130311
 - update to recent git
 

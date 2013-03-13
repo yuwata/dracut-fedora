@@ -1,0 +1,201 @@
+From c85cda9e2f72c655c01452956bda629bbecb9e55 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 13 Mar 2013 08:04:25 +0100
+Subject: [PATCH] systemd: local-fs.target is now root-fs.target and
+ initrd-fs.target
+
+Also rename dracut.target to initrd.target
+
+see also systemd commit 700e07f
+http://cgit.freedesktop.org/systemd/systemd/commit/?id=700e07f
+---
+ dracut.spec                                        |  3 ++-
+ modules.d/98systemd/dracut-mount.service           |  4 ++--
+ modules.d/98systemd/dracut-pre-mount.service       |  2 +-
+ modules.d/98systemd/dracut-pre-pivot.service       |  4 ++--
+ modules.d/98systemd/emergency.service              |  2 +-
+ .../98systemd/{dracut.target => initrd.target}     |  6 ++----
+ modules.d/98systemd/module-setup.sh                | 24 ++++++++++++----------
+ modules.d/99base/dracut-lib.sh                     |  6 +++---
+ 8 files changed, 26 insertions(+), 25 deletions(-)
+ rename modules.d/98systemd/{dracut.target => initrd.target} (73%)
+
+diff --git a/dracut.spec b/dracut.spec
+index 65112cb..06149de 100644
+--- a/dracut.spec
++++ b/dracut.spec
+@@ -87,7 +87,8 @@ Requires: kbd kbd-misc
+ 
+ %if 0%{?fedora} || 0%{?rhel} > 6
+ Requires: util-linux >= 2.21
+-Conflicts: systemd < 198
++Conflicts: systemd < 198-4
++Conflicts: grubby < 8.23
+ %else
+ Requires: util-linux-ng >= 2.21
+ %endif
+diff --git a/modules.d/98systemd/dracut-mount.service b/modules.d/98systemd/dracut-mount.service
+index b478067..b26b8a5 100644
+--- a/modules.d/98systemd/dracut-mount.service
++++ b/modules.d/98systemd/dracut-mount.service
+@@ -11,8 +11,8 @@
+ Description=dracut mount hook
+ Documentation=man:dracut-mount.service(8)
+ DefaultDependencies=no
+-After=dracut-pre-mount.service dracut-initqueue.service initrd-parse-etc.service local-fs.target
+-Wants=local-fs.target
++After=dracut-pre-mount.service dracut-initqueue.service initrd-parse-etc.service root-fs.target initrd-fs.target
++Wants=root-fs.target initrd-fs.target
+ ConditionPathExists=/etc/initrd-release
+ ConditionDirectoryNotEmpty=|/lib/dracut/hooks/mount
+ ConditionKernelCommandLine=|rd.break=mount
+diff --git a/modules.d/98systemd/dracut-pre-mount.service b/modules.d/98systemd/dracut-pre-mount.service
+index 39c830c..17bfda9 100644
+--- a/modules.d/98systemd/dracut-pre-mount.service
++++ b/modules.d/98systemd/dracut-pre-mount.service
+@@ -11,7 +11,7 @@
+ Description=dracut pre-mount hook
+ Documentation=man:dracut-pre-mount.service(8)
+ DefaultDependencies=no
+-Before=sysroot.mount local-fs.target
++Before=sysroot.mount root-fs.target
+ After=dracut-initqueue.service
+ After=cryptsetup.target
+ ConditionPathExists=/etc/initrd-release
+diff --git a/modules.d/98systemd/dracut-pre-pivot.service b/modules.d/98systemd/dracut-pre-pivot.service
+index 40a0fb1..49f76ef 100644
+--- a/modules.d/98systemd/dracut-pre-pivot.service
++++ b/modules.d/98systemd/dracut-pre-pivot.service
+@@ -11,8 +11,8 @@
+ Description=dracut pre-pivot and cleanup hook
+ Documentation=man:dracut-pre-pivot.service(8)
+ DefaultDependencies=no
+-After=dracut-mount.service dracut-initqueue.service initrd-parse-etc.service local-fs.target
+-Wants=local-fs.target
++After=dracut-mount.service dracut-initqueue.service initrd-parse-etc.service initrd-fs.target root-fs.target
++Wants=initrd-fs.target root-fs.target
+ Before=initrd-cleanup.service
+ ConditionPathExists=/etc/initrd-release
+ ConditionDirectoryNotEmpty=|/lib/dracut/hooks/pre-pivot
+diff --git a/modules.d/98systemd/emergency.service b/modules.d/98systemd/emergency.service
+index 22115be..18bb45f 100644
+--- a/modules.d/98systemd/emergency.service
++++ b/modules.d/98systemd/emergency.service
+@@ -17,7 +17,7 @@ Wants=systemd-vconsole-setup.service
+ Environment=HOME=/
+ WorkingDirectory=/
+ ExecStart=/bin/dracut-emergency
+-ExecStopPost=-/usr/bin/systemctl --no-block isolate dracut.target
++ExecStopPost=-/usr/bin/systemctl --no-block isolate initrd.target
+ Type=oneshot
+ StandardInput=tty-force
+ StandardOutput=inherit
+diff --git a/modules.d/98systemd/dracut.target b/modules.d/98systemd/initrd.target
+similarity index 73%
+rename from modules.d/98systemd/dracut.target
+rename to modules.d/98systemd/initrd.target
+index 08a22d2..19494d4 100644
+--- a/modules.d/98systemd/dracut.target
++++ b/modules.d/98systemd/initrd.target
+@@ -1,11 +1,9 @@
+ [Unit]
+-Description=dracut
++Description=Initrd Target
+ Requires=basic.target
+ Conflicts=rescue.service rescue.target
+ After=basic.target rescue.service rescue.target
+ AllowIsolate=yes
+ OnFailure=emergency.target
+ OnFailureIsolate=yes
+-
+-[Install]
+-Alias=default.target
++ConditionPathExists=/etc/initrd-release
+diff --git a/modules.d/98systemd/module-setup.sh b/modules.d/98systemd/module-setup.sh
+index 32d4be5..443481a 100755
+--- a/modules.d/98systemd/module-setup.sh
++++ b/modules.d/98systemd/module-setup.sh
+@@ -45,6 +45,8 @@ install() {
+         $systemdsystemunitdir/basic.target \
+         $systemdsystemunitdir/halt.target \
+         $systemdsystemunitdir/kexec.target \
++        $systemdsystemunitdir/initrd-fs.target \
++        $systemdsystemunitdir/root-fs.target \
+         $systemdsystemunitdir/local-fs.target \
+         $systemdsystemunitdir/local-fs-pre.target \
+         $systemdsystemunitdir/remote-fs.target \
+@@ -139,7 +141,7 @@ install() {
+ 
+     dracutsystemunitdir="/etc/systemd/system"
+ 
+-    mkdir -p "${initdir}${dracutsystemunitdir}/dracut.target.wants"
++    mkdir -p "${initdir}${dracutsystemunitdir}/initrd.target.wants"
+ 
+     mkdir -p "${initdir}${systemdsystemunitdir}/sysinit.target.d"
+     {
+@@ -148,38 +150,38 @@ install() {
+         echo "After=emergency.service emergency.target"
+     } > "${initdir}${systemdsystemunitdir}/sysinit.target.d/nolocalfs.conf"
+ 
+-    inst_simple "$moddir/dracut.target" ${dracutsystemunitdir}/dracut.target
+-    ln -fs ${dracutsystemunitdir}/dracut.target "${initdir}${systemdsystemunitdir}/default.target"
++    inst_simple "$moddir/initrd.target" ${dracutsystemunitdir}/initrd.target
++    ln -fs ${dracutsystemunitdir}/initrd.target "${initdir}${systemdsystemunitdir}/default.target"
+ 
+     inst_script "$moddir/dracut-cmdline.sh" /bin/dracut-cmdline
+     inst_simple "$moddir/dracut-cmdline.service" ${dracutsystemunitdir}/dracut-cmdline.service
+-    ln -fs ../dracut-cmdline.service "${initdir}${dracutsystemunitdir}/dracut.target.wants/dracut-cmdline.service"
++    ln -fs ../dracut-cmdline.service "${initdir}${dracutsystemunitdir}/initrd.target.wants/dracut-cmdline.service"
+ 
+     inst_script "$moddir/dracut-pre-udev.sh" /bin/dracut-pre-udev
+     inst_simple "$moddir/dracut-pre-udev.service" ${dracutsystemunitdir}/dracut-pre-udev.service
+-    ln -fs ../dracut-pre-udev.service "${initdir}${dracutsystemunitdir}/dracut.target.wants/dracut-pre-udev.service"
++    ln -fs ../dracut-pre-udev.service "${initdir}${dracutsystemunitdir}/initrd.target.wants/dracut-pre-udev.service"
+ 
+     inst_script "$moddir/dracut-pre-trigger.sh" /bin/dracut-pre-trigger
+     inst_simple "$moddir/dracut-pre-trigger.service" ${dracutsystemunitdir}/dracut-pre-trigger.service
+-    ln -fs ../dracut-pre-trigger.service "${initdir}${dracutsystemunitdir}/dracut.target.wants/dracut-pre-trigger.service"
++    ln -fs ../dracut-pre-trigger.service "${initdir}${dracutsystemunitdir}/initrd.target.wants/dracut-pre-trigger.service"
+ 
+     inst_script "$moddir/dracut-initqueue.sh" /bin/dracut-initqueue
+     inst_simple "$moddir/dracut-initqueue.service" ${dracutsystemunitdir}/dracut-initqueue.service
+-    ln -fs ../dracut-initqueue.service "${initdir}${dracutsystemunitdir}/dracut.target.wants/dracut-initqueue.service"
++    ln -fs ../dracut-initqueue.service "${initdir}${dracutsystemunitdir}/initrd.target.wants/dracut-initqueue.service"
+ 
+     inst_script "$moddir/dracut-pre-mount.sh" /bin/dracut-pre-mount
+     inst_simple "$moddir/dracut-pre-mount.service" ${dracutsystemunitdir}/dracut-pre-mount.service
+-    ln -fs ../dracut-pre-mount.service "${initdir}${dracutsystemunitdir}/dracut.target.wants/dracut-pre-mount.service"
++    ln -fs ../dracut-pre-mount.service "${initdir}${dracutsystemunitdir}/initrd.target.wants/dracut-pre-mount.service"
+ 
+     inst_script "$moddir/dracut-mount.sh" /bin/dracut-mount
+     inst_simple "$moddir/dracut-mount.service" ${dracutsystemunitdir}/dracut-mount.service
+-    ln -fs ../dracut-mount.service "${initdir}${dracutsystemunitdir}/dracut.target.wants/dracut-mount.service"
++    ln -fs ../dracut-mount.service "${initdir}${dracutsystemunitdir}/initrd.target.wants/dracut-mount.service"
+ 
+     inst_script "$moddir/dracut-pre-pivot.sh" /bin/dracut-pre-pivot
+     inst_simple "$moddir/dracut-pre-pivot.service" ${dracutsystemunitdir}/dracut-pre-pivot.service
+-    ln -fs ../dracut-pre-pivot.service "${initdir}${dracutsystemunitdir}/dracut.target.wants/dracut-pre-pivot.service"
++    ln -fs ../dracut-pre-pivot.service "${initdir}${dracutsystemunitdir}/initrd.target.wants/dracut-pre-pivot.service"
+ 
+-    ln -fs ../initrd-parse-etc.service "${initdir}${dracutsystemunitdir}/dracut.target.wants/initrd-parse-etc.service"
++    ln -fs ../initrd-parse-etc.service "${initdir}${dracutsystemunitdir}/initrd.target.wants/initrd-parse-etc.service"
+ 
+     inst_rules 99-systemd.rules
+ 
+diff --git a/modules.d/99base/dracut-lib.sh b/modules.d/99base/dracut-lib.sh
+index d2c803a..d4d1e77 100755
+--- a/modules.d/99base/dracut-lib.sh
++++ b/modules.d/99base/dracut-lib.sh
+@@ -839,9 +839,9 @@ wait_for_dev()
+         _name="${_name##/}"
+         _name="$(str_replace "$_name" '-' '\x2d')"
+         _name="$(str_replace "$_name" '/' '-')"
+-        if ! [ -L ${PREFIX}/etc/systemd/system/dracut.target.requires/${_name}.device ]; then
+-            [ -d ${PREFIX}/etc/systemd/system/dracut.target.requires ] || mkdir -p ${PREFIX}/etc/systemd/system/dracut.target.requires
+-            ln -s ../${_name}.device ${PREFIX}/etc/systemd/system/dracut.target.requires/${_name}.device
++        if ! [ -L ${PREFIX}/etc/systemd/system/initrd.target.requires/${_name}.device ]; then
++            [ -d ${PREFIX}/etc/systemd/system/initrd.target.requires ] || mkdir -p ${PREFIX}/etc/systemd/system/initrd.target.requires
++            ln -s ../${_name}.device ${PREFIX}/etc/systemd/system/initrd.target.requires/${_name}.device
+         fi
+     fi
+ }
