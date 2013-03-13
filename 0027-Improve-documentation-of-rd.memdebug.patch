@@ -1,0 +1,31 @@
+From 9c322b2f3b5beb623d226d4bf491a33badb99fe7 Mon Sep 17 00:00:00 2001
+From: "dyoung@redhat.com" <dyoung@redhat.com>
+Date: Wed, 13 Mar 2013 15:59:25 +0800
+Subject: [PATCH] Improve documentation of rd.memdebug
+
+Explain more about rd.memdebug verbose level in dracut.cmdline.7.asc.
+
+Signed-off-by: Dave Young <dyoung@redhat.com>
+---
+ dracut.cmdline.7.asc | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/dracut.cmdline.7.asc b/dracut.cmdline.7.asc
+index 62372a5..f1457d5 100644
+--- a/dracut.cmdline.7.asc
++++ b/dracut.cmdline.7.asc
+@@ -144,8 +144,12 @@ It should be attached to any report about dracut problems.
+     If "quiet" is set, it also logs to the console.
+ 
+ **rd.memdebug=[0-3]**::
+-    print memory usage debug info, set the verbose level from 1 to 3
+-    print nothing when set rd.memdebug=0
++    Print memory usage info at various points, set the verbose level from 0 to 3
++    Higher level means more debugging output:
++    0 - no output
++    1 - partial /proc/meminfo
++    2 - /proc/meminfo
++    3 - /proc/meminfo + /proc/slabinfo
+ 
+ **rd.break**::
+     drop to a shell at the end

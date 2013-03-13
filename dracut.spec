@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 026
-Release: 19.git20130313%{?dist}
+Release: 33.git20130313%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -47,6 +47,20 @@ Patch15: 0015-dracut.spec-add-nohostonly-and-norescue-subpackages.patch
 Patch16: 0016-lsinitrd.sh-simplify-check-for-boot-loader-spec-dirs.patch
 Patch17: 0017-51-dracut-rescue.install-create-directory-if-it-does.patch
 Patch18: 0018-systemd-local-fs.target-is-now-root-fs.target-and-in.patch
+Patch19: 0019-systemd-add-modules-load.d-modules-to-the-initramfs.patch
+Patch20: 0020-systemd-add-sysctl.d-and-sysctl.conf.patch
+Patch21: 0021-plymouth-do-not-install-hooks-in-systemd-mode.patch
+Patch22: 0022-dracut.sh-add-regenerate-all.patch
+Patch23: 0023-add-dracut-bash-completion.sh.patch
+Patch24: 0024-dracut.spec-fix-requirements.patch
+Patch25: 0025-dracut-initramfs-restore.sh-also-look-for-image-in-b.patch
+Patch26: 0026-print-memdebug-to-stderr.patch
+Patch27: 0027-Improve-documentation-of-rd.memdebug.patch
+Patch28: 0028-Add-memdebug-at-different-points-in-99base-init.sh.patch
+Patch29: 0029-systemd-remove-upstream-renamed-old-service-files.patch
+Patch30: 0030-kernel-modules-move-usb-storage-out-of-fixed-drivers.patch
+Patch31: 0031-dracut.sh-Add-noimageifnotneeded-parameter.patch
+Patch32: 0032-shutdown-shutdown.sh-mount-move-all-basic-mounts-out.patch
 
 
 BuildRequires: dash bash git
@@ -89,7 +103,7 @@ Provides: mkinitrd = 2.6.1
 Obsoletes: dracut-kernel < 005
 Provides:  dracut-kernel = %{version}-%{release}
 
-Requires: bash
+Requires: bash >= 4
 Requires: coreutils
 Requires: cpio
 Requires: filesystem >= 2.1.0
@@ -101,14 +115,14 @@ Requires: module-init-tools >= 3.7-9
 Requires: sed
 Requires: file
 Requires: kpartx
-Requires: udev > 166
 Requires: kbd kbd-misc
 
 %if 0%{?fedora} || 0%{?rhel} > 6
 Requires: util-linux >= 2.21
-Conflicts: systemd < 198-4
+Requires: systemd >= 198-4
 Conflicts: grubby < 8.23
 %else
+Requires: udev > 166
 Requires: util-linux-ng >= 2.21
 %endif
 
@@ -296,6 +310,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/dracut
 # compat symlink
 /sbin/dracut
+%{_datadir}/bash-completion/completions/dracut
 %if 0%{?fedora} > 12 || 0%{?rhel} >= 6 || 0%{?suse_version} > 9999
 %{_bindir}/mkinitrd
 %{_bindir}/lsinitrd
@@ -435,6 +450,16 @@ rm -rf $RPM_BUILD_ROOT
 %{dracutlibdir}/dracut.conf.d/02-norescue.conf
 
 %changelog
+* Wed Mar 13 2013 Harald Hoyer <harald@redhat.com> 026-33.git20130313
+- add module-load.d modules to the initramfs
+- add sysctl.d to the initramfs
+- optimize plymouth module for systemd mode
+- add new dracut parameter "--regenerate-all"
+- add new dracut parameter "--noimageifnotneeded"
+- shutdown: mount move /run /sys /dev /proc out of /oldroot
+  before pre-shutdown
+- add bash completion for dracut
+
 * Wed Mar 13 2013 Harald Hoyer <harald@redhat.com> 026-19.git20130313
 - fix switch-root and local-fs.target problem
 - add norescue and nohostonly subpackages
