@@ -1,0 +1,23 @@
+From 81b676a675d89f8f688c5508a3eb8225196796e5 Mon Sep 17 00:00:00 2001
+From: Will Woods <wwoods@redhat.com>
+Date: Thu, 14 Mar 2013 13:48:06 -0400
+Subject: [PATCH] fix typo in dracut.conf.5.asc
+
+It's /etc/dracut.conf.d, not /etc/dracut/conf.d
+---
+ dracut.conf.5.asc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/dracut.conf.5.asc b/dracut.conf.5.asc
+index 1cc810f..dbaa2e5 100644
+--- a/dracut.conf.5.asc
++++ b/dracut.conf.5.asc
+@@ -140,7 +140,7 @@ Files
+ -----
+ _/etc/dracut.conf_::
+     Old configuration file. You better use your own file in
+-    _/etc/dracut/conf.d/_.
++    _/etc/dracut.conf.d/_.
+ 
+ _/etc/dracut.conf.d/_::
+     Any _/etc/dracut.conf.d/*.conf_ file can overwrite the values in

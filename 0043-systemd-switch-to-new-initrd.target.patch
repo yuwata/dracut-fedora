@@ -1,0 +1,234 @@
+From 85c85f07e27234d305a2995ef059aa1241d4875d Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 14 Mar 2013 15:35:54 +0100
+Subject: [PATCH] systemd: switch to new initrd.target
+
+                             (normal startup)
+                                    :
+                                    :
+                                    v
+                              basic.target
+                                    |
+             ______________________/|
+            /                       |
+            |                  sysroot.mount
+            |                       |
+            |                       v
+            |             initrd-root-fs.target
+            |                       |
+            |                       v
+            |            initrd-parse-etc.service
+(custom initrd services)            |
+            |                       v
+            |            (sysroot-usr.mount and
+            |             various mounts marked
+            |               with fstab option
+            |                x-initrd.mount)
+            |                       |
+            |                       v
+            |                initrd-fs.target
+            |                       |
+            \______________________ |
+                                   \|
+                                    v
+                               initrd.target
+                                    |
+                                    v
+                          initrd-cleanup.service
+                               isolates to
+                         initrd-switch-root.target
+                                    |
+                                    v
+             ______________________/|
+            /                       |
+            |        initrd-udevadm-cleanup-db.service
+            |                       |
+(custom initrd services)            |
+            |                       |
+            \______________________ |
+                                   \|
+                                    v
+                        initrd-switch-root.target
+                                    |
+                                    v
+                        initrd-switch-root.service
+                                    |
+                                    v
+                               switch-root
+---
+ modules.d/98systemd/dracut-mount.service       |  4 ++--
+ modules.d/98systemd/dracut-pre-mount.service   |  2 +-
+ modules.d/98systemd/dracut-pre-pivot.service   |  4 ++--
+ modules.d/98systemd/emergency.service          |  2 +-
+ modules.d/98systemd/module-setup.sh            | 20 +++++---------------
+ modules.d/98systemd/udevadm-cleanup-db.service | 22 ----------------------
+ modules.d/99fs-lib/fs-lib.sh                   |  4 ++--
+ 7 files changed, 13 insertions(+), 45 deletions(-)
+ delete mode 100644 modules.d/98systemd/udevadm-cleanup-db.service
+
+diff --git a/modules.d/98systemd/dracut-mount.service b/modules.d/98systemd/dracut-mount.service
+index b26b8a5..5c12683 100644
+--- a/modules.d/98systemd/dracut-mount.service
++++ b/modules.d/98systemd/dracut-mount.service
+@@ -11,8 +11,8 @@
+ Description=dracut mount hook
+ Documentation=man:dracut-mount.service(8)
+ DefaultDependencies=no
+-After=dracut-pre-mount.service dracut-initqueue.service initrd-parse-etc.service root-fs.target initrd-fs.target
+-Wants=root-fs.target initrd-fs.target
++After=initrd-root-fs.target initrd-parse-etc.service
++
+ ConditionPathExists=/etc/initrd-release
+ ConditionDirectoryNotEmpty=|/lib/dracut/hooks/mount
+ ConditionKernelCommandLine=|rd.break=mount
+diff --git a/modules.d/98systemd/dracut-pre-mount.service b/modules.d/98systemd/dracut-pre-mount.service
+index 17bfda9..0d76943 100644
+--- a/modules.d/98systemd/dracut-pre-mount.service
++++ b/modules.d/98systemd/dracut-pre-mount.service
+@@ -11,7 +11,7 @@
+ Description=dracut pre-mount hook
+ Documentation=man:dracut-pre-mount.service(8)
+ DefaultDependencies=no
+-Before=sysroot.mount root-fs.target
++Before=initrd-root-fs.target
+ After=dracut-initqueue.service
+ After=cryptsetup.target
+ ConditionPathExists=/etc/initrd-release
+diff --git a/modules.d/98systemd/dracut-pre-pivot.service b/modules.d/98systemd/dracut-pre-pivot.service
+index 49f76ef..72941c9 100644
+--- a/modules.d/98systemd/dracut-pre-pivot.service
++++ b/modules.d/98systemd/dracut-pre-pivot.service
+@@ -11,8 +11,7 @@
+ Description=dracut pre-pivot and cleanup hook
+ Documentation=man:dracut-pre-pivot.service(8)
+ DefaultDependencies=no
+-After=dracut-mount.service dracut-initqueue.service initrd-parse-etc.service initrd-fs.target root-fs.target
+-Wants=initrd-fs.target root-fs.target
++After=initrd-fs.target
+ Before=initrd-cleanup.service
+ ConditionPathExists=/etc/initrd-release
+ ConditionDirectoryNotEmpty=|/lib/dracut/hooks/pre-pivot
+@@ -25,6 +24,7 @@ StandardInput=null
+ StandardOutput=syslog
+ StandardError=syslog+console
+ KillMode=process
++RemainAfterExit=yes
+ 
+ # Bash ignores SIGTERM, so we send SIGHUP instead, to ensure that bash
+ # terminates cleanly.
+diff --git a/modules.d/98systemd/emergency.service b/modules.d/98systemd/emergency.service
+index 18bb45f..a932739 100644
+--- a/modules.d/98systemd/emergency.service
++++ b/modules.d/98systemd/emergency.service
+@@ -17,7 +17,7 @@ Wants=systemd-vconsole-setup.service
+ Environment=HOME=/
+ WorkingDirectory=/
+ ExecStart=/bin/dracut-emergency
+-ExecStopPost=-/usr/bin/systemctl --no-block isolate initrd.target
++ExecStopPost=-/usr/bin/systemctl --fail --no-block default
+ Type=oneshot
+ StandardInput=tty-force
+ StandardOutput=inherit
+diff --git a/modules.d/98systemd/module-setup.sh b/modules.d/98systemd/module-setup.sh
+index 0119291..f74ae88 100755
+--- a/modules.d/98systemd/module-setup.sh
++++ b/modules.d/98systemd/module-setup.sh
+@@ -46,8 +46,9 @@ install() {
+         $systemdsystemunitdir/basic.target \
+         $systemdsystemunitdir/halt.target \
+         $systemdsystemunitdir/kexec.target \
++        $systemdsystemunitdir/initrd.target \
+         $systemdsystemunitdir/initrd-fs.target \
+-        $systemdsystemunitdir/root-fs.target \
++        $systemdsystemunitdir/initrd-root-fs.target \
+         $systemdsystemunitdir/local-fs.target \
+         $systemdsystemunitdir/local-fs-pre.target \
+         $systemdsystemunitdir/remote-fs.target \
+@@ -148,8 +149,8 @@ install() {
+ 
+     # install adm user/group for journald
+     dracut_install nologin
+-    egrep '^adm:' "$initdir/etc/passwd" 2>/dev/null >> "$initdir/etc/passwd"
+-    egrep '^adm:' /etc/group >> "$initdir/etc/group"
++    egrep '^systemd-journal:' "$initdir/etc/passwd" 2>/dev/null >> "$initdir/etc/passwd"
++    egrep '^systemd-journal:' /etc/group >> "$initdir/etc/group"
+ 
+     ln -fs $systemdutildir/systemd "$initdir/init"
+     ln -fs $systemdutildir/systemd "$initdir/sbin/init"
+@@ -163,15 +164,7 @@ install() {
+ 
+     mkdir -p "${initdir}${dracutsystemunitdir}/initrd.target.wants"
+ 
+-    mkdir -p "${initdir}${systemdsystemunitdir}/sysinit.target.d"
+-    {
+-        echo "[Unit]"
+-        echo "After="
+-        echo "After=emergency.service emergency.target"
+-    } > "${initdir}${systemdsystemunitdir}/sysinit.target.d/nolocalfs.conf"
+-
+-    inst_simple "$moddir/initrd.target" ${dracutsystemunitdir}/initrd.target
+-    ln -fs ${dracutsystemunitdir}/initrd.target "${initdir}${systemdsystemunitdir}/default.target"
++    ln -fs initrd.target "${initdir}${systemdsystemunitdir}/default.target"
+ 
+     inst_script "$moddir/dracut-cmdline.sh" /bin/dracut-cmdline
+     inst_simple "$moddir/dracut-cmdline.service" ${dracutsystemunitdir}/dracut-cmdline.service
+@@ -201,8 +194,6 @@ install() {
+     inst_simple "$moddir/dracut-pre-pivot.service" ${dracutsystemunitdir}/dracut-pre-pivot.service
+     ln -fs ../dracut-pre-pivot.service "${initdir}${dracutsystemunitdir}/initrd.target.wants/dracut-pre-pivot.service"
+ 
+-    ln -fs ../initrd-parse-etc.service "${initdir}${dracutsystemunitdir}/initrd.target.wants/initrd-parse-etc.service"
+-
+     inst_rules 99-systemd.rules
+ 
+     for i in \
+@@ -224,6 +215,5 @@ install() {
+         echo "RateLimitBurst=0"
+     } >> "$initdir/etc/systemd/journald.conf"
+ 
+-
+ }
+ 
+diff --git a/modules.d/98systemd/udevadm-cleanup-db.service b/modules.d/98systemd/udevadm-cleanup-db.service
+deleted file mode 100644
+index fba032a..0000000
+--- a/modules.d/98systemd/udevadm-cleanup-db.service
++++ /dev/null
+@@ -1,22 +0,0 @@
+-#  This file is part of systemd.
+-#
+-#  systemd is free software; you can redistribute it and/or modify it
+-#  under the terms of the GNU Lesser General Public License as published by
+-#  the Free Software Foundation; either version 2.1 of the License, or
+-#  (at your option) any later version.
+-
+-[Unit]
+-Description=Cleanup udevd DB
+-Documentation=man:udevadm-cleanup-db.service(8)
+-DefaultDependencies=no
+-ConditionPathExists=/etc/initrd-release
+-Conflicts=systemd-udevd.service systemd-udevd-control.socket systemd-udevd-kernel.socket
+-After=systemd-udevd.service systemd-udevd-control.socket systemd-udevd-kernel.socket
+-Before=initrd-switch-root.target
+-
+-[Service]
+-Type=oneshot
+-ExecStart=-/usr/bin/udevadm info --cleanup-db
+-StandardInput=null
+-StandardOutput=null
+-StandardError=null
+diff --git a/modules.d/99fs-lib/fs-lib.sh b/modules.d/99fs-lib/fs-lib.sh
+index 838ffa6..6936bbb 100755
+--- a/modules.d/99fs-lib/fs-lib.sh
++++ b/modules.d/99fs-lib/fs-lib.sh
+@@ -220,9 +220,9 @@ write_fs_tab() {
+     [ -z "$_rootfstype" ] && _rootfstype="auto"
+ 
+     if [ -z "$_rootflags" ]; then
+-        _rootflags="ro"
++        _rootflags="ro,x-initrd-rootfs.mount"
+     else
+-        _rootflags="ro,$_rootflags"
++        _rootflags="ro,$_rootflags,x-initrd-rootfs.mount"
+     fi
+ 
+     _rw=0

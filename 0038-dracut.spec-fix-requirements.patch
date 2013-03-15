@@ -1,0 +1,31 @@
+From d46394ad330abe6e1368e5d40e01e8b97a7ae40c Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 14 Mar 2013 17:53:00 +0100
+Subject: [PATCH] dracut.spec: fix requirements
+
+---
+ dracut.spec | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/dracut.spec b/dracut.spec
+index b21f220..4870390 100644
+--- a/dracut.spec
++++ b/dracut.spec
+@@ -70,7 +70,7 @@ Provides: mkinitrd = 2.6.1
+ Obsoletes: dracut-kernel < 005
+ Provides:  dracut-kernel = %{version}-%{release}
+ 
+-Requires: bash > 4
++Requires: bash >= 4
+ Requires: coreutils
+ Requires: cpio
+ Requires: filesystem >= 2.1.0
+@@ -86,7 +86,7 @@ Requires: kbd kbd-misc
+ 
+ %if 0%{?fedora} || 0%{?rhel} > 6
+ Requires: util-linux >= 2.21
+-Requires: systemd > 198-4
++Requires: systemd >= 198-4
+ Conflicts: grubby < 8.23
+ %else
+ Requires: udev > 166

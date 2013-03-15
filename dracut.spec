@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 026
-Release: 33.git20130313%{?dist}
+Release: 48.git20130315%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -61,6 +61,21 @@ Patch29: 0029-systemd-remove-upstream-renamed-old-service-files.patch
 Patch30: 0030-kernel-modules-move-usb-storage-out-of-fixed-drivers.patch
 Patch31: 0031-dracut.sh-Add-noimageifnotneeded-parameter.patch
 Patch32: 0032-shutdown-shutdown.sh-mount-move-all-basic-mounts-out.patch
+Patch33: 0033-Don-t-write-DHCPV6C-yes-for-each-dhcp-ipv4-configura.patch
+Patch34: 0034-Write-BOOTPROTO-ibft-for-ip-ibft-to-ifcfg-files.patch
+Patch35: 0035-TODO-remove-completed-items.patch
+Patch36: 0036-51-dracut-rescue-postinst.sh-fixed-new-kernel-pkg-ca.patch
+Patch37: 0037-dracut-install-handle-more-ldd-errors.patch
+Patch38: 0038-dracut.spec-fix-requirements.patch
+Patch39: 0039-ifcfg-write-ifcfg.sh-fixed-typo.patch
+Patch40: 0040-iscsi-iscsiroot.sh-do-not-mount-manually-in-systemd-.patch
+Patch41: 0041-nfs-nfsroot.sh-only-cat-etc-fstab-if-existant.patch
+Patch42: 0042-udev-rules-module-setup.sh-do-not-install-run.patch
+Patch43: 0043-systemd-switch-to-new-initrd.target.patch
+Patch44: 0044-systemd-do-not-use-systemd-version-until-fixed.patch
+Patch45: 0045-fix-typo-in-dracut.conf.5.asc.patch
+Patch46: 0046-fixed-testsuite.patch
+Patch47: 0047-dracut.spec-bump-systemd-version-requirement.patch
 
 
 BuildRequires: dash bash git
@@ -119,7 +134,7 @@ Requires: kbd kbd-misc
 
 %if 0%{?fedora} || 0%{?rhel} > 6
 Requires: util-linux >= 2.21
-Requires: systemd >= 198-4
+Requires: systemd >= 198-5
 Conflicts: grubby < 8.23
 %else
 Requires: udev > 166
@@ -450,6 +465,10 @@ rm -rf $RPM_BUILD_ROOT
 %{dracutlibdir}/dracut.conf.d/02-norescue.conf
 
 %changelog
+* Fri Mar 15 2013 Harald Hoyer <harald@redhat.com> 026-48.git20130315
+- use new initrd.target from systemd
+- fixed rescue generation
+
 * Wed Mar 13 2013 Harald Hoyer <harald@redhat.com> 026-33.git20130313
 - add module-load.d modules to the initramfs
 - add sysctl.d to the initramfs

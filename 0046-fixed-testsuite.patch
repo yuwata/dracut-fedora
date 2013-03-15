@@ -1,0 +1,436 @@
+From bb278147cfc969159fa5f44768fcd1fd5fb494fc Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 14 Mar 2013 18:29:19 +0100
+Subject: [PATCH] fixed testsuite
+
+---
+ test/TEST-01-BASIC/test.sh        |  4 ++--
+ test/TEST-02-SYSTEMD/test.sh      |  6 +++---
+ test/TEST-03-USR-MOUNT/test.sh    |  4 ++--
+ test/TEST-04-FULL-SYSTEMD/test.sh |  6 +++---
+ test/TEST-10-RAID/test.sh         |  4 ++--
+ test/TEST-11-LVM/test.sh          |  6 +++---
+ test/TEST-12-RAID-DEG/test.sh     |  6 +++---
+ test/TEST-13-ENC-RAID-LVM/test.sh | 10 +++++-----
+ test/TEST-15-BTRFSRAID/test.sh    |  9 ++++-----
+ test/TEST-16-DMSQUASH/test.sh     |  2 +-
+ test/TEST-20-NFS/test.sh          |  4 ++--
+ test/TEST-30-ISCSI/test.sh        |  8 ++++----
+ test/TEST-40-NBD/create-root.sh   |  2 +-
+ test/TEST-40-NBD/test.sh          | 17 +++++++++--------
+ test/TEST-50-MULTINIC/test.sh     |  4 ++--
+ 15 files changed, 46 insertions(+), 46 deletions(-)
+
+diff --git a/test/TEST-01-BASIC/test.sh b/test/TEST-01-BASIC/test.sh
+index 7ce4f9d..7727cd0 100755
+--- a/test/TEST-01-BASIC/test.sh
++++ b/test/TEST-01-BASIC/test.sh
+@@ -11,7 +11,7 @@ test_run() {
+     $testdir/run-qemu \
+ 	-hda $TESTDIR/root.ext3 \
+ 	-hdb $TESTDIR/result \
+-	-m 256M -nographic \
++	-m 256M -smp 2 -nographic \
+ 	-net none -kernel /boot/vmlinuz-$KVERSION \
+ 	-watchdog i6300esb -watchdog-action poweroff \
+ 	-append "root=LABEL=dracut rw systemd.log_level=debug systemd.log_target=console rd.retry=3 rd.debug console=ttyS0,115200n81 $DEBUGFAIL" \
+@@ -70,7 +70,7 @@ test_setup() {
+ 
+     $testdir/run-qemu \
+ 	-hda $TESTDIR/root.ext3 \
+-	-m 256M -nographic -net none \
++	-m 256M -smp 2 -nographic -net none \
+ 	-kernel "/boot/vmlinuz-$kernel" \
+ 	-append "root=/dev/dracut/root rw rootfstype=ext3 quiet console=ttyS0,115200n81 selinux=0" \
+ 	-initrd $TESTDIR/initramfs.makeroot  || return 1
+diff --git a/test/TEST-02-SYSTEMD/test.sh b/test/TEST-02-SYSTEMD/test.sh
+index 6defa08..459cf03 100755
+--- a/test/TEST-02-SYSTEMD/test.sh
++++ b/test/TEST-02-SYSTEMD/test.sh
+@@ -8,7 +8,7 @@ KVERSION=${KVERSION-$(uname -r)}
+ test_run() {
+     $testdir/run-qemu \
+ 	-hda $TESTDIR/root.ext3 \
+-	-m 256M -nographic \
++	-m 256M -smp 2 -nographic \
+ 	-net none -kernel /boot/vmlinuz-$KVERSION \
+ 	-append "root=LABEL=dracut rw loglevel=77 systemd.log_level=debug systemd.log_target=console rd.retry=3 rd.info console=ttyS0,115200n81 selinux=0 rd.debug init=/sbin/init $DEBUGFAIL" \
+ 	-initrd $TESTDIR/initramfs.testing
+@@ -66,9 +66,9 @@ test_setup() {
+ 
+     $testdir/run-qemu \
+ 	-hda $TESTDIR/root.ext3 \
+-	-m 256M -nographic -net none \
++	-m 256M -smp 2 -nographic -net none \
+ 	-kernel "/boot/vmlinuz-$kernel" \
+-	-append "root=/dev/dracut/root rw rootfstype=ext3 quiet console=ttyS0,115200n81 selinux=0" \
++	-append "root=/dev/fakeroot rw rootfstype=ext3 quiet console=ttyS0,115200n81 selinux=0" \
+ 	-initrd $TESTDIR/initramfs.makeroot  || return 1
+     grep -m 1 -q dracut-root-block-created $TESTDIR/root.ext3 || return 1
+ 
+diff --git a/test/TEST-03-USR-MOUNT/test.sh b/test/TEST-03-USR-MOUNT/test.sh
+index 0dcd13c..680720b 100755
+--- a/test/TEST-03-USR-MOUNT/test.sh
++++ b/test/TEST-03-USR-MOUNT/test.sh
+@@ -18,7 +18,7 @@ client_run() {
+ 	-hda $TESTDIR/root.btrfs \
+ 	-hdb $TESTDIR/usr.btrfs \
+ 	-hdc $TESTDIR/result \
+-	-m 256M -nographic \
++	-m 256M -smp 2 -nographic \
+ 	-net none -kernel /boot/vmlinuz-$KVERSION \
+ 	-watchdog i6300esb -watchdog-action poweroff \
+ 	-append "root=LABEL=dracut $client_opts quiet rd.retry=3 rd.info console=ttyS0,115200n81 selinux=0 rd.debug $DEBUGFAIL" \
+@@ -105,7 +105,7 @@ test_setup() {
+     $testdir/run-qemu \
+ 	-hda $TESTDIR/root.btrfs \
+ 	-hdb $TESTDIR/usr.btrfs \
+-	-m 256M -nographic -net none \
++	-m 256M -smp 2 -nographic -net none \
+ 	-kernel "/boot/vmlinuz-$kernel" \
+ 	-append "root=/dev/dracut/root rw rootfstype=btrfs quiet console=ttyS0,115200n81 selinux=0" \
+ 	-initrd $TESTDIR/initramfs.makeroot  || return 1
+diff --git a/test/TEST-04-FULL-SYSTEMD/test.sh b/test/TEST-04-FULL-SYSTEMD/test.sh
+index 0b8e999..d3dc7ef 100755
+--- a/test/TEST-04-FULL-SYSTEMD/test.sh
++++ b/test/TEST-04-FULL-SYSTEMD/test.sh
+@@ -20,7 +20,7 @@ client_run() {
+ 	-hda $TESTDIR/root.btrfs \
+ 	-hdb $TESTDIR/usr.btrfs \
+ 	-hdc $TESTDIR/result \
+-	-m 256M -nographic \
++	-m 256M -smp 2 -nographic \
+ 	-net none -kernel /boot/vmlinuz-$KVERSION \
+ 	-append "root=LABEL=dracut $client_opts rd.retry=3 console=ttyS0,115200n81 selinux=0 $DEBUGOUT $DEBUGFAIL" \
+ 	-initrd $TESTDIR/initramfs.testing
+@@ -247,9 +247,9 @@ EOF
+     $testdir/run-qemu \
+ 	-hda $TESTDIR/root.btrfs \
+ 	-hdb $TESTDIR/usr.btrfs \
+-	-m 256M -nographic -net none \
++	-m 256M -smp 2 -nographic -net none \
+ 	-kernel "/boot/vmlinuz-$kernel" \
+-	-append "root=/dev/dracut/root rw rootfstype=btrfs quiet console=ttyS0,115200n81 selinux=0" \
++	-append "root=/dev/fakeroot rw rootfstype=btrfs quiet console=ttyS0,115200n81 selinux=0" \
+ 	-initrd $TESTDIR/initramfs.makeroot  || return 1
+     grep -m 1 -q dracut-root-block-created $TESTDIR/root.btrfs || return 1
+ 
+diff --git a/test/TEST-10-RAID/test.sh b/test/TEST-10-RAID/test.sh
+index b71cf9d..e11c518 100755
+--- a/test/TEST-10-RAID/test.sh
++++ b/test/TEST-10-RAID/test.sh
+@@ -10,7 +10,7 @@ test_run() {
+     DISKIMAGE=$TESTDIR/TEST-10-RAID-root.img
+     $testdir/run-qemu \
+ 	-hda $DISKIMAGE \
+-	-m 256M -nographic \
++	-m 256M -smp 2 -nographic \
+ 	-net none -kernel /boot/vmlinuz-$KVERSION \
+ 	-append "root=/dev/dracut/root rd.auto rw rd.retry=10 console=ttyS0,115200n81 selinux=0 $DEBUGFAIL" \
+ 	-initrd $TESTDIR/initramfs.testing
+@@ -67,7 +67,7 @@ test_setup() {
+     # Invoke KVM and/or QEMU to actually create the target filesystem.
+     $testdir/run-qemu \
+ 	-hda $DISKIMAGE \
+-	-m 256M -nographic -net none \
++	-m 256M -smp 2 -nographic -net none \
+ 	-kernel "/boot/vmlinuz-$kernel" \
+ 	-append "root=/dev/cannotreach rw rootfstype=ext2 console=ttyS0,115200n81 selinux=0" \
+ 	-initrd $TESTDIR/initramfs.makeroot  || return 1
+diff --git a/test/TEST-11-LVM/test.sh b/test/TEST-11-LVM/test.sh
+index c40b4df..d876e55 100755
+--- a/test/TEST-11-LVM/test.sh
++++ b/test/TEST-11-LVM/test.sh
+@@ -9,7 +9,7 @@ KVERSION=${KVERSION-$(uname -r)}
+ test_run() {
+     $testdir/run-qemu \
+ 	-hda $TESTDIR/root.ext2 \
+-	-m 256M -nographic \
++	-m 256M -smp 2 -nographic \
+ 	-net none -kernel /boot/vmlinuz-$KVERSION \
+ 	-append "root=/dev/dracut/root rw rd.auto=1 quiet rd.retry=3 rd.info console=ttyS0,115200n81 selinux=0 rd.debug  $DEBUGFAIL" \
+ 	-initrd $TESTDIR/initramfs.testing
+@@ -61,9 +61,9 @@ test_setup() {
+ 	-f $TESTDIR/initramfs.makeroot $KVERSION || return 1
+     rm -rf $TESTDIR/overlay
+     # Invoke KVM and/or QEMU to actually create the target filesystem.
+-    $testdir/run-qemu -hda $TESTDIR/root.ext2 -m 256M -nographic -net none \
++    $testdir/run-qemu -hda $TESTDIR/root.ext2 -m 256M -smp 2 -nographic -net none \
+ 	-kernel "/boot/vmlinuz-$kernel" \
+-	-append "root=/dev/dracut/root rw rootfstype=ext2 quiet console=ttyS0,115200n81 selinux=0" \
++	-append "root=/dev/fakeroot rw rootfstype=ext2 quiet console=ttyS0,115200n81 selinux=0" \
+ 	-initrd $TESTDIR/initramfs.makeroot  || return 1
+     grep -m 1 -q dracut-root-block-created $TESTDIR/root.ext2 || return 1
+     (
+diff --git a/test/TEST-12-RAID-DEG/test.sh b/test/TEST-12-RAID-DEG/test.sh
+index 7e4b804..1eae41a 100755
+--- a/test/TEST-12-RAID-DEG/test.sh
++++ b/test/TEST-12-RAID-DEG/test.sh
+@@ -15,7 +15,7 @@ client_run() {
+     cp --sparse=always --reflink=auto $TESTDIR/disk3.img $TESTDIR/disk3.img.new
+ 
+     $testdir/run-qemu \
+-	-hda $TESTDIR/root.ext2 -m 256M -nographic \
++	-hda $TESTDIR/root.ext2 -m 256M -nographic  -smp 2 \
+ 	-hdc $TESTDIR/disk2.img.new \
+ 	-hdd $TESTDIR/disk3.img.new \
+ 	-net none -kernel /boot/vmlinuz-$KVERSION \
+@@ -106,9 +106,9 @@ test_setup() {
+ 	-hdb $TESTDIR/disk1.img \
+ 	-hdc $TESTDIR/disk2.img \
+ 	-hdd $TESTDIR/disk3.img \
+-	-m 256M -nographic -net none \
++	-m 256M -smp 2 -nographic -net none \
+ 	-kernel "/boot/vmlinuz-$kernel" \
+-	-append "root=/dev/dracut/root rw rootfstype=ext2 quiet console=ttyS0,115200n81 selinux=0" \
++	-append "root=/dev/fakeroot rw rootfstype=ext2 quiet console=ttyS0,115200n81 selinux=0" \
+ 	-initrd $TESTDIR/initramfs.makeroot  || return 1
+ 
+     grep -m 1 -q dracut-root-block-created $TESTDIR/root.ext2 || return 1
+diff --git a/test/TEST-13-ENC-RAID-LVM/test.sh b/test/TEST-13-ENC-RAID-LVM/test.sh
+index e5d3939..b8fc7ff 100755
+--- a/test/TEST-13-ENC-RAID-LVM/test.sh
++++ b/test/TEST-13-ENC-RAID-LVM/test.sh
+@@ -17,7 +17,7 @@ test_run() {
+     $testdir/run-qemu \
+ 	-hda $TESTDIR/root.ext2 \
+ 	-hdb $TESTDIR/check-success.img \
+-	-m 256M -nographic \
++	-m 256M -smp 2 -nographic \
+ 	-net none -kernel /boot/vmlinuz-$KVERSION \
+ 	-append "root=/dev/dracut/root rw rd.auto rd.retry=20 console=ttyS0,115200n81 selinux=0 rd.debug rootwait $LUKSARGS $DEBUGFAIL" \
+ 	-initrd $TESTDIR/initramfs.testing
+@@ -30,7 +30,7 @@ test_run() {
+     $testdir/run-qemu \
+ 	-hda $TESTDIR/root.ext2 \
+ 	-hdb $TESTDIR/check-success.img \
+-	-m 256M -nographic \
++	-m 256M -smp 2 -nographic \
+ 	-net none -kernel /boot/vmlinuz-$KVERSION \
+ 	-append "root=/dev/dracut/root rw quiet rd.auto rd.retry=20 rd.info console=ttyS0,115200n81 selinux=0 rd.debug  $DEBUGFAIL" \
+ 	-initrd $TESTDIR/initramfs.testing
+@@ -43,7 +43,7 @@ test_run() {
+     $testdir/run-qemu \
+ 	-hda $TESTDIR/root.ext2 \
+ 	-hdb $TESTDIR/check-success.img \
+-	-m 256M -nographic \
++	-m 256M -smp 2 -nographic \
+ 	-net none -kernel /boot/vmlinuz-$KVERSION \
+ 	-append "root=/dev/dracut/root rw quiet rd.auto rd.retry=10 rd.info console=ttyS0,115200n81 selinux=0 rd.debug  $DEBUGFAIL rd.luks.uuid=failme" \
+ 	-initrd $TESTDIR/initramfs.testing
+@@ -98,9 +98,9 @@ test_setup() {
+ 	-f $TESTDIR/initramfs.makeroot $KVERSION || return 1
+     rm -rf $TESTDIR/overlay
+     # Invoke KVM and/or QEMU to actually create the target filesystem.
+-    $testdir/run-qemu -hda $TESTDIR/root.ext2 -m 256M -nographic -net none \
++    $testdir/run-qemu -hda $TESTDIR/root.ext2 -m 256M -smp 2 -nographic -net none \
+ 	-kernel "/boot/vmlinuz-$kernel" \
+-	-append "root=/dev/dracut/root rw rootfstype=ext2 quiet console=ttyS0,115200n81 selinux=0" \
++	-append "root=/dev/fakeroot rw rootfstype=ext2 quiet console=ttyS0,115200n81 selinux=0" \
+ 	-initrd $TESTDIR/initramfs.makeroot  || return 1
+     grep -m 1 -q dracut-root-block-created $TESTDIR/root.ext2 || return 1
+     cryptoUUIDS=$(grep --binary-files=text  -m 3 ID_FS_UUID $TESTDIR/root.ext2)
+diff --git a/test/TEST-15-BTRFSRAID/test.sh b/test/TEST-15-BTRFSRAID/test.sh
+index 981f919..8f013d5 100755
+--- a/test/TEST-15-BTRFSRAID/test.sh
++++ b/test/TEST-15-BTRFSRAID/test.sh
+@@ -9,9 +9,9 @@ test_run() {
+     DISKIMAGE=$TESTDIR/TEST-15-BTRFSRAID-root.img
+     $testdir/run-qemu \
+ 	-hda $DISKIMAGE \
+-	-m 256M -nographic \
++	-m 256M  -smp 2 -nographic \
+ 	-net none -kernel /boot/vmlinuz-$KVERSION \
+-	-append "root=LABEL=root rw quiet rd.retry=3 rd.info console=ttyS0,115200n81 selinux=0 rd.debug  $DEBUGFAIL" \
++	-append "root=LABEL=root rw rd.retry=3 rd.info console=ttyS0,115200n81 selinux=0 $DEBUGFAIL" \
+ 	-initrd $TESTDIR/initramfs.testing
+     grep -m 1 -q dracut-root-block-success $DISKIMAGE || return 1
+ }
+@@ -67,9 +67,9 @@ test_setup() {
+     # Invoke KVM and/or QEMU to actually create the target filesystem.
+     $testdir/run-qemu \
+ 	-hda $DISKIMAGE \
+-	-m 256M -nographic -net none \
++	-m 256M  -smp 2 -nographic -net none \
+ 	-kernel "/boot/vmlinuz-$kernel" \
+-	-append "root=LABEL=root rw quiet console=ttyS0,115200n81 selinux=0" \
++	-append "root=/dev/fakeroot rw quiet console=ttyS0,115200n81 selinux=0" \
+ 	-initrd $TESTDIR/initramfs.makeroot  || return 1
+ 
+     grep -m 1 -q dracut-root-block-created $DISKIMAGE || return 1
+@@ -79,7 +79,6 @@ test_setup() {
+ 	. $basedir/dracut-functions.sh
+ 	dracut_install poweroff shutdown
+ 	inst_hook emergency 000 ./hard-off.sh
+-	inst ./cryptroot-ask.sh /sbin/cryptroot-ask
+ 	inst_simple ./99-idesymlinks.rules /etc/udev/rules.d/99-idesymlinks.rules
+     )
+     sudo $basedir/dracut.sh -l -i $TESTDIR/overlay / \
+diff --git a/test/TEST-16-DMSQUASH/test.sh b/test/TEST-16-DMSQUASH/test.sh
+index 9c4f356..1f0854e 100755
+--- a/test/TEST-16-DMSQUASH/test.sh
++++ b/test/TEST-16-DMSQUASH/test.sh
+@@ -19,7 +19,7 @@ test_run() {
+ 	-boot order=d \
+ 	-cdrom $TESTDIR/livecd.iso \
+ 	-hda $TESTDIR/root.img \
+-	-m 256M -nographic \
++	-m 256M -smp 2 -nographic \
+ 	-net none -kernel /boot/vmlinuz-$KVERSION \
+ 	-append "root=live:CDLABEL=LiveCD live rw quiet rd.retry=3 rd.info console=ttyS0,115200n81 selinux=0 rd.debug $DEBUGFAIL" \
+ 	-initrd $TESTDIR/initramfs.testing
+diff --git a/test/TEST-20-NFS/test.sh b/test/TEST-20-NFS/test.sh
+index 5e32d7c..daf5bac 100755
+--- a/test/TEST-20-NFS/test.sh
++++ b/test/TEST-20-NFS/test.sh
+@@ -17,7 +17,7 @@ run_server() {
+     fsck -a $TESTDIR/server.ext3 || return 1
+     $testdir/run-qemu \
+         -hda $TESTDIR/server.ext3 \
+-        -m 256M \
++        -m 256M -smp 2 \
+         -nographic \
+         -net nic,macaddr=52:54:00:12:34:56,model=e1000 \
+         -net socket,listen=127.0.0.1:12320 \
+@@ -54,7 +54,7 @@ client_test() {
+ 
+     $testdir/run-qemu \
+         -hda $TESTDIR/client.img \
+-        -m 256M -nographic \
++        -m 256M -smp 2 -nographic \
+         -net nic,macaddr=$mac,model=e1000 \
+         -net socket,connect=127.0.0.1:12320 \
+         -kernel /boot/vmlinuz-$KVERSION \
+diff --git a/test/TEST-30-ISCSI/test.sh b/test/TEST-30-ISCSI/test.sh
+index c1febc9..f6893a8 100755
+--- a/test/TEST-30-ISCSI/test.sh
++++ b/test/TEST-30-ISCSI/test.sh
+@@ -16,7 +16,7 @@ run_server() {
+         -hdb $TESTDIR/root.ext3 \
+         -hdc $TESTDIR/iscsidisk2.img \
+         -hdd $TESTDIR/iscsidisk3.img \
+-        -m 256M -nographic \
++        -m 256M  -smp 2 -nographic \
+         -serial $SERIAL \
+         -net nic,macaddr=52:54:00:12:34:56,model=e1000 \
+         -net socket,listen=127.0.0.1:12330 \
+@@ -41,7 +41,7 @@ run_client() {
+ 
+     $testdir/run-qemu \
+         -hda $TESTDIR/client.img \
+-        -m 256M -nographic \
++        -m 256M -smp 2 -nographic \
+         -net nic,macaddr=52:54:00:12:34:00,model=e1000 \
+         -net socket,connect=127.0.0.1:12330 \
+         -kernel /boot/vmlinuz-$KVERSION \
+@@ -147,9 +147,9 @@ test_setup() {
+         -hdb $TESTDIR/client.img \
+         -hdc $TESTDIR/iscsidisk2.img \
+         -hdd $TESTDIR/iscsidisk3.img \
+-        -m 256M -nographic -net none \
++        -smp 2 -m 256M -nographic -net none \
+         -kernel "/boot/vmlinuz-$kernel" \
+-        -append "root=/dev/dracut/root rw rootfstype=ext3 quiet console=ttyS0,115200n81 selinux=0" \
++        -append "root=/dev/fakeroot rw rootfstype=ext3 quiet console=ttyS0,115200n81 selinux=0" \
+         -initrd $TESTDIR/initramfs.makeroot  || return 1
+     grep -m 1 -q dracut-root-block-created $TESTDIR/client.img || return 1
+     rm $TESTDIR/client.img
+diff --git a/test/TEST-40-NBD/create-root.sh b/test/TEST-40-NBD/create-root.sh
+index 9c1c09e..62188d7 100755
+--- a/test/TEST-40-NBD/create-root.sh
++++ b/test/TEST-40-NBD/create-root.sh
+@@ -13,7 +13,7 @@ lvm pvcreate -ff  -y /dev/mapper/dracut_crypt_test && \
+ lvm vgcreate dracut /dev/mapper/dracut_crypt_test && \
+ lvm lvcreate -l 100%FREE -n root dracut && \
+ lvm vgchange -ay && \
+-mke2fs -j /dev/dracut/root && \
++mke2fs -L dracut -j /dev/dracut/root && \
+ /sbin/tune2fs -e continue /dev/dracut/root && \
+ mkdir -p /sysroot && \
+ mount /dev/dracut/root /sysroot && \
+diff --git a/test/TEST-40-NBD/test.sh b/test/TEST-40-NBD/test.sh
+index dcff8f7..dae65f2 100755
+--- a/test/TEST-40-NBD/test.sh
++++ b/test/TEST-40-NBD/test.sh
+@@ -18,7 +18,7 @@ run_server() {
+         -hda $TESTDIR/server.ext2 \
+         -hdb $TESTDIR/nbd.ext2 \
+         -hdc $TESTDIR/encrypted.ext2 \
+-        -m 256M -nographic \
++        -m 256M -smp 2 -nographic \
+         -net nic,macaddr=52:54:00:12:34:56,model=e1000 \
+         -net socket,listen=127.0.0.1:12340 \
+         -serial $SERIAL \
+@@ -55,7 +55,7 @@ client_test() {
+ 
+     $testdir/run-qemu \
+         -hda $TESTDIR/flag.img \
+-        -m 512M \
++        -m 512M -smp 2 \
+         -nographic \
+         -net nic,macaddr=$mac,model=e1000 \
+         -net socket,connect=127.0.0.1:12340 \
+@@ -166,16 +166,16 @@ client_run() {
+ 
+     . $TESTDIR/luks.uuid
+ 
+-    client_test "NBD root=/dev/dracut/root netroot=nbd:IP:port" \
++    client_test "NBD root=LABEL=dracut netroot=nbd:IP:port" \
+         52:54:00:12:34:00 \
+-        "root=/dev/dracut/root rd.luks.uuid=$ID_FS_UUID rd.lv.vg=dracut netroot=nbd:192.168.50.1:2001" || return 1
++        "root=LABEL=dracut rd.luks.uuid=$ID_FS_UUID rd.lv.vg=dracut netroot=nbd:192.168.50.1:2001" || return 1
+ 
+     # XXX This should be ext2,errors=panic but that doesn't currently
+     # XXX work when you have a real root= line in addition to netroot=
+     # XXX How we should work here needs clarification
+-    client_test "NBD root=/dev/dracut/root netroot=dhcp (w/ fstype and opts)" \
++    client_test "NBD root=LABEL=dracut netroot=dhcp (w/ fstype and opts)" \
+         52:54:00:12:34:05 \
+-        "root=/dev/dracut/root  rd.luks.uuid=$ID_FS_UUID rd.lv.vg=dracut netroot=dhcp" || return 1
++        "root=LABEL=dracut rd.luks.uuid=$ID_FS_UUID rd.lv.vg=dracut netroot=dhcp" || return 1
+ 
+     if [[ -s server.pid ]]; then
+         sudo kill -TERM $(cat $TESTDIR/server.pid)
+@@ -213,6 +213,7 @@ make_encrypted_root() {
+         export initdir=$TESTDIR/overlay
+         . $basedir/dracut-functions.sh
+         dracut_install mke2fs poweroff cp umount tune2fs
++        inst_hook emergency 000 ./hard-off.sh
+         inst_hook initqueue 01 ./create-root.sh
+         inst_hook initqueue/finished 01 ./finished-false.sh
+         inst_simple ./99-idesymlinks.rules /etc/udev/rules.d/99-idesymlinks.rules
+@@ -231,10 +232,10 @@ make_encrypted_root() {
+     $testdir/run-qemu \
+         -hda $TESTDIR/flag.img \
+         -hdb $TESTDIR/encrypted.ext2 \
+-        -m 256M \
++        -m 256M -smp 2\
+         -nographic -net none \
+         -kernel "/boot/vmlinuz-$kernel" \
+-        -append "root=/dev/dracut/root rw quiet console=ttyS0,115200n81 selinux=0" \
++        -append "root=/dev/fakeroot rw quiet console=ttyS0,115200n81 selinux=0" \
+         -initrd $TESTDIR/initramfs.makeroot  || return 1
+     grep -m 1 -q dracut-root-block-created $TESTDIR/flag.img || return 1
+     grep -a -m 1 ID_FS_UUID $TESTDIR/flag.img > $TESTDIR/luks.uuid
+diff --git a/test/TEST-50-MULTINIC/test.sh b/test/TEST-50-MULTINIC/test.sh
+index 65d76b5..17c8cc5 100755
+--- a/test/TEST-50-MULTINIC/test.sh
++++ b/test/TEST-50-MULTINIC/test.sh
+@@ -17,7 +17,7 @@ run_server() {
+     fsck -a $TESTDIR/server.ext3 || return 1
+     $testdir/run-qemu \
+         -hda $TESTDIR/server.ext3 \
+-        -m 512M \
++        -m 512M -smp 2 \
+         -nographic \
+         -netdev socket,mcast=230.0.0.1:12320,id=net0 \
+         -net nic,macaddr=52:54:01:12:34:56,model=e1000,netdev=net0 \
+@@ -52,7 +52,7 @@ client_test() {
+         return 1
+     fi
+ 
+-    $testdir/run-qemu -hda $TESTDIR/client.img -m 512M -nographic \
++    $testdir/run-qemu -hda $TESTDIR/client.img -m 512M -smp 2 -nographic \
+         -netdev socket,mcast=230.0.0.1:12320,id=net0 \
+         -net nic,netdev=net0,macaddr=52:54:00:12:34:$mac1,model=e1000 \
+         -netdev socket,mcast=230.0.0.1:12320,id=net1 \

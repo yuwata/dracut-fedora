@@ -1,0 +1,26 @@
+From 87dc81a1f69f20b9015b47d0935fa3b99dc54e5c Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 14 Mar 2013 17:52:44 +0100
+Subject: [PATCH] dracut-install: handle more ldd errors
+
+---
+ install/dracut-install.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/install/dracut-install.c b/install/dracut-install.c
+index 8aa0e2e..5040dea 100644
+--- a/install/dracut-install.c
++++ b/install/dracut-install.c
+@@ -294,6 +294,12 @@ static int resolve_deps(const char *src)
+                 if (strstr(buf, "not regular file"))
+                         break;
+ 
++                if (strstr(buf, "cannot read header"))
++                        break;
++
++                if (strstr(buf, destrootdir))
++                        break;
++
+                 p = strstr(buf, "/");
+                 if (p) {
+                         int r;

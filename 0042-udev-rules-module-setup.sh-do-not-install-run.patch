@@ -1,0 +1,23 @@
+From c853dc72e90b998ca2e1e3133f7e97697999be87 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 14 Mar 2013 17:59:07 +0100
+Subject: [PATCH] udev-rules/module-setup.sh: do not install /run/*
+
+---
+ modules.d/95udev-rules/module-setup.sh | 3 ---
+ 1 file changed, 3 deletions(-)
+
+diff --git a/modules.d/95udev-rules/module-setup.sh b/modules.d/95udev-rules/module-setup.sh
+index 1eb8642..9459646 100755
+--- a/modules.d/95udev-rules/module-setup.sh
++++ b/modules.d/95udev-rules/module-setup.sh
+@@ -36,9 +36,6 @@ install() {
+ 
+     prepare_udev_rules 59-persistent-storage.rules 61-persistent-storage.rules
+ 
+-    inst_dir /run/udev
+-    inst_dir /run/udev/rules.d
+-
+     {
+         for i in cdrom tape dialout floppy; do
+             if ! egrep -q "^$i:" "$initdir/etc/group" 2>/dev/null; then
