@@ -1,0 +1,24 @@
+From ee2321c91e52c4de2a3a9e41c0469cf76447db41 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 15 Mar 2013 16:54:38 +0100
+Subject: [PATCH] dracut.conf.5.asc: remove duplicated install_items
+
+---
+ dracut.conf.5.asc | 4 ----
+ 1 file changed, 4 deletions(-)
+
+diff --git a/dracut.conf.5.asc b/dracut.conf.5.asc
+index dbaa2e5..df876cc 100644
+--- a/dracut.conf.5.asc
++++ b/dracut.conf.5.asc
+@@ -51,10 +51,6 @@ Configuration files must have the extension .conf; other extensions are ignored.
+     Specify a space-separated list of kernel modules not to add to the
+     initramfs. The kernel modules have to be specified without the ".ko" suffix.
+ 
+-*install_items+=*" __<kernel modules>__ "::
+-    Specify a space-separated list of files, which are added to the initramfs
+-    image.
+-
+ *filesystems+=*" __<filesystem names>__ "::
+     Specify a space-separated list of kernel filesystem modules to exclusively
+     include in the generic initramfs.

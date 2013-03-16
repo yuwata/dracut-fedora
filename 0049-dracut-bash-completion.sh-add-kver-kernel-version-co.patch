@@ -1,0 +1,24 @@
+From fb05f9876ac18b64c8b9e07f9eb2e451e818b46e Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 15 Mar 2013 10:42:18 +0100
+Subject: [PATCH] dracut-bash-completion.sh: add --kver kernel version
+ completion
+
+---
+ dracut-bash-completion.sh | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/dracut-bash-completion.sh b/dracut-bash-completion.sh
+index 38e2ebd..322e630 100644
+--- a/dracut-bash-completion.sh
++++ b/dracut-bash-completion.sh
+@@ -51,6 +51,9 @@ _dracut() {
+                         -a|-m|-o|--add|--modules|--omit)
+                                 comps=$(dracut --list-modules 2>/dev/null)
+                         ;;
++                        --kver)
++                                comps=$(cd /lib/modules; echo *)
++                        ;;
+                         *)
+                                 return 0
+                         ;;

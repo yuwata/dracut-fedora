@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 026
-Release: 48.git20130315%{?dist}
+Release: 54.git20130316%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -76,6 +76,12 @@ Patch44: 0044-systemd-do-not-use-systemd-version-until-fixed.patch
 Patch45: 0045-fix-typo-in-dracut.conf.5.asc.patch
 Patch46: 0046-fixed-testsuite.patch
 Patch47: 0047-dracut.spec-bump-systemd-version-requirement.patch
+Patch48: 0048-sosreport.sh-use-o-short-monotonic-for-the-journal-o.patch
+Patch49: 0049-dracut-bash-completion.sh-add-kver-kernel-version-co.patch
+Patch50: 0050-TEST-16-DMSQUASH-use-current-releasever.patch
+Patch51: 0051-dracut.conf.5.asc-remove-duplicated-install_items.patch
+Patch52: 0052-dmsquash-live-force-load-squashfs-kernel-module.patch
+Patch53: 0053-sosreport-mkdir-run-initramfs-if-it-does-not-exist-y.patch
 
 
 BuildRequires: dash bash git
@@ -465,6 +471,12 @@ rm -rf $RPM_BUILD_ROOT
 %{dracutlibdir}/dracut.conf.d/02-norescue.conf
 
 %changelog
+* Sat Mar 16 2013 Harald Hoyer <harald@redhat.com> 026-54.git20130316
+- fix for squashfs
+Resolves: rhbz#922248
+- documentation fixes
+- sosreport, mkdir /run/initramfs
+
 * Fri Mar 15 2013 Harald Hoyer <harald@redhat.com> 026-48.git20130315
 - use new initrd.target from systemd
 - fixed rescue generation

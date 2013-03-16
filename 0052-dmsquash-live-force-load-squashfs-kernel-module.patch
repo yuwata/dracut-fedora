@@ -1,0 +1,27 @@
+From 85804a9197790d461dfa1458883f84a9da9ae589 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Sat, 16 Mar 2013 10:31:37 +0100
+Subject: [PATCH] dmsquash-live: force load squashfs kernel module
+
+https://bugzilla.redhat.com/show_bug.cgi?id=922248
+---
+ modules.d/90dmsquash-live/dmsquash-live-root.sh | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/modules.d/90dmsquash-live/dmsquash-live-root.sh b/modules.d/90dmsquash-live/dmsquash-live-root.sh
+index 0b1ed20..a79b0d9 100755
+--- a/modules.d/90dmsquash-live/dmsquash-live-root.sh
++++ b/modules.d/90dmsquash-live/dmsquash-live-root.sh
+@@ -49,9 +49,12 @@ ln -s $livedev /run/initramfs/livedev
+ 
+ # determine filesystem type for a filesystem image
+ det_img_fs() {
++    udevadm settle
+     blkid -s TYPE -u noraid -o value "$1"
+ }
+ 
++modprobe squashfs
++
+ for arg in $CMDLINE; do case $arg in ro|rw) liverw=$arg ;; esac; done
+ # mount the backing of the live image first
+ mkdir -m 0755 -p /run/initramfs/live
