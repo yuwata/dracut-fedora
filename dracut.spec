@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 026
-Release: 55.git20130318%{?dist}
+Release: 56.git20130318%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -83,6 +83,7 @@ Patch51: 0051-dracut.conf.5.asc-remove-duplicated-install_items.patch
 Patch52: 0052-dmsquash-live-force-load-squashfs-kernel-module.patch
 Patch53: 0053-sosreport-mkdir-run-initramfs-if-it-does-not-exist-y.patch
 Patch54: 0054-kernel-modules-module-setup.sh-install-all-host-file.patch
+Patch55: 0055-kernel-modules-module-setup.sh-don-t-fail-hard-on-a-.patch
 
 
 BuildRequires: dash bash git
@@ -472,6 +473,10 @@ rm -rf $RPM_BUILD_ROOT
 %{dracutlibdir}/dracut.conf.d/02-norescue.conf
 
 %changelog
+* Mon Mar 18 2013 Harald Hoyer <harald@redhat.com> 026-56.git20130318
+- don't fail hard on kernel modules install
+Resolves: rhbz#922565
+
 * Mon Mar 18 2013 Harald Hoyer <harald@redhat.com> 026-55.git20130318
 - install all host filesystem drivers
 Resolves: rhbz#922565
