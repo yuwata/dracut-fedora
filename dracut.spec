@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 026
-Release: 56.git20130318%{?dist}
+Release: 62.git20130319%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -84,6 +84,12 @@ Patch52: 0052-dmsquash-live-force-load-squashfs-kernel-module.patch
 Patch53: 0053-sosreport-mkdir-run-initramfs-if-it-does-not-exist-y.patch
 Patch54: 0054-kernel-modules-module-setup.sh-install-all-host-file.patch
 Patch55: 0055-kernel-modules-module-setup.sh-don-t-fail-hard-on-a-.patch
+Patch56: 0056-Makefile-use-D_FILE_OFFSET_BITS-64-to-build-dracut-i.patch
+Patch57: 0057-drm-module-setup.sh-redirect-grep-to-dev-null.patch
+Patch58: 0058-systemd-add-more-ordering.patch
+Patch59: 0059-add-dracut.bootup.7-man-page.patch
+Patch60: 0060-fs-lib-fs-lib.sh-write_fs_tab-start-initrd-root-fs.t.patch
+Patch61: 0061-nbd-nbdroot.sh-fix-root-blockdev-case.patch
 
 
 BuildRequires: dash bash git
@@ -360,6 +366,7 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 %{_mandir}/man7/dracut.kernel.7*
 %{_mandir}/man7/dracut.cmdline.7*
+%{_mandir}/man7/dracut.bootup.7*
 %{_mandir}/man5/dracut.conf.5*
 %if %{defined _unitdir}
 %{dracutlibdir}/modules.d/00systemd-bootchart
@@ -473,6 +480,10 @@ rm -rf $RPM_BUILD_ROOT
 %{dracutlibdir}/dracut.conf.d/02-norescue.conf
 
 %changelog
+* Tue Mar 19 2013 Harald Hoyer <harald@redhat.com> 026-62.git20130319
+- fix dracut service ordering
+Resolves: rhbz#922991
+
 * Mon Mar 18 2013 Harald Hoyer <harald@redhat.com> 026-56.git20130318
 - don't fail hard on kernel modules install
 Resolves: rhbz#922565

@@ -1,0 +1,21 @@
+From db43f56d94bcb87c92b688e708988ef39603cdc2 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Tue, 19 Mar 2013 12:23:20 +0100
+Subject: [PATCH] fs-lib/fs-lib.sh:write_fs_tab() start initrd-root-fs.target
+
+---
+ modules.d/99fs-lib/fs-lib.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/modules.d/99fs-lib/fs-lib.sh b/modules.d/99fs-lib/fs-lib.sh
+index 6936bbb..3fa8772 100755
+--- a/modules.d/99fs-lib/fs-lib.sh
++++ b/modules.d/99fs-lib/fs-lib.sh
+@@ -245,6 +245,6 @@ write_fs_tab() {
+ 
+     if type systemctl >/dev/null 2>/dev/null; then
+         systemctl daemon-reload
+-        systemctl --no-block start initrd-fs.target
++        systemctl --no-block start initrd-root-fs.target
+     fi
+ }

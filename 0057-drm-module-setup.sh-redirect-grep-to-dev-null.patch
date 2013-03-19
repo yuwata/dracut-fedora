@@ -1,0 +1,23 @@
+From d59732004dac2d173e4a5976184813517d043b50 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 18 Mar 2013 14:17:19 +0100
+Subject: [PATCH] drm/module-setup.sh: redirect grep to /dev/null
+
+on some architectures, no pci devices exist
+---
+ modules.d/50drm/module-setup.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/modules.d/50drm/module-setup.sh b/modules.d/50drm/module-setup.sh
+index e471c11..bf33c5b 100644
+--- a/modules.d/50drm/module-setup.sh
++++ b/modules.d/50drm/module-setup.sh
+@@ -54,7 +54,7 @@ installkernel() {
+         # as we could e.g. be in the installer; nokmsboot boot parameter will disable
+         # loading of the driver if needed
+         if [[ $hostonly ]] && modinfo -F alias $_modname | sed -e 's,\?,\.,g' -e 's,\*,\.\*,g' \
+-            | grep -qxf - /sys/bus/pci/devices/*/modalias; then
++            | grep -qxf - /sys/bus/pci/devices/*/modalias 2>/dev/null; then
+             hostonly='' instmods $_modname
+             continue
+         fi

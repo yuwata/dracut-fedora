@@ -1,0 +1,22 @@
+From a3a8f58d735040f4f800510bf45e6125c98dbae5 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 18 Mar 2013 10:58:25 +0100
+Subject: [PATCH] Makefile: use  -D_FILE_OFFSET_BITS=64 to build dracut-install
+
+---
+ Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile b/Makefile
+index 644d17d..ce40647 100644
+--- a/Makefile
++++ b/Makefile
+@@ -11,7 +11,7 @@ sysconfdir ?= ${prefix}/etc
+ bindir ?= ${prefix}/bin
+ mandir ?= ${prefix}/share/man
+ CFLAGS ?= -O2 -g -Wall
+-CFLAGS += -std=gnu99
++CFLAGS += -std=gnu99  -D_FILE_OFFSET_BITS=64
+ bashcompletiondir ?= ${datadir}/bash-completion/completions
+ 
+ man1pages = lsinitrd.1
