@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 026
-Release: 62.git20130319%{?dist}
+Release: 72.git20130320%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -90,12 +90,24 @@ Patch58: 0058-systemd-add-more-ordering.patch
 Patch59: 0059-add-dracut.bootup.7-man-page.patch
 Patch60: 0060-fs-lib-fs-lib.sh-write_fs_tab-start-initrd-root-fs.t.patch
 Patch61: 0061-nbd-nbdroot.sh-fix-root-blockdev-case.patch
+Patch62: 0062-network-netroot.sh-do-not-unset-root.patch
+Patch63: 0063-TEST-40-NBD-test.sh-kill_server-after-test_run.patch
+Patch64: 0064-51-dracut-rescue-postinst.sh-add-extra-checks.patch
+Patch65: 0065-51-dracut-rescue-postinst.sh-Rename-image-and-grub-e.patch
+Patch66: 0066-51-dracut-rescue-postinst.sh-51-dracut-rescue.instal.patch
+Patch67: 0067-dracut.sh-remove-temporary-cpio-output-in-trap.patch
+Patch68: 0068-dracut.spec-use-pkg-config-for-bashcompletiondir.patch
+Patch69: 0069-dracut.spec-use-configure.patch
+Patch70: 0070-dracut.sh-turn-off-host-only-mode-if-essential-syste.patch
+Patch71: 0071-dracut.sh-turn-off-hostonly-mode-if-udev-database-is.patch
 
 
 BuildRequires: dash bash git
 
 %if 0%{?fedora} || 0%{?rhel}
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+BuildRequires: bash-completion
+BuildRequires: pkgconfig
 %endif
 %if 0%{?suse_version}
 BuildRoot: %{_tmppath}/%{name}-%{version}-build
@@ -254,19 +266,17 @@ git am -p1 %{patches}
 %endif
 
 %build
-make all
+%configure --systemdsystemunitdir=%{_unitdir} --bashcompletiondir=$(pkg-config --variable=completionsdir bash-completion) --libdir=%{_prefix}/lib
+
+make %{?_smp_mflags}
 
 %install
 %if 0%{?fedora} || 0%{?rhel}
 rm -rf $RPM_BUILD_ROOT
 %endif
-make install DESTDIR=$RPM_BUILD_ROOT \
-     libdir=%{_prefix}/lib \
-     bindir=%{_bindir} \
-%if %{defined _unitdir}
-     systemdsystemunitdir=%{_unitdir} \
-%endif
-     sysconfdir=/etc mandir=%{_mandir}
+make %{?_smp_mflags} install \
+     DESTDIR=$RPM_BUILD_ROOT \
+     libdir=%{_prefix}/lib
 
 echo "DRACUT_VERSION=%{version}-%{release}" > $RPM_BUILD_ROOT/%{dracutlibdir}/dracut-version.sh
 
@@ -480,6 +490,12 @@ rm -rf $RPM_BUILD_ROOT
 %{dracutlibdir}/dracut.conf.d/02-norescue.conf
 
 %changelog
+* Wed Mar 20 2013 Harald Hoyer <harald@redhat.com> 026-72.git20130320
+- fix rescue image naming
+Resolves: rhbz#923439
+- turn off host-only mode if essential system filesystems not mounted
+- turn off host-only mode if udev database is not accessible
+
 * Tue Mar 19 2013 Harald Hoyer <harald@redhat.com> 026-62.git20130319
 - fix dracut service ordering
 Resolves: rhbz#922991

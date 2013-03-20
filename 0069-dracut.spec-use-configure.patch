@@ -1,0 +1,99 @@
+From 1d4b3375431d2d19d511aa5784f2c1ed1e6bbb9e Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 20 Mar 2013 07:16:43 +0100
+Subject: [PATCH] dracut.spec: use configure
+
+---
+ configure   | 31 ++++++++++++++++++++++++++++---
+ dracut.spec | 15 ++++++---------
+ 2 files changed, 34 insertions(+), 12 deletions(-)
+
+diff --git a/configure b/configure
+index 409256b..19b5e1f 100755
+--- a/configure
++++ b/configure
+@@ -25,6 +25,7 @@ read_arg() {
+         # return 1 to indicate they should do it instead.
+         return 1
+     fi
++    return 0
+ }
+ 
+ while (($# > 0)); do
+@@ -36,18 +37,42 @@ while (($# > 0)); do
+         --sbindir) read_arg sbindir "$@" || shift;;
+         --mandir) read_arg mandir "$@" || shift;;
+         --disable-documentation) enable_documentation=no;;
++        --program-prefix) read_arg programprefix "$@" || shift;;
++        --exec-prefix) read_arg execprefix "$@" || shift;;
++        --bindir) read_arg bindir "$@" || shift;;
++        --includedir) read_arg includedir "$@" || shift;;
++        --libexecdir) read_arg libexecdir "$@" || shift;;
++        --localstatedir) read_arg localstatedir "$@" || shift;;
++        --sharedstatedir) read_arg sharedstatedir "$@" || shift;;
++        --infodir) read_arg infodir "$@" || shift;;
++        --systemdsystemunitdir) read_arg systemdsystemunitdir "$@" || shift;;
++        --bashcompletiondir) read_arg bashcompletiondir "$@" || shift;;
+         *) echo "Ignoring unknown option '$1'";;
+     esac
+     shift
+ done
+ 
+-cat > Makefile.inc.tmp <<EOF
++cat > Makefile.inc.$$ <<EOF
+ prefix ?= ${prefix}
+ libdir ?= ${libdir:-${prefix}/lib}
+ datadir ?= ${datadir:-${prefix}/share}
+ sysconfdir ?= ${sysconfdir:-${prefix}/etc}
+ sbindir ?= ${sbindir:-${prefix}/sbin}
+ mandir ?= ${mandir:-${prefix}/share/man}
+-enable_documentation ?= ${enable_documentation}
++enable_documentation ?= ${enable_documentation:-yes}
++bindir ?= ${bindir:-${prefix}/bin}
+ EOF
+-mv Makefile.inc.tmp Makefile.inc
++
++{
++    [[ $programprefix ]] && echo "programprefix ?= ${programprefix}"
++    [[ $execprefix ]] && echo "execprefix ?= ${execprefix}"
++    [[ $includedir ]] && echo "includedir ?= ${includedir}"
++    [[ $libexecdir ]] && echo "libexecdir ?= ${libexecdir}"
++    [[ $localstatedir ]] && echo "localstatedir ?= ${localstatedir}"
++    [[ $sharedstatedir ]] && echo "sharedstatedir ?= ${sharedstatedir}"
++    [[ $infodir ]] && echo "infodir ?= ${infodir}"
++    [[ $systemdsystemunitdir ]] && echo "systemdsystemunitdir ?= ${systemdsystemunitdir}"
++    [[ $bashcompletiondir ]] && echo "bashcompletiondir ?= ${bashcompletiondir}"
++} >> Makefile.inc.$$
++
++mv Makefile.inc.$$ Makefile.inc
+diff --git a/dracut.spec b/dracut.spec
+index cd61770..93d497e 100644
+--- a/dracut.spec
++++ b/dracut.spec
+@@ -194,20 +194,17 @@ git am -p1 %{patches}
+ %endif
+ 
+ %build
+-make all
++%configure --systemdsystemunitdir=%{_unitdir} --bashcompletiondir=$(pkg-config --variable=completionsdir bash-completion) --libdir=%{_prefix}/lib
++
++make %{?_smp_mflags}
+ 
+ %install
+ %if 0%{?fedora} || 0%{?rhel}
+ rm -rf $RPM_BUILD_ROOT
+ %endif
+-make install DESTDIR=$RPM_BUILD_ROOT \
+-     libdir=%{_prefix}/lib \
+-     bindir=%{_bindir} \
+-%if %{defined _unitdir}
+-     systemdsystemunitdir=%{_unitdir} \
+-%endif
+-     sysconfdir=/etc mandir=%{_mandir} \
+-     bashcompletiondir=$(pkg-config --variable=completionsdir bash-completion)
++make %{?_smp_mflags} install \
++     DESTDIR=$RPM_BUILD_ROOT \
++     libdir=%{_prefix}/lib
+ 
+ echo "DRACUT_VERSION=%{version}-%{release}" > $RPM_BUILD_ROOT/%{dracutlibdir}/dracut-version.sh
+ 
