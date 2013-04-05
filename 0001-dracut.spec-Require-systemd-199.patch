@@ -1,22 +1,22 @@
-From 7e9fc37db84636de2f704d165ff0ffdc6e964530 Mon Sep 17 00:00:00 2001
+From d50cf62d62069c50eb1afed9d377aa2cc8c967ef Mon Sep 17 00:00:00 2001
 From: Harald Hoyer <harald@redhat.com>
-Date: Fri, 15 Mar 2013 07:11:17 +0100
-Subject: [PATCH] dracut.spec: bump systemd version requirement
+Date: Tue, 26 Mar 2013 17:04:43 +0100
+Subject: [PATCH] dracut.spec: Require systemd >= 199
 
 ---
  dracut.spec | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/dracut.spec b/dracut.spec
-index 4870390..ac4a786 100644
+index af417a4..cb605c6 100644
 --- a/dracut.spec
 +++ b/dracut.spec
-@@ -86,7 +86,7 @@ Requires: kbd kbd-misc
+@@ -92,7 +92,7 @@ Requires: kbd kbd-misc
  
  %if 0%{?fedora} || 0%{?rhel} > 6
  Requires: util-linux >= 2.21
--Requires: systemd >= 198-4
-+Requires: systemd >= 198-5
+-Requires: systemd >= 198-5
++Requires: systemd >= 199
  Conflicts: grubby < 8.23
  %else
  Requires: udev > 166
