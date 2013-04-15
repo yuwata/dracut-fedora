@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 027
-Release: 19.git20130410%{?dist}
+Release: 26.git20130415%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -47,6 +47,13 @@ Patch15: 0015-Wait-for-logical-interface-to-be-up.patch
 Patch16: 0016-Let-user-specify-the-action-after-fail.patch
 Patch17: 0017-ifup.sh-Add-support-for-bridge-over-a-vlan-tagged-in.patch
 Patch18: 0018-crypt-module-setup.sh-also-handle-UUID-while-filteri.patch
+Patch19: 0019-Do-not-call-plymouth-with-full-path.patch
+Patch20: 0020-plymouth-plymouth-pretrigger.sh-fixup-of-ca2c6936.patch
+Patch21: 0021-AUTHORS-update.patch
+Patch22: 0022-Makefile-git2spec.pl-use-git-describe.patch
+Patch23: 0023-systemd-include-the-systemd-random-seed-load.service.patch
+Patch24: 0024-url-lib-module-setup.sh-install-ca-bundle.crt-by-lib.patch
+Patch25: 0025-dmsquash-live-add-support-for-iso-scan-filename-kern.patch
 
 
 BuildRequires: dash bash git
@@ -456,6 +463,13 @@ rm -rf $RPM_BUILD_ROOT
 %{dracutlibdir}/dracut.conf.d/02-norescue.conf
 
 %changelog
+* Mon Apr 15 2013 Harald Hoyer <harald@redhat.com> 027-26.git20130415
+- do not call plymouth with full path
+- include systemd-random-seed-load.service
+- fix ca-bundle.crt for ssl curl
+Resolves: rhbz#950770
+- add support for "iso-scan/filename" kernel parameter
+
 * Wed Apr 10 2013 Harald Hoyer <harald@redhat.com> 027-19.git20130410
 - also handle UUID= entries in crypttab in host-only mode
 Resolves:rhbz#919752
