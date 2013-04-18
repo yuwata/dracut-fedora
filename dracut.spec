@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 027
-Release: 26.git20130415%{?dist}
+Release: 36.git20130418%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -54,6 +54,16 @@ Patch22: 0022-Makefile-git2spec.pl-use-git-describe.patch
 Patch23: 0023-systemd-include-the-systemd-random-seed-load.service.patch
 Patch24: 0024-url-lib-module-setup.sh-install-ca-bundle.crt-by-lib.patch
 Patch25: 0025-dmsquash-live-add-support-for-iso-scan-filename-kern.patch
+Patch26: 0026-Makefile-fixup-tarball-Makefile.patch
+Patch27: 0027-lsinitrd-switch-to-getopt-and-add-f-and-k-parameter.patch
+Patch28: 0028-lsinitrd-add-bash-completion.patch
+Patch29: 0029-dracut-bash-completion.sh-file-filename-completion.patch
+Patch30: 0030-lsinitrd-drop-use-of-file.patch
+Patch31: 0031-lsinitrd.sh-do-not-output-filename-for-a-single-file.patch
+Patch32: 0032-.gitignore-ignore-more-files.patch
+Patch33: 0033-Makefile-remove-dracut-version.sh-on-clean.patch
+Patch34: 0034-base-dracut-lib.sh-do-not-setdebug-if-not-in-initram.patch
+Patch35: 0035-dracut-install-error-out-if-ldd-reports-no-execution.patch
 
 
 BuildRequires: dash bash git
@@ -110,11 +120,9 @@ Requires: findutils
 Requires: grep
 Requires: hardlink
 Requires: gzip xz
-Requires: module-init-tools >= 3.7-9
+Requires: kmod
 Requires: sed
-Requires: file
 Requires: kpartx
-Requires: kbd kbd-misc
 
 %if 0%{?fedora} || 0%{?rhel} > 6
 Requires: util-linux >= 2.21
@@ -308,6 +316,7 @@ rm -rf $RPM_BUILD_ROOT
 # compat symlink
 /sbin/dracut
 %{_datadir}/bash-completion/completions/dracut
+%{_datadir}/bash-completion/completions/lsinitrd
 %if 0%{?fedora} > 12 || 0%{?rhel} >= 6 || 0%{?suse_version} > 9999
 %{_bindir}/mkinitrd
 %{_bindir}/lsinitrd
@@ -463,6 +472,15 @@ rm -rf $RPM_BUILD_ROOT
 %{dracutlibdir}/dracut.conf.d/02-norescue.conf
 
 %changelog
+* Thu Apr 18 2013 Harald Hoyer <harald@redhat.com> 027-36.git20130418
+- fix initramfs creation on noexec tmpdir
+Resolves: rhbz#953426
+- more options for lsinitrd
+- bash completion for lsinitrd
+- do not output debug information on initramfs creation, if rd.debug is
+  on the kernel command line
+- drop requirement on 'file', lsinitrd can find the magic on its own
+
 * Mon Apr 15 2013 Harald Hoyer <harald@redhat.com> 027-26.git20130415
 - do not call plymouth with full path
 - include systemd-random-seed-load.service
