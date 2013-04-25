@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 027
-Release: 36.git20130418%{?dist}
+Release: 39.git20130425%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -64,6 +64,9 @@ Patch32: 0032-.gitignore-ignore-more-files.patch
 Patch33: 0033-Makefile-remove-dracut-version.sh-on-clean.patch
 Patch34: 0034-base-dracut-lib.sh-do-not-setdebug-if-not-in-initram.patch
 Patch35: 0035-dracut-install-error-out-if-ldd-reports-no-execution.patch
+Patch36: 0036-shutdown-redirect-output-to-dev-console-only-if-it-e.patch
+Patch37: 0037-fixup-3be5d63c2f.patch
+Patch38: 0038-fixed-fips-mode.patch
 
 
 BuildRequires: dash bash git
@@ -472,6 +475,11 @@ rm -rf $RPM_BUILD_ROOT
 %{dracutlibdir}/dracut.conf.d/02-norescue.conf
 
 %changelog
+* Thu Apr 25 2013 Harald Hoyer <harald@redhat.com> 027-39.git20130425
+- fix shutdown, if /dev/console is not writeable
+- fixed fips mode
+Resolves: rhbz#956521
+
 * Thu Apr 18 2013 Harald Hoyer <harald@redhat.com> 027-36.git20130418
 - fix initramfs creation on noexec tmpdir
 Resolves: rhbz#953426
