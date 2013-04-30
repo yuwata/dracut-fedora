@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 027
-Release: 39.git20130425%{?dist}
+Release: 45.git20130430%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -67,6 +67,12 @@ Patch35: 0035-dracut-install-error-out-if-ldd-reports-no-execution.patch
 Patch36: 0036-shutdown-redirect-output-to-dev-console-only-if-it-e.patch
 Patch37: 0037-fixup-3be5d63c2f.patch
 Patch38: 0038-fixed-fips-mode.patch
+Patch39: 0039-dracut.sh-do-not-preunlink-for-fips-mode.patch
+Patch40: 0040-fips-do-not-fail-immediatly-after-loading-the-crypto.patch
+Patch41: 0041-dracut-install-make-use-of-_cleanup_-macros.patch
+Patch42: 0042-_emergency_shell-Show-current-working-directory-corr.patch
+Patch43: 0043-test-use-grep-option-F-and-install-etc-os-release.patch
+Patch44: 0044-zfcp-match-udev-rule-against-KERNEL-zfcp.patch
 
 
 BuildRequires: dash bash git
@@ -475,6 +481,10 @@ rm -rf $RPM_BUILD_ROOT
 %{dracutlibdir}/dracut.conf.d/02-norescue.conf
 
 %changelog
+* Tue Apr 30 2013 Harald Hoyer <harald@redhat.com> 027-45.git20130430
+- fixed fips mode more
+Resolves: rhbz#956521
+
 * Thu Apr 25 2013 Harald Hoyer <harald@redhat.com> 027-39.git20130425
 - fix shutdown, if /dev/console is not writeable
 - fixed fips mode
