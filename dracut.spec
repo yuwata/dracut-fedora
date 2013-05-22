@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 027
-Release: 45.git20130430%{?dist}
+Release: 46.git20130430%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -73,6 +73,10 @@ Patch41: 0041-dracut-install-make-use-of-_cleanup_-macros.patch
 Patch42: 0042-_emergency_shell-Show-current-working-directory-corr.patch
 Patch43: 0043-test-use-grep-option-F-and-install-etc-os-release.patch
 Patch44: 0044-zfcp-match-udev-rule-against-KERNEL-zfcp.patch
+# Don't specify 'p' as a separator for dmraid; see #966162. Generated in
+# sequence with the above patches against dracut HEAD of 2013-05-22, will
+# send to harald. -adamw
+Patch45: 0045-don-t-specify-p-as-a-separator-for-dmraid-arrays-RHB.patch
 
 
 BuildRequires: dash bash git
@@ -481,6 +485,10 @@ rm -rf $RPM_BUILD_ROOT
 %{dracutlibdir}/dracut.conf.d/02-norescue.conf
 
 %changelog
+* Wed May 22 2013 Adam Williamson <awilliam@redhat.com> 027-46.git20130430
+- don't specify "p" as a separator for dmraid
+Resolves: rhbz#966162
+
 * Tue Apr 30 2013 Harald Hoyer <harald@redhat.com> 027-45.git20130430
 - fixed fips mode more
 Resolves: rhbz#956521
