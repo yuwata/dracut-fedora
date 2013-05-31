@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 027
-Release: 46.git20130430%{?dist}
+Release: 81.git20130531%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -73,10 +73,42 @@ Patch41: 0041-dracut-install-make-use-of-_cleanup_-macros.patch
 Patch42: 0042-_emergency_shell-Show-current-working-directory-corr.patch
 Patch43: 0043-test-use-grep-option-F-and-install-etc-os-release.patch
 Patch44: 0044-zfcp-match-udev-rule-against-KERNEL-zfcp.patch
-# Don't specify 'p' as a separator for dmraid; see #966162. Generated in
-# sequence with the above patches against dracut HEAD of 2013-05-22, will
-# send to harald. -adamw
-Patch45: 0045-don-t-specify-p-as-a-separator-for-dmraid-arrays-RHB.patch
+Patch45: 0045-usrmount-Fix-miss-detection-of-btrfs-subvolumes.patch
+Patch46: 0046-dracut.sh-degrade-message-about-missing-tools-for-st.patch
+Patch47: 0047-don-t-specify-p-as-a-separator-for-dmraid-arrays-RHB.patch
+Patch48: 0048-systemd-set-environment-vars-DRACUT_SYSTEMD-NEWROOT-.patch
+Patch49: 0049-don-t-add-volatile-swap-partitions-to-host_devs.patch
+Patch50: 0050-dracut-functions.sh-clarify-instmods-error-message.patch
+Patch51: 0051-01fips-module-setup.sh-add-libssl.so.10-to-make-kdum.patch
+Patch52: 0052-Fix-parsing-command-line-arguments.patch
+Patch53: 0053-Introduce-stricter-type-correctness.patch
+Patch54: 0054-Use-consistiently-termination-code-macros.patch
+Patch55: 0055-Always-check-the-return-number-of-asprintf.patch
+Patch56: 0056-Fix-memory-leak.patch
+Patch57: 0057-dracut.spec-put-selinux-for-kdump-crash-file-context.patch
+Patch58: 0058-url-lib-url-lib.sh-turn-off-curl-globbing.patch
+Patch59: 0059-btrfs-include-btrfs-zero-log-in-the-initramfs.patch
+Patch60: 0060-ifcfg-write-ifcfg.sh-proper-NAME-the-interfaces.patch
+Patch61: 0061-40network-Provide-a-hostname-fallback-function-in-ca.patch
+Patch62: 0062-dracut-emergency.service-do-not-start-for-action_on_.patch
+Patch63: 0063-i18n-module-setup.sh-install-default-font-latarcyrhe.patch
+Patch64: 0064-crypt-loop-module-setup.sh-install-loop-kernel-modul.patch
+Patch65: 0065-udev-rules-module-setup.sh-optionally-install-etc-pc.patch
+Patch66: 0066-ifcfg-write-ifcfg.sh.patch
+Patch67: 0067-kernel-modules-module-setup.sh-add-nvme-kernel-modul.patch
+Patch68: 0068-fs-lib-module-setup.sh-add-xfs_metadump.patch
+Patch69: 0069-99fs-lib-fs-lib.sh-Let-user-specify-the-action-after.patch
+Patch70: 0070-use-system-provides-udev-rule-and-initialization-scr.patch
+Patch71: 0071-selinux-load_policy-script-fix.patch
+Patch72: 0072-base-dracut-lib.sh-export-DRACUT_SYSTEMD-and-NEWROOT.patch
+Patch73: 0073-kernel-modules-module-setup.sh-add-hid-hyperv-and-hv.patch
+Patch74: 0074-dmsquash-live-dmsquash-live-root.sh-add-parameter-rd.patch
+Patch75: 0075-systemd-emergency.service-do-not-run-for-action_on_f.patch
+Patch76: 0076-network-wait-for-all-required-interfaces-if-rd.needn.patch
+Patch77: 0077-lvm-add-tools-for-thin-provisioning.patch
+Patch78: 0078-ifcfg-write-ifcfg.sh-fixed-logic.patch
+Patch79: 0079-dracut-functions.sh-get_persistent_dev-fix-case-for-.patch
+Patch80: 0080-dmsquash-live-dmsquash-live-root.sh-fixup-32214acb3a.patch
 
 
 BuildRequires: dash bash git
@@ -280,7 +312,6 @@ rm -fr $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/50gensplash
 rm -fr $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/96securityfs
 rm -fr $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/97masterkey
 rm -fr $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/98integrity
-rm -fr $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/98selinux
 %endif
 
 mkdir -p $RPM_BUILD_ROOT/boot/dracut
@@ -397,12 +428,12 @@ rm -rf $RPM_BUILD_ROOT
 %if %{undefined _unitdir}
 %{dracutlibdir}/modules.d/96securityfs
 %{dracutlibdir}/modules.d/97masterkey
-%{dracutlibdir}/modules.d/98selinux
 %{dracutlibdir}/modules.d/98integrity
 %endif
 %{dracutlibdir}/modules.d/97biosdevname
 %{dracutlibdir}/modules.d/98ecryptfs
 %{dracutlibdir}/modules.d/98pollcdrom
+%{dracutlibdir}/modules.d/98selinux
 %{dracutlibdir}/modules.d/98syslog
 %{dracutlibdir}/modules.d/98systemd
 %{dracutlibdir}/modules.d/98usrmount
@@ -485,6 +516,42 @@ rm -rf $RPM_BUILD_ROOT
 %{dracutlibdir}/dracut.conf.d/02-norescue.conf
 
 %changelog
+* Fri May 31 2013 Harald Hoyer <harald@redhat.com> 027-81.git20130531
+- fix btrfs mount flags for /usr
+- degrade message about missing tools for stripping
+Resolves: rhbz#958519
+- set environment vars DRACUT_SYSTEMD, NEWROOT in service file
+Resolves: rhbz#963159
+- don't add volatile swap partitions to host_devs
+- add libssl.so.10 to make kdump work with fips mode
+- readd selinux dracut module for kdump
+- url-lib/url-lib.sh: turn off curl globbing
+Resolves: rhbz#907497
+- include btrfs-zero-log in the initramfs
+Resolves: rhbz#963257
+- proper NAME the network interfaces
+Resolves: rhbz#965842
+- install default font latarcyrheb-sun16
+Resolves: rhbz#927564
+- optionally install /etc/pcmcia/config.opts
+Resolves: rhbz#920076
+- fix ONBOOT for slaves, set TYPE=Bond for bonding
+Resolves: rhbz#919001
+- add nvme kernel module
+Resolves: rhbz#910734
+- add xfs_metadump
+- selinux: load_policy script fix
+- add hid-hyperv and hv-vmbus kernel modules
+- add parameter rd.live.squashimg
+Resolves: rhbz#789036 rhbz#782108
+- wait for all required interfaces if "rd.neednet=1"
+Resolves: rhbz#801829
+- lvm: add tools for thin provisioning
+Resolves: rhbz#921235
+- ifcfg/write-ifcfg.sh: fixed ifcfg file generation
+- do not wait for mpath* devices
+Resolves: rhbz#969068
+
 * Wed May 22 2013 Adam Williamson <awilliam@redhat.com> 027-46.git20130430
 - don't specify "p" as a separator for dmraid
 Resolves: rhbz#966162

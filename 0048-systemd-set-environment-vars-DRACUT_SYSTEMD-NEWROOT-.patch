@@ -1,0 +1,163 @@
+From 780cb337416a21b000353d1f2dbb362690265b3b Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Tue, 28 May 2013 12:50:57 +0200
+Subject: [PATCH] systemd: set environment vars DRACUT_SYSTEMD, NEWROOT in
+ service file
+
+---
+ modules.d/98systemd/dracut-cmdline.service     | 2 ++
+ modules.d/98systemd/dracut-cmdline.sh          | 2 --
+ modules.d/98systemd/dracut-emergency.service   | 2 ++
+ modules.d/98systemd/dracut-initqueue.service   | 2 ++
+ modules.d/98systemd/dracut-mount.service       | 2 ++
+ modules.d/98systemd/dracut-pre-mount.service   | 2 ++
+ modules.d/98systemd/dracut-pre-pivot.service   | 2 ++
+ modules.d/98systemd/dracut-pre-trigger.service | 2 ++
+ modules.d/98systemd/dracut-pre-udev.service    | 2 ++
+ modules.d/98systemd/emergency.service          | 2 ++
+ modules.d/98systemd/rescue.service             | 2 ++
+ 11 files changed, 20 insertions(+), 2 deletions(-)
+
+diff --git a/modules.d/98systemd/dracut-cmdline.service b/modules.d/98systemd/dracut-cmdline.service
+index 33a37f9..07f6939 100644
+--- a/modules.d/98systemd/dracut-cmdline.service
++++ b/modules.d/98systemd/dracut-cmdline.service
+@@ -23,6 +23,8 @@ ConditionKernelCommandLine=|resume
+ ConditionKernelCommandLine=|noresume
+ 
+ [Service]
++Environment=DRACUT_SYSTEMD=1
++Environment=NEWROOT=/sysroot
+ Type=oneshot
+ ExecStart=-/bin/dracut-cmdline
+ StandardInput=null
+diff --git a/modules.d/98systemd/dracut-cmdline.sh b/modules.d/98systemd/dracut-cmdline.sh
+index ad51142..a6738bd 100755
+--- a/modules.d/98systemd/dracut-cmdline.sh
++++ b/modules.d/98systemd/dracut-cmdline.sh
+@@ -2,8 +2,6 @@
+ # -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
+ # ex: ts=8 sw=4 sts=4 et filetype=sh
+ 
+-export DRACUT_SYSTEMD=1
+-export NEWROOT="/sysroot"
+ [ -d $NEWROOT ] || mkdir -p -m 0755 $NEWROOT
+ [ -d /run/initramfs ] || mkdir -p -m 0755 /run/initramfs
+ [ -d /run/lock ] || mkdir -p -m 0755 /run/lock
+diff --git a/modules.d/98systemd/dracut-emergency.service b/modules.d/98systemd/dracut-emergency.service
+index 153931b..12eef6c 100644
+--- a/modules.d/98systemd/dracut-emergency.service
++++ b/modules.d/98systemd/dracut-emergency.service
+@@ -16,6 +16,8 @@ Conflicts=emergency.service emergency.target
+ 
+ [Service]
+ Environment=HOME=/
++Environment=DRACUT_SYSTEMD=1
++Environment=NEWROOT=/sysroot
+ WorkingDirectory=/
+ ExecStart=/bin/dracut-emergency
+ ExecStopPost=-/bin/rm -f /.console_lock
+diff --git a/modules.d/98systemd/dracut-initqueue.service b/modules.d/98systemd/dracut-initqueue.service
+index c19cfea..f4c1dd4 100644
+--- a/modules.d/98systemd/dracut-initqueue.service
++++ b/modules.d/98systemd/dracut-initqueue.service
+@@ -19,6 +19,8 @@ ConditionPathExistsGlob=|/lib/dracut/hooks/initqueue/*.sh
+ ConditionKernelCommandLine=|rd.break=pre-mount
+ 
+ [Service]
++Environment=DRACUT_SYSTEMD=1
++Environment=NEWROOT=/sysroot
+ Type=oneshot
+ ExecStart=-/bin/dracut-initqueue
+ StandardInput=null
+diff --git a/modules.d/98systemd/dracut-mount.service b/modules.d/98systemd/dracut-mount.service
+index db18f86..20c633d 100644
+--- a/modules.d/98systemd/dracut-mount.service
++++ b/modules.d/98systemd/dracut-mount.service
+@@ -17,6 +17,8 @@ ConditionDirectoryNotEmpty=|/lib/dracut/hooks/mount
+ ConditionKernelCommandLine=|rd.break=mount
+ 
+ [Service]
++Environment=DRACUT_SYSTEMD=1
++Environment=NEWROOT=/sysroot
+ Type=oneshot
+ ExecStart=-/bin/dracut-mount
+ StandardInput=null
+diff --git a/modules.d/98systemd/dracut-pre-mount.service b/modules.d/98systemd/dracut-pre-mount.service
+index bec3c75..d7be48d 100644
+--- a/modules.d/98systemd/dracut-pre-mount.service
++++ b/modules.d/98systemd/dracut-pre-mount.service
+@@ -19,6 +19,8 @@ ConditionDirectoryNotEmpty=|/lib/dracut/hooks/pre-mount
+ ConditionKernelCommandLine=|rd.break=pre-mount
+ 
+ [Service]
++Environment=DRACUT_SYSTEMD=1
++Environment=NEWROOT=/sysroot
+ Type=oneshot
+ ExecStart=-/bin/dracut-pre-mount
+ StandardInput=null
+diff --git a/modules.d/98systemd/dracut-pre-pivot.service b/modules.d/98systemd/dracut-pre-pivot.service
+index 9d0143c..36394aa 100644
+--- a/modules.d/98systemd/dracut-pre-pivot.service
++++ b/modules.d/98systemd/dracut-pre-pivot.service
+@@ -18,6 +18,8 @@ ConditionDirectoryNotEmpty=|/lib/dracut/hooks/pre-pivot
+ ConditionKernelCommandLine=|rd.break=pre-pivot
+ 
+ [Service]
++Environment=DRACUT_SYSTEMD=1
++Environment=NEWROOT=/sysroot
+ Type=oneshot
+ ExecStart=-/bin/dracut-pre-pivot
+ StandardInput=null
+diff --git a/modules.d/98systemd/dracut-pre-trigger.service b/modules.d/98systemd/dracut-pre-trigger.service
+index e49e405..bb34196 100644
+--- a/modules.d/98systemd/dracut-pre-trigger.service
++++ b/modules.d/98systemd/dracut-pre-trigger.service
+@@ -19,6 +19,8 @@ ConditionDirectoryNotEmpty=|/lib/dracut/hooks/pre-trigger
+ ConditionKernelCommandLine=|rd.break=pre-trigger
+ 
+ [Service]
++Environment=DRACUT_SYSTEMD=1
++Environment=NEWROOT=/sysroot
+ Type=oneshot
+ ExecStart=-/bin/dracut-pre-trigger
+ StandardInput=null
+diff --git a/modules.d/98systemd/dracut-pre-udev.service b/modules.d/98systemd/dracut-pre-udev.service
+index b372373..d125b37 100644
+--- a/modules.d/98systemd/dracut-pre-udev.service
++++ b/modules.d/98systemd/dracut-pre-udev.service
+@@ -22,6 +22,8 @@ ConditionKernelCommandLine=|rd.driver.pre
+ ConditionKernelCommandLine=|rd.driver.post
+ 
+ [Service]
++Environment=DRACUT_SYSTEMD=1
++Environment=NEWROOT=/sysroot
+ Type=oneshot
+ ExecStart=-/bin/dracut-pre-udev
+ StandardInput=null
+diff --git a/modules.d/98systemd/emergency.service b/modules.d/98systemd/emergency.service
+index a932739..35d9c31 100644
+--- a/modules.d/98systemd/emergency.service
++++ b/modules.d/98systemd/emergency.service
+@@ -15,6 +15,8 @@ Wants=systemd-vconsole-setup.service
+ 
+ [Service]
+ Environment=HOME=/
++Environment=DRACUT_SYSTEMD=1
++Environment=NEWROOT=/sysroot
+ WorkingDirectory=/
+ ExecStart=/bin/dracut-emergency
+ ExecStopPost=-/usr/bin/systemctl --fail --no-block default
+diff --git a/modules.d/98systemd/rescue.service b/modules.d/98systemd/rescue.service
+index b5fb663..62f2067 100644
+--- a/modules.d/98systemd/rescue.service
++++ b/modules.d/98systemd/rescue.service
+@@ -13,6 +13,8 @@ DefaultDependencies=no
+ 
+ [Service]
+ Environment=HOME=/
++Environment=DRACUT_SYSTEMD=1
++Environment=NEWROOT=/sysroot
+ WorkingDirectory=/
+ ExecStartPre=-/bin/plymouth quit
+ ExecStart=-/bin/sh -i -l

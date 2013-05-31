@@ -1,0 +1,40 @@
+From 32214acb3ae02d28cf72e15040f062fcbd5aa4ab Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 30 May 2013 09:26:43 +0200
+Subject: [PATCH] dmsquash-live/dmsquash-live-root.sh: add parameter
+ rd.live.squashimg
+
+rd.live.squashimg names the squash image in the rd.live.dir
+and defaults to squashfs.img
+
+https://bugzilla.redhat.com/show_bug.cgi?id=789036
+https://bugzilla.redhat.com/show_bug.cgi?id=782108
+---
+ modules.d/90dmsquash-live/dmsquash-live-root.sh | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/modules.d/90dmsquash-live/dmsquash-live-root.sh b/modules.d/90dmsquash-live/dmsquash-live-root.sh
+index 07e41f0..f63819c 100755
+--- a/modules.d/90dmsquash-live/dmsquash-live-root.sh
++++ b/modules.d/90dmsquash-live/dmsquash-live-root.sh
+@@ -19,6 +19,9 @@ livedev="$1"
+ # specified as their own things
+ live_dir=$(getarg rd.live.dir -d live_dir)
+ [ -z "$live_dir" ] && live_dir="LiveOS"
++squash_image=$(getarg rd.live.squashimg)
++[ -z "squash_image" ] && squash_image="squashfs.img"
++
+ getargbool 0 rd.live.ram -d -y live_ram && live_ram="yes"
+ getargbool 0 rd.live.overlay.reset -d -y reset_overlay && reset_overlay="yes"
+ getargbool 0 rd.live.overlay.readonly -d -y readonly_overlay && readonly_overlay="--readonly" || readonly_overlay=""
+@@ -180,8 +183,8 @@ if [ -n "$FSIMG" ] ; then
+ fi
+ 
+ # we might have an embedded fs image on squashfs (compressed live)
+-if [ -e /run/initramfs/live/${live_dir}/squashfs.img ]; then
+-    SQUASHED="/run/initramfs/live/${live_dir}/squashfs.img"
++if [ -e /run/initramfs/live/${live_dir}/${squash_image} ]; then
++    SQUASHED="/run/initramfs/live/${live_dir}/${squash_image}"
+ fi
+ 
+ if [ -e "$SQUASHED" ] ; then

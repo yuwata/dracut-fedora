@@ -1,8 +1,8 @@
-From 96dd416ac2ea8ea0f5bbbdce2abafbbce84f0ad6 Mon Sep 17 00:00:00 2001
+From 8d7c07f191524f2ac59e3083910db985fa4bbcd5 Mon Sep 17 00:00:00 2001
 From: Adam Williamson <awilliam@redhat.com>
 Date: Wed, 22 May 2013 13:56:58 -0700
-Subject: [PATCH 45/45] don't specify "p" as a separator for dmraid arrays
- (RHBZ #966162)
+Subject: [PATCH] don't specify "p" as a separator for dmraid arrays (RHBZ
+ #966162)
 
 As per RHBZ #966162, parted stopped unconditionally using "p" as a
 separator for dmraid device names in version 3.1, so other things need
@@ -33,6 +33,3 @@ index 68e0515..3753ddd 100755
          done
      fi
  
--- 
-1.8.2.1
-

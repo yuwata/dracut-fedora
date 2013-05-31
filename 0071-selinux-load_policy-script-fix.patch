@@ -1,0 +1,39 @@
+From cf8b1b785366e0a7c2ae1b3781d66b0f99d6f8fe Mon Sep 17 00:00:00 2001
+From: "dyoung@redhat.com" <dyoung@redhat.com>
+Date: Thu, 30 May 2013 14:19:00 +0800
+Subject: [PATCH] selinux: load_policy script fix
+
+chroot load_policy will use selinuxfs which should be mounted
+in $NEWROOT/sys/fs/selinux for Fedora 19, but because there's
+no $NEWROOT/sys/fs, so later process will fail.
+
+Fixing this by bind mount /sys to $NEWROOT/sys.
+
+Signed-off-by: Dave Young <dyoung@redhat.com>
+---
+ modules.d/98selinux/selinux-loadpolicy.sh | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/modules.d/98selinux/selinux-loadpolicy.sh b/modules.d/98selinux/selinux-loadpolicy.sh
+index 7526265..5dddfc2 100755
+--- a/modules.d/98selinux/selinux-loadpolicy.sh
++++ b/modules.d/98selinux/selinux-loadpolicy.sh
+@@ -24,7 +24,8 @@ rd_load_policy()
+         local ret=0
+         local out
+         info "Loading SELinux policy"
+-        # load_policy does mount /proc and /selinux in
++        mount -o bind /sys $NEWROOT/sys
++        # load_policy does mount /proc and /sys/fs/selinux in
+         # libselinux,selinux_init_load_policy()
+         if [ -x "$NEWROOT/sbin/load_policy" ]; then
+             out=$(LANG=C chroot "$NEWROOT" /sbin/load_policy -i 2>&1)
+@@ -35,6 +36,8 @@ rd_load_policy()
+             ret=$?
+             info $out
+         fi
++        umount $NEWROOT/sys/fs/selinux
++        umount $NEWROOT/sys
+ 
+         if [ "$SELINUX" = "disabled" ]; then
+             return 0;

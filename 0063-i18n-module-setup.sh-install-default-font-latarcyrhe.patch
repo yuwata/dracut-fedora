@@ -1,0 +1,22 @@
+From 0a3e348225336f45a9abe8e74b384fdf17e9053f Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 29 May 2013 13:20:00 +0200
+Subject: [PATCH] i18n/module-setup.sh: install default font latarcyrheb-sun16
+
+---
+ modules.d/10i18n/module-setup.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/modules.d/10i18n/module-setup.sh b/modules.d/10i18n/module-setup.sh
+index fcd8282..60a50e7 100755
+--- a/modules.d/10i18n/module-setup.sh
++++ b/modules.d/10i18n/module-setup.sh
+@@ -14,7 +14,7 @@ depends() {
+ install() {
+     dracut_install -o $systemdutildir/systemd-vconsole-setup
+     KBDSUBDIRS=consolefonts,consoletrans,keymaps,unimaps
+-    DEFAULT_FONT=LatArCyrHeb-16
++    DEFAULT_FONT=latarcyrheb-sun16
+     I18N_CONF="/etc/locale.conf"
+     VCONFIG_CONF="/etc/vconsole.conf"
+ 

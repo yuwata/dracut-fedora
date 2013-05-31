@@ -1,0 +1,68 @@
+From bcfbddefe13d179d553da77cf66ada5e6fd804c8 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Tue, 28 May 2013 13:26:05 +0200
+Subject: [PATCH] don't add volatile swap partitions to host_devs
+
+---
+ TODO      |  1 +
+ dracut.sh | 17 ++++++++++++-----
+ 2 files changed, 13 insertions(+), 5 deletions(-)
+
+diff --git a/TODO b/TODO
+index 9eeedfa..e275324 100644
+--- a/TODO
++++ b/TODO
+@@ -22,6 +22,7 @@ INITRAMFS TODO
+ 
+ GENERATOR TODO
+ 
++- remove wait for swap devs, if no "resume=" is given on the kernel command line
+ - add presets (predefined set of modules)
+ - add interpreter/plugin-scripts to be sourced at the beginning or end (can use dracut-functions)
+ - add mechanism for module specific command line options
+diff --git a/dracut.sh b/dracut.sh
+index 88b0645..7481ac0 100755
+--- a/dracut.sh
++++ b/dracut.sh
+@@ -830,7 +830,7 @@ if [[ $hostonly ]]; then
+     # in hostonly mode, determine all devices, which have to be accessed
+     # and examine them for filesystem types
+ 
+-    push host_mp \
++    for mp in \
+         "/" \
+         "/etc" \
+         "/usr" \
+@@ -838,9 +838,8 @@ if [[ $hostonly ]]; then
+         "/usr/sbin" \
+         "/usr/lib" \
+         "/usr/lib64" \
+-        "/boot"
+-
+-    for mp in "${host_mp[@]}"; do
++        "/boot";
++    do
+         mountpoint "$mp" >/dev/null 2>&1 || continue
+         push host_devs $(readlink -f "/dev/block/$(find_block_device "$mp")")
+     done
+@@ -856,11 +855,19 @@ if [[ $hostonly ]]; then
+             [[ "$_d" == UUID\=* ]] && _d="/dev/disk/by-uuid/${_d#UUID=}"
+             [[ "$_d" == LABEL\=* ]] && _d="/dev/disk/by-label/$_d#LABEL=}"
+             [[ "$_d" -ef "$dev" ]] || continue
++
++            while read _mapper _a _p _o; do
++                [[ $_mapper = \#* ]] && continue
++                [[ "$_d" -ef /dev/mapper/"$_mapper" ]] || continue
++                [[ "$_o" ]] || _o="$_p"
++                # skip mkswap swap
++                [[ $_o == *swap* ]] && continue 2
++            done < /etc/crypttab
++
+             push host_devs $(readlink -f $dev)
+             break
+         done < /etc/fstab
+     done < /proc/swaps
+-
+ fi
+ 
+ _get_fs_type() (

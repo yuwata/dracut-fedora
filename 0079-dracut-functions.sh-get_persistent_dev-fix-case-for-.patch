@@ -1,0 +1,25 @@
+From 15c5c072f4fe44f39d60f2fa050a6b4ab05ee34f Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 31 May 2013 07:46:08 +0200
+Subject: [PATCH] dracut-functions.sh:get_persistent_dev() fix case for
+ multipath
+
+/dev/mapper/mpath* is not a persistent device path
+
+https://bugzilla.redhat.com/show_bug.cgi?id=969068
+---
+ dracut-functions.sh | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/dracut-functions.sh b/dracut-functions.sh
+index 4a0e81a..3d88c9d 100755
+--- a/dracut-functions.sh
++++ b/dracut-functions.sh
+@@ -254,6 +254,7 @@ get_persistent_dev() {
+     [ -z "$_dev" ] && return
+ 
+     for i in /dev/mapper/* /dev/disk/by-uuid/* /dev/disk/by-id/*; do
++        [[ $i == /dev/mapper/mpath* ]] && continue
+         _tmp=$(udevadm info --query=name --name="$i" 2>/dev/null)
+         if [ "$_tmp" = "$_dev" ]; then
+             echo $i

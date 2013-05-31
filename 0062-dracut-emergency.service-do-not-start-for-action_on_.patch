@@ -1,0 +1,22 @@
+From b78e6ac2c328c76057b17059a761ab44707f9aa0 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 29 May 2013 11:33:25 +0200
+Subject: [PATCH] dracut-emergency.service: do not start for
+ "action_on_fail=continue"
+
+---
+ modules.d/98systemd/dracut-emergency.service | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/modules.d/98systemd/dracut-emergency.service b/modules.d/98systemd/dracut-emergency.service
+index 12eef6c..ebf5aac 100644
+--- a/modules.d/98systemd/dracut-emergency.service
++++ b/modules.d/98systemd/dracut-emergency.service
+@@ -13,6 +13,7 @@ DefaultDependencies=no
+ After=systemd-vconsole-setup.service
+ Wants=systemd-vconsole-setup.service
+ Conflicts=emergency.service emergency.target
++ConditionKernelCommandLine=!action_on_fail=continue
+ 
+ [Service]
+ Environment=HOME=/
