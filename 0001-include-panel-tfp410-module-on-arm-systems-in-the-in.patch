@@ -1,0 +1,26 @@
+From bbed67be116c7bee8b08b029bbda039cabed3c8e Mon Sep 17 00:00:00 2001
+From: Dennis Gilmore <dennis@ausil.us>
+Date: Tue, 4 Jun 2013 13:39:23 -0500
+Subject: [PATCH] include panel-tfp410 module on arm systems in the initramfs
+ needed for framebuffer on omap systems
+
+---
+ modules.d/90kernel-modules/module-setup.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/modules.d/90kernel-modules/module-setup.sh b/modules.d/90kernel-modules/module-setup.sh
+index ed7a19e..8388a08 100755
+--- a/modules.d/90kernel-modules/module-setup.sh
++++ b/modules.d/90kernel-modules/module-setup.sh
+@@ -47,7 +47,7 @@ installkernel() {
+         if [[ "$(uname -p)" == arm* ]]; then
+             # arm specific modules
+             hostonly='' instmods sdhci_esdhc_imx mmci sdhci_tegra mvsdio omap omapdrm \
+-                omap_hsmmc sdhci_dove ahci_platform pata_imx sata_mv
++                omap_hsmmc panel-tfp410 sdhci_dove ahci_platform pata_imx sata_mv
+         fi
+ 
+         # install virtual machine support
+-- 
+1.8.2.1
+

@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 027
-Release: 81.git20130531%{?dist}
+Release: 82.git20130531%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -109,7 +109,7 @@ Patch77: 0077-lvm-add-tools-for-thin-provisioning.patch
 Patch78: 0078-ifcfg-write-ifcfg.sh-fixed-logic.patch
 Patch79: 0079-dracut-functions.sh-get_persistent_dev-fix-case-for-.patch
 Patch80: 0080-dmsquash-live-dmsquash-live-root.sh-fixup-32214acb3a.patch
-
+Patch81: 0001-include-panel-tfp410-module-on-arm-systems-in-the-in.patch
 
 BuildRequires: dash bash git
 
@@ -516,6 +516,9 @@ rm -rf $RPM_BUILD_ROOT
 %{dracutlibdir}/dracut.conf.d/02-norescue.conf
 
 %changelog
+* Tue Jun 04 2013 Dennis Gilmore <dennis@ausil.us> 027-82.git20130531
+- add patch to include  panel-tfp410 module on arm systems
+
 * Fri May 31 2013 Harald Hoyer <harald@redhat.com> 027-81.git20130531
 - fix btrfs mount flags for /usr
 - degrade message about missing tools for stripping
