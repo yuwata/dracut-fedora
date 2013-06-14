@@ -9,7 +9,7 @@
 %endif
 
 Name: dracut
-Version: 028
+Version: 029
 Release: 1%{?dist}
 
 Summary: Initramfs generator using udev
@@ -31,7 +31,7 @@ URL: https://dracut.wiki.kernel.org/
 Source0: http://www.kernel.org/pub/linux/utils/boot/dracut/dracut-%{version}.tar.bz2
 
 
-BuildRequires: dash bash git
+BuildRequires: bash git
 
 %if 0%{?fedora} || 0%{?rhel}
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -436,6 +436,15 @@ rm -rf $RPM_BUILD_ROOT
 %{dracutlibdir}/dracut.conf.d/02-norescue.conf
 
 %changelog
+* Fri Jun 14 2013 Harald Hoyer <harald@redhat.com> 029-1
+- wait for IPv6 auto configuration
+Resolves: rhbz#973719
+- i18n: make the default font configurable
+- systemd/dracut-pre-pivot.service: also execute for cleanup hooks or rd.break
+- add dracut-shutdown.service.8 manpage
+- lvm: redirect error message of lvs to /dev/null
+Resolves: rhbz#921235
+
 * Wed Jun 12 2013 Harald Hoyer <harald@redhat.com> 028-1
 - lvm: fixed "thin" recognition
 Resolves: rhbz#921235
