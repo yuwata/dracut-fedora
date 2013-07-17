@@ -9,7 +9,7 @@
 %endif
 
 Name: dracut
-Version: 029
+Version: 030
 Release: 1%{?dist}
 
 Summary: Initramfs generator using udev
@@ -76,6 +76,10 @@ Provides: mkinitrd = 2.6.1
 
 Obsoletes: dracut-kernel < 005
 Provides:  dracut-kernel = %{version}-%{release}
+
+Obsoletes: dracut <= 029
+Obsoletes: dracut-norescue
+Provides:  dracut-horescue
 
 Requires: bash >= 4
 Requires: coreutils
@@ -159,20 +163,23 @@ Requires: libcap
 This package requires everything which is needed to build an
 initramfs with dracut, which drops capabilities.
 
-%package nohostonly
+%package config-generic
 Summary: dracut configuration to turn off hostonly image generation
 Requires: %{name} = %{version}-%{release}
+Obsoletes: dracut-nohostonly
+Provides:  dracut-nohostonly
 
-%description nohostonly
+%description config-generic
 This package provides the configuration to turn off the host specific initramfs
-generation with dracut.
+generation with dracut and generates a generic image by default.
 
-%package norescue
-Summary: dracut configuration to turn off rescue image generation
+%package config-rescue
+Summary: dracut configuration to turn on rescue image generation
 Requires: %{name} = %{version}-%{release}
+Obsoletes: dracut <= 029
 
-%description norescue
-This package provides the configuration to turn off the rescue initramfs
+%description config-rescue
+This package provides the configuration to turn on the rescue initramfs
 generation with dracut.
 
 %package tools
@@ -203,7 +210,7 @@ make %{?_smp_mflags}
 
 %install
 %if 0%{?fedora} || 0%{?rhel}
-rm -rf $RPM_BUILD_ROOT
+rm -rf -- $RPM_BUILD_ROOT
 %endif
 make %{?_smp_mflags} install \
      DESTDIR=$RPM_BUILD_ROOT \
@@ -212,26 +219,26 @@ make %{?_smp_mflags} install \
 echo "DRACUT_VERSION=%{version}-%{release}" > $RPM_BUILD_ROOT/%{dracutlibdir}/dracut-version.sh
 
 %if 0%{?fedora} == 0 && 0%{?rhel} == 0 && 0%{?suse_version} == 0
-rm -fr $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/01fips
-rm -fr $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/02fips-aesni
+rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/01fips
+rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/02fips-aesni
 %endif
 
 %if %{defined _unitdir}
 # for systemd, better use systemd-bootchart
-rm -fr $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/00bootchart
+rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/00bootchart
 %endif
 
 # we do not support dash in the initramfs
-rm -fr $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/00dash
+rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/00dash
 
 # remove gentoo specific modules
-rm -fr $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/50gensplash
+rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/50gensplash
 
 %if %{defined _unitdir}
 # with systemd IMA and selinux modules do not make sense
-rm -fr $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/96securityfs
-rm -fr $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/97masterkey
-rm -fr $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/98integrity
+rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/96securityfs
+rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/97masterkey
+rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/98integrity
 %endif
 
 mkdir -p $RPM_BUILD_ROOT/boot/dracut
@@ -250,8 +257,8 @@ install -m 0644 dracut.conf.d/suse.conf.example   $RPM_BUILD_ROOT%{dracutlibdir}
 %endif
 
 %if 0%{?fedora} <= 12 && 0%{?rhel} < 6 && 0%{?suse_version} <= 9999
-rm $RPM_BUILD_ROOT%{_bindir}/mkinitrd
-rm $RPM_BUILD_ROOT%{_bindir}/lsinitrd
+rm -f -- $RPM_BUILD_ROOT%{_bindir}/mkinitrd
+rm -f -- $RPM_BUILD_ROOT%{_bindir}/lsinitrd
 %endif
 
 %if 0%{?fedora} || 0%{?rhel} > 6
@@ -259,8 +266,8 @@ rm $RPM_BUILD_ROOT%{_bindir}/lsinitrd
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/kernel/postinst.d
 install -m 0755 51-dracut-rescue-postinst.sh $RPM_BUILD_ROOT%{_sysconfdir}/kernel/postinst.d/51-dracut-rescue-postinst.sh
 
-echo 'hostonly="no"' > $RPM_BUILD_ROOT%{dracutlibdir}/dracut.conf.d/02-nohostonly.conf
-echo 'dracut_rescue_image="no"' > $RPM_BUILD_ROOT%{dracutlibdir}/dracut.conf.d/02-norescue.conf
+echo 'hostonly="no"' > $RPM_BUILD_ROOT%{dracutlibdir}/dracut.conf.d/02-generic-image.conf
+echo 'dracut_rescue_image="yes"' > $RPM_BUILD_ROOT%{dracutlibdir}/dracut.conf.d/02-rescue.conf
 %endif
 
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/logrotate.d
@@ -271,7 +278,7 @@ mkdir -p $RPM_BUILD_ROOT/sbin
 ln -s /usr/bin/dracut $RPM_BUILD_ROOT/sbin/dracut
 
 %clean
-rm -rf $RPM_BUILD_ROOT
+rm -rf -- $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root,0755)
@@ -385,8 +392,6 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 %if 0%{?fedora} || 0%{?rhel} > 6
 %{_prefix}/lib/kernel/install.d/50-dracut.install
-%{_prefix}/lib/kernel/install.d/51-dracut-rescue.install
-%{_sysconfdir}/kernel/postinst.d/51-dracut-rescue-postinst.sh
 %endif
 
 %files network
@@ -427,15 +432,34 @@ rm -rf $RPM_BUILD_ROOT
 %dir /var/lib/dracut
 %dir /var/lib/dracut/overlay
 
-%files nohostonly
+%files config-generic
 %defattr(-,root,root,0755)
-%{dracutlibdir}/dracut.conf.d/02-nohostonly.conf
+%{dracutlibdir}/dracut.conf.d/02-generic-image.conf
 
-%files norescue
+%files config-rescue
 %defattr(-,root,root,0755)
-%{dracutlibdir}/dracut.conf.d/02-norescue.conf
+%{dracutlibdir}/dracut.conf.d/02-rescue.conf
+%if 0%{?fedora} || 0%{?rhel} > 6
+%{_prefix}/lib/kernel/install.d/51-dracut-rescue.install
+%{_sysconfdir}/kernel/postinst.d/51-dracut-rescue-postinst.sh
+%endif
 
 %changelog
+* Wed Jul 17 2013 Harald Hoyer <harald@redhat.com> 030-1
+- support new persistent network interface names
+- fix findmnt calls, prevents hang on stale NFS mounts
+- add systemd.slice and slice.target units
+- major shell cleanup
+- support root=PARTLABEL= and root=PARTUUID=
+- terminfo: only install l/linux v/vt100 and v/vt220
+- unset all LC_* and LANG, 10% faster
+- fixed dependency loop for dracut-cmdline.service
+- do not wait_for_dev for the root devices
+- do not wait_for_dev for devices, if dracut-initqueue is not needed
+- support early microcode loading with --early-microcode
+- dmraid, let dmraid setup its own partitions
+- sosreport renamed to rdsosreport
+
 * Fri Jun 14 2013 Harald Hoyer <harald@redhat.com> 029-1
 - wait for IPv6 auto configuration
 Resolves: rhbz#973719
