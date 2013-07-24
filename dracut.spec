@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 030
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -30,6 +30,7 @@ URL: https://dracut.wiki.kernel.org/
 # http://git.kernel.org/?p=boot/dracut/dracut.git;a=snapshot;h=%{version};sf=tgz
 Source0: http://www.kernel.org/pub/linux/utils/boot/dracut/dracut-%{version}.tar.bz2
 
+Patch1: 0001-arm-add-ehci_tegra-to-initramfs.patch
 
 BuildRequires: bash git
 
@@ -445,6 +446,10 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Wed Jul 24 2013 Kyle McMartin <kyle@redhat.com> 030-2
+- Add ehci-tegra.ko to initramfs to allow rawhide tegra based platforms
+  to boot off USB disks.
+
 * Wed Jul 17 2013 Harald Hoyer <harald@redhat.com> 030-1
 - support new persistent network interface names
 - fix findmnt calls, prevents hang on stale NFS mounts
