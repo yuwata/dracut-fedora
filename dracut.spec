@@ -30,8 +30,6 @@ URL: https://dracut.wiki.kernel.org/
 # http://git.kernel.org/?p=boot/dracut/dracut.git;a=snapshot;h=%{version};sf=tgz
 Source0: http://www.kernel.org/pub/linux/utils/boot/dracut/dracut-%{version}.tar.bz2
 
-Patch1: 0001-arm-add-ehci_tegra-to-initramfs.patch
-
 BuildRequires: bash git
 
 %if 0%{?fedora} || 0%{?rhel}
