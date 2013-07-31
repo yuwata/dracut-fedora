@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 031
-Release: 4.git20130731%{?dist}
+Release: 6.git20130731%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -32,6 +32,8 @@ Source0: http://www.kernel.org/pub/linux/utils/boot/dracut/dracut-%{version}.tar
 Patch1: 0001-Generate-correct-ifcfg-file-for-vlan-option.patch
 Patch2: 0002-Revert-base-setup-correct-system-time-and-time-zone-.patch
 Patch3: 0003-Change-the-implementation-of-action_on_fail.patch
+Patch4: 0004-lvm-add-yes-to-lvm-lvchange.patch
+Patch5: 0005-cms-cmssetup.sh-correct-port-for-zfcp.conf.patch
 
 
 BuildRequires: bash git
@@ -447,6 +449,10 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Wed Jul 31 2013 Harald Hoyer <harald@redhat.com> 031-6.git20130731
+- cmssetup: fixed port for zfcp.conf
+- lvm: call lvchange with --yes to boot from snapshots
+
 * Wed Jul 31 2013 Harald Hoyer <harald@redhat.com> 031-4.git20130731
 - remove action_on_fail kernel command line parameter
 
