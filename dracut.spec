@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 031
-Release: 3.git20130731%{?dist}
+Release: 4.git20130731%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -31,6 +31,7 @@ URL: https://dracut.wiki.kernel.org/
 Source0: http://www.kernel.org/pub/linux/utils/boot/dracut/dracut-%{version}.tar.bz2
 Patch1: 0001-Generate-correct-ifcfg-file-for-vlan-option.patch
 Patch2: 0002-Revert-base-setup-correct-system-time-and-time-zone-.patch
+Patch3: 0003-Change-the-implementation-of-action_on_fail.patch
 
 
 BuildRequires: bash git
@@ -446,6 +447,9 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Wed Jul 31 2013 Harald Hoyer <harald@redhat.com> 031-4.git20130731
+- remove action_on_fail kernel command line parameter
+
 * Wed Jul 31 2013 Harald Hoyer <harald@redhat.com> 031-3.git20130731
 - do not include adjtime and localtime in the initramfs
 - write out vlan configs
