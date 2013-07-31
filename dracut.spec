@@ -445,7 +445,6 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
-=======
 * Wed Jul 31 2013 Harald Hoyer <harald@redhat.com> 031-1
 - do not include the resume dracut module in hostonly mode,
   if no swap is present
