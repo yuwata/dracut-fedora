@@ -1,0 +1,31 @@
+From ff66b6dad345ca12de4aa14db298c8776b16d115 Mon Sep 17 00:00:00 2001
+From: WANG Chao <chaowang@redhat.com>
+Date: Thu, 1 Aug 2013 18:54:55 +0800
+Subject: [PATCH] 95terminfo: install vt102
+
+systemd uses vt102 as default term for tty:
+
+commit acda6a0
+Author: Lennart Poettering <lennart@poettering.net>
+Date:   Sun Apr 22 02:45:39 2012 +0200
+
+    default to v102 everywhere, instead of vt100, to synchronize with agetty
+
+Signed-off-by: WANG Chao <chaowang@redhat.com>
+---
+ modules.d/95terminfo/module-setup.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/modules.d/95terminfo/module-setup.sh b/modules.d/95terminfo/module-setup.sh
+index ecd4395..4656cd3 100755
+--- a/modules.d/95terminfo/module-setup.sh
++++ b/modules.d/95terminfo/module-setup.sh
+@@ -10,7 +10,7 @@ install() {
+     done
+ 
+     if [ -d ${_terminfodir} ]; then
+-        for i in "l/linux" "v/vt100" "v/vt220"; do
++        for i in "l/linux" "v/vt100" "v/vt102" "v/vt220"; do
+             inst_dir "$_terminfodir/${i%/*}"
+             cp --reflink=auto --sparse=auto -prfL -t "${initdir}/${_terminfodir}/${i%/*}" "$_terminfodir/$i"
+         done

@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 031
-Release: 6.git20130731%{?dist}
+Release: 7.git20130801%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -34,6 +34,7 @@ Patch2: 0002-Revert-base-setup-correct-system-time-and-time-zone-.patch
 Patch3: 0003-Change-the-implementation-of-action_on_fail.patch
 Patch4: 0004-lvm-add-yes-to-lvm-lvchange.patch
 Patch5: 0005-cms-cmssetup.sh-correct-port-for-zfcp.conf.patch
+Patch6: 0006-95terminfo-install-vt102.patch
 
 
 BuildRequires: bash git
@@ -449,6 +450,9 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Thu Aug 01 2013 Harald Hoyer <harald@redhat.com> 031-7.git20130801
+- also install vt102 terminfo
+
 * Wed Jul 31 2013 Harald Hoyer <harald@redhat.com> 031-6.git20130731
 - cmssetup: fixed port for zfcp.conf
 - lvm: call lvchange with --yes to boot from snapshots
