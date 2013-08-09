@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 031
-Release: 22.git20130809%{?dist}
+Release: 24.git20130809%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -50,6 +50,8 @@ Patch18: 0018-network-net-lib.sh-fix-ibft-interface-configuration.patch
 Patch19: 0019-iscsi-module-setup.sh-install-some-modules-regardles.patch
 Patch20: 0020-multipath-need_shutdown-if-multipath-devices-exist.patch
 Patch21: 0021-omit-drivers-fix.patch
+Patch22: 0022-lsinitrd.sh-fixed-case.patch
+Patch23: 0023-dracut-logger.sh-do-not-unset-logging-messages-if-sy.patch
 
 
 BuildRequires: bash git
@@ -465,6 +467,12 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Fri Aug 09 2013 Harald Hoyer <harald@redhat.com> 031-24.git20130809
+- fixed logging to journal
+
+* Fri Aug 09 2013 Harald Hoyer <harald@redhat.com> 031-23.git20130809
+- fixed lsinitrd
+
 * Fri Aug 09 2013 Harald Hoyer <harald@redhat.com> 031-22.git20130809
 - lsinitrd.sh: add old cpio signature
 - dracut.sh: call find with -print0 and cpio with --null
