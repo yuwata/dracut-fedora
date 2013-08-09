@@ -1,0 +1,30 @@
+From beb26a084794a4bc8baffc8384cb8e41844f89f9 Mon Sep 17 00:00:00 2001
+From: "dyoung@redhat.com" <dyoung@redhat.com>
+Date: Thu, 8 Aug 2013 14:05:02 +0800
+Subject: [PATCH] omit drivers fix
+
+Because omit_drivers list use underline always, so when maching with it
+the _mod need to be converted as well or sometimes omit-drivers will fail
+silently.
+
+Fix this by replace '-' with '_' in instmods function.
+
+Signed-off-by: Dave Young <dyoung@redhat.com>
+---
+ dracut-functions.sh | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/dracut-functions.sh b/dracut-functions.sh
+index fbe0633..6033a1a 100755
+--- a/dracut-functions.sh
++++ b/dracut-functions.sh
+@@ -1420,7 +1420,8 @@ instmods() {
+                     return $_ret
+                 fi
+ 
+-                if [[ $omit_drivers ]] && [[ "$1" =~ $omit_drivers ]]; then
++                _mod=${_mod/-/_}
++                if [[ $omit_drivers ]] && [[ "$_mod" =~ $omit_drivers ]]; then
+                     dinfo "Omitting driver ${_mod##$srcmods}"
+                     return 0
+                 fi

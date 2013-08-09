@@ -1,0 +1,21 @@
+From 1cb652491858464a1ce04f263bb78f313338aa68 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 5 Aug 2013 11:14:24 +0200
+Subject: [PATCH] lsinitrd.sh: add old cpio signature
+
+---
+ lsinitrd.sh | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/lsinitrd.sh b/lsinitrd.sh
+index ae71d2e..ef1c262 100755
+--- a/lsinitrd.sh
++++ b/lsinitrd.sh
+@@ -109,6 +109,7 @@ case $bin in
+         CAT="zcat";;
+     BZh*)
+         CAT="bzcat";;
++    $'\x71\xc7'*)
+     070701)
+         CAT="cat";;
+     *)

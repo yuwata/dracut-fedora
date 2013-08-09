@@ -1,0 +1,42 @@
+From a4f7b504712bd7499d60d16f358ec89ab31bbb47 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 5 Aug 2013 11:25:45 +0200
+Subject: [PATCH] dracut.sh/dracut-functions.sh: handle root on non-block
+ device
+
+---
+ dracut-functions.sh | 4 +++-
+ dracut.sh           | 5 ++++-
+ 2 files changed, 7 insertions(+), 2 deletions(-)
+
+diff --git a/dracut-functions.sh b/dracut-functions.sh
+index eb1278e..dee53bb 100755
+--- a/dracut-functions.sh
++++ b/dracut-functions.sh
+@@ -421,7 +421,9 @@ find_mp_fstype() {
+ find_dev_fstype() {
+     local _find_dev _fs
+     _find_dev="$1"
+-    [[ "$_find_dev" = /dev* ]] || _find_dev="/dev/block/$_find_dev"
++    if ! [[ "$_find_dev" = /dev* ]]; then
++        [[ -b "/dev/block/$_find_dev" ]] && _find_dev="/dev/block/$_find_dev"
++    fi
+ 
+     if [[ $use_fstab != yes ]]; then
+         findmnt -e -v -n -o 'FSTYPE' --source "$_find_dev" | { \
+diff --git a/dracut.sh b/dracut.sh
+index 3140b7e..c35d771 100755
+--- a/dracut.sh
++++ b/dracut.sh
+@@ -871,7 +871,10 @@ if [[ $hostonly ]]; then
+     do
+         mp=$(readlink -f "$mp")
+         mountpoint "$mp" >/dev/null 2>&1 || continue
+-        _dev="$(readlink -f "/dev/block/$(find_block_device "$mp")")"
++        _dev=$(find_block_device "$mp")
++        _bdev=$(readlink -f "/dev/block/$dev")
++        [[ -b $_bdev ]] && _dev=$_bdev
++        push host_devs $_dev
+         [[ "$_mp" == "/" ]] && root_dev="$_dev"
+         push host_devs "$_dev"
+     done

@@ -1,0 +1,26 @@
+From aacdba2bdb3efddd7b3b9cdb149204d86f5020b0 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Tue, 6 Aug 2013 16:56:42 +0200
+Subject: [PATCH] dracut.sh: check the value of --kver
+
+https://bugzilla.redhat.com/show_bug.cgi?id=993327
+---
+ dracut.sh | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/dracut.sh b/dracut.sh
+index 4ef71f3..0b674ae 100755
+--- a/dracut.sh
++++ b/dracut.sh
+@@ -478,6 +478,11 @@ if [[ $regenerate_all == "yes" ]]; then
+         ((ret+=$?))
+     done
+     exit $ret
++elif [[ $kernel ]]; then
++    if ! [[ -d /lib/modules/$kernel ]] && [[ $no_kernel != yes ]]; then
++        printf -- "Kernel version $kernel has no modules in /lib/modules/$kernel\n" >&2
++        exit 1
++    fi
+ fi
+ 
+ if ! [[ $kernel ]]; then

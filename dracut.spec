@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 031
-Release: 7.git20130801%{?dist}
+Release: 22.git20130809%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -35,6 +35,21 @@ Patch3: 0003-Change-the-implementation-of-action_on_fail.patch
 Patch4: 0004-lvm-add-yes-to-lvm-lvchange.patch
 Patch5: 0005-cms-cmssetup.sh-correct-port-for-zfcp.conf.patch
 Patch6: 0006-95terminfo-install-vt102.patch
+Patch7: 0007-lsinitrd.sh-add-old-cpio-signature.patch
+Patch8: 0008-dracut.sh-call-find-with-print0-and-cpio-with-null.patch
+Patch9: 0009-dracut.asc-small-corrections.patch
+Patch10: 0010-systemd-dracut-initqueue.sh-continue-to-boot-if-fini.patch
+Patch11: 0011-dracut.sh-dracut-functions.sh-handle-root-on-non-blo.patch
+Patch12: 0012-dracut-functions.sh-removed-non-dracut-install-shell.patch
+Patch13: 0013-dracut-functions.sh-inst_multiple-dracut_install.patch
+Patch14: 0014-51-dracut-rescue.install-fixed-rescue-image-creation.patch
+Patch15: 0015-dracut.sh-do-not-strip-in-FIPS-mode.patch
+Patch16: 0016-dracut.sh-check-the-value-of-kver.patch
+Patch17: 0017-crypt-Fix-typo-etc-crypttab-not-etc-cryptab.patch
+Patch18: 0018-network-net-lib.sh-fix-ibft-interface-configuration.patch
+Patch19: 0019-iscsi-module-setup.sh-install-some-modules-regardles.patch
+Patch20: 0020-multipath-need_shutdown-if-multipath-devices-exist.patch
+Patch21: 0021-omit-drivers-fix.patch
 
 
 BuildRequires: bash git
@@ -450,6 +465,25 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Fri Aug 09 2013 Harald Hoyer <harald@redhat.com> 031-22.git20130809
+- lsinitrd.sh: add old cpio signature
+- dracut.sh: call find with -print0 and cpio with --null
+- dracut.asc: small corrections
+- systemd/dracut-initqueue.sh: continue to boot if finished failed
+- dracut.sh/dracut-functions.sh: handle root on non-block device
+- dracut-functions.sh: removed non dracut-install shell functions
+- dracut-functions.sh: inst_multiple == dracut_install
+- 51-dracut-rescue.install: fixed rescue image creation
+- dracut.sh: do not strip in FIPS mode
+Resolves: rhbz#990250
+- dracut.sh: check the value of --kver
+- crypt: Fix typo--/etc/crypttab not /etc/cryptab
+- network/net-lib.sh: fix ibft interface configuration
+- iscsi/module-setup.sh: install some modules regardless of hostonly
+- multipath: need_shutdown if multipath devices exist
+Resolves: rhbz#994913
+- omit drivers fix
+
 * Thu Aug 01 2013 Harald Hoyer <harald@redhat.com> 031-7.git20130801
 - also install vt102 terminfo
 

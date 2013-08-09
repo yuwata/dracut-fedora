@@ -1,0 +1,24 @@
+From 7929ec198fa693f07160518b6858e967fdd53f48 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 9 Aug 2013 10:33:27 +0200
+Subject: [PATCH] iscsi/module-setup.sh: install some modules regardless of
+ hostonly
+
+---
+ modules.d/95iscsi/module-setup.sh | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/modules.d/95iscsi/module-setup.sh b/modules.d/95iscsi/module-setup.sh
+index 3f817ec..502e834 100755
+--- a/modules.d/95iscsi/module-setup.sh
++++ b/modules.d/95iscsi/module-setup.sh
+@@ -36,7 +36,8 @@ depends() {
+ installkernel() {
+     local _arch=$(uname -m)
+ 
+-    instmods iscsi_tcp iscsi_ibft crc32c bnx2i iscsi_boot_sysfs qla4xxx cxgb3i cxgb4i be2iscsi
++    instmods bnx2i qla4xxx cxgb3i cxgb4i be2iscsi
++    hostonly="" instmods iscsi_tcp iscsi_ibft crc32c iscsi_boot_sysfs
+     iscsi_module_filter() {
+         local _funcs='iscsi_register_transport'
+         # subfunctions inherit following FDs
