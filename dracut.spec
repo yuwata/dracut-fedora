@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 031
-Release: 24.git20130809%{?dist}
+Release: 28.git20130812%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -52,6 +52,10 @@ Patch20: 0020-multipath-need_shutdown-if-multipath-devices-exist.patch
 Patch21: 0021-omit-drivers-fix.patch
 Patch22: 0022-lsinitrd.sh-fixed-case.patch
 Patch23: 0023-dracut-logger.sh-do-not-unset-logging-messages-if-sy.patch
+Patch24: 0024-dracut-logger.sh-saveguard-logger-with.patch
+Patch25: 0025-dracut.sh-use-local-lsinitrd.sh-for-l.patch
+Patch26: 0026-dracut.sh-fixed-typo.patch
+Patch27: 0027-base-don-t-install-switch_root-if-systemd-is-used.patch
 
 
 BuildRequires: bash git
@@ -467,6 +471,9 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Mon Aug 12 2013 Harald Hoyer <harald@redhat.com> 031-28.git20130812
+- fixed typo in hostonly device recognition
+
 * Fri Aug 09 2013 Harald Hoyer <harald@redhat.com> 031-24.git20130809
 - fixed logging to journal
 

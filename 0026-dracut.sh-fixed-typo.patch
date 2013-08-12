@@ -1,0 +1,22 @@
+From e95b672376314602777989bcb416bf7037ca77bc Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 12 Aug 2013 12:46:35 +0200
+Subject: [PATCH] dracut.sh: fixed typo
+
+---
+ dracut.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/dracut.sh b/dracut.sh
+index 6208c82..2ac3d8b 100755
+--- a/dracut.sh
++++ b/dracut.sh
+@@ -877,7 +877,7 @@ if [[ $hostonly ]]; then
+         mp=$(readlink -f "$mp")
+         mountpoint "$mp" >/dev/null 2>&1 || continue
+         _dev=$(find_block_device "$mp")
+-        _bdev=$(readlink -f "/dev/block/$dev")
++        _bdev=$(readlink -f "/dev/block/$_dev")
+         [[ -b $_bdev ]] && _dev=$_bdev
+         push host_devs $_dev
+         [[ "$_mp" == "/" ]] && root_dev="$_dev"

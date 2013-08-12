@@ -1,0 +1,26 @@
+From 109283a8830f7b9c1d4bb6b4852f1bff0d36bf30 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 12 Aug 2013 12:57:13 +0200
+Subject: [PATCH] base: don't install switch_root, if systemd is used
+
+---
+ modules.d/99base/module-setup.sh | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/modules.d/99base/module-setup.sh b/modules.d/99base/module-setup.sh
+index f217ccb..52ce400 100755
+--- a/modules.d/99base/module-setup.sh
++++ b/modules.d/99base/module-setup.sh
+@@ -41,11 +41,10 @@ install() {
+ 
+     mkdir -p ${initdir}/tmp
+ 
+-    inst_multiple switch_root || dfatal "Failed to install switch_root"
+-
+     inst_simple "$moddir/dracut-lib.sh" "/lib/dracut-lib.sh"
+ 
+     if ! dracut_module_included "systemd"; then
++        inst_multiple switch_root || dfatal "Failed to install switch_root"
+         inst_hook cmdline 10 "$moddir/parse-root-opts.sh"
+     fi
+ 
