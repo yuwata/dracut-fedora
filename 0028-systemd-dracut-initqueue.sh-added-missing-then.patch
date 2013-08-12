@@ -1,0 +1,22 @@
+From e8b9702c0a7837c901addbdc964eccfc71e7a3df Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 12 Aug 2013 13:08:17 +0200
+Subject: [PATCH] systemd/dracut-initqueue.sh: added missing "then"
+
+---
+ modules.d/98systemd/dracut-initqueue.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/modules.d/98systemd/dracut-initqueue.sh b/modules.d/98systemd/dracut-initqueue.sh
+index 893ebc4..d7ebf2b 100755
+--- a/modules.d/98systemd/dracut-initqueue.sh
++++ b/modules.d/98systemd/dracut-initqueue.sh
+@@ -62,7 +62,7 @@ while :; do
+     fi
+ 
+     main_loop=$(($main_loop+1))
+-    if [ $main_loop -gt $RDRETRY ];
++    if [ $main_loop -gt $RDRETRY ]; then
+         if ! [ -d /sysroot/etc/fstab ] || ! [ -e /sysroot/sbin/init ] ; then
+             action_on_fail "Could not boot." && break
+         fi

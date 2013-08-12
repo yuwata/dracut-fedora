@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 031
-Release: 28.git20130812%{?dist}
+Release: 29.git20130812%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -56,6 +56,7 @@ Patch24: 0024-dracut-logger.sh-saveguard-logger-with.patch
 Patch25: 0025-dracut.sh-use-local-lsinitrd.sh-for-l.patch
 Patch26: 0026-dracut.sh-fixed-typo.patch
 Patch27: 0027-base-don-t-install-switch_root-if-systemd-is-used.patch
+Patch28: 0028-systemd-dracut-initqueue.sh-added-missing-then.patch
 
 
 BuildRequires: bash git
@@ -471,6 +472,9 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Mon Aug 12 2013 Harald Hoyer <harald@redhat.com> 031-29.git20130812
+- added missing "then" in initqueue
+
 * Mon Aug 12 2013 Harald Hoyer <harald@redhat.com> 031-28.git20130812
 - fixed typo in hostonly device recognition
 
