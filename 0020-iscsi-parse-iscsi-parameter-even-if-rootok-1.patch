@@ -1,0 +1,23 @@
+From 5ecc117a25db5d8d1d61953d86f0cbbc0b5e0ef3 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Tue, 3 Sep 2013 15:23:28 +0200
+Subject: [PATCH] iscsi: parse iscsi parameter, even if rootok=1
+
+---
+ modules.d/95iscsi/parse-iscsiroot.sh | 3 ---
+ 1 file changed, 3 deletions(-)
+
+diff --git a/modules.d/95iscsi/parse-iscsiroot.sh b/modules.d/95iscsi/parse-iscsiroot.sh
+index 286e3dc..e83ef32 100755
+--- a/modules.d/95iscsi/parse-iscsiroot.sh
++++ b/modules.d/95iscsi/parse-iscsiroot.sh
+@@ -13,9 +13,6 @@
+ # root= takes precedence over netroot= if root=iscsi[...]
+ #
+ 
+-# Don't continue if root is ok
+-[ -n "$rootok" ] && return
+-
+ # This script is sourced, so root should be set. But let's be paranoid
+ [ -z "$root" ] && root=$(getarg root=)
+ [ -z "$netroot" ] && netroot=$(getarg netroot=)

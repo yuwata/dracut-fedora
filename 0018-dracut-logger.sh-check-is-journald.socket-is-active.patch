@@ -1,0 +1,26 @@
+From 6a877a79c4c94d4e6752c981559ac85f21073973 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 28 Aug 2013 20:01:54 +0200
+Subject: [PATCH] dracut-logger.sh: check is journald.socket is active
+
+before using systemd-cat, make sure someone is listening
+---
+ dracut-logger.sh | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/dracut-logger.sh b/dracut-logger.sh
+index 0c505e2..b052581 100755
+--- a/dracut-logger.sh
++++ b/dracut-logger.sh
+@@ -141,7 +141,10 @@ dlog_init() {
+     fi
+ 
+     if (( $sysloglvl > 0 )); then
+-        if [[ -d /run/systemd/journal ]] && type -P systemd-cat &>/dev/null && (( $UID  == 0 )) ; then
++        if [[ -d /run/systemd/journal ]] \
++            && type -P systemd-cat &>/dev/null \
++            && (( $UID  == 0 )) \
++            && systemctl is-active systemd-journald.socket  &>/dev/null; then
+             readonly _dlogdir="$(mktemp --tmpdir="$TMPDIR/" -d -t dracut-log.XXXXXX)"
+             readonly _systemdcatfile="$_dlogdir/systemd-cat"
+             mkfifo "$_systemdcatfile"

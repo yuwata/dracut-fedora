@@ -1,0 +1,80 @@
+From c82a11334d53f26ac158df9bcfca1a4e2ad39ae0 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Tue, 20 Aug 2013 16:01:10 +0200
+Subject: [PATCH] dracut-functions.sh: add expand_persistent_dev()
+
+also fixes missing '{' for LABEL=... swaps
+---
+ dracut-functions.sh | 38 +++++++++++++++++++++++++++++++-------
+ dracut.sh           |  3 +--
+ 2 files changed, 32 insertions(+), 9 deletions(-)
+
+diff --git a/dracut-functions.sh b/dracut-functions.sh
+index 1d70bd0..6c7e693 100755
+--- a/dracut-functions.sh
++++ b/dracut-functions.sh
+@@ -323,19 +323,43 @@ get_persistent_dev() {
+     done
+ }
+ 
++expand_persistent_dev() {
++    local _dev=$1
++
++    case "$_dev" in
++        LABEL=*)
++            _dev="/dev/disk/by-label/${_dev#LABEL=}"
++            ;;
++        UUID=*)
++            _dev="${_dev#UUID=}"
++            _dev="$(tr "[:upper:]" "[:lower:]" <<< "$_dev" )"
++            _dev="/dev/disk/by-uuid/${_dev}"
++            ;;
++        PARTUUID=*)
++            _dev="${_dev#PARTUUID=}"
++            _dev="$(tr "[:upper:]" "[:lower:]"  <<< "$_dev" )"
++            _dev="/dev/disk/by-partuuid/${_dev}"
++            ;;
++        PARTLABEL=*)
++            _dev="/dev/disk/by-partlabel/${_dev#PARTLABEL=}"
++            ;;
++    esac
++    printf "%s" "$_dev"
++}
++
+ shorten_persistent_dev() {
+-    local dev="$1"
+-    case "$dev" in
++    local _dev="$1"
++    case "$_dev" in
+         /dev/disk/by-uuid/*)
+-            printf "%s" "UUID=${dev##*/}";;
++            printf "%s" "UUID=${_dev##*/}";;
+         /dev/disk/by-label/*)
+-            printf "%s" "LABEL=${dev##*/}";;
++            printf "%s" "LABEL=${_dev##*/}";;
+         /dev/disk/by-partuuid/*)
+-            printf "%s" "PARTUUID=${dev##*/}";;
++            printf "%s" "PARTUUID=${_dev##*/}";;
+         /dev/disk/by-partlabel/*)
+-            printf "%s" "PARTLABEL=${dev##*/}";;
++            printf "%s" "PARTLABEL=${_dev##*/}";;
+         *)
+-            printf "%s" "$dev";;
++            printf "%s" "$_dev";;
+     esac
+ }
+ 
+diff --git a/dracut.sh b/dracut.sh
+index 117f877..0c42958 100755
+--- a/dracut.sh
++++ b/dracut.sh
+@@ -913,8 +913,7 @@ if [[ $hostonly ]]; then
+                 [[ $_t != "swap" ]] && continue
+                 [[ $_m != "swap" ]] && [[ $_m != "none" ]] && continue
+                 [[ "$_o" == *noauto* ]] && continue
+-                [[ "$_d" == UUID\=* ]] && _d="/dev/disk/by-uuid/${_d#UUID=}"
+-                [[ "$_d" == LABEL\=* ]] && _d="/dev/disk/by-label/$_d#LABEL=}"
++                _d=$(expand_persistent_dev "$_d")
+                 [[ "$_d" -ef "$dev" ]] || continue
+ 
+                 if [[ -f /etc/crypttab ]]; then

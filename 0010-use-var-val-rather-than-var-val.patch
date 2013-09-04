@@ -1,0 +1,293 @@
+From ffc68f357e95f7c8e9240e45dee2a46a3df567d7 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 22 Aug 2013 11:24:01 +0200
+Subject: [PATCH] use ${var:+val} rather than ${var+val}
+
+${var:+val} also catches var=""
+---
+ 50-dracut.install                      |  2 +-
+ dracut-functions.sh                    | 42 ++++++++++++++++------------------
+ dracut.sh                              |  4 ++--
+ modules.d/40network/dhclient-script.sh |  2 +-
+ modules.d/40network/ifup.sh            |  4 ++--
+ modules.d/95iscsi/iscsiroot.sh         | 14 ++++++------
+ modules.d/95nbd/nbdroot.sh             |  4 ++--
+ modules.d/95nfs/nfs-lib.sh             |  2 +-
+ test/TEST-04-FULL-SYSTEMD/test.sh      |  2 +-
+ test/TEST-50-MULTINIC/test.sh          |  2 +-
+ 10 files changed, 38 insertions(+), 40 deletions(-)
+
+diff --git a/50-dracut.install b/50-dracut.install
+index a0623a1..0282741 100755
+--- a/50-dracut.install
++++ b/50-dracut.install
+@@ -22,7 +22,7 @@ done
+ ret=0
+ case "$1" in
+     add)
+-	dracut ${noimageifnotneeded+--noimageifnotneeded} "$3"/initrd "$2"
++	dracut ${noimageifnotneeded:+--noimageifnotneeded} "$3"/initrd "$2"
+         ret=$?
+ 	;;
+     remove)
+diff --git a/dracut-functions.sh b/dracut-functions.sh
+index 8f32f07..8a1b73f 100755
+--- a/dracut-functions.sh
++++ b/dracut-functions.sh
+@@ -688,37 +688,37 @@ fi
+ [[ $DRACUT_RESOLVE_LAZY ]] || export DRACUT_RESOLVE_DEPS=1
+ inst_dir() {
+     [[ -e ${initdir}/"$1" ]] && return 0  # already there
+-    $DRACUT_INSTALL ${initdir+-D "$initdir"} -d "$@"
+-    (($? != 0)) && derror $DRACUT_INSTALL ${initdir+-D "$initdir"} -d "$@" || :
++    $DRACUT_INSTALL ${initdir:+-D "$initdir"} -d "$@"
++    (($? != 0)) && derror $DRACUT_INSTALL ${initdir:+-D "$initdir"} -d "$@" || :
+ }
+ 
+ inst() {
+     [[ -e ${initdir}/"${2:-$1}" ]] && return 0  # already there
+         #dinfo "$DRACUT_INSTALL -l $@"
+-    $DRACUT_INSTALL ${initdir+-D "$initdir"} ${DRACUT_RESOLVE_DEPS+-l} ${DRACUT_FIPS_MODE+-H} "$@"
+-    (($? != 0)) && derror $DRACUT_INSTALL ${initdir+-D "$initdir"} ${DRACUT_RESOLVE_DEPS+-l} ${DRACUT_FIPS_MODE+-H} "$@" || :
++    $DRACUT_INSTALL ${initdir:+-D "$initdir"} ${DRACUT_RESOLVE_DEPS:+-l} ${DRACUT_FIPS_MODE:+-H} "$@"
++    (($? != 0)) && derror $DRACUT_INSTALL ${initdir:+-D "$initdir"} ${DRACUT_RESOLVE_DEPS:+-l} ${DRACUT_FIPS_MODE:+-H} "$@" || :
+ }
+ 
+ inst_simple() {
+     [[ -e ${initdir}/"${2:-$1}" ]] && return 0  # already there
+     [[ -e $1 ]] || return 1  # no source
+-    $DRACUT_INSTALL ${initdir+-D "$initdir"} "$@"
+-    (($? != 0)) && derror $DRACUT_INSTALL ${initdir+-D "$initdir"} "$@" || :
++    $DRACUT_INSTALL ${initdir:+-D "$initdir"} "$@"
++    (($? != 0)) && derror $DRACUT_INSTALL ${initdir:+-D "$initdir"} "$@" || :
+ }
+ 
+ inst_symlink() {
+     [[ -e ${initdir}/"${2:-$1}" ]] && return 0  # already there
+     [[ -L $1 ]] || return 1
+-    $DRACUT_INSTALL ${initdir+-D "$initdir"} ${DRACUT_RESOLVE_DEPS+-l}  ${DRACUT_FIPS_MODE+-H} "$@"
+-    (($? != 0)) && derror $DRACUT_INSTALL ${initdir+-D "$initdir"} ${DRACUT_RESOLVE_DEPS+-l}  ${DRACUT_FIPS_MODE+-H} "$@" || :
++    $DRACUT_INSTALL ${initdir:+-D "$initdir"} ${DRACUT_RESOLVE_DEPS:+-l}  ${DRACUT_FIPS_MODE:+-H} "$@"
++    (($? != 0)) && derror $DRACUT_INSTALL ${initdir:+-D "$initdir"} ${DRACUT_RESOLVE_DEPS:+-l}  ${DRACUT_FIPS_MODE:+-H} "$@" || :
+ }
+ 
+ inst_multiple() {
+     local ret
+         #dinfo "initdir=$initdir $DRACUT_INSTALL -l $@"
+-    $DRACUT_INSTALL ${initdir+-D "$initdir"} -a ${DRACUT_RESOLVE_DEPS+-l}  ${DRACUT_FIPS_MODE+-H} "$@"
++    $DRACUT_INSTALL ${initdir:+-D "$initdir"} -a ${DRACUT_RESOLVE_DEPS:+-l}  ${DRACUT_FIPS_MODE:+-H} "$@"
+     ret=$?
+-    (($ret != 0)) && derror $DRACUT_INSTALL ${initdir+-D "$initdir"} -a ${DRACUT_RESOLVE_DEPS+-l}  ${DRACUT_FIPS_MODE+-H} "$@" || :
++    (($ret != 0)) && derror $DRACUT_INSTALL ${initdir:+-D "$initdir"} -a ${DRACUT_RESOLVE_DEPS:+-l}  ${DRACUT_FIPS_MODE:+-H} "$@" || :
+     return $ret
+ }
+ 
+@@ -729,18 +729,18 @@ dracut_install() {
+ inst_library() {
+     [[ -e ${initdir}/"${2:-$1}" ]] && return 0  # already there
+     [[ -e $1 ]] || return 1  # no source
+-    $DRACUT_INSTALL ${initdir+-D "$initdir"} ${DRACUT_RESOLVE_DEPS+-l}  ${DRACUT_FIPS_MODE+-H} "$@"
+-    (($? != 0)) && derror $DRACUT_INSTALL ${initdir+-D "$initdir"} ${DRACUT_RESOLVE_DEPS+-l}  ${DRACUT_FIPS_MODE+-H} "$@" || :
++    $DRACUT_INSTALL ${initdir:+-D "$initdir"} ${DRACUT_RESOLVE_DEPS:+-l}  ${DRACUT_FIPS_MODE:+-H} "$@"
++    (($? != 0)) && derror $DRACUT_INSTALL ${initdir:+-D "$initdir"} ${DRACUT_RESOLVE_DEPS:+-l}  ${DRACUT_FIPS_MODE:+-H} "$@" || :
+ }
+ 
+ inst_binary() {
+-    $DRACUT_INSTALL ${initdir+-D "$initdir"} ${DRACUT_RESOLVE_DEPS+-l}  ${DRACUT_FIPS_MODE+-H} "$@"
+-    (($? != 0)) && derror $DRACUT_INSTALL ${initdir+-D "$initdir"} ${DRACUT_RESOLVE_DEPS+-l}  ${DRACUT_FIPS_MODE+-H} "$@" || :
++    $DRACUT_INSTALL ${initdir:+-D "$initdir"} ${DRACUT_RESOLVE_DEPS:+-l}  ${DRACUT_FIPS_MODE:+-H} "$@"
++    (($? != 0)) && derror $DRACUT_INSTALL ${initdir:+-D "$initdir"} ${DRACUT_RESOLVE_DEPS:+-l}  ${DRACUT_FIPS_MODE:+-H} "$@" || :
+ }
+ 
+ inst_script() {
+-    $DRACUT_INSTALL ${initdir+-D "$initdir"} ${DRACUT_RESOLVE_DEPS+-l}  ${DRACUT_FIPS_MODE+-H} "$@"
+-    (($? != 0)) && derror $DRACUT_INSTALL ${initdir+-D "$initdir"} ${DRACUT_RESOLVE_DEPS+-l}  ${DRACUT_FIPS_MODE+-H} "$@" || :
++    $DRACUT_INSTALL ${initdir:+-D "$initdir"} ${DRACUT_RESOLVE_DEPS:+-l}  ${DRACUT_FIPS_MODE:+-H} "$@"
++    (($? != 0)) && derror $DRACUT_INSTALL ${initdir:+-D "$initdir"} ${DRACUT_RESOLVE_DEPS:+-l}  ${DRACUT_FIPS_MODE:+-H} "$@" || :
+ }
+ 
+ # find symlinks linked to given library file
+@@ -850,13 +850,11 @@ inst_rule_initqueue() {
+ inst_rules() {
+     local _target=/etc/udev/rules.d _rule _found
+ 
+-    [[ $hostonly ]] || unset hostonly
+-
+     inst_dir "${udevdir}/rules.d"
+     inst_dir "$_target"
+     for _rule in "$@"; do
+         if [ "${_rule#/}" = "$_rule" ]; then
+-            for r in ${udevdir}/rules.d ${hostonly+/etc/udev/rules.d}; do
++            for r in ${udevdir}/rules.d ${hostonly:+/etc/udev/rules.d}; do
+                 if [[ -e $r/$_rule ]]; then
+                     _found="$r/$_rule"
+                     inst_rule_programs "$_found"
+@@ -1388,7 +1386,7 @@ dracut_kernel_post() {
+     local _pid
+ 
+     if [[ $DRACUT_KERNEL_LAZY_HASHDIR ]] && [[ -f "$DRACUT_KERNEL_LAZY_HASHDIR/lazylist" ]]; then
+-        xargs -r modprobe -a ${_moddirname+-d ${_moddirname}/} \
++        xargs -r modprobe -a ${_moddirname:+-d ${_moddirname}/} \
+             --ignore-install --show-depends --set-version $kernel \
+             < "$DRACUT_KERNEL_LAZY_HASHDIR/lazylist" 2>/dev/null \
+             | sort -u \
+@@ -1399,7 +1397,7 @@ dracut_kernel_post() {
+ 
+         (
+             if [[ $DRACUT_INSTALL ]] && [[ -z $_moddirname ]]; then
+-                xargs -r $DRACUT_INSTALL ${initdir+-D "$initdir"} -a < "$DRACUT_KERNEL_LAZY_HASHDIR/lazylist.dep"
++                xargs -r $DRACUT_INSTALL ${initdir:+-D "$initdir"} -a < "$DRACUT_KERNEL_LAZY_HASHDIR/lazylist.dep"
+             else
+                 while read _modpath; do
+                     local _destpath=$_modpath
+@@ -1418,7 +1416,7 @@ dracut_kernel_post() {
+                 for _fwdir in $fw_dir; do
+                     echo $_fwdir/$line;
+                 done;
+-            done | xargs -r $DRACUT_INSTALL ${initdir+-D "$initdir"} -a -o
++            done | xargs -r $DRACUT_INSTALL ${initdir:+-D "$initdir"} -a -o
+         else
+             for _fw in $(xargs -r modinfo -k $kernel -F firmware < "$DRACUT_KERNEL_LAZY_HASHDIR/lazylist.dep"); do
+                 for _fwdir in $fw_dir; do
+diff --git a/dracut.sh b/dracut.sh
+index 0c42958..7ad9d1e 100755
+--- a/dracut.sh
++++ b/dracut.sh
+@@ -729,7 +729,7 @@ fi
+ 
+ if ! [[ $print_cmdline ]]; then
+     inst /bin/sh
+-    if ! $DRACUT_INSTALL ${initdir+-D "$initdir"} -R "$initdir/bin/sh" &>/dev/null; then
++    if ! $DRACUT_INSTALL ${initdir:+-D "$initdir"} -R "$initdir/bin/sh" &>/dev/null; then
+         unset DRACUT_RESOLVE_LAZY
+         export DRACUT_RESOLVE_DEPS=1
+     fi
+@@ -1184,7 +1184,7 @@ if [[ $kernel_only != yes ]]; then
+         find "$initdir" -type f \
+             '(' -perm -0100 -or -perm -0010 -or -perm -0001 ')' \
+             -not -path '*.ko' -print0 \
+-        | xargs -r -0 $DRACUT_INSTALL ${initdir+-D "$initdir"} -R ${DRACUT_FIPS_MODE+-H} --
++        | xargs -r -0 $DRACUT_INSTALL ${initdir:+-D "$initdir"} -R ${DRACUT_FIPS_MODE:+-H} --
+         dinfo "*** Resolving executable dependencies done***"
+     fi
+ fi
+diff --git a/modules.d/40network/dhclient-script.sh b/modules.d/40network/dhclient-script.sh
+index f04b83d..07c3d9b 100755
+--- a/modules.d/40network/dhclient-script.sh
++++ b/modules.d/40network/dhclient-script.sh
+@@ -42,7 +42,7 @@ setup_interface() {
+ 
+     # Note: hostname can be fqdn OR short hostname, so chop off any
+     # trailing domain name and explicity add any domain if set.
+-    [ -n "$hostname" ] && echo "echo ${hostname%.$domain}${domain+.$domain} > /proc/sys/kernel/hostname" > /tmp/net.$netif.hostname
++    [ -n "$hostname" ] && echo "echo ${hostname%.$domain}${domain:+.$domain} > /proc/sys/kernel/hostname" > /tmp/net.$netif.hostname
+ }
+ 
+ PATH=/usr/sbin:/usr/bin:/sbin:/bin
+diff --git a/modules.d/40network/ifup.sh b/modules.d/40network/ifup.sh
+index 32f0ff2..f9e1669 100755
+--- a/modules.d/40network/ifup.sh
++++ b/modules.d/40network/ifup.sh
+@@ -124,10 +124,10 @@ do_static() {
+     [ -n "$mtu" ] && ip link set mtu $mtu dev $netif
+     if strstr $ip '*:*:*'; then
+         # note no ip addr flush for ipv6
+-        ip addr add $ip/$mask ${srv+peer $srv} dev $netif
++        ip addr add $ip/$mask ${srv:+peer $srv} dev $netif
+     else
+         ip addr flush dev $netif
+-        ip addr add $ip/$mask ${srv+peer $srv} brd + dev $netif
++        ip addr add $ip/$mask ${srv:+peer $srv} brd + dev $netif
+     fi
+ 
+     [ -n "$gw" ] && echo ip route add default via $gw dev $netif > /tmp/net.$netif.gw
+diff --git a/modules.d/95iscsi/iscsiroot.sh b/modules.d/95iscsi/iscsiroot.sh
+index 0c04219..5181f52 100755
+--- a/modules.d/95iscsi/iscsiroot.sh
++++ b/modules.d/95iscsi/iscsiroot.sh
+@@ -96,7 +96,7 @@ handle_netroot()
+ # XXX is this needed?
+     getarg ro && iscsirw=ro
+     getarg rw && iscsirw=rw
+-    fsopts=${fsopts+$fsopts,}${iscsirw}
++    fsopts=${fsopts:+$fsopts,}${iscsirw}
+ 
+     if [ -z $iscsi_initiator ]; then
+     # XXX Where are these from?
+@@ -155,12 +155,12 @@ handle_netroot()
+     iscsistart -i $iscsi_initiator -t $iscsi_target_name        \
+         -g $iscsi_target_group -a $iscsi_target_ip      \
+         -p $iscsi_target_port \
+-        ${iscsi_username+-u $iscsi_username} \
+-        ${iscsi_password+-w $iscsi_password} \
+-        ${iscsi_in_username+-U $iscsi_in_username} \
+-        ${iscsi_in_password+-W $iscsi_in_password} \
+-	${iscsi_iface_name+--param iface.iscsi_ifacename=$iscsi_iface_name} \
+-	${iscsi_netdev_name+--param iface.net_ifacename=$iscsi_netdev_name} \
++        ${iscsi_username:+-u $iscsi_username} \
++        ${iscsi_password:+-w $iscsi_password} \
++        ${iscsi_in_username:+-U $iscsi_in_username} \
++        ${iscsi_in_password:+-W $iscsi_in_password} \
++	${iscsi_iface_name:+--param iface.iscsi_ifacename=$iscsi_iface_name} \
++	${iscsi_netdev_name:+--param iface.net_ifacename=$iscsi_netdev_name} \
+         ${iscsi_param} \
+ 	|| :
+ 
+diff --git a/modules.d/95nbd/nbdroot.sh b/modules.d/95nbd/nbdroot.sh
+index 1a1ed54..823da0e 100755
+--- a/modules.d/95nbd/nbdroot.sh
++++ b/modules.d/95nbd/nbdroot.sh
+@@ -76,12 +76,12 @@ while [ -n "$nbdflags" ]; do
+         nbdrw=$f
+         continue
+     fi
+-    fsopts=${fsopts+$fsopts,}$f
++    fsopts=${fsopts:+$fsopts,}$f
+ done
+ 
+ getarg ro && nbdrw=ro
+ getarg rw && nbdrw=rw
+-fsopts=${fsopts+$fsopts,}${nbdrw}
++fsopts=${fsopts:+$fsopts,}${nbdrw}
+ 
+ # XXX better way to wait for the device to be made?
+ i=0
+diff --git a/modules.d/95nfs/nfs-lib.sh b/modules.d/95nfs/nfs-lib.sh
+index 628996c..f5fc56d 100755
+--- a/modules.d/95nfs/nfs-lib.sh
++++ b/modules.d/95nfs/nfs-lib.sh
+@@ -128,7 +128,7 @@ mount_nfs() {
+     nfs_to_var $nfsroot $netif
+     munge_nfs_options
+     if [ "$nfs" = "nfs4" ]; then
+-        options=$options${nfslock+,$nfslock}
++        options=$options${nfslock:+,$nfslock}
+     else
+         # NFSv{2,3} doesn't support using locks as it requires a helper to
+         # transfer the rpcbind state to the new root
+diff --git a/test/TEST-04-FULL-SYSTEMD/test.sh b/test/TEST-04-FULL-SYSTEMD/test.sh
+index d4998d8..3eeb840 100755
+--- a/test/TEST-04-FULL-SYSTEMD/test.sh
++++ b/test/TEST-04-FULL-SYSTEMD/test.sh
+@@ -82,7 +82,7 @@ test_setup() {
+ 	inst "$basedir/modules.d/40network/ifup.sh" "/sbin/ifup"
+ 	inst_multiple grep
+         inst_simple ./fstab /etc/fstab
+-        rpm -ql systemd | xargs -r $DRACUT_INSTALL ${initdir+-D "$initdir"} -o -a -l
++        rpm -ql systemd | xargs -r $DRACUT_INSTALL ${initdir:+-D "$initdir"} -o -a -l
+         inst /lib/systemd/system/systemd-remount-fs.service
+         inst /lib/systemd/systemd-remount-fs
+         inst /lib/systemd/system/systemd-journal-flush.service
+diff --git a/test/TEST-50-MULTINIC/test.sh b/test/TEST-50-MULTINIC/test.sh
+index b616e6b..7c9d544 100755
+--- a/test/TEST-50-MULTINIC/test.sh
++++ b/test/TEST-50-MULTINIC/test.sh
+@@ -20,7 +20,7 @@ run_server() {
+         -display none \
+         -net socket,listen=127.0.0.1:12350 \
+         -net nic,macaddr=52:54:01:12:34:56,model=e1000 \
+-        ${SERIAL+-serial "$SERIAL"} \
++        ${SERIAL:+-serial "$SERIAL"} \
+         -watchdog i6300esb -watchdog-action poweroff \
+         -kernel /boot/vmlinuz-"$KVERSION" \
+         -append "loglevel=7 root=/dev/sda rootfstype=ext3 rw console=ttyS0,115200n81 selinux=0" \

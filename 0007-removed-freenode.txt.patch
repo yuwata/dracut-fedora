@@ -1,0 +1,17 @@
+From 49c062821a481ff409ac2d53ed9dd3ed7331eefb Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 22 Aug 2013 10:24:15 +0200
+Subject: [PATCH] removed freenode.txt
+
+---
+ freenode.txt | 1 -
+ 1 file changed, 1 deletion(-)
+ delete mode 100644 freenode.txt
+
+diff --git a/freenode.txt b/freenode.txt
+deleted file mode 100644
+index 3ed8941..0000000
+--- a/freenode.txt
++++ /dev/null
+@@ -1 +0,0 @@
+-bzMuf3ty

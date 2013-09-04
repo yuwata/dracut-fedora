@@ -1,0 +1,34 @@
+From ace51ef520090e214bac2f6d98f772da0e36376a Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 22 Aug 2013 10:53:43 +0200
+Subject: [PATCH] dracut-functions.sh:inst_rules() do not install from /etc in
+ generic mode
+
+In generic mode, local configuration should not be part of the image.
+
+Also handle symlinks for rule files.
+---
+ dracut-functions.sh | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/dracut-functions.sh b/dracut-functions.sh
+index 87b9769..8f32f07 100755
+--- a/dracut-functions.sh
++++ b/dracut-functions.sh
+@@ -850,12 +850,14 @@ inst_rule_initqueue() {
+ inst_rules() {
+     local _target=/etc/udev/rules.d _rule _found
+ 
++    [[ $hostonly ]] || unset hostonly
++
+     inst_dir "${udevdir}/rules.d"
+     inst_dir "$_target"
+     for _rule in "$@"; do
+         if [ "${_rule#/}" = "$_rule" ]; then
+-            for r in ${udevdir}/rules.d /etc/udev/rules.d; do
+-                if [[ -f $r/$_rule ]]; then
++            for r in ${udevdir}/rules.d ${hostonly+/etc/udev/rules.d}; do
++                if [[ -e $r/$_rule ]]; then
+                     _found="$r/$_rule"
+                     inst_rule_programs "$_found"
+                     inst_rule_group_owner "$_found"

@@ -1,0 +1,17 @@
+From c504d8b4351a5becceec28d98376a301e02ce824 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 22 Aug 2013 10:14:24 +0200
+Subject: [PATCH] freenode IRC #dracut verification
+
+---
+ freenode.txt | 1 +
+ 1 file changed, 1 insertion(+)
+ create mode 100644 freenode.txt
+
+diff --git a/freenode.txt b/freenode.txt
+new file mode 100644
+index 0000000..3ed8941
+--- /dev/null
++++ b/freenode.txt
+@@ -0,0 +1 @@
++bzMuf3ty

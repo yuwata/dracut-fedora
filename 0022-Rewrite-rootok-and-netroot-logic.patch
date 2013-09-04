@@ -1,0 +1,190 @@
+From de74e1ef41148f72b572252eaa5a8e4859cfa929 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 4 Sep 2013 09:45:04 +0200
+Subject: [PATCH] Rewrite "rootok" and "netroot" logic
+
+Previously if "$rootok" = 1, parsing of netroot command line arguments
+was skipped. For multiple netroot arguments, all parse scripts have to
+run.
+
+Previously only the first netroot argument was taken into account for
+the parsing scripts. Now every netroot argument is processed.
+---
+ modules.d/40network/dhcp-root.sh     | 16 ++++++++++------
+ modules.d/40network/netroot.sh       |  1 +
+ modules.d/95cifs/parse-cifsroot.sh   | 16 +++++++---------
+ modules.d/95iscsi/parse-iscsiroot.sh |  7 ++++++-
+ modules.d/95nbd/parse-nbdroot.sh     | 12 +++++++-----
+ modules.d/95nfs/parse-nfsroot.sh     | 20 ++++++++++++++------
+ 6 files changed, 45 insertions(+), 27 deletions(-)
+
+diff --git a/modules.d/40network/dhcp-root.sh b/modules.d/40network/dhcp-root.sh
+index 85c7f08..f2a04e0 100755
+--- a/modules.d/40network/dhcp-root.sh
++++ b/modules.d/40network/dhcp-root.sh
+@@ -2,20 +2,24 @@
+ # -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
+ # ex: ts=8 sw=4 sts=4 et filetype=sh
+ 
+-# Don't continue if root is ok
+-[ -n "$rootok" ] && return
+-
+ # This script is sourced, so root should be set. But let's be paranoid
+ [ -z "$root" ] && root=$(getarg root=)
+-[ -z "$netroot" ] && netroot=$(getarg netroot=)
+ 
+-if [ "$root" = "dhcp" ] || [ "$root" = "dhcp6" ] || [ "$netroot" = "dhcp" ] ; then
++if [ -z "$netroot" ]; then
++    for netroot in $(getargs netroot=); do
++        [ "$netroot" = "dhcp" ] && break
++        [ "$netroot" = "dhcp6" ] && break
++    done
++    [ "$netroot" = "dhcp" ] || [ "$netroot" = "dhcp6" ] || unset netroot
++fi
++
++if [ "$root" = "dhcp" ] || [ "$root" = "dhcp6" ] || [ "$netroot" = "dhcp" ] || [ "$netroot" = "dhcp6" ]; then
+     # Tell ip= checker that we need dhcp
+     NEEDDHCP="1"
+ 
+     # Done, all good!
+     rootok=1
+-    if [ "$netroot" != "dhcp" ] ; then
++    if [ "$netroot" != "dhcp" ] && [ "$netroot" != "dhcp6" ]; then
+         netroot=$root
+     fi
+ 
+diff --git a/modules.d/40network/netroot.sh b/modules.d/40network/netroot.sh
+index daeb14c..8f6945f 100755
+--- a/modules.d/40network/netroot.sh
++++ b/modules.d/40network/netroot.sh
+@@ -51,6 +51,7 @@ if [ -z "$2" ]; then
+         netroot=$new_root_path
+ 
+         # FIXME!
++        unset rootok
+         for f in $hookdir/cmdline/90*.sh; do
+             [ -f "$f" ] && . "$f";
+         done
+diff --git a/modules.d/95cifs/parse-cifsroot.sh b/modules.d/95cifs/parse-cifsroot.sh
+index f376b16..52d5809 100755
+--- a/modules.d/95cifs/parse-cifsroot.sh
++++ b/modules.d/95cifs/parse-cifsroot.sh
+@@ -14,22 +14,20 @@
+ type getarg >/dev/null 2>&1 || . /lib/dracut-lib.sh
+ . /lib/cifs-lib.sh
+ 
+-#Don't continue if root is ok
+-[ -n "$rootok" ] && return
+-
+ # This script is sourced, so root should be set. But let's be paranoid
+ [ -z "$root" ] && root=$(getarg root=)
+-[ -z "$netroot" ] && netroot=$(getarg netroot=)
++
++if [ -z "$netroot" ]; then
++    for netroot in $(getargs netroot=); do
++        [ "${netroot%%:*}" = "cifs" ] && break
++    done
++    [ "${netroot%%:*}" = "cifs" ] || unset netroot
++fi
+ 
+ # Root takes precedence over netroot
+ if [ "${root%%:*}" = "cifs" ] ; then
+-
+-    # Don't continue if root is ok
+-    [ -n "$rootok" ] && return
+-
+     if [ -n "$netroot" ] ; then
+         warn "root takes precedence over netroot. Ignoring netroot"
+-
+     fi
+     netroot=$root
+     unset root
+diff --git a/modules.d/95iscsi/parse-iscsiroot.sh b/modules.d/95iscsi/parse-iscsiroot.sh
+index e83ef32..0c8b524 100755
+--- a/modules.d/95iscsi/parse-iscsiroot.sh
++++ b/modules.d/95iscsi/parse-iscsiroot.sh
+@@ -15,7 +15,12 @@
+ 
+ # This script is sourced, so root should be set. But let's be paranoid
+ [ -z "$root" ] && root=$(getarg root=)
+-[ -z "$netroot" ] && netroot=$(getarg netroot=)
++if [ -z "$netroot" ]; then
++    for netroot in $(getargs netroot=); do
++        [ "${netroot%%:*}" = "iscsi" ] && break
++    done
++    [ "${netroot%%:*}" = "iscsi" ] || unset netroot
++fi
+ [ -z "$iscsiroot" ] && iscsiroot=$(getarg iscsiroot=)
+ [ -z "$iscsi_firmware" ] && getargbool 0 rd.iscsi.firmware -y iscsi_firmware && iscsi_firmware="1"
+ 
+diff --git a/modules.d/95nbd/parse-nbdroot.sh b/modules.d/95nbd/parse-nbdroot.sh
+index ec9e1f6..49c44b6 100755
+--- a/modules.d/95nbd/parse-nbdroot.sh
++++ b/modules.d/95nbd/parse-nbdroot.sh
+@@ -26,14 +26,16 @@ netroot_to_var() {
+ 
+ # This script is sourced, so root should be set. But let's be paranoid
+ [ -z "$root" ] && root=$(getarg root=)
+-[ -z "$netroot" ] && netroot=$(getarg netroot=)
++
++if [ -z "$netroot" ]; then
++    for netroot in $(getargs netroot=); do
++        [ "${netroot%%:*}" = "nbd" ] && break
++    done
++    [ "${netroot%%:*}" = "nbd" ] || unset netroot
++fi
+ 
+ # Root takes precedence over netroot
+ if [ "${root%%:*}" = "nbd" ] ; then
+-
+-    # Don't continue if root is ok
+-    [ -n "$rootok" ] && return
+-
+     if [ -n "$netroot" ] ; then
+         warn "root takes precedence over netroot. Ignoring netroot"
+ 
+diff --git a/modules.d/95nfs/parse-nfsroot.sh b/modules.d/95nfs/parse-nfsroot.sh
+index 283420a..9fc2a8c 100755
+--- a/modules.d/95nfs/parse-nfsroot.sh
++++ b/modules.d/95nfs/parse-nfsroot.sh
+@@ -27,18 +27,19 @@
+ 
+ type getarg >/dev/null 2>&1 || . /lib/dracut-lib.sh
+ 
+-#Don't continue if root is ok
+-[ -n "$rootok" ] && return
+-
+ # This script is sourced, so root should be set. But let's be paranoid
+ [ -z "$root" ] && root=$(getarg root=)
+-[ -z "$netroot" ] && netroot=$(getarg netroot=)
+ [ -z "$nfsroot" ] && nfsroot=$(getarg nfsroot=)
+ 
++[ -n "$netroot" ] && oldnetroot="$netroot"
++
+ # netroot= cmdline argument must be ignored, but must be used if
+ # we're inside netroot to parse dhcp root-path
+ if [ -n "$netroot" ] ; then
+-    if [ "$netroot" = "$(getarg netroot=)" ] ; then
++    for n in $(getargs netroot=); do
++        [ "$n" = "$netroot" ] && break
++    done
++    if [ "$n" = "$netroot" ]; then
+         warn "Ignoring netroot argument for NFS"
+         netroot=$root
+     fi
+@@ -67,7 +68,14 @@ esac
+ # Continue if nfs
+ case "${netroot%%:*}" in
+     nfs|nfs4|/dev/nfs);;
+-    *) unset netroot; return;;
++    *)
++        if [ -n "$oldnetroot" ]; then
++            netroot="$oldnetroot"
++        else
++            unset netroot
++        fi
++        return
++        ;;
+ esac
+ 
+ # Check required arguments

@@ -1,0 +1,22 @@
+From 2b9d8f65a6f3fb8141701753ee5cd75f80849cf8 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 23 Aug 2013 19:04:12 +0200
+Subject: [PATCH] dracut-functions.sh:get_persistent_dev() do not check
+ non-existent dirs
+
+---
+ dracut-functions.sh | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/dracut-functions.sh b/dracut-functions.sh
+index 8a1b73f..c89d816 100755
+--- a/dracut-functions.sh
++++ b/dracut-functions.sh
+@@ -313,6 +313,7 @@ get_persistent_dev() {
+         /dev/disk/by-id/* \
+         /dev/disk/by-path/* \
+         ; do
++        [[ -e "$i" ]] || continue
+         [[ $i == /dev/mapper/control ]] && continue
+         [[ $i == /dev/mapper/mpath* ]] && continue
+         _tmp=$(get_maj_min "$i")

@@ -1,0 +1,64 @@
+From a242ef13e0c2f5982708d898e063f02e1aa027c5 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 26 Aug 2013 10:18:47 +0200
+Subject: [PATCH] network: move ibft parsing before all other network cmdline
+ parser
+
+otherwise the config produced by ibft will not get processed
+---
+ modules.d/40network/module-setup.sh  |  1 +
+ modules.d/40network/parse-ibft.sh    | 10 ++++++++++
+ modules.d/40network/parse-ip-opts.sh |  4 ----
+ 3 files changed, 11 insertions(+), 4 deletions(-)
+ create mode 100755 modules.d/40network/parse-ibft.sh
+
+diff --git a/modules.d/40network/module-setup.sh b/modules.d/40network/module-setup.sh
+index 464e0cb..d2833d0 100755
+--- a/modules.d/40network/module-setup.sh
++++ b/modules.d/40network/module-setup.sh
+@@ -82,6 +82,7 @@ install() {
+     inst_hook pre-udev 50 "$moddir/ifname-genrules.sh"
+     inst_hook pre-udev 60 "$moddir/net-genrules.sh"
+     inst_hook cmdline 91 "$moddir/dhcp-root.sh"
++    inst_hook cmdline 92 "$moddir/parse-ibft.sh"
+     inst_hook cmdline 95 "$moddir/parse-vlan.sh"
+     inst_hook cmdline 96 "$moddir/parse-bond.sh"
+     inst_hook cmdline 96 "$moddir/parse-team.sh"
+diff --git a/modules.d/40network/parse-ibft.sh b/modules.d/40network/parse-ibft.sh
+new file mode 100755
+index 0000000..9776c75
+--- /dev/null
++++ b/modules.d/40network/parse-ibft.sh
+@@ -0,0 +1,10 @@
++#!/bin/sh
++# -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
++# ex: ts=8 sw=4 sts=4 et filetype=sh
++
++command -v getarg >/dev/null          || . /lib/dracut-lib.sh
++command -v ibft_to_cmdline >/dev/null || . /lib/net-lib.sh
++
++# If ibft is requested, read ibft vals and write ip=XXX cmdline args
++[ "ibft" = "$(getarg ip=)" ] && ibft_to_cmdline
++
+diff --git a/modules.d/40network/parse-ip-opts.sh b/modules.d/40network/parse-ip-opts.sh
+index 4ca5098..4bf286d 100755
+--- a/modules.d/40network/parse-ip-opts.sh
++++ b/modules.d/40network/parse-ip-opts.sh
+@@ -15,7 +15,6 @@
+ #
+ 
+ command -v getarg >/dev/null          || . /lib/dracut-lib.sh
+-command -v ibft_to_cmdline >/dev/null || . /lib/net-lib.sh
+ 
+ if [ -n "$netroot" ] && [ -z "$(getarg ip=)" ] && [ -z "$(getarg BOOTIF=)" ]; then
+     # No ip= argument(s) for netroot provided, defaulting to DHCP
+@@ -39,9 +38,6 @@ if [ -n "$NEEDBOOTDEV" ] ; then
+     [ -z "$BOOTDEV" ] && warn "Please supply bootdev argument for multiple ip= lines"
+ fi
+ 
+-# If ibft is requested, read ibft vals and write ip=XXX cmdline args
+-[ "ibft" = "$(getarg ip=)" ] && ibft_to_cmdline
+-
+ # Check ip= lines
+ # XXX Would be nice if we could errorcheck ip addresses here as well
+ for p in $(getargs ip=); do
