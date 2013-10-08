@@ -1,0 +1,48 @@
+From 6c8fc6e377b94e26e6d03cddbf174cb27caad0a6 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Tue, 8 Oct 2013 15:02:14 +0200
+Subject: [PATCH] 10i18n/parse-i18n.sh: parse rd.vconsole and rd.locale
+
+and removed systemd part, because parse-i18n.sh is not even installed in
+systemd driven initramfs images.
+---
+ modules.d/10i18n/parse-i18n.sh | 22 ++++++++--------------
+ 1 file changed, 8 insertions(+), 14 deletions(-)
+
+diff --git a/modules.d/10i18n/parse-i18n.sh b/modules.d/10i18n/parse-i18n.sh
+index 348c5bc..416a746 100755
+--- a/modules.d/10i18n/parse-i18n.sh
++++ b/modules.d/10i18n/parse-i18n.sh
+@@ -19,24 +19,18 @@ inst_key_val() {
+     unset _value
+ }
+ 
+-inst_key_val '' /etc/vconsole.conf vconsole.keymap      KEYMAP      -d KEYTABLE
+-inst_key_val '' /etc/vconsole.conf vconsole.font        FONT        -d SYSFONT
+-inst_key_val '' /etc/vconsole.conf vconsole.font.map    FONT_MAP    -d CONTRANS
+-inst_key_val '' /etc/vconsole.conf vconsole.font.unimap FONT_UNIMAP -d UNIMAP
+-inst_key_val 1  /etc/vconsole.conf vconsole.font.unicode UNICODE vconsole.unicode
+-inst_key_val '' /etc/vconsole.conf vconsole.keymap.ext  EXT_KEYMAP
++inst_key_val '' /etc/vconsole.conf rd.vconsole.keymap vconsole.keymap      KEYMAP      -d KEYTABLE
++inst_key_val '' /etc/vconsole.conf rd.vconsole.font vconsole.font        FONT        -d SYSFONT
++inst_key_val '' /etc/vconsole.conf rd.vconsole.font.map vconsole.font.map    FONT_MAP    -d CONTRANS
++inst_key_val '' /etc/vconsole.conf rd.vconsole.font.unimap vconsole.font.unimap FONT_UNIMAP -d UNIMAP
++inst_key_val 1  /etc/vconsole.conf rd.vconsole.font.unicode vconsole.font.unicode UNICODE vconsole.unicode
++inst_key_val '' /etc/vconsole.conf rd.vconsole.keymap.ext vconsole.keymap.ext  EXT_KEYMAP
+ 
+-inst_key_val '' /etc/locale.conf   locale.LANG   LANG
+-inst_key_val '' /etc/locale.conf   locale.LC_ALL LC_ALL
++inst_key_val '' /etc/locale.conf   rd.locale.LANG locale.LANG   LANG
++inst_key_val '' /etc/locale.conf   rd.locale.LC_ALL locale.LC_ALL LC_ALL
+ 
+ if [ -f /etc/locale.conf ]; then
+     . /etc/locale.conf
+     export LANG
+     export LC_ALL
+ fi
+-
+-if [ -n "$DRACUT_SYSTEMD" ]; then
+-    rm -f -- /etc/udev/rules.d/10-console.rules
+-    rm -f -- /lib/udev/rules.d/10-console.rules
+-    rm -f -- /lib/udev/console_init
+-fi

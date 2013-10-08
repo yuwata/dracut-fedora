@@ -1,0 +1,47 @@
+From 3622d6d7b0806023d60f62fc90b859adaefe5e59 Mon Sep 17 00:00:00 2001
+From: "Brian C. Lane" <bcl@redhat.com>
+Date: Tue, 8 Oct 2013 15:13:44 +0200
+Subject: [PATCH] dmsquash-live: add /dev/mapper/live-base
+
+This is similar to the reason for adding the
+/run/initramfs/live-baseloop symlink -- access to the original live
+image without overlays.
+
+livemedia-creator does not create a osmin.img, so there is no mountable
+device for it to use when rsyncing the live image to the target. It
+needs a device that points to the original live image without overlays.
+
+Note that lmc won't be creating osmin.img, since really isn't needed any
+longer. Its purpose was to provide a minimal image that could be dd'd to
+the target. Now that we use rsync this is no longer necessary.
+
+The included patch adds a /dev/mapper/live-base device that Anaconda can
+use whether or not there is an osmin present.
+---
+ modules.d/90dmsquash-live/dmsquash-live-root.sh | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/modules.d/90dmsquash-live/dmsquash-live-root.sh b/modules.d/90dmsquash-live/dmsquash-live-root.sh
+index 8951f80..5705e8d 100755
+--- a/modules.d/90dmsquash-live/dmsquash-live-root.sh
++++ b/modules.d/90dmsquash-live/dmsquash-live-root.sh
+@@ -144,6 +144,9 @@ do_live_overlay() {
+         over=$OVERLAY_LOOPDEV
+     fi
+     echo 0 $sz snapshot $base $over p 8 | dmsetup create live-rw
++
++    # Create a device that always points to a ro base image
++    echo 0 $sz linear $base 0 | dmsetup create --readonly live-base
+ }
+ 
+ # live cd helper function
+@@ -225,9 +228,6 @@ if [ -n "$ROOTFLAGS" ]; then
+     ROOTFLAGS="-o $ROOTFLAGS"
+ fi
+ 
+-if [ -b "$BASE_LOOPDEV" ]; then
+-    ln -s $BASE_LOOPDEV /run/initramfs/live-baseloop
+-fi
+ ln -s /dev/mapper/live-rw /dev/root
+ printf 'mount %s /dev/mapper/live-rw %s\n' "$ROOTFLAGS" "$NEWROOT" > $hookdir/mount/01-$$-live.sh
+ 
