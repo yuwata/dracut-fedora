@@ -1,0 +1,16 @@
+From 0000000000000deadbeef0000000000000000000 Mon Sep 17 00:00:00 2001
+From: Kyle McMartin <kyle@redhat.com>
+Date: Fri, 11 Oct 2013 17:47:24 -0400
+Subject: [PATCH] add mmc_block and usb_storage on ARM
+
+--- a/modules.d/90kernel-modules/module-setup.sh
++++ b/modules.d/90kernel-modules/module-setup.sh
+@@ -49,7 +49,7 @@ installkernel() {
+             # arm specific modules
+             hostonly='' instmods sdhci_esdhc_imx mmci sdhci_tegra mvsdio omap omapdrm \
+                 omap_hsmmc panel-tfp410 sdhci_dove ahci_platform pata_imx sata_mv \
+-                ehci-tegra
++                ehci-tegra mmc_block usb_storage
+         fi
+ 
+         # install virtual machine support
