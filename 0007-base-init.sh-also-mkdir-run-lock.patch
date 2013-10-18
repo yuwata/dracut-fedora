@@ -1,0 +1,21 @@
+From ab2676d29144097239c189b1a6d938e0420eb580 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 9 Oct 2013 08:20:39 +0200
+Subject: [PATCH] base/init.sh: also mkdir /run/lock
+
+---
+ modules.d/99base/init.sh | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/modules.d/99base/init.sh b/modules.d/99base/init.sh
+index ae73fd2..3ba440a 100755
+--- a/modules.d/99base/init.sh
++++ b/modules.d/99base/init.sh
+@@ -90,6 +90,7 @@ trap "action_on_fail Signal caught!" 0
+ 
+ [ -d /run/initramfs ] || mkdir -p -m 0755 /run/initramfs
+ [ -d /run/log ] || mkdir -p -m 0755 /run/log
++[ -d /run/lock ] || mkdir -p -m 0755 /run/lock
+ 
+ export UDEVVERSION=$(udevadm --version)
+ if [ $UDEVVERSION -gt 166 ]; then

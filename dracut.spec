@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 034
-Release: 8.git20131008%{?dist}
+Release: 18.git20131018%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -35,7 +35,17 @@ Patch3: 0003-10i18n-parse-i18n.sh-parse-rd.vconsole-and-rd.locale.patch
 Patch4: 0004-dracut.sh-do-not-bail-out-if-kernel-modules-dir-is-m.patch
 Patch5: 0005-Doc-cleanup-extend-and-split-and-reuse.patch
 Patch6: 0006-dmsquash-live-add-dev-mapper-live-base.patch
-Patch7: 0007-arm-add-more-modules-for-hostonly.patch
+Patch7: 0007-base-init.sh-also-mkdir-run-lock.patch
+Patch8: 0008-resume-fix-swap-detection-in-hostonly.patch
+Patch9: 0009-resume-remove-resume-genrules.sh.patch
+Patch10: 0010-Add-lzo-lz4-compression-and-read-INITRD_COMPRESS.patch
+Patch11: 0011-lvm-fix-thin-recognition.patch
+Patch12: 0012-dracut.sh-also-mkdir-run-lock-which-is-copied-to.patch
+Patch13: 0013-dracut.sh-no-need-to-make-subdirs-in-run.patch
+Patch14: 0014-network-fcoe-only-redirect-output-to-loginit.pipe-if.patch
+Patch15: 0015-mkdir-basic-dirs-in-run.patch
+Patch16: 0016-dracut-functions.sh-check_block_and_slaves-skip-LVM-.patch
+Patch17: 0017-kernel-modules-ARM-add-mmc_block-usb_storage-to-stat.patch
 
 
 BuildRequires: bash git
@@ -456,6 +466,11 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Fri Oct 18 2013 Harald Hoyer <harald@redhat.com> 034-18.git20131018
+- Fixed LVM with thin provisioning
+Resolves: rhbz#1013767
+- fixed swap detection in host only mode
+
 * Fri Oct 11 2013 Kyle McMartin <kyle@fedoraproject.org> 034-8.git20131008
 - Force mmc_block and usb_storage into ARM initramfs.
 Resolves: rhbz#1015234

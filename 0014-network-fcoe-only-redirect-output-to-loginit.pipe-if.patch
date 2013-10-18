@@ -1,0 +1,36 @@
+From 879546753341a9b2b1ad391a14ebe9fd3f6c27c4 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 16 Oct 2013 11:39:34 +0200
+Subject: [PATCH] network/fcoe: only redirect output to loginit.pipe, if exists
+
+---
+ modules.d/40network/dhclient-script.sh | 2 +-
+ modules.d/95fcoe/fcoe-up.sh            | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/modules.d/40network/dhclient-script.sh b/modules.d/40network/dhclient-script.sh
+index 07c3d9b..af483ac 100755
+--- a/modules.d/40network/dhclient-script.sh
++++ b/modules.d/40network/dhclient-script.sh
+@@ -48,7 +48,7 @@ setup_interface() {
+ PATH=/usr/sbin:/usr/bin:/sbin:/bin
+ 
+ export PS4="dhclient.$interface.$$ + "
+-exec >>/run/initramfs/loginit.pipe 2>>/run/initramfs/loginit.pipe
++[ -e /run/initramfs/loginit.pipe ] && exec >>/run/initramfs/loginit.pipe 2>>/run/initramfs/loginit.pipe
+ type getarg >/dev/null 2>&1 || . /lib/dracut-lib.sh
+ type ip_to_var >/dev/null 2>&1 || . /lib/net-lib.sh
+ 
+diff --git a/modules.d/95fcoe/fcoe-up.sh b/modules.d/95fcoe/fcoe-up.sh
+index ecb1593..8cf39ec 100755
+--- a/modules.d/95fcoe/fcoe-up.sh
++++ b/modules.d/95fcoe/fcoe-up.sh
+@@ -14,7 +14,7 @@ PATH=/usr/sbin:/usr/bin:/sbin:/bin
+ [ -z "$1" -o -z "$2" ] && exit 1
+ 
+ export PS4="fcoe-up.$1.$$ + "
+-exec >>/run/initramfs/loginit.pipe 2>>/run/initramfs/loginit.pipe
++[ -e /run/initramfs/loginit.pipe ] && exec >>/run/initramfs/loginit.pipe 2>>/run/initramfs/loginit.pipe
+ type getarg >/dev/null 2>&1 || . /lib/dracut-lib.sh
+ type ip_to_var >/dev/null 2>&1 || . /lib/net-lib.sh
+ 
