@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 034
-Release: 18.git20131018%{?dist}
+Release: 19.git20131021%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -46,6 +46,7 @@ Patch14: 0014-network-fcoe-only-redirect-output-to-loginit.pipe-if.patch
 Patch15: 0015-mkdir-basic-dirs-in-run.patch
 Patch16: 0016-dracut-functions.sh-check_block_and_slaves-skip-LVM-.patch
 Patch17: 0017-kernel-modules-ARM-add-mmc_block-usb_storage-to-stat.patch
+Patch18: 0018-lvm-always-install-thin-utils-for-lvm.patch
 
 
 BuildRequires: bash git
@@ -466,6 +467,11 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Mon Oct 21 2013 Harald Hoyer <harald@redhat.com> 034-19.git20131021
+- Fixed LVM with thin provisioning
+Resolves: rhbz#1013767
+Resolves: rhbz#1021083
+
 * Fri Oct 18 2013 Harald Hoyer <harald@redhat.com> 034-18.git20131018
 - Fixed LVM with thin provisioning
 Resolves: rhbz#1013767
