@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 034
-Release: 19.git20131021%{?dist}
+Release: 24.git20131030%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -47,6 +47,11 @@ Patch15: 0015-mkdir-basic-dirs-in-run.patch
 Patch16: 0016-dracut-functions.sh-check_block_and_slaves-skip-LVM-.patch
 Patch17: 0017-kernel-modules-ARM-add-mmc_block-usb_storage-to-stat.patch
 Patch18: 0018-lvm-always-install-thin-utils-for-lvm.patch
+Patch19: 0019-usrmount-module-setup.sh-fixed-typo.patch
+Patch20: 0020-Handle-crypto-modules-with-and-without-modaliases.patch
+Patch21: 0021-fips-include-crct10dif_generic.patch
+Patch22: 0022-iscsi-nbd-do-not-try-to-mount-the-whole-disk-if-root.patch
+Patch23: 0023-dracut.spec-move-sbin-dracut-to-usr-sbin-dracut.patch
 
 
 BuildRequires: bash git
@@ -293,8 +298,8 @@ echo 'dracut_rescue_image="yes"' > $RPM_BUILD_ROOT%{dracutlibdir}/dracut.conf.d/
 %endif
 
 # create compat symlink
-mkdir -p $RPM_BUILD_ROOT/sbin
-ln -s /usr/bin/dracut $RPM_BUILD_ROOT/sbin/dracut
+mkdir -p $RPM_BUILD_ROOT%{_sbindir}
+ln -sr $RPM_BUILD_ROOT%{_bindir}/dracut $RPM_BUILD_ROOT%{_sbindir}/dracut
 
 %clean
 rm -rf -- $RPM_BUILD_ROOT
@@ -304,7 +309,7 @@ rm -rf -- $RPM_BUILD_ROOT
 %doc README HACKING TODO COPYING AUTHORS NEWS dracut.html dracut.png dracut.svg
 %{_bindir}/dracut
 # compat symlink
-/sbin/dracut
+%{_sbindir}/dracut
 %{_datadir}/bash-completion/completions/dracut
 %{_datadir}/bash-completion/completions/lsinitrd
 %if 0%{?fedora} > 12 || 0%{?rhel} >= 6 || 0%{?suse_version} > 9999
@@ -467,6 +472,12 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Wed Oct 30 2013 Harald Hoyer <harald@redhat.com> 034-24.git20131030
+- fixed booting with rd.iscsi.firmware and without root=
+- fips: include crct10dif_generic
+- fixed missing modules in hostonly, which have no modalias
+- moved dracut to /usr/sbin
+
 * Mon Oct 21 2013 Harald Hoyer <harald@redhat.com> 034-19.git20131021
 - Fixed LVM with thin provisioning
 Resolves: rhbz#1013767

@@ -1,0 +1,23 @@
+From 0a8e91bb24de6eaf542ade0fffc941c3f072daec Mon Sep 17 00:00:00 2001
+From: Kyle McMartin <kmcmarti@redhat.com>
+Date: Wed, 30 Oct 2013 12:35:27 +0100
+Subject: [PATCH] fips: include crct10dif_generic
+
+Resolves: rhbz#1024455
+---
+ modules.d/01fips/module-setup.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/modules.d/01fips/module-setup.sh b/modules.d/01fips/module-setup.sh
+index 6493290..fb5a5cd 100755
+--- a/modules.d/01fips/module-setup.sh
++++ b/modules.d/01fips/module-setup.sh
+@@ -16,7 +16,7 @@ depends() {
+ installkernel() {
+     local _fipsmodules _mod
+     _fipsmodules="aead aes_generic aes-x86_64 ansi_cprng arc4 blowfish camellia cast6 cbc ccm "
+-    _fipsmodules+="chainiv crc32c cryptomgr crypto_null ctr cts deflate des des3_ede dm-crypt dm-mod "
++    _fipsmodules+="chainiv crc32c crct10dif_generic cryptomgr crypto_null ctr cts deflate des des3_ede dm-crypt dm-mod "
+     _fipsmodules+="ecb eseqiv fcrypt gcm ghash_generic hmac khazad lzo md4 md5 michael_mic rmd128 "
+     _fipsmodules+="rmd160 rmd256 rmd320 rot13 salsa20 seed seqiv serpent sha1 sha224 sha256 sha256_generic "
+     _fipsmodules+="sha384 sha512 sha512_generic tcrypt tea tnepres twofish wp256 wp384 wp512 xeta xtea xts zlib"
