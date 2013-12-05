@@ -1,0 +1,46 @@
+From 1c89fd148d361a43b1ddb7ec1e8068849244a9b7 Mon Sep 17 00:00:00 2001
+From: Hannes Reinecke <hare@suse.de>
+Date: Fri, 29 Nov 2013 13:13:53 +0100
+Subject: [PATCH] Fixup script permissions
+
+Scripts with a shebang should be marked as executable.
+
+Signed-off-by: Hannes Reinecke <hare@suse.de>
+---
+ modules.d/03modsign/load-modsign-keys.sh | 0
+ modules.d/03modsign/module-setup.sh      | 0
+ modules.d/40network/net-lib.sh           | 0
+ modules.d/40network/parse-vlan.sh        | 0
+ modules.d/50drm/module-setup.sh          | 0
+ modules.d/91crypt-loop/crypt-loop-lib.sh | 0
+ modules.d/98pollcdrom/pollcdrom.sh       | 0
+ 7 files changed, 0 insertions(+), 0 deletions(-)
+ mode change 100644 => 100755 modules.d/03modsign/load-modsign-keys.sh
+ mode change 100644 => 100755 modules.d/03modsign/module-setup.sh
+ mode change 100644 => 100755 modules.d/40network/net-lib.sh
+ mode change 100644 => 100755 modules.d/40network/parse-vlan.sh
+ mode change 100644 => 100755 modules.d/50drm/module-setup.sh
+ mode change 100644 => 100755 modules.d/91crypt-loop/crypt-loop-lib.sh
+ mode change 100644 => 100755 modules.d/98pollcdrom/pollcdrom.sh
+
+diff --git a/modules.d/03modsign/load-modsign-keys.sh b/modules.d/03modsign/load-modsign-keys.sh
+old mode 100644
+new mode 100755
+diff --git a/modules.d/03modsign/module-setup.sh b/modules.d/03modsign/module-setup.sh
+old mode 100644
+new mode 100755
+diff --git a/modules.d/40network/net-lib.sh b/modules.d/40network/net-lib.sh
+old mode 100644
+new mode 100755
+diff --git a/modules.d/40network/parse-vlan.sh b/modules.d/40network/parse-vlan.sh
+old mode 100644
+new mode 100755
+diff --git a/modules.d/50drm/module-setup.sh b/modules.d/50drm/module-setup.sh
+old mode 100644
+new mode 100755
+diff --git a/modules.d/91crypt-loop/crypt-loop-lib.sh b/modules.d/91crypt-loop/crypt-loop-lib.sh
+old mode 100644
+new mode 100755
+diff --git a/modules.d/98pollcdrom/pollcdrom.sh b/modules.d/98pollcdrom/pollcdrom.sh
+old mode 100644
+new mode 100755

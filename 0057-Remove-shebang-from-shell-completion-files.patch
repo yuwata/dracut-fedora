@@ -1,0 +1,34 @@
+From 336bd09d2cf9d3ded4abb828eb54742218a32b04 Mon Sep 17 00:00:00 2001
+From: Hannes Reinecke <hare@suse.de>
+Date: Fri, 29 Nov 2013 13:13:54 +0100
+Subject: [PATCH] Remove shebang from shell-completion files
+
+Shell-completion files are meant to be sourced, not executed.
+So they shouldn't have a shebang at the start.
+
+Signed-off-by: Hannes Reinecke <hare@suse.de>
+---
+ dracut-bash-completion.sh   | 2 +-
+ lsinitrd-bash-completion.sh | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/dracut-bash-completion.sh b/dracut-bash-completion.sh
+index d796c35..9f359c6 100644
+--- a/dracut-bash-completion.sh
++++ b/dracut-bash-completion.sh
+@@ -1,4 +1,4 @@
+-#!/bin/bash
++#
+ # -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
+ # ex: ts=8 sw=4 sts=4 et filetype=sh
+ #
+diff --git a/lsinitrd-bash-completion.sh b/lsinitrd-bash-completion.sh
+index 78ab165..3df2965 100644
+--- a/lsinitrd-bash-completion.sh
++++ b/lsinitrd-bash-completion.sh
+@@ -1,4 +1,4 @@
+-#!/bin/bash
++#
+ # -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
+ # ex: ts=8 sw=4 sts=4 et filetype=sh
+ #

@@ -1,0 +1,73 @@
+From 7c8da72c11b74a1759e0ebbabe003d69a4459114 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 2 Dec 2013 10:36:42 +0100
+Subject: [PATCH] network/net-lib.sh:iface_has_link() fixup
+
+Just echo'ing the flags IFF_UP|IFF_RUNNING does _not_ reflect the
+carrier state immediately. So wait for it to really show up.
+---
+ modules.d/40network/net-lib.sh | 47 +++++++++++++++++++++---------------------
+ 1 file changed, 23 insertions(+), 24 deletions(-)
+
+diff --git a/modules.d/40network/net-lib.sh b/modules.d/40network/net-lib.sh
+index 0aa312a..7544401 100644
+--- a/modules.d/40network/net-lib.sh
++++ b/modules.d/40network/net-lib.sh
+@@ -28,30 +28,6 @@ iface_for_mac() {
+     done
+ }
+ 
+-iface_has_link() {
+-    local interface="$1" flags=""
+-    [ -n "$interface" ] || return 2
+-    interface="/sys/class/net/$interface"
+-    [ -d "$interface" ] || return 2
+-    flags=$(cat $interface/flags)
+-    echo $(($flags|0x41)) > $interface/flags # 0x41: IFF_UP|IFF_RUNNING
+-    [ "$(cat $interface/carrier)" = 1 ] || return 1
+-    # XXX Do we need to reset the flags here? anaconda never bothered..
+-}
+-
+-find_iface_with_link() {
+-    local iface_path="" iface=""
+-    for iface_path in /sys/class/net/*; do
+-        iface=${iface_path##*/}
+-        str_starts "$iface" "lo" && continue
+-        if iface_has_link $iface; then
+-            echo "$iface"
+-            return 0
+-        fi
+-    done
+-    return 1
+-}
+-
+ # get the iface name for the given identifier - either a MAC, IP, or iface name
+ iface_name() {
+     case $1 in
+@@ -483,3 +459,26 @@ type hostname >/dev/null 2>&1 || \
+ hostname() {
+ 	cat /proc/sys/kernel/hostname
+ }
++
++iface_has_link() {
++    local interface="$1" flags=""
++    [ -n "$interface" ] || return 2
++    interface="/sys/class/net/$interface"
++    [ -d "$interface" ] || return 2
++    linkup "$1"
++    [ "$(cat $interface/carrier)" = 1 ] || return 1
++    # XXX Do we need to reset the flags here? anaconda never bothered..
++}
++
++find_iface_with_link() {
++    local iface_path="" iface=""
++    for iface_path in /sys/class/net/*; do
++        iface=${iface_path##*/}
++        str_starts "$iface" "lo" && continue
++        if iface_has_link $iface; then
++            echo "$iface"
++            return 0
++        fi
++    done
++    return 1
++}

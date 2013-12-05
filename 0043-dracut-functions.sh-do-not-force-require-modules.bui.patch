@@ -1,0 +1,41 @@
+From b29cb51654db13706c7356aa827e554456b25b0a Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 5 Dec 2013 15:06:06 +0100
+Subject: [PATCH] dracut-functions.sh: do not force require modules.builtin*
+
+---
+ dracut-functions.sh | 7 -------
+ dracut.sh           | 2 +-
+ 2 files changed, 1 insertion(+), 8 deletions(-)
+
+diff --git a/dracut-functions.sh b/dracut-functions.sh
+index 2872516..04f4fea 100755
+--- a/dracut-functions.sh
++++ b/dracut-functions.sh
+@@ -1456,13 +1456,6 @@ dracut_kernel_post() {
+         wait $_pid
+     fi
+ 
+-    for _f in modules.builtin.bin modules.builtin; do
+-        [[ $srcmods/$_f ]] && break
+-    done || {
+-        dfatal "No modules.builtin.bin and modules.builtin found!"
+-        return 1
+-    }
+-
+     for _f in modules.builtin.bin modules.builtin modules.order; do
+         [[ $srcmods/$_f ]] && inst_simple "$srcmods/$_f" "/lib/modules/$kernel/$_f"
+     done
+diff --git a/dracut.sh b/dracut.sh
+index 6975d90..5709874 100755
+--- a/dracut.sh
++++ b/dracut.sh
+@@ -501,7 +501,7 @@ if [[ $regenerate_all == "yes" ]]; then
+ 
+     cd /lib/modules
+     for i in *; do
+-        [[ -f $i/modules.builtin ]] || continue
++        [[ -f $i/modules.dep ]] || [[ -f $i/modules.dep.bin ]] || continue
+         dracut --kver="$i" "${dracut_args[@]}"
+         ((ret+=$?))
+     done

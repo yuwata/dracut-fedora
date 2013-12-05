@@ -1,0 +1,31 @@
+From e41f3f902512a91a286e14d6ffa52206c70ea5f6 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 2 Dec 2013 10:32:00 +0100
+Subject: [PATCH] dracut.sh:_get_fs_type() if block device exists return early
+
+even, if no ID_FS_TYPE was found, return if the block device exists
+---
+ dracut.sh | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/dracut.sh b/dracut.sh
+index bce2662..177b813 100755
+--- a/dracut.sh
++++ b/dracut.sh
+@@ -987,12 +987,12 @@ unset rest
+ 
+ _get_fs_type() {
+     [[ $1 ]] || return
+-    if [[ -b /dev/block/$1 ]] && ID_FS_TYPE=$(get_fs_env "/dev/block/$1"); then
+-        host_fs_types["$(readlink -f "/dev/block/$1")"]="$ID_FS_TYPE"
++    if [[ -b /dev/block/$1 ]]; then
++        ID_FS_TYPE=$(get_fs_env "/dev/block/$1") && host_fs_types["$(readlink -f "/dev/block/$1")"]="$ID_FS_TYPE"
+         return 1
+     fi
+-    if [[ -b $1 ]] && ID_FS_TYPE=$(get_fs_env "$1"); then
+-        host_fs_types["$(readlink -f "$1")"]="$ID_FS_TYPE"
++    if [[ -b $1 ]]; then
++        ID_FS_TYPE=$(get_fs_env "$1") && host_fs_types["$(readlink -f "$1")"]="$ID_FS_TYPE"
+         return 1
+     fi
+     if fstype=$(find_dev_fstype "$1"); then

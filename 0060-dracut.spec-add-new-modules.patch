@@ -1,0 +1,24 @@
+From 57575f3c9c5323887b1aec7f04d1467ba1e5fb1b Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 5 Dec 2013 17:27:57 +0100
+Subject: [PATCH] dracut.spec: add new modules
+
+---
+ dracut.spec | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/dracut.spec b/dracut.spec
+index 44171d8..91ec15d 100644
+--- a/dracut.spec
++++ b/dracut.spec
+@@ -350,8 +350,10 @@ rm -rf -- $RPM_BUILD_ROOT
+ %{dracutlibdir}/modules.d/95rootfs-block
+ %{dracutlibdir}/modules.d/95dasd
+ %{dracutlibdir}/modules.d/95dasd_mod
++%{dracutlibdir}/modules.d/95dasd_rules
+ %{dracutlibdir}/modules.d/95fstab-sys
+ %{dracutlibdir}/modules.d/95zfcp
++%{dracutlibdir}/modules.d/95zfcp_rules
+ %{dracutlibdir}/modules.d/95terminfo
+ %{dracutlibdir}/modules.d/95udev-rules
+ %{dracutlibdir}/modules.d/95virtfs

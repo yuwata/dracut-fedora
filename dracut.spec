@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 034
-Release: 24.git20131030%{?dist}
+Release: 62.git20131205%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -52,6 +52,44 @@ Patch20: 0020-Handle-crypto-modules-with-and-without-modaliases.patch
 Patch21: 0021-fips-include-crct10dif_generic.patch
 Patch22: 0022-iscsi-nbd-do-not-try-to-mount-the-whole-disk-if-root.patch
 Patch23: 0023-dracut.spec-move-sbin-dracut-to-usr-sbin-dracut.patch
+Patch24: 0024-dracut.sh-fixed-PATH-shortener.patch
+Patch25: 0025-dracut.modules.7.asc-removed-empty-section.patch
+Patch26: 0026-fips-also-install-etc-system-fips-in-the-initramfs.patch
+Patch27: 0027-dracut-functions.sh-Avoid-loading-unnecessary-32-bit.patch
+Patch28: 0028-iscsi-nbd-do-not-fail-in-hostonly-mode.patch
+Patch29: 0029-systemd-do-not-exit-the-initqueue-if-systemd-asks-a-.patch
+Patch30: 0030-Run-xz-and-lzma-with-multiple-threads.patch
+Patch31: 0031-kernel-modules-add-ohci-pci-to-the-list-of-forced-mo.patch
+Patch32: 0032-lvm-do-not-run-pvscan-for-lvmetad-update.patch
+Patch33: 0033-fips-fix-RHEV-vmlinuz-check.patch
+Patch34: 0034-dracut.cmdline.7.asc-document-server-ip-of-ip-parame.patch
+Patch35: 0035-dracut.sh-_get_fs_type-if-block-device-exists-return.patch
+Patch36: 0036-network-net-lib.sh-wait_for_if_up-wait-for-state-UP.patch
+Patch37: 0037-network-net-lib.sh-iface_has_link-fixup.patch
+Patch38: 0038-network-ifup.sh-before-doing-dhcp-check-if-the-link-.patch
+Patch39: 0039-base-dracut-lib.sh-wait_for_dev-relax-requirement.patch
+Patch40: 0040-resume-autoconf-resume.patch
+Patch41: 0041-resume-no-more-autoresume.patch
+Patch42: 0042-dracut.sh-skip-crypt-swaps-with-password-files.patch
+Patch43: 0043-dracut-functions.sh-do-not-force-require-modules.bui.patch
+Patch44: 0044-10i18n-parse-i18n.sh-fixed-vconsole.conf-locale.conf.patch
+Patch45: 0045-95dasd-Install-kernel-modules-only-once.patch
+Patch46: 0046-95dasd-Only-install-module-if-normalize_dasd_arg-is-.patch
+Patch47: 0047-95dasd_mod-make-dasd_cio_free-optional.patch
+Patch48: 0048-95zfcp-Make-installation-optional.patch
+Patch49: 0049-95znet-Make-installation-optional.patch
+Patch50: 0050-Add-DASD-configuration-for-SuSE.patch
+Patch51: 0051-Add-zfcp-scripts-for-SUSE.patch
+Patch52: 0052-Make-logfile-configurable.patch
+Patch53: 0053-mkinitrd-suse-Add-SUSE-compability-wrapper-for-dracu.patch
+Patch54: 0054-mkinitrd-suse.8.asc-Add-manpage-for-SUSE-compat-mkin.patch
+Patch55: 0055-Fixup-keymap-setting-for-openSUSE.patch
+Patch56: 0056-Fixup-script-permissions.patch
+Patch57: 0057-Remove-shebang-from-shell-completion-files.patch
+Patch58: 0058-lvm-install-thin-tools-only-when-needed-in-hostonly.patch
+Patch59: 0059-i18n-introduce-i18n_install_all-to-install-everythin.patch
+Patch60: 0060-dracut.spec-add-new-modules.patch
+Patch61: 0061-dracut.spec-remove-suse-man-pages.patch
 
 
 BuildRequires: bash git
@@ -270,13 +308,16 @@ mkdir -p $RPM_BUILD_ROOT%{_localstatedir}/log
 touch $RPM_BUILD_ROOT%{_localstatedir}/log/dracut.log
 mkdir -p $RPM_BUILD_ROOT%{_sharedstatedir}/initramfs
 
-%if 0%{?fedora} || 0%{?rhel} || 0%{?suse_version}
+%if 0%{?fedora} || 0%{?rhel}
 install -m 0644 dracut.conf.d/fedora.conf.example $RPM_BUILD_ROOT%{dracutlibdir}/dracut.conf.d/01-dist.conf
-install -m 0644 dracut.conf.d/fips.conf.example $RPM_BUILD_ROOT%{dracutlibdir}/dracut.conf.d/40-fips.conf
+rm -f $RPM_BUILD_ROOT%{_mandir}/man?/*suse*
 %endif
-
 %if 0%{?suse_version}
 install -m 0644 dracut.conf.d/suse.conf.example   $RPM_BUILD_ROOT%{dracutlibdir}/dracut.conf.d/01-dist.conf
+%endif
+
+%if 0%{?fedora} || 0%{?rhel} || 0%{?suse_version}
+install -m 0644 dracut.conf.d/fips.conf.example $RPM_BUILD_ROOT%{dracutlibdir}/dracut.conf.d/40-fips.conf
 %endif
 
 %if 0%{?fedora} <= 12 && 0%{?rhel} < 6 && 0%{?suse_version} <= 9999
@@ -374,8 +415,10 @@ rm -rf -- $RPM_BUILD_ROOT
 %{dracutlibdir}/modules.d/95rootfs-block
 %{dracutlibdir}/modules.d/95dasd
 %{dracutlibdir}/modules.d/95dasd_mod
+%{dracutlibdir}/modules.d/95dasd_rules
 %{dracutlibdir}/modules.d/95fstab-sys
 %{dracutlibdir}/modules.d/95zfcp
+%{dracutlibdir}/modules.d/95zfcp_rules
 %{dracutlibdir}/modules.d/95terminfo
 %{dracutlibdir}/modules.d/95udev-rules
 %{dracutlibdir}/modules.d/95virtfs
@@ -472,6 +515,16 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Thu Dec 05 2013 Harald Hoyer <harald@redhat.com> 034-62.git20131205
+- fixed PATH shortener
+- also install /etc/system-fips in the initramfs
+- nbd, do not fail in hostonly mode
+- add ohci-pci to the list of hardcoded modules
+- lvm: do not run pvscan for lvmetad
+- network fixes
+- skip crypt swaps with password files
+- fixed i18n
+
 * Wed Oct 30 2013 Harald Hoyer <harald@redhat.com> 034-24.git20131030
 - fixed booting with rd.iscsi.firmware and without root=
 - fips: include crct10dif_generic

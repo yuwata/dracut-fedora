@@ -1,0 +1,22 @@
+From cf3fd99e72745b894a5c787277f90305f2ea1215 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Sat, 2 Nov 2013 13:14:40 +0100
+Subject: [PATCH] dracut.sh: fixed PATH shortener
+
+---
+ dracut.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/dracut.sh b/dracut.sh
+index ae792c4..03472ba 100755
+--- a/dracut.sh
++++ b/dracut.sh
+@@ -533,7 +533,7 @@ for i in /usr/sbin /sbin /usr/bin /bin; do
+     if [ -L "$i" ]; then
+         rl=$(readlink -f $i)
+     fi
+-    if [[ "$NPATH" != "*:$rl*" ]] ; then
++    if [[ "$NPATH" != *:$rl* ]] ; then
+         NPATH+=":$rl"
+     fi
+ done

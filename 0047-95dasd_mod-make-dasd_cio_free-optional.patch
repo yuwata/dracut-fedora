@@ -1,0 +1,38 @@
+From 8b2b77e460663b3fe45e0eea2f4a5babe4b731bc Mon Sep 17 00:00:00 2001
+From: Hannes Reinecke <hare@suse.de>
+Date: Fri, 29 Nov 2013 13:13:44 +0100
+Subject: [PATCH] 95dasd_mod: make dasd_cio_free optional
+
+dasd_cio_free is a RedHat-specific tool, so make it optional.
+
+Signed-off-by: Hannes Reinecke <hare@suse.de>
+---
+ modules.d/95dasd_mod/module-setup.sh   | 3 ++-
+ modules.d/95dasd_mod/parse-dasd-mod.sh | 4 +++-
+ 2 files changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/modules.d/95dasd_mod/module-setup.sh b/modules.d/95dasd_mod/module-setup.sh
+index 011010d..8fde525 100755
+--- a/modules.d/95dasd_mod/module-setup.sh
++++ b/modules.d/95dasd_mod/module-setup.sh
+@@ -23,6 +23,7 @@ installkernel() {
+ # called by dracut
+ install() {
+     inst_hook cmdline 31 "$moddir/parse-dasd-mod.sh"
+-    inst_multiple dasd_cio_free grep sed seq
++    inst_multiple grep sed seq
++    inst_multiple -o dasd_cio_free
+ }
+ 
+diff --git a/modules.d/95dasd_mod/parse-dasd-mod.sh b/modules.d/95dasd_mod/parse-dasd-mod.sh
+index 87c88ed..0236d12 100755
+--- a/modules.d/95dasd_mod/parse-dasd-mod.sh
++++ b/modules.d/95dasd_mod/parse-dasd-mod.sh
+@@ -15,4 +15,6 @@ if [ -n "$mod_args" ]; then
+ fi
+ 
+ unset dasd_arg
+-dasd_cio_free
++if [ -x /sbin/dasd_cio_free ] ; then
++    dasd_cio_free
++fi

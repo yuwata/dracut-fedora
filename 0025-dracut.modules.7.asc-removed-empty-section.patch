@@ -1,0 +1,21 @@
+From 095fa1559178522029ad854017a0c83d4979e876 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Sat, 2 Nov 2013 13:20:32 +0100
+Subject: [PATCH] dracut.modules.7.asc: removed empty section
+
+---
+ dracut.modules.7.asc | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/dracut.modules.7.asc b/dracut.modules.7.asc
+index 4cb2aa1..17acdb4 100644
+--- a/dracut.modules.7.asc
++++ b/dracut.modules.7.asc
+@@ -10,7 +10,6 @@ dracut.modules - dracut modules
+ 
+ DESCRIPTION
+ -----------
+-== dracut Components
+ 
+ dracut uses a modular system to build and extend the initramfs image. All
+ modules are located in _/usr/lib/dracut/modules.d_ or in _<git-src>/modules.d_.
