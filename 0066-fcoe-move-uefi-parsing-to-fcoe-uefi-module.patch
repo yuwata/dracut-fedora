@@ -1,0 +1,57 @@
+From ab173bb4c1c758d2f87d11b03efca6b6c950225e Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 12 Dec 2013 09:20:53 +0100
+Subject: [PATCH] fcoe: move uefi parsing to fcoe-uefi module
+
+---
+ modules.d/95fcoe-uefi/module-setup.sh              | 22 ++++++++++++++++++++++
+ .../{95fcoe => 95fcoe-uefi}/parse-uefifcoe.sh      |  0
+ modules.d/95fcoe/module-setup.sh                   |  1 -
+ 3 files changed, 22 insertions(+), 1 deletion(-)
+ create mode 100755 modules.d/95fcoe-uefi/module-setup.sh
+ rename modules.d/{95fcoe => 95fcoe-uefi}/parse-uefifcoe.sh (100%)
+
+diff --git a/modules.d/95fcoe-uefi/module-setup.sh b/modules.d/95fcoe-uefi/module-setup.sh
+new file mode 100755
+index 0000000..007aa59
+--- /dev/null
++++ b/modules.d/95fcoe-uefi/module-setup.sh
+@@ -0,0 +1,22 @@
++#!/bin/bash
++# -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
++# ex: ts=8 sw=4 sts=4 et filetype=sh
++
++# called by dracut
++check() {
++    [[ $hostonly ]] || [[ $mount_needs ]] && return 1
++
++    return 0
++}
++
++# called by dracut
++depends() {
++    echo fcoe bash
++    return 0
++}
++
++# called by dracut
++install() {
++    inst_hook cmdline 20 "$moddir/parse-uefifcoe.sh"
++}
++
+diff --git a/modules.d/95fcoe/parse-uefifcoe.sh b/modules.d/95fcoe-uefi/parse-uefifcoe.sh
+similarity index 100%
+rename from modules.d/95fcoe/parse-uefifcoe.sh
+rename to modules.d/95fcoe-uefi/parse-uefifcoe.sh
+diff --git a/modules.d/95fcoe/module-setup.sh b/modules.d/95fcoe/module-setup.sh
+index 7ada2ee..2605fa0 100755
+--- a/modules.d/95fcoe/module-setup.sh
++++ b/modules.d/95fcoe/module-setup.sh
+@@ -36,7 +36,6 @@ install() {
+     inst "$moddir/fcoe-up.sh" "/sbin/fcoe-up"
+     inst "$moddir/fcoe-edd.sh" "/sbin/fcoe-edd"
+     inst "$moddir/fcoe-genrules.sh" "/sbin/fcoe-genrules.sh"
+-    inst_hook cmdline 20 "$moddir/parse-uefifcoe.sh"
+     inst_hook cmdline 99 "$moddir/parse-fcoe.sh"
+     dracut_need_initqueue
+ }

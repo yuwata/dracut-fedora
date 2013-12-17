@@ -1,0 +1,25 @@
+From 3934ca8e6c0e80ecb32a2ed9403321afd510842e Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 5 Dec 2013 18:38:35 +0100
+Subject: [PATCH] systemd/dracut-initqueue.sh: fixed waiting in the loop if PW
+ asked
+
+continue the main loop instead of the for loop, if a password is
+currently asked
+---
+ modules.d/98systemd/dracut-initqueue.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/modules.d/98systemd/dracut-initqueue.sh b/modules.d/98systemd/dracut-initqueue.sh
+index 64e8154..1e05dcd 100755
+--- a/modules.d/98systemd/dracut-initqueue.sh
++++ b/modules.d/98systemd/dracut-initqueue.sh
+@@ -53,7 +53,7 @@ while :; do
+     sleep 0.5
+ 
+     for i in /run/systemd/ask-password/ask.*; do
+-        [ -e "$i" ] && continue
++        [ -e "$i" ] && continue 2
+     done
+ 
+     if [ $main_loop -gt $((2*$RDRETRY/3)) ]; then

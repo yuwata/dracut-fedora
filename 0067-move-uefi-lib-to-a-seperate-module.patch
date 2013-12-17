@@ -1,0 +1,92 @@
+From 89031be3735045ae06d560bf4f42ec58d889fe8e Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 12 Dec 2013 09:49:06 +0100
+Subject: [PATCH] move uefi-lib to a seperate module
+
+---
+ modules.d/95fcoe-uefi/module-setup.sh        |  4 +---
+ modules.d/95fcoe/module-setup.sh             |  5 -----
+ modules.d/99base/module-setup.sh             |  1 -
+ modules.d/99uefi-lib/module-setup.sh         | 19 +++++++++++++++++++
+ modules.d/{99base => 99uefi-lib}/uefi-lib.sh |  0
+ 5 files changed, 20 insertions(+), 9 deletions(-)
+ create mode 100755 modules.d/99uefi-lib/module-setup.sh
+ rename modules.d/{99base => 99uefi-lib}/uefi-lib.sh (100%)
+
+diff --git a/modules.d/95fcoe-uefi/module-setup.sh b/modules.d/95fcoe-uefi/module-setup.sh
+index 007aa59..653d88e 100755
+--- a/modules.d/95fcoe-uefi/module-setup.sh
++++ b/modules.d/95fcoe-uefi/module-setup.sh
+@@ -4,14 +4,12 @@
+ 
+ # called by dracut
+ check() {
+-    [[ $hostonly ]] || [[ $mount_needs ]] && return 1
+-
+     return 0
+ }
+ 
+ # called by dracut
+ depends() {
+-    echo fcoe bash
++    echo fcoe uefi-lib
+     return 0
+ }
+ 
+diff --git a/modules.d/95fcoe/module-setup.sh b/modules.d/95fcoe/module-setup.sh
+index 2605fa0..539c464 100755
+--- a/modules.d/95fcoe/module-setup.sh
++++ b/modules.d/95fcoe/module-setup.sh
+@@ -4,11 +4,6 @@
+ 
+ # called by dracut
+ check() {
+-    # FIXME
+-    # If hostonly was requested, fail the check until we have some way of
+-    # knowing we are booting from FCoE
+-    [[ $hostonly ]] || [[ $mount_needs ]] && return 1
+-
+     for i in dcbtool fipvlan lldpad ip readlink; do
+         type -P $i >/dev/null || return 1
+     done
+diff --git a/modules.d/99base/module-setup.sh b/modules.d/99base/module-setup.sh
+index e53cf2e..d4dbca9 100755
+--- a/modules.d/99base/module-setup.sh
++++ b/modules.d/99base/module-setup.sh
+@@ -45,7 +45,6 @@ install() {
+     mkdir -p ${initdir}/tmp
+ 
+     inst_simple "$moddir/dracut-lib.sh" "/lib/dracut-lib.sh"
+-    inst_simple "$moddir/uefi-lib.sh" "/lib/uefi-lib.sh"
+ 
+     if ! dracut_module_included "systemd"; then
+         inst_multiple switch_root || dfatal "Failed to install switch_root"
+diff --git a/modules.d/99uefi-lib/module-setup.sh b/modules.d/99uefi-lib/module-setup.sh
+new file mode 100755
+index 0000000..4a856ea
+--- /dev/null
++++ b/modules.d/99uefi-lib/module-setup.sh
+@@ -0,0 +1,19 @@
++#!/bin/bash
++# module-setup for img-lib
++
++# called by dracut
++check() {
++    return 255
++}
++
++# called by dracut
++depends() {
++    echo bash
++    return 0
++}
++
++# called by dracut
++install() {
++    inst_simple "$moddir/uefi-lib.sh" "/lib/uefi-lib.sh"
++}
++
+diff --git a/modules.d/99base/uefi-lib.sh b/modules.d/99uefi-lib/uefi-lib.sh
+similarity index 100%
+rename from modules.d/99base/uefi-lib.sh
+rename to modules.d/99uefi-lib/uefi-lib.sh

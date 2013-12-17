@@ -1,0 +1,31 @@
+From 831625d29ed6f174b276cd738e34bfebc5052e1c Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 13 Dec 2013 11:05:39 +0100
+Subject: [PATCH] lvm: fixed lvm thin check
+
+---
+ modules.d/90lvm/module-setup.sh | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/modules.d/90lvm/module-setup.sh b/modules.d/90lvm/module-setup.sh
+index 1206310..a64e5d6 100755
+--- a/modules.d/90lvm/module-setup.sh
++++ b/modules.d/90lvm/module-setup.sh
+@@ -99,9 +99,16 @@ install() {
+ 
+     if [[ $hostonly ]] && type -P lvs &>/dev/null; then
+         for dev in "${!host_fs_types[@]}"; do
+-            if [[ "$(lvs --noheadings -o segtype "$dev" 2>/dev/null)" == *thin* ]] ; then
++            [ -e /sys/block/${dev#/dev/}/dm/name ] || continue
++            dev=$(</sys/block/${dev#/dev/}/dm/name)
++            eval $(dmsetup splitname --nameprefixes --noheadings --rows "$dev" 2>/dev/null)
++            [[ ${DM_VG_NAME} ]] && [[ ${DM_LV_NAME} ]] || continue
++            if [[ "$(lvs --noheadings -o segtype ${DM_VG_NAME} 2>/dev/null)" == *thin* ]] ; then
+                 inst_multiple -o thin_dump thin_restore thin_check thin_repair
++                break
+             fi
+         done
++    else
++        inst_multiple -o thin_dump thin_restore thin_check thin_repair
+     fi
+ }

@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 034
-Release: 62.git20131205%{?dist}
+Release: 70.git20131216%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -90,6 +90,14 @@ Patch58: 0058-lvm-install-thin-tools-only-when-needed-in-hostonly.patch
 Patch59: 0059-i18n-introduce-i18n_install_all-to-install-everythin.patch
 Patch60: 0060-dracut.spec-add-new-modules.patch
 Patch61: 0061-dracut.spec-remove-suse-man-pages.patch
+Patch62: 0062-TODO-update.patch
+Patch63: 0063-systemd-dracut-initqueue.sh-fixed-waiting-in-the-loo.patch
+Patch64: 0064-base-rdsosreport.sh-add-ip-a-output.patch
+Patch65: 0065-usrmount-always-install.patch
+Patch66: 0066-fcoe-move-uefi-parsing-to-fcoe-uefi-module.patch
+Patch67: 0067-move-uefi-lib-to-a-seperate-module.patch
+Patch68: 0068-lvm-fixed-lvm-thin-check.patch
+Patch69: 0069-dracut.spec-add-95fcoe-uefi-and-99uefi-lib.patch
 
 
 BuildRequires: bash git
@@ -476,6 +484,8 @@ rm -rf -- $RPM_BUILD_ROOT
 %{dracutlibdir}/modules.d/95ssh-client
 %{dracutlibdir}/modules.d/45ifcfg
 %{dracutlibdir}/modules.d/95znet
+%{dracutlibdir}/modules.d/95fcoe-uefi
+%{dracutlibdir}/modules.d/99uefi-lib
 
 %if 0%{?fedora} || 0%{?rhel} || 0%{?suse_version}
 %files fips
@@ -515,6 +525,11 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Mon Dec 16 2013 Harald Hoyer <harald@redhat.com> 034-70.git20131216
+- fixed systemd password waiting
+- split out fcoe uefi
+- fixed lvm thin tools check
+
 * Thu Dec 05 2013 Harald Hoyer <harald@redhat.com> 034-62.git20131205
 - fixed PATH shortener
 - also install /etc/system-fips in the initramfs
