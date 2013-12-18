@@ -1,0 +1,127 @@
+From ac5bff2b6fcbeb6a2409ac9e79721c92b10b4fa9 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 18 Dec 2013 12:28:51 +0100
+Subject: [PATCH] dracut-lib/wait_for_dev(): prevent systemd daemon-reload
+
+prevent a systemd daemon-reload, if it is not necessary to do.
+---
+ modules.d/98systemd/dracut-cmdline.sh   |  2 --
+ modules.d/98systemd/module-setup.sh     |  2 ++
+ modules.d/98systemd/rootfs-generator.sh | 30 ++++++++++++++++++++++++++++++
+ modules.d/99base/dracut-lib.sh          | 30 ++++++++++++++++++++++++------
+ 4 files changed, 56 insertions(+), 8 deletions(-)
+ create mode 100755 modules.d/98systemd/rootfs-generator.sh
+
+diff --git a/modules.d/98systemd/dracut-cmdline.sh b/modules.d/98systemd/dracut-cmdline.sh
+index aa8a02b..3170e75 100755
+--- a/modules.d/98systemd/dracut-cmdline.sh
++++ b/modules.d/98systemd/dracut-cmdline.sh
+@@ -61,8 +61,6 @@ case "$root" in
+         rootok=1 ;;
+ esac
+ 
+-[ "${root%%:*}" = "block" ] && wait_for_dev "${root#block:}"
+-
+ [ -z "$root" ] && die "No or empty root= argument"
+ [ -z "$rootok" ] && die "Don't know how to handle 'root=$root'"
+ 
+diff --git a/modules.d/98systemd/module-setup.sh b/modules.d/98systemd/module-setup.sh
+index 748e25b..74ce5f9 100755
+--- a/modules.d/98systemd/module-setup.sh
++++ b/modules.d/98systemd/module-setup.sh
+@@ -181,6 +181,8 @@ install() {
+     inst_script "$moddir/dracut-mount.sh" /bin/dracut-mount
+     inst_script "$moddir/dracut-pre-pivot.sh" /bin/dracut-pre-pivot
+ 
++    inst_script "$moddir/rootfs-generator.sh" /lib/systemd/system-generators/dracut-rootfs-generator
++
+     inst_rules 99-systemd.rules
+ 
+     for i in \
+diff --git a/modules.d/98systemd/rootfs-generator.sh b/modules.d/98systemd/rootfs-generator.sh
+new file mode 100755
+index 0000000..3770c6b
+--- /dev/null
++++ b/modules.d/98systemd/rootfs-generator.sh
+@@ -0,0 +1,30 @@
++#!/bin/sh
++# -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
++# ex: ts=8 sw=4 sts=4 et filetype=sh
++
++type getarg >/dev/null 2>&1 || . /lib/dracut-lib.sh
++root=$(getarg root=)
++case "$root" in
++    block:LABEL=*|LABEL=*)
++        root="${root#block:}"
++        root="$(echo $root | sed 's,/,\\x2f,g')"
++        root="block:/dev/disk/by-label/${root#LABEL=}"
++        rootok=1 ;;
++    block:UUID=*|UUID=*)
++        root="${root#block:}"
++        root="block:/dev/disk/by-uuid/${root#UUID=}"
++        rootok=1 ;;
++    block:PARTUUID=*|PARTUUID=*)
++        root="${root#block:}"
++        root="block:/dev/disk/by-partuuid/${root#PARTUUID=}"
++        rootok=1 ;;
++    block:PARTLABEL=*|PARTLABEL=*)
++        root="${root#block:}"
++        root="block:/dev/disk/by-partlabel/${root#PARTLABEL=}"
++        rootok=1 ;;
++    /dev/*)
++        root="block:${root}"
++        rootok=1 ;;
++esac
++
++[ "${root%%:*}" = "block" ] && wait_for_dev -n "${root#block:}"
+diff --git a/modules.d/99base/dracut-lib.sh b/modules.d/99base/dracut-lib.sh
+index 970bcfb..85f7cdf 100755
+--- a/modules.d/99base/dracut-lib.sh
++++ b/modules.d/99base/dracut-lib.sh
+@@ -853,7 +853,18 @@ dev_unit_name()
+ wait_for_dev()
+ {
+     local _name
++    local _needreload
++    local _noreload
++
++    if [ "$1" = "-n" ]; then
++        _noreload=1
++        shift
++    fi
++
+     _name="$(str_replace "$1" '/' '\x2f')"
++
++    [ -e "${PREFIX}$hookdir/initqueue/finished/devexists-${_name}.sh" ] && return 0
++
+     printf '[ -e "%s" ]\n' $1 \
+         >> "${PREFIX}$hookdir/initqueue/finished/devexists-${_name}.sh"
+     {
+@@ -866,14 +877,21 @@ wait_for_dev()
+         if ! [ -L ${PREFIX}/etc/systemd/system/initrd.target.wants/${_name}.device ]; then
+             [ -d ${PREFIX}/etc/systemd/system/initrd.target.wants ] || mkdir -p ${PREFIX}/etc/systemd/system/initrd.target.wants
+             ln -s ../${_name}.device ${PREFIX}/etc/systemd/system/initrd.target.wants/${_name}.device
++            _needreload=1
+         fi
+ 
+-        mkdir -p ${PREFIX}/etc/systemd/system/${_name}.device.d
+-        {
+-            echo "[Unit]"
+-            echo "JobTimeoutSec=3600"
+-        } > ${PREFIX}/etc/systemd/system/${_name}.device.d/timeout.conf
+-        [ -z "$PREFIX" ] && /sbin/initqueue --onetime --unique --name daemon-reload systemctl daemon-reload
++        if ! [ -f ${PREFIX}/etc/systemd/system/${_name}.device.d/timeout.conf ]; then
++            mkdir -p ${PREFIX}/etc/systemd/system/${_name}.device.d
++            {
++                echo "[Unit]"
++                echo "JobTimeoutSec=3600"
++            } > ${PREFIX}/etc/systemd/system/${_name}.device.d/timeout.conf
++            _needreload=1
++        fi
++
++        if [ -z "$PREFIX" ] && [ "$_needreload" = 1 ] && [ -z "$_noreload" ]; then
++            /sbin/initqueue --onetime --unique --name daemon-reload systemctl daemon-reload
++        fi
+     fi
+ }
+ 

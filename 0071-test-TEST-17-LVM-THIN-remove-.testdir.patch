@@ -1,0 +1,17 @@
+From 859e3a77d0a1343fe84fc425676d8f8fa09c558c Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Tue, 17 Dec 2013 13:36:55 +0100
+Subject: [PATCH] test/TEST-17-LVM-THIN: remove .testdir
+
+---
+ test/TEST-17-LVM-THIN/.testdir | 1 -
+ 1 file changed, 1 deletion(-)
+ delete mode 100644 test/TEST-17-LVM-THIN/.testdir
+
+diff --git a/test/TEST-17-LVM-THIN/.testdir b/test/TEST-17-LVM-THIN/.testdir
+deleted file mode 100644
+index 9af2638..0000000
+--- a/test/TEST-17-LVM-THIN/.testdir
++++ /dev/null
+@@ -1 +0,0 @@
+-TESTDIR="/var/tmp/dracut-test.uElZSK"

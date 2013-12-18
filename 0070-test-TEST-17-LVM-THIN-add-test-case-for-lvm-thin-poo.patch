@@ -1,0 +1,232 @@
+From 61a02caca422ddca0ee7c71e63d3cdfd786293c8 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 16 Dec 2013 13:15:48 +0100
+Subject: [PATCH] test/TEST-17-LVM-THIN: add test case for lvm thin pools
+
+---
+ test/TEST-17-LVM-THIN/.testdir             |  1 +
+ test/TEST-17-LVM-THIN/99-idesymlinks.rules |  8 +++
+ test/TEST-17-LVM-THIN/Makefile             | 10 ++++
+ test/TEST-17-LVM-THIN/create-root.sh       | 31 +++++++++++
+ test/TEST-17-LVM-THIN/finished-false.sh    |  2 +
+ test/TEST-17-LVM-THIN/hard-off.sh          |  3 +
+ test/TEST-17-LVM-THIN/test-init.sh         | 17 ++++++
+ test/TEST-17-LVM-THIN/test.sh              | 88 ++++++++++++++++++++++++++++++
+ 8 files changed, 160 insertions(+)
+ create mode 100644 test/TEST-17-LVM-THIN/.testdir
+ create mode 100644 test/TEST-17-LVM-THIN/99-idesymlinks.rules
+ create mode 100644 test/TEST-17-LVM-THIN/Makefile
+ create mode 100755 test/TEST-17-LVM-THIN/create-root.sh
+ create mode 100755 test/TEST-17-LVM-THIN/finished-false.sh
+ create mode 100755 test/TEST-17-LVM-THIN/hard-off.sh
+ create mode 100755 test/TEST-17-LVM-THIN/test-init.sh
+ create mode 100755 test/TEST-17-LVM-THIN/test.sh
+
+diff --git a/test/TEST-17-LVM-THIN/.testdir b/test/TEST-17-LVM-THIN/.testdir
+new file mode 100644
+index 0000000..9af2638
+--- /dev/null
++++ b/test/TEST-17-LVM-THIN/.testdir
+@@ -0,0 +1 @@
++TESTDIR="/var/tmp/dracut-test.uElZSK"
+diff --git a/test/TEST-17-LVM-THIN/99-idesymlinks.rules b/test/TEST-17-LVM-THIN/99-idesymlinks.rules
+new file mode 100644
+index 0000000..d557790
+--- /dev/null
++++ b/test/TEST-17-LVM-THIN/99-idesymlinks.rules
+@@ -0,0 +1,8 @@
++ACTION=="add|change", SUBSYSTEM=="block", ENV{DEVTYPE}=="disk", KERNEL=="hda", SYMLINK+="sda"
++ACTION=="add|change", SUBSYSTEM=="block", ENV{DEVTYPE}=="partition", KERNEL=="hda*", SYMLINK+="sda$env{MINOR}"
++ACTION=="add|change", SUBSYSTEM=="block", ENV{DEVTYPE}=="disk", KERNEL=="hdb", SYMLINK+="sdb"
++ACTION=="add|change", SUBSYSTEM=="block", ENV{DEVTYPE}=="partition", KERNEL=="hdb*", SYMLINK+="sdb$env{MINOR}"
++ACTION=="add|change", SUBSYSTEM=="block", ENV{DEVTYPE}=="disk", KERNEL=="hdc", SYMLINK+="sdc"
++ACTION=="add|change", SUBSYSTEM=="block", ENV{DEVTYPE}=="partition", KERNEL=="hdc*", SYMLINK+="sdc$env{MINOR}"
++ACTION=="add|change", SUBSYSTEM=="block", ENV{DEVTYPE}=="disk", KERNEL=="hdd", SYMLINK+="sdd"
++ACTION=="add|change", SUBSYSTEM=="block", ENV{DEVTYPE}=="partition", KERNEL=="hdd*", SYMLINK+="sdd$env{MINOR}"
+diff --git a/test/TEST-17-LVM-THIN/Makefile b/test/TEST-17-LVM-THIN/Makefile
+new file mode 100644
+index 0000000..aad2705
+--- /dev/null
++++ b/test/TEST-17-LVM-THIN/Makefile
+@@ -0,0 +1,10 @@
++all:
++	@$(MAKE) -s --no-print-directory -C ../.. all
++	@V=$(V) basedir=../.. testdir=../ ./test.sh --all
++setup:
++	@$(MAKE) --no-print-directory -C ../.. all
++	@basedir=../.. testdir=../ ./test.sh --setup
++clean:
++	@basedir=../.. testdir=../ ./test.sh --clean
++run:
++	@basedir=../.. testdir=../ ./test.sh --run
+diff --git a/test/TEST-17-LVM-THIN/create-root.sh b/test/TEST-17-LVM-THIN/create-root.sh
+new file mode 100755
+index 0000000..740704f
+--- /dev/null
++++ b/test/TEST-17-LVM-THIN/create-root.sh
+@@ -0,0 +1,31 @@
++#!/bin/sh
++# don't let udev and this script step on eachother's toes
++for x in 64-lvm.rules 70-mdadm.rules 99-mount-rules; do
++    > "/etc/udev/rules.d/$x"
++done
++rm -f -- /etc/lvm/lvm.conf
++udevadm control --reload
++# save a partition at the beginning for future flagging purposes
++sfdisk -C 2560 -H 2 -S 32 -L /dev/sda <<EOF
++,1
++,800
++,800
++,800
++EOF
++for i in sda2 sda3 sda4; do
++lvm pvcreate -ff  -y /dev/$i ;
++done && \
++lvm vgcreate dracut /dev/sda[234] && \
++lvm lvcreate -l 16  -T dracut/mythinpool && \
++lvm lvcreate -V1G -T dracut/mythinpool -n root && \
++lvm vgchange -ay && \
++mke2fs /dev/dracut/root && \
++mkdir -p /sysroot && \
++mount /dev/dracut/root /sysroot && \
++cp -a -t /sysroot /source/* && \
++umount /sysroot && \
++sleep 1 && \
++lvm lvchange -a n /dev/dracut/root && \
++sleep 1 && \
++echo "dracut-root-block-created" >/dev/sda1
++poweroff -f
+diff --git a/test/TEST-17-LVM-THIN/finished-false.sh b/test/TEST-17-LVM-THIN/finished-false.sh
+new file mode 100755
+index 0000000..ecdbef9
+--- /dev/null
++++ b/test/TEST-17-LVM-THIN/finished-false.sh
+@@ -0,0 +1,2 @@
++#!/bin/sh
++exit 1
+diff --git a/test/TEST-17-LVM-THIN/hard-off.sh b/test/TEST-17-LVM-THIN/hard-off.sh
+new file mode 100755
+index 0000000..12c3d5a
+--- /dev/null
++++ b/test/TEST-17-LVM-THIN/hard-off.sh
+@@ -0,0 +1,3 @@
++#!/bin/sh
++getarg rd.shell || poweroff -f
++getarg failme && poweroff -f
+diff --git a/test/TEST-17-LVM-THIN/test-init.sh b/test/TEST-17-LVM-THIN/test-init.sh
+new file mode 100755
+index 0000000..fd03aa5
+--- /dev/null
++++ b/test/TEST-17-LVM-THIN/test-init.sh
+@@ -0,0 +1,17 @@
++#!/bin/sh
++export PATH=/sbin:/bin:/usr/sbin:/usr/bin
++strstr() { [ "${1#*$2*}" != "$1" ]; }
++CMDLINE=$(while read line; do echo $line;done < /proc/cmdline)
++plymouth --quit
++exec >/dev/console 2>&1
++echo "dracut-root-block-success" >/dev/sda1
++export TERM=linux
++export PS1='initramfs-test:\w\$ '
++[ -f /etc/mtab ] || ln -sfn /proc/mounts /etc/mtab
++[ -f /etc/fstab ] || ln -sfn /proc/mounts /etc/fstab
++stty sane
++echo "made it to the rootfs!"
++strstr "$CMDLINE" "rd.shell" && sh -i
++echo "Powering down."
++mount -n -o remount,ro /
++poweroff -f
+diff --git a/test/TEST-17-LVM-THIN/test.sh b/test/TEST-17-LVM-THIN/test.sh
+new file mode 100755
+index 0000000..0cfce19
+--- /dev/null
++++ b/test/TEST-17-LVM-THIN/test.sh
+@@ -0,0 +1,88 @@
++#!/bin/bash
++TEST_DESCRIPTION="root filesystem on LVM PV with thin pool"
++
++KVERSION=${KVERSION-$(uname -r)}
++
++# Uncomment this to debug failures
++#DEBUGFAIL="rd.break rd.shell"
++
++test_run() {
++    $testdir/run-qemu \
++	-hda $TESTDIR/root.ext2 \
++	-m 256M -smp 2 -nographic \
++	-net none -kernel /boot/vmlinuz-$KVERSION \
++	-append "root=/dev/dracut/root rw rd.auto=1 quiet rd.retry=3 rd.info console=ttyS0,115200n81 selinux=0 rd.debug  $DEBUGFAIL" \
++	-initrd $TESTDIR/initramfs.testing
++    grep -F -m 1 -q dracut-root-block-success $TESTDIR/root.ext2 || return 1
++}
++
++test_setup() {
++    # Create the blank file to use as a root filesystem
++    dd if=/dev/null of=$TESTDIR/root.ext2 bs=1M seek=80
++
++    kernel=$KVERSION
++    # Create what will eventually be our root filesystem onto an overlay
++    (
++	export initdir=$TESTDIR/overlay/source
++	. $basedir/dracut-functions.sh
++	inst_multiple sh df free ls shutdown poweroff stty cat ps ln ip route \
++	    mount dmesg ifconfig dhclient mkdir cp ping dhclient
++        for _terminfodir in /lib/terminfo /etc/terminfo /usr/share/terminfo; do
++	    [ -f ${_terminfodir}/l/linux ] && break
++	done
++	inst_multiple -o ${_terminfodir}/l/linux
++	inst "$basedir/modules.d/40network/dhclient-script.sh" "/sbin/dhclient-script"
++	inst "$basedir/modules.d/40network/ifup.sh" "/sbin/ifup"
++	inst_multiple grep
++        inst_simple /etc/os-release
++	inst ./test-init.sh /sbin/init
++	find_binary plymouth >/dev/null && inst_multiple plymouth
++	(cd "$initdir"; mkdir -p dev sys proc etc var/run tmp )
++	cp -a /etc/ld.so.conf* $initdir/etc
++	mkdir $initdir/run
++	sudo ldconfig -r "$initdir"
++    )
++
++    # second, install the files needed to make the root filesystem
++    (
++	export initdir=$TESTDIR/overlay
++	. $basedir/dracut-functions.sh
++	inst_multiple sfdisk mke2fs poweroff cp umount
++	inst_hook initqueue 01 ./create-root.sh
++        inst_hook initqueue/finished 01 ./finished-false.sh
++	inst_simple ./99-idesymlinks.rules /etc/udev/rules.d/99-idesymlinks.rules
++    )
++
++    # create an initramfs that will create the target root filesystem.
++    # We do it this way so that we do not risk trashing the host mdraid
++    # devices, volume groups, encrypted partitions, etc.
++    $basedir/dracut.sh -l -i $TESTDIR/overlay / \
++	-m "dash lvm mdraid udev-rules base rootfs-block kernel-modules" \
++	-d "piix ide-gd_mod ata_piix ext2 sd_mod" \
++	-f $TESTDIR/initramfs.makeroot $KVERSION || return 1
++    rm -rf -- $TESTDIR/overlay
++    # Invoke KVM and/or QEMU to actually create the target filesystem.
++    $testdir/run-qemu -hda $TESTDIR/root.ext2 -m 256M -smp 2 -nographic -net none \
++	-kernel "/boot/vmlinuz-$kernel" \
++	-append "root=/dev/fakeroot rw rootfstype=ext2 quiet console=ttyS0,115200n81 selinux=0" \
++	-initrd $TESTDIR/initramfs.makeroot  || return 1
++    grep -F -m 1 -q dracut-root-block-created $TESTDIR/root.ext2 || return 1
++    (
++	export initdir=$TESTDIR/overlay
++	. $basedir/dracut-functions.sh
++	inst_multiple poweroff shutdown
++	inst_hook emergency 000 ./hard-off.sh
++	inst_simple ./99-idesymlinks.rules /etc/udev/rules.d/99-idesymlinks.rules
++    )
++    sudo $basedir/dracut.sh -l -i $TESTDIR/overlay / \
++	-o "plymouth network" \
++	-a "debug" -I lvs \
++	-d "piix ide-gd_mod ata_piix ext2 sd_mod" \
++	-f $TESTDIR/initramfs.testing $KVERSION || return 1
++}
++
++test_cleanup() {
++    return 0
++}
++
++. $testdir/test-functions

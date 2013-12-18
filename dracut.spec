@@ -10,7 +10,7 @@
 
 Name: dracut
 Version: 034
-Release: 70.git20131216%{?dist}
+Release: 74.git20131218%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -98,6 +98,10 @@ Patch66: 0066-fcoe-move-uefi-parsing-to-fcoe-uefi-module.patch
 Patch67: 0067-move-uefi-lib-to-a-seperate-module.patch
 Patch68: 0068-lvm-fixed-lvm-thin-check.patch
 Patch69: 0069-dracut.spec-add-95fcoe-uefi-and-99uefi-lib.patch
+Patch70: 0070-test-TEST-17-LVM-THIN-add-test-case-for-lvm-thin-poo.patch
+Patch71: 0071-test-TEST-17-LVM-THIN-remove-.testdir.patch
+Patch72: 0072-iscsi-do-iscsi_firmware-regardless-of-network.patch
+Patch73: 0073-dracut-lib-wait_for_dev-prevent-systemd-daemon-reloa.patch
 
 
 BuildRequires: bash git
@@ -525,6 +529,10 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Wed Dec 18 2013 Harald Hoyer <harald@redhat.com> 034-74.git20131218
+- do not systemctl daemon-reload
+- do iscsistart for iscsi_firmware even without network
+
 * Mon Dec 16 2013 Harald Hoyer <harald@redhat.com> 034-70.git20131216
 - fixed systemd password waiting
 - split out fcoe uefi
