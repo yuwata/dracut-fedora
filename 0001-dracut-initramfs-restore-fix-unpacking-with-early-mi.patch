@@ -1,0 +1,39 @@
+From 0626cbe923732d45739ea6da4b816c78c44503ef Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 20 Mar 2014 13:18:13 +0100
+Subject: [PATCH] dracut-initramfs-restore: fix unpacking with early microcode
+
+---
+ dracut-initramfs-restore.sh | 10 +++++++---
+ 1 file changed, 7 insertions(+), 3 deletions(-)
+
+diff --git a/dracut-initramfs-restore.sh b/dracut-initramfs-restore.sh
+index f29c814..0dd1938 100644
+--- a/dracut-initramfs-restore.sh
++++ b/dracut-initramfs-restore.sh
+@@ -6,6 +6,10 @@ set -e
+ 
+ KERNEL_VERSION="$(uname -r)"
+ 
++[[ $dracutbasedir ]] || dracutbasedir=/usr/lib/dracut
++SKIP="$dracutbasedir/skipcpio"
++[[ -x $SKIP ]] || SKIP=cat
++
+ [[ -f /etc/machine-id ]] && read MACHINE_ID < /etc/machine-id
+ 
+ if [[ $MACHINE_ID ]] && [[ -d /boot/${MACHINE_ID} || -L /boot/${MACHINE_ID} ]] ; then
+@@ -16,11 +20,11 @@ fi
+ cd /run/initramfs
+ 
+ [ -f .need_shutdown -a -f "$IMG" ] || exit 1
+-if zcat "$IMG"  | cpio -id --quiet >/dev/null; then
++if $SKIP "$IMG" | zcat | cpio -id --no-absolute-filenames --quiet >/dev/null; then
+     rm -f -- .need_shutdown
+-elif xzcat "$IMG"  | cpio -id --quiet >/dev/null; then
++elif $SKIP "$IMG" | xzcat | cpio -id --no-absolute-filenames --quiet >/dev/null; then
+     rm -f -- .need_shutdown
+-elif lz4 -d -c "$IMG"  | cpio -id --quiet >/dev/null; then
++elif $SKIP "$IMG" | lz4 -d -c | cpio -id --no-absolute-filenames --quiet >/dev/null; then
+     rm -f -- .need_shutdown
+ else
+     # something failed, so we clean up
