@@ -11,7 +11,7 @@
 
 Name: dracut
 Version: 037
-Release: 3.git20140320%{?dist}
+Release: 10.git20140402%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -32,6 +32,13 @@ URL: https://dracut.wiki.kernel.org/
 Source0: http://www.kernel.org/pub/linux/utils/boot/dracut/dracut-%{version}.tar.xz
 Patch1: 0001-dracut-initramfs-restore-fix-unpacking-with-early-mi.patch
 Patch2: 0002-systemd-add-systemd-gpt-auto-generator.patch
+Patch3: 0003-fcoe-wait-for-lldpad-to-be-ready.patch
+Patch4: 0004-network-handle-ip-dhcp6-for-all-interfaces.patch
+Patch5: 0005-lsinitrd.sh-prevent-construct.patch
+Patch6: 0006-network-DCHPv6-set-valid_lft-and-preferred_lft.patch
+Patch7: 0007-dm-add-dm-cache-modules.patch
+Patch8: 0008-fcoe-workaround-fcoe-timing-issues.patch
+Patch9: 0009-fstab-do-not-mount-and-fsck-from-fstab-if-using-syst.patch
 
 
 BuildRequires: bash git
@@ -480,6 +487,12 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Wed Apr 02 2014 Harald Hoyer <harald@redhat.com> 037-10.git20140402
+- fixed fstab.sys with systemd
+- DHCPv6 fixes
+- dm-cache module now included
+- FCoE fixes
+
 * Thu Mar 20 2014 Harald Hoyer <harald@redhat.com> 037-3.git20140320
 - fixed dracut-initramfs-restore with microcode
 

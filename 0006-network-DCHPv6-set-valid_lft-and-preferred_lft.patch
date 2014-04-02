@@ -1,0 +1,35 @@
+From ebe7411691fb01c278c088e74e9ca32453cc1370 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 27 Mar 2014 12:31:23 +0100
+Subject: [PATCH] network: DCHPv6: set valid_lft and preferred_lft
+
+https://bugzilla.redhat.com/show_bug.cgi?id=1064365
+---
+ modules.d/40network/dhclient-script.sh | 10 +++++++---
+ 1 file changed, 7 insertions(+), 3 deletions(-)
+
+diff --git a/modules.d/40network/dhclient-script.sh b/modules.d/40network/dhclient-script.sh
+index 50e8932..ba05250 100755
+--- a/modules.d/40network/dhclient-script.sh
++++ b/modules.d/40network/dhclient-script.sh
+@@ -64,13 +64,17 @@ setup_interface6() {
+     search=$(printf -- "$new_domain_search")
+     namesrv=$new_domain_name_servers
+     hostname=$new_host_name
+-    lease_time=$new_dhcp_lease_time
++    [ -n "$new_dhcp_lease_time" ] && lease_time=$new_dhcp_lease_time
++    [ -n "$new_max_life" ] && lease_time=$new_max_life
++    preferred_lft=$lease_time
++    [ -n "$new_preferred_life" ] && preferred_lft=$new_preferred_life
+ 
+     [ -f /tmp/net.$netif.override ] && . /tmp/net.$netif.override
+ 
+     ip -6 addr add ${new_ip6_address}/${new_ip6_prefixlen} \
+-        dev ${netif} scope global valid_lft ${lease_time} \
+-        preferred_lft ${lease_time}
++        dev ${netif} scope global \
++        ${lease_time:+valid_lft $lease_time} \
++        ${preferred_lft:+preferred_lft ${preferred_lft}}
+ 
+     [ -n "${search}${domain}" ] && echo "search $search $domain" > /tmp/net.$netif.resolv.conf
+     if  [ -n "$namesrv" ] ; then

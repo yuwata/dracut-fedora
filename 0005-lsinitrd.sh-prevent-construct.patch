@@ -1,0 +1,83 @@
+From fd9f902477a8d8df6ce0fa1b044484c435fff247 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 27 Mar 2014 09:27:53 +0100
+Subject: [PATCH] lsinitrd.sh: prevent < <$() construct
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Running dracut in a chroot environment, which has /dev not correctly
+setup will result in errors like:
+
+/usr/bin/lsinitrd: line 164: /dev/fd/62: No such file or directory
+cpio: Malformed number �5�OK��
+cpio: Malformed number 5�OK��
+cpio: Malformed number �OK��
+
+This is because bash wants /dev/fd/<num> for constructs like:
+foo < <$(bar)
+---
+ lsinitrd.sh | 50 +++++++++++++++++++++++++++++---------------------
+ 1 file changed, 29 insertions(+), 21 deletions(-)
+
+diff --git a/lsinitrd.sh b/lsinitrd.sh
+index 8dc9032..a697bc2 100755
+--- a/lsinitrd.sh
++++ b/lsinitrd.sh
+@@ -160,27 +160,35 @@ case $bin in
+         ;;
+ esac
+ 
+-if [[ $SKIP ]]; then
+-    read -N 6 bin < <($SKIP "$image")
+-fi
+-
+-case $bin in
+-    $'\x1f\x8b'*)
+-        CAT="zcat --";;
+-    BZh*)
+-        CAT="bzcat --";;
+-    $'\x71\xc7'*|070701)
+-        CAT="cat --"
+-        ;;
+-    $'\x02\x21'*)
+-        CAT="lz4 -d -c";;
+-    *)
+-        CAT="xzcat --";
+-        if echo "test"|xz|xzcat --single-stream >/dev/null 2>&1; then
+-            CAT="xzcat --single-stream --"
+-        fi
+-        ;;
+-esac
++CAT=$({
++        if [[ $SKIP ]]; then
++            $SKIP "$image"
++        else
++            cat "$image"
++        fi } | {
++        read -N 6 bin
++        case $bin in
++            $'\x1f\x8b'*)
++                echo "zcat --"
++                ;;
++            BZh*)
++                echo "bzcat --"
++                ;;
++            $'\x71\xc7'*|070701)
++                echo "cat --"
++                ;;
++            $'\x02\x21'*)
++                echo "lz4 -d -c"
++                ;;
++            *)
++                if echo "test"|xz|xzcat --single-stream >/dev/null 2>&1; then
++                    echo "xzcat --single-stream --"
++                else
++                    echo "xzcat --"
++                fi
++                ;;
++        esac
++    })
+ 
+ skipcpio()
+ {
