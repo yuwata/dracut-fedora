@@ -11,7 +11,7 @@
 
 Name: dracut
 Version: 037
-Release: 10.git20140402%{?dist}
+Release: 11.git20140402%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -40,6 +40,10 @@ Patch7: 0007-dm-add-dm-cache-modules.patch
 Patch8: 0008-fcoe-workaround-fcoe-timing-issues.patch
 Patch9: 0009-fstab-do-not-mount-and-fsck-from-fstab-if-using-syst.patch
 
+# Revert dangerous behaviour change which breaks boot for multiple reporters
+# https://bugzilla.redhat.com/show_bug.cgi?id=1084766
+Patch100: 0001-Revert-Add-no-hostonly-cmdline-option-handling-for-g.patch
+Patch101: 0002-Revert-Add-flag-to-toggle-hostonly-cmdline-storing-i.patch
 
 BuildRequires: bash git
 
@@ -487,6 +491,9 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Thu Apr 17 2014 Adam Williamson <awilliam@redhat.com> - 037-11.git20140402
+- revert broken upstream change that causes RHBZ#1084766
+
 * Wed Apr 02 2014 Harald Hoyer <harald@redhat.com> 037-10.git20140402
 - fixed fstab.sys with systemd
 - DHCPv6 fixes
