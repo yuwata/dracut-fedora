@@ -11,7 +11,7 @@
 
 Name: dracut
 Version: 037
-Release: 11.git20140402%{?dist}
+Release: 12.git20140402%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -39,6 +39,7 @@ Patch6: 0006-network-DCHPv6-set-valid_lft-and-preferred_lft.patch
 Patch7: 0007-dm-add-dm-cache-modules.patch
 Patch8: 0008-fcoe-workaround-fcoe-timing-issues.patch
 Patch9: 0009-fstab-do-not-mount-and-fsck-from-fstab-if-using-syst.patch
+Patch10: 0001-kernel-modules-Fix-storage-module-selection-for-sdhc.patch
 
 # Revert dangerous behaviour change which breaks boot for multiple reporters
 # https://bugzilla.redhat.com/show_bug.cgi?id=1084766
@@ -491,6 +492,9 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Fri May 23 2014 Peter Robinson <pbrobinson@fedoraproject.org> 037-12.git20140402
+- Fix achi/mmc/sdhci selection for non host based initrd
+
 * Thu Apr 17 2014 Adam Williamson <awilliam@redhat.com> - 037-11.git20140402
 - revert broken upstream change that causes RHBZ#1084766
 
