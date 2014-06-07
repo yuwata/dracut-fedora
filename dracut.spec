@@ -11,7 +11,7 @@
 
 Name: dracut
 Version: 037
-Release: 12.git20140402%{?dist}
+Release: 13.git20140402%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -492,6 +492,9 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Sat Jun 07 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 037-13.git20140402
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_21_Mass_Rebuild
+
 * Fri May 23 2014 Peter Robinson <pbrobinson@fedoraproject.org> 037-12.git20140402
 - Fix achi/mmc/sdhci selection for non host based initrd
 
