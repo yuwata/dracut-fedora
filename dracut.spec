@@ -53,7 +53,6 @@ Patch020: 0020-resume-parse-resume.sh-correctly-write-timeout-hook.patch
 Patch021: 0021-ifcfg-write-ifcfg.sh-IPV6INIT-yes-check-also-for-non.patch
 Patch022: 0022-cms-cmssetup.sh-convert-SUBCHANNELS-to-lowercase.patch
 Patch023: 0023-mdraid-module-setup.sh-fixed-print-cmdline-for-empty.patch
-Patch024: 0024-ifcfg-write-ifcfg.sh-include-net-lib.sh.patch
 Patch025: 0025-nbd-nbdroot.sh-call-nbd-client-with-systemd-mark.patch
 Patch026: 0026-fcoe-uefi-parse-uefifcoe.sh-fixed-parameter-generati.patch
 Patch027: 0027-dracut-functions.sh-print_vars-fix-for-values-with-s.patch
@@ -526,7 +525,7 @@ rm -rf -- $RPM_BUILD_ROOT
 
 %changelog
 * Sat Jun 28 2014 Zbigniew Jędrzejewski-Szmek <zbyszek@in.waw.pl> - 13.git20140628
-- Pull all bugfixy commits from current git
+- Pull most bugfixy commits from current git
 Resolves: rhbz#1112061
 
 * Sat Jun 07 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 037-13.git20140402
