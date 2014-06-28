@@ -1,0 +1,26 @@
+From 16ef1e38570e25c097fcf64d1dddcaf4bf623e1e Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 11 Jun 2014 14:55:11 +0200
+Subject: [PATCH] iscsi: correctly install the timeout iscsiroot dummy call
+
+initqueue parses $1 as the executable command
+---
+ modules.d/95iscsi/parse-iscsiroot.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/modules.d/95iscsi/parse-iscsiroot.sh b/modules.d/95iscsi/parse-iscsiroot.sh
+index 4be9d56121..52a4805a59 100755
+--- a/modules.d/95iscsi/parse-iscsiroot.sh
++++ b/modules.d/95iscsi/parse-iscsiroot.sh
+@@ -64,7 +64,7 @@ if [ -n "$iscsi_firmware" ] ; then
+     netroot=${netroot:-iscsi:}
+     modprobe -q iscsi_boot_sysfs 2>/dev/null
+     modprobe -q iscsi_ibft
+-    initqueue --onetime --timeout "/sbin/iscsiroot dummy '$netroot' '$NEWROOT'"
++    initqueue --onetime --timeout /sbin/iscsiroot dummy "'$netroot'" "'$NEWROOT'"
+ fi
+ 
+ # If it's not iscsi we don't continue
+-- 
+1.9.3
+

@@ -9,7 +9,7 @@ https://bugzilla.redhat.com/show_bug.cgi?id=1064365
  1 file changed, 7 insertions(+), 3 deletions(-)
 
 diff --git a/modules.d/40network/dhclient-script.sh b/modules.d/40network/dhclient-script.sh
-index 50e8932..ba05250 100755
+index 50e8932627..ba05250de9 100755
 --- a/modules.d/40network/dhclient-script.sh
 +++ b/modules.d/40network/dhclient-script.sh
 @@ -64,13 +64,17 @@ setup_interface6() {
@@ -33,3 +33,6 @@ index 50e8932..ba05250 100755
  
      [ -n "${search}${domain}" ] && echo "search $search $domain" > /tmp/net.$netif.resolv.conf
      if  [ -n "$namesrv" ] ; then
+-- 
+1.9.3
+

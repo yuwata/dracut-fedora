@@ -9,7 +9,7 @@ Subject: [PATCH] fcoe: workaround fcoe timing issues
  2 files changed, 21 insertions(+), 4 deletions(-)
 
 diff --git a/modules.d/95fcoe/fcoe-genrules.sh b/modules.d/95fcoe/fcoe-genrules.sh
-index 80894ed..fa3af6d 100755
+index 80894ed2d5..fa3af6df0c 100755
 --- a/modules.d/95fcoe/fcoe-genrules.sh
 +++ b/modules.d/95fcoe/fcoe-genrules.sh
 @@ -13,4 +13,4 @@
@@ -19,7 +19,7 @@ index 80894ed..fa3af6d 100755
 -} > /etc/udev/rules.d/92-fcoe.rules
 +} >> /etc/udev/rules.d/92-fcoe.rules
 diff --git a/modules.d/95fcoe/fcoe-up.sh b/modules.d/95fcoe/fcoe-up.sh
-index dd45358..d8c73c8 100755
+index dd4535889f..d8c73c8147 100755
 --- a/modules.d/95fcoe/fcoe-up.sh
 +++ b/modules.d/95fcoe/fcoe-up.sh
 @@ -36,10 +36,27 @@ if [ "$dcb" = "dcb" ]; then
@@ -53,3 +53,6 @@ index dd45358..d8c73c8 100755
      fipvlan "$netif" -c -s
  elif [ "$netdriver" = "bnx2x" ]; then
      # If driver is bnx2x, do not use /sys/module/fcoe/parameters/create but fipvlan
+-- 
+1.9.3
+

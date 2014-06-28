@@ -1,0 +1,51 @@
+From c771f395699e10a534c05bdb790843d74c4898c9 Mon Sep 17 00:00:00 2001
+From: Alex Harpin <development@landsofshadow.co.uk>
+Date: Tue, 6 May 2014 23:41:17 +0100
+Subject: [PATCH] bonding: use hwaddr of the slave rather than the master
+
+When a bonded interface is brought up, any slaves included in the bond
+have their hardware address set to that of the bond master.  Although
+this allows an interface to be brought up on start up, when the
+configuration file is imported into the booted system it prevents
+the bonded interface being successfully restarted.
+
+The fix involves obtaining the hardware address of the slaves before
+they are added to the bond and then using this value in the
+configuration file.
+---
+ modules.d/40network/ifup.sh      | 1 +
+ modules.d/45ifcfg/write-ifcfg.sh | 6 +++++-
+ 2 files changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/modules.d/40network/ifup.sh b/modules.d/40network/ifup.sh
+index ede018832f..fd84e4cd0f 100755
+--- a/modules.d/40network/ifup.sh
++++ b/modules.d/40network/ifup.sh
+@@ -188,6 +188,7 @@ if [ -e /tmp/bond.${netif}.info ]; then
+ 
+         for slave in $bondslaves ; do
+             ip link set $slave down
++            cat /sys/class/net/$slave/address > /tmp/net.${netif}.${slave}.hwaddr
+             echo "+$slave" > /sys/class/net/$bondname/bonding/slaves
+             linkup $slave
+         done
+diff --git a/modules.d/45ifcfg/write-ifcfg.sh b/modules.d/45ifcfg/write-ifcfg.sh
+index 7f997a2afd..fb388bcb8e 100755
+--- a/modules.d/45ifcfg/write-ifcfg.sh
++++ b/modules.d/45ifcfg/write-ifcfg.sh
+@@ -206,7 +206,11 @@ for netup in /tmp/net.*.did-setup ; do
+                 echo "TYPE=Ethernet"
+                 echo "ONBOOT=yes"
+                 echo "NETBOOT=yes"
+-                echo "HWADDR=\"$(cat /sys/class/net/$slave/address)\""
++                if [ -e /tmp/net.${netif}.${slave}.hwaddr ]; then
++                   echo "HWADDR=\"$(cat /tmp/net.${netif}.${slave}.hwaddr)\""
++                else
++                   echo "HWADDR=\"$(cat /sys/class/net/$slave/address)\""
++                fi
+                 echo "SLAVE=yes"
+                 echo "MASTER=\"$netif\""
+                 echo "NAME=\"$slave\""
+-- 
+1.9.3
+

@@ -1,0 +1,29 @@
+From 47fe3982753c53a96103e32d70055da6dd354aeb Mon Sep 17 00:00:00 2001
+From: Vasiliy Tolstov <v.tolstov@selfip.ru>
+Date: Mon, 26 May 2014 15:28:43 +0400
+Subject: [PATCH] network/ifup.sh: Don't try to modprobe ipv6, if already
+ available
+
+Signed-off-by: Vasiliy Tolstov <v.tolstov@selfip.ru>
+
+[Edited-by: Harald Hoyer]
+Simplified logic.
+---
+ modules.d/40network/ifup.sh | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/modules.d/40network/ifup.sh b/modules.d/40network/ifup.sh
+index fd84e4cd0f..79127f248d 100755
+--- a/modules.d/40network/ifup.sh
++++ b/modules.d/40network/ifup.sh
+@@ -106,6 +106,7 @@ do_dhcp() {
+ }
+ 
+ load_ipv6() {
++    [ -d /proc/sys/net/ipv6 ] && return
+     modprobe ipv6
+     i=0
+     while [ ! -d /proc/sys/net/ipv6 ]; do
+-- 
+1.9.3
+

@@ -1,0 +1,26 @@
+From a96a5ccec2833c98000ad78aee494257e91b9acd Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 11 Jun 2014 14:58:55 +0200
+Subject: [PATCH] iscsi: correctly install the settled iscsiroot dummy call
+
+initqueue parses $1 as the executable command
+---
+ modules.d/95iscsi/parse-iscsiroot.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/modules.d/95iscsi/parse-iscsiroot.sh b/modules.d/95iscsi/parse-iscsiroot.sh
+index 52a4805a59..b48be38778 100755
+--- a/modules.d/95iscsi/parse-iscsiroot.sh
++++ b/modules.d/95iscsi/parse-iscsiroot.sh
+@@ -88,7 +88,7 @@ fi
+ 
+ if [ -n "$netroot" ] && [ "$root" != "/dev/root" ] && [ "$root" != "dhcp" ]; then
+     if ! getargbool 1 rd.neednet >/dev/null || ! getarg "ip="; then
+-        initqueue --onetime --settled "/sbin/iscsiroot dummy '$netroot' '$NEWROOT'"
++        initqueue --onetime --settled /sbin/iscsiroot dummy "'$netroot'" "'$NEWROOT'"
+     fi
+ fi
+ 
+-- 
+1.9.3
+

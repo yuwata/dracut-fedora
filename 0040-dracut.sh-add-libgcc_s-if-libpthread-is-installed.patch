@@ -1,0 +1,34 @@
+From c026ccef5b4b8d2eba98ea38a5c524441bbd3fe6 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 20 Jun 2014 11:19:49 +0200
+Subject: [PATCH] dracut.sh: add libgcc_s, if libpthread is installed
+
+workaround the fact, that pthread_cancel() wants to
+dlopen libgcc_s.so.1
+---
+ dracut.sh | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/dracut.sh b/dracut.sh
+index c4163bcfec..04bb3398a3 100755
+--- a/dracut.sh
++++ b/dracut.sh
+@@ -1348,6 +1348,15 @@ if [[ $kernel_only != yes ]]; then
+         | xargs -r -0 $DRACUT_INSTALL ${initdir:+-D "$initdir"} -R ${DRACUT_FIPS_MODE:+-H} --
+         dinfo "*** Resolving executable dependencies done***"
+     fi
++
++    # libpthread workaround: pthread_cancel wants to dlopen libgcc_s.so
++    for _dir in $libdirs; do
++        for _f in "$_dir/libpthread.so"*; do
++            [[ -e "$_f" ]] || continue
++            inst_libdir_file "libgcc_s.so*"
++            break 2
++        done
++    done
+ fi
+ 
+ while pop include_src src && pop include_target tgt; do
+-- 
+1.9.3
+

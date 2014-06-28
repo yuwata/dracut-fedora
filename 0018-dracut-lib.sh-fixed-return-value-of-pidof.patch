@@ -1,0 +1,39 @@
+From a74176588b2219b1f8df2671e5f60f3d27222958 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 7 May 2014 13:33:14 +0200
+Subject: [PATCH] dracut-lib.sh: fixed return value of pidof()
+
+pidof always returned with 0, so any "while pidof" loop would not
+terminate.
+
+Thanks "Consus" for the hint!
+---
+ modules.d/99base/dracut-lib.sh | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/modules.d/99base/dracut-lib.sh b/modules.d/99base/dracut-lib.sh
+index e4d7da8edb..98ea451fc9 100755
+--- a/modules.d/99base/dracut-lib.sh
++++ b/modules.d/99base/dracut-lib.sh
+@@ -969,6 +969,7 @@ if ! command -v pidof >/dev/null 2>/dev/null; then
+         local _cmd
+         local _exe
+         local _rl
++        local _ret=1
+         local i
+         _cmd="$1"
+         [ -z "$_cmd" ] && return 1
+@@ -983,8 +984,9 @@ if ! command -v pidof >/dev/null 2>/dev/null; then
+             fi
+             i=${i%/exe}
+             echo ${i##/proc/}
++            _ret=0
+         done
+-        return 0
++        return $_ret
+     }
+ fi
+ 
+-- 
+1.9.3
+

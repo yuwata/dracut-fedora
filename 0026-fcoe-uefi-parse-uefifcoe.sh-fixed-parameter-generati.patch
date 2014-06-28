@@ -1,0 +1,27 @@
+From dff1aefba4d8e3b756a989309c56a2b0f24a6b6f Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Tue, 20 May 2014 11:22:26 +0200
+Subject: [PATCH] fcoe-uefi/parse-uefifcoe.sh: fixed parameter generation from
+ UEFI
+
+"fcoe=" was missing for the parameter specifying the interface
+---
+ modules.d/95fcoe-uefi/parse-uefifcoe.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/modules.d/95fcoe-uefi/parse-uefifcoe.sh b/modules.d/95fcoe-uefi/parse-uefifcoe.sh
+index 0799cdd64f..7b8f1a6f67 100755
+--- a/modules.d/95fcoe-uefi/parse-uefifcoe.sh
++++ b/modules.d/95fcoe-uefi/parse-uefifcoe.sh
+@@ -26,7 +26,7 @@ print_fcoe_uefi_conf()
+         esac
+     fi
+     # fcoe=eth0:nodcb
+-    printf "%s\n" "$dev:nodcb"
++    printf "fcoe=%s\n" "$dev:nodcb"
+     return 0
+ }
+ 
+-- 
+1.9.3
+

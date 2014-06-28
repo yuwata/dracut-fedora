@@ -1,0 +1,30 @@
+From 9552c2c3463c1baecb7e65ee6c6db436427599ac Mon Sep 17 00:00:00 2001
+From: Tobias Geerinckx <tobias.geerinckx@gmail.com>
+Date: Tue, 3 Jun 2014 04:59:34 +0200
+Subject: [PATCH] lsinitrd.sh: don't choke on LZO-compressed images
+
+lsinitrd (and hence dracut) currently fail to list the contents of any
+LZO-compressed image, and merely spit out misleading xzcat errors.
+
+I guess no-one actually uses them.
+---
+ lsinitrd.sh | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/lsinitrd.sh b/lsinitrd.sh
+index a697bc2b75..4ba8752c4b 100755
+--- a/lsinitrd.sh
++++ b/lsinitrd.sh
+@@ -180,6 +180,9 @@ CAT=$({
+             $'\x02\x21'*)
+                 echo "lz4 -d -c"
+                 ;;
++            $'\x89'LZO$'\0'*)
++                echo "lzop -d -c"
++                ;;
+             *)
+                 if echo "test"|xz|xzcat --single-stream >/dev/null 2>&1; then
+                     echo "xzcat --single-stream --"
+-- 
+1.9.3
+

@@ -21,7 +21,7 @@ foo < <$(bar)
  1 file changed, 29 insertions(+), 21 deletions(-)
 
 diff --git a/lsinitrd.sh b/lsinitrd.sh
-index 8dc9032..a697bc2 100755
+index 8dc9032378..a697bc2b75 100755
 --- a/lsinitrd.sh
 +++ b/lsinitrd.sh
 @@ -160,27 +160,35 @@ case $bin in
@@ -81,3 +81,6 @@ index 8dc9032..a697bc2 100755
  
  skipcpio()
  {
+-- 
+1.9.3
+

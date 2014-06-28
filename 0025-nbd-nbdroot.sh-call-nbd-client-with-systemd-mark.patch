@@ -1,0 +1,28 @@
+From 6a8dec999380f3dcae608e2433f8179ddef08f8e Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 16 May 2014 13:33:33 +0200
+Subject: [PATCH] nbd/nbdroot.sh: call nbd-client with "--systemd-mark"
+
+otherwise nbd-client will get killed by systemd
+---
+ modules.d/95nbd/nbdroot.sh | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/modules.d/95nbd/nbdroot.sh b/modules.d/95nbd/nbdroot.sh
+index 32f346d3d9..8bfbebcbda 100755
+--- a/modules.d/95nbd/nbdroot.sh
++++ b/modules.d/95nbd/nbdroot.sh
+@@ -111,6 +111,10 @@ if [ "$root" = "block:/dev/root" -o "$root" = "dhcp" ]; then
+     fi
+ fi
+ 
++if strstr "$(nbd-client --help 2>&1)" "systemd-mark"; then
++    preopts="--systemd-mark $preopts"
++fi
++
+ nbd-client $preopts "$nbdserver" $nbdport /dev/nbd0 $opts || exit 1
+ 
+ # NBD doesn't emit uevents when it gets connected, so kick it
+-- 
+1.9.3
+

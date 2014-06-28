@@ -1,6 +1,6 @@
-From e1ec3b48b3f63b30082bcfe7b0110ee24a989b67 Mon Sep 17 00:00:00 2001
+From 36c5c664275e795099b2930185d3d2af3cfe513d Mon Sep 17 00:00:00 2001
 From: Peter Robinson <pbrobinson@gmail.com>
-Date: Fri, 23 May 2014 11:33:42 +0100
+Date: Fri, 23 May 2014 11:54:01 +0100
 Subject: [PATCH] kernel-modules: Fix storage module selection for
  sdhci/mmc/ahci
 
@@ -24,7 +24,7 @@ Signed-off-by: <pbrobinson@gmail.com>
  1 file changed, 2 insertions(+), 4 deletions(-)
 
 diff --git a/modules.d/90kernel-modules/module-setup.sh b/modules.d/90kernel-modules/module-setup.sh
-index 2378663..5271438 100755
+index 23786632ad..5271438d18 100755
 --- a/modules.d/90kernel-modules/module-setup.sh
 +++ b/modules.d/90kernel-modules/module-setup.sh
 @@ -6,7 +6,7 @@
