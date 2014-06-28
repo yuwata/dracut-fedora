@@ -11,7 +11,7 @@
 
 Name: dracut
 Version: 037
-Release: 13.git20140628%{?dist}
+Release: 14.git20140628%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -524,7 +524,7 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
-* Sat Jun 28 2014 Zbigniew Jędrzejewski-Szmek <zbyszek@in.waw.pl> - 13.git20140628
+* Sat Jun 28 2014 Zbigniew Jędrzejewski-Szmek <zbyszek@in.waw.pl> - 037-14.git20140628
 - Pull most bugfixy commits from current git
 Resolves: rhbz#1112061
 
