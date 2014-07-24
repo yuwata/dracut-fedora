@@ -1,0 +1,40 @@
+From ad8638e04e4ac3641afee0e273c91aa3fb6d4278 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Tue, 22 Jul 2014 11:51:08 +0200
+Subject: [PATCH] base/dracut-lib:pidof() turn off debugging
+
+---
+ modules.d/99base/dracut-lib.sh | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/modules.d/99base/dracut-lib.sh b/modules.d/99base/dracut-lib.sh
+index a77b843..abcebf5 100755
+--- a/modules.d/99base/dracut-lib.sh
++++ b/modules.d/99base/dracut-lib.sh
+@@ -991,13 +991,17 @@ wait_for_loginit()
+ # pidof version for root
+ if ! command -v pidof >/dev/null 2>/dev/null; then
+     pidof() {
++        debug_off
+         local _cmd
+         local _exe
+         local _rl
+         local _ret=1
+         local i
+         _cmd="$1"
+-        [ -z "$_cmd" ] && return 1
++        if [ -z "$_cmd" ]; then
++            debug_on
++            return 1
++        fi
+         _exe=$(type -P "$1")
+         for i in /proc/*/exe; do
+             [ -e "$i" ] || continue
+@@ -1011,6 +1015,7 @@ if ! command -v pidof >/dev/null 2>/dev/null; then
+             echo ${i##/proc/}
+             _ret=0
+         done
++        debug_on
+         return $_ret
+     }
+ fi

@@ -11,7 +11,7 @@
 
 Name: dracut
 Version: 038
-Release: 2%{?dist}
+Release: 14.git20140724%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -31,6 +31,20 @@ URL: https://dracut.wiki.kernel.org/
 # http://git.kernel.org/?p=boot/dracut/dracut.git;a=snapshot;h=%{version};sf=tgz
 Source0: http://www.kernel.org/pub/linux/utils/boot/dracut/dracut-%{version}.tar.xz
 Source1: https://www.gnu.org/licenses/lgpl-2.1.txt
+
+Patch1: 0001-modsign-do-not-hardcode-path-to-keyctl.patch
+Patch2: 0002-lvm-module-setup.sh-check-for-existance-of-69-dm-lvm.patch
+Patch3: 0003-dracut.sh-always-copy-prelink-files-in-FIPS-mode.patch
+Patch4: 0004-plymouth-also-find-the-pkglibdir-on-debian.patch
+Patch5: 0005-dracut-functions.sh-speed-up-ldconfig_paths.patch
+Patch6: 0006-Installing-an-OS-with-VLAN-enabled-to-an-ISCSI-LUN-f.patch
+Patch7: 0007-dracut-functions.sh-fix-inst-functions-for-H-handlin.patch
+Patch8: 0008-ARM-update-modules-for-ARM-host-only-options.patch
+Patch9: 0009-base-dracut-lib-pidof-turn-off-debugging.patch
+Patch10: 0010-network-add-rd.route-parameter.patch
+Patch11: 0011-add-install-optional-and-install_optional_items.patch
+Patch12: 0012-test-TEST-30-ISCSI-add-rd.shell-to-client-root.patch
+Patch13: 0013-dracut.sh-add-DRACUT_PATH.patch
 
 BuildRequires: bash git
 
@@ -476,6 +490,14 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Thu Jul 24 2014 Harald Hoyer <harald@redhat.com> 038-14.git20140724
+- fixed lvm modules issues
+Resolves: rhbz#1118890
+- fixed vlan issues
+- fixed prelink for FIPS
+- new rd.route parameter
+- more ARM modules
+
 * Fri Jul 11 2014 Tom Callaway <spot@fedoraproject.org> - 038-2
 - fix license handling
 

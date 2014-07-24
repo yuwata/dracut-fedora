@@ -1,0 +1,35 @@
+From 4adeefc4abb8fb1d83e483d12da6b337c486fded Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Tue, 8 Jul 2014 11:50:51 +0200
+Subject: [PATCH] plymouth: also find the pkglibdir on debian
+
+---
+ modules.d/50plymouth/module-setup.sh | 12 +++++++++---
+ 1 file changed, 9 insertions(+), 3 deletions(-)
+
+diff --git a/modules.d/50plymouth/module-setup.sh b/modules.d/50plymouth/module-setup.sh
+index b818324..33fab11 100755
+--- a/modules.d/50plymouth/module-setup.sh
++++ b/modules.d/50plymouth/module-setup.sh
+@@ -15,12 +15,18 @@ depends() {
+ 
+ # called by dracut
+ install() {
+-    if grep -q nash /usr/libexec/plymouth/plymouth-populate-initrd \
+-        || [ ! -x /usr/libexec/plymouth/plymouth-populate-initrd ]; then
++    PKGLIBDIR="/usr/lib/plymouth"
++    if type -P dpkg-architecture &>/dev/null; then
++        PKGLIBDIR="/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/plymouth"
++    fi
++    [ -x /usr/libexec/plymouth/plymouth-populate-initrd ] && PKGLIBDIR="/usr/libexec/plymouth"
++
++    if grep -q nash ${PKGLIBDIR}/plymouth-populate-initrd \
++        || [ ! -x ${PKGLIBDIR}/plymouth-populate-initrd ]; then
+         . "$moddir"/plymouth-populate-initrd.sh
+     else
+         PLYMOUTH_POPULATE_SOURCE_FUNCTIONS="$dracutfunctions" \
+-            /usr/libexec/plymouth/plymouth-populate-initrd -t "$initdir"
++            ${PKGLIBDIR}/plymouth-populate-initrd -t "$initdir"
+     fi
+ 
+     inst_hook emergency 50 "$moddir"/plymouth-emergency.sh
