@@ -1,0 +1,28 @@
+From 4a3f3ba68c73707231bba72cdf7ab01464456e5a Mon Sep 17 00:00:00 2001
+From: Nicolas Chauvet <kwizart@gmail.com>
+Date: Mon, 4 Aug 2014 22:04:37 +0200
+Subject: [PATCH] Test soc path for modalias needed by drm
+
+On ARM, both pci and soc path can be tested for drm.
+
+With this patchset, that was missing in recent kernel,
+the tegra_drm case is not needed anymore:
+http://patchwork.ozlabs.org/patch/361765/
+http://www.spinics.net/lists/linux-tegra/msg17948.html
+---
+ modules.d/50drm/module-setup.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/modules.d/50drm/module-setup.sh b/modules.d/50drm/module-setup.sh
+index e25fc9f..9a48aaf 100755
+--- a/modules.d/50drm/module-setup.sh
++++ b/modules.d/50drm/module-setup.sh
+@@ -57,7 +57,7 @@ installkernel() {
+         # as we could e.g. be in the installer; nokmsboot boot parameter will disable
+         # loading of the driver if needed
+         if [[ $hostonly ]] && modinfo -F alias $_modname | sed -e 's,\?,\.,g' -e 's,\*,\.\*,g' \
+-            | grep -qxf - /sys/bus/pci/devices/*/modalias 2>/dev/null; then
++            | grep -qxf - /sys/bus/{pci/devices,soc/devices/soc?}/*/modalias 2>/dev/null; then
+             hostonly='' instmods $_modname
+             continue
+         fi

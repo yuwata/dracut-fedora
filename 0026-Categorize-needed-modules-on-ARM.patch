@@ -1,0 +1,31 @@
+From b96ea1e196ae5706a68644a3679ee8c432b0b8f1 Mon Sep 17 00:00:00 2001
+From: Nicolas Chauvet <kwizart@gmail.com>
+Date: Mon, 4 Aug 2014 22:04:38 +0200
+Subject: [PATCH] Categorize needed modules on ARM
+
+---
+ modules.d/90kernel-modules/module-setup.sh | 11 +++++++----
+ 1 file changed, 7 insertions(+), 4 deletions(-)
+
+diff --git a/modules.d/90kernel-modules/module-setup.sh b/modules.d/90kernel-modules/module-setup.sh
+index 1ce133f..f3e4f65 100755
+--- a/modules.d/90kernel-modules/module-setup.sh
++++ b/modules.d/90kernel-modules/module-setup.sh
+@@ -51,10 +51,13 @@ installkernel() {
+ 
+         if [[ "$(uname -p)" == arm* ]]; then
+             # arm specific modules
+-            hostonly='' instmods \
+-	        connector-hdmi connector-dvi encoder-tfp410 \
+-	        encoder-tpd12s015 i2c-tegra gpio-regulator \
+-		as3722-regulator orion-ehci ehci-tegra 
++            instmods \
++                "=drivers/i2c/busses" \
++                "=drivers/regulator" \
++                "=drivers/rtc" \
++                "=drivers/usb/host" \
++                "=drivers/usb/phy" \
++                ${NULL}
+         fi
+ 
+         # install virtual machine support

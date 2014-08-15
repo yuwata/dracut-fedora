@@ -1,0 +1,28 @@
+From 32125a976bb6ff67768ca813446743b781ba012f Mon Sep 17 00:00:00 2001
+From: Alex Harpin <development@landsofshadow.co.uk>
+Date: Sat, 2 Aug 2014 20:08:25 +0100
+Subject: [PATCH] bridging: update the ifcfg files generated for bridge slaves
+
+Update the ifcfg files generated for bridge slaves so they reference
+the bridge they are part of.  Related to early patch submitted as a
+fix for Bug #1123552.
+
+Bug #1123552 https://bugzilla.redhat.com/show_bug.cgi?id=1123552
+---
+ modules.d/45ifcfg/write-ifcfg.sh | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/modules.d/45ifcfg/write-ifcfg.sh b/modules.d/45ifcfg/write-ifcfg.sh
+index d920c22..7f068cb 100755
+--- a/modules.d/45ifcfg/write-ifcfg.sh
++++ b/modules.d/45ifcfg/write-ifcfg.sh
+@@ -234,8 +234,7 @@ for netup in /tmp/net.*.did-setup ; do
+                 echo "ONBOOT=yes"
+                 echo "NETBOOT=yes"
+                 echo "HWADDR=\"$(cat /sys/class/net/$slave/address)\""
+-                echo "SLAVE=yes"
+-                echo "MASTER=\"$bridgename\""
++                echo "BRIDGE=\"$bridgename\""
+                 echo "NAME=\"$slave\""
+                 echo "UUID=\"$(cat /proc/sys/kernel/random/uuid)\""
+             } >> /tmp/ifcfg/ifcfg-$slave

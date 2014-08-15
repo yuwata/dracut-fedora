@@ -1,0 +1,23 @@
+From e02a29e7a2403dd1bb4f581b14ec4bf4ace6cba7 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 15 Aug 2014 11:44:26 +0200
+Subject: [PATCH] dracut.usage.asc: extend parameters for shutdown debug
+ procedure
+
+---
+ dracut.usage.asc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/dracut.usage.asc b/dracut.usage.asc
+index 6979af6..50ceb49 100644
+--- a/dracut.usage.asc
++++ b/dracut.usage.asc
+@@ -528,7 +528,7 @@ on _pre-shutdown_ or _shutdown_.
+ To do this from an already booted system:
+ ----
+ # mkdir -p /run/initramfs/etc/cmdline.d
+-# echo "rd.break=pre-shutdown" > /run/initramfs/etc/cmdline.d/debug.conf
++# echo "rd.debug rd.break=pre-shutdown rd.break=shutdown" > /run/initramfs/etc/cmdline.d/debug.conf
+ # touch /run/initramfs/.need_shutdown
+ ----
+ 

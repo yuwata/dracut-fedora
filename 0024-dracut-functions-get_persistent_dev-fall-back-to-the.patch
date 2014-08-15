@@ -1,0 +1,28 @@
+From a628b7caf52459a31c46463744fafc42bb8f3407 Mon Sep 17 00:00:00 2001
+From: WANG Chao <chaowang@redhat.com>
+Date: Mon, 28 Jul 2014 22:26:28 +0800
+Subject: [PATCH] dracut-functions: get_persistent_dev() fall back to the
+ original name
+
+In case of raw disk/partition, ex. /dev/vda1, which doesn't contain any
+filesystem on it. get_persistent_dev() would return empty. Now fix it to
+return its original name, /dev/vda1 in above case. So that we don't have
+to check its return string every time.
+
+Signed-off-by: WANG Chao <chaowang@redhat.com>
+---
+ dracut-functions.sh | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/dracut-functions.sh b/dracut-functions.sh
+index 6cdfea0..b07063f 100755
+--- a/dracut-functions.sh
++++ b/dracut-functions.sh
+@@ -388,6 +388,7 @@ get_persistent_dev() {
+             return
+         fi
+     done
++    echo $1
+ }
+ 
+ expand_persistent_dev() {

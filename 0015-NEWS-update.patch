@@ -1,0 +1,32 @@
+From ba7dab6dbab3fee9527384868695de12033529ed Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Tue, 29 Jul 2014 11:04:09 +0200
+Subject: [PATCH] NEWS: update
+
+---
+ NEWS | 15 +++++++++++++++
+ 1 file changed, 15 insertions(+)
+
+diff --git a/NEWS b/NEWS
+index 102fd03..126a9d7 100644
+--- a/NEWS
++++ b/NEWS
+@@ -1,3 +1,18 @@
++dracut-039
++==========
++- DRACUT_PATH can now be used to specify the PATH used by dracut
++  to search for binaries instead of the default
++  /usr/sbin:/sbin:/usr/bin:/bin
++  This should be set in the distribution config file
++  /usr/lib/dracut/dracut.conf.d/01-dist.conf
++- "rd.route" kernel command line parameter added
++- "--install-optional" and install_optional_items added
++- find plymouth pkglibdir on debian
++- speed up ldconfig_paths()
++- more ARM modules
++- fixed inst*() functions and "-H" handling
++- various bugfixes
++
+ dracut-038
+ ==========
+ - "rd.cmdline=ask" will ask the user on the console to enter additional

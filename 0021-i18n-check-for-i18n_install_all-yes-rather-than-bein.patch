@@ -1,0 +1,25 @@
+From ae488efa5e6103ffc1be8b8782f8a1c7a5aa90b4 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 14 Aug 2014 12:56:53 +0200
+Subject: [PATCH] i18n: check for $i18n_install_all == "yes" rather than being
+ set
+
+i18n_install_all="no" does not have the expected effect without this
+patch
+---
+ modules.d/10i18n/module-setup.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/modules.d/10i18n/module-setup.sh b/modules.d/10i18n/module-setup.sh
+index a091f89..720fcbd 100755
+--- a/modules.d/10i18n/module-setup.sh
++++ b/modules.d/10i18n/module-setup.sh
+@@ -247,7 +247,7 @@ install() {
+     if checks; then
+         install_base
+ 
+-        if [[ ${hostonly} ]] && ! [[ ${i18n_install_all} ]]; then
++        if [[ ${hostonly} ]] && ! [[ ${i18n_install_all} == "yes" ]]; then
+             install_local_i18n || install_all_kbd
+         else
+             install_all_kbd
