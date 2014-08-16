@@ -11,7 +11,7 @@
 
 Name: dracut
 Version: 038
-Release: 30.git20140815%{?dist}
+Release: 31.git20140815%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -507,6 +507,9 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Sat Aug 16 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 038-31.git20140815
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_21_22_Mass_Rebuild
+
 * Fri Aug 15 2014 Harald Hoyer <harald@redhat.com> 038-30.git20140815
 - git snapshot
 
