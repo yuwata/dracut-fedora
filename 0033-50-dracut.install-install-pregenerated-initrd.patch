@@ -1,0 +1,32 @@
+From bc140a0b299d6f873f6d583d85cbdbc40afbc964 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 15 Aug 2014 14:58:34 +0200
+Subject: [PATCH] 50-dracut.install: install pregenerated initrd
+
+If there is an already pregenerated initrd at the same location as the
+kernel install that and do not generate a new one.
+---
+ 50-dracut.install | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/50-dracut.install b/50-dracut.install
+index b0cc7c3..ad5fc0e 100755
+--- a/50-dracut.install
++++ b/50-dracut.install
+@@ -10,6 +10,16 @@ KERNEL_IMAGE="$4"
+ ret=0
+ case "$COMMAND" in
+     add)
++        INITRD_IMAGE_PREGENERATED=${KERNEL_IMAGE%/*}/initrd
++        if [[ -f ${INITRD_IMAGE_PREGENERATED} ]]; then
++            # we found an initrd at the same place as the kernel
++            # use this and don't generate a new one
++            cp "$INITRD_IMAGE_PREGENERATED" "$BOOT_DIR_ABS/initrd" \
++                && chown root:root "$BOOT_DIR_ABS/initrd" \
++                && chmod 0600 "$BOOT_DIR_ABS/initrd" \
++                && exit 0
++        fi
++
+         if [[ -f /etc/kernel/cmdline ]]; then
+             readarray -t BOOT_OPTIONS < /etc/kernel/cmdline
+         fi

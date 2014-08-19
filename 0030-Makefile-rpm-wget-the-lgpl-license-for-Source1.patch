@@ -1,0 +1,24 @@
+From 99128f2b64775313866b1d4edd3cd6220be937f8 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 15 Aug 2014 14:03:39 +0200
+Subject: [PATCH] Makefile:rpm: wget the lgpl license for Source1
+
+---
+ Makefile | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/Makefile b/Makefile
+index 7383309..f68960a 100644
+--- a/Makefile
++++ b/Makefile
+@@ -188,7 +188,9 @@ rpm: dracut-$(VERSION).tar.xz syncheck
+ 	rpmbuild=$$(mktemp -d -t rpmbuild-dracut.XXXXXX); src=$$(pwd); \
+ 	cp dracut-$(VERSION).tar.xz "$$rpmbuild"; \
+ 	LC_MESSAGES=C $$src/git2spec.pl $(VERSION) "$$rpmbuild" < dracut.spec > $$rpmbuild/dracut.spec; \
+-	(cd "$$rpmbuild"; rpmbuild --define "_topdir $$PWD" --define "_sourcedir $$PWD" \
++	(cd "$$rpmbuild"; \
++	wget https://www.gnu.org/licenses/lgpl-2.1.txt; \
++	rpmbuild --define "_topdir $$PWD" --define "_sourcedir $$PWD" \
+ 	        --define "_specdir $$PWD" --define "_srcrpmdir $$PWD" \
+ 		--define "_rpmdir $$PWD" -ba dracut.spec; ) && \
+ 	( mv "$$rpmbuild"/$$(arch)/*.rpm .; mv "$$rpmbuild"/*.src.rpm .;rm -fr -- "$$rpmbuild"; ls *.rpm )
