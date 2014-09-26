@@ -11,7 +11,7 @@
 
 Name: dracut
 Version: 038
-Release: 34.git20140815%{?dist}
+Release: 35.git20140815%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -63,6 +63,7 @@ Patch30: 0030-Makefile-rpm-wget-the-lgpl-license-for-Source1.patch
 Patch31: 0031-51-dracut-rescue.install-fixed-proc-cmdline-read.patch
 Patch32: 0032-50-dracut.install-fixed-proc-cmdline-reading.patch
 Patch33: 0033-50-dracut.install-install-pregenerated-initrd.patch
+Patch34: 0034-Enable-early-microcode-by-default.patch
 
 Source1: https://www.gnu.org/licenses/lgpl-2.1.txt
 
@@ -511,7 +512,11 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
-* Fri Aug 15 2014 Harald Hoyer <harald@redhat.com> 038-34.git20140815
+* Fri Sep 26 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Enable early-microcode by default (rhbz 1083716)
+- Fix changelog date
+
+* Tue Aug 19 2014 Harald Hoyer <harald@redhat.com> 038-34.git20140815
 - git snapshot
 
 * Sat Aug 16 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 038-31.git20140815
