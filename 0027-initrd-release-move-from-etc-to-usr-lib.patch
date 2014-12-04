@@ -1,0 +1,195 @@
+From ca4108b78e04d6ee202efbeea13840fac46f76f6 Mon Sep 17 00:00:00 2001
+From: Tom Gundersen <teg@jklm.no>
+Date: Mon, 1 Dec 2014 16:59:09 +0100
+Subject: [PATCH] initrd-release: move from /etc to /usr/lib
+
+This mimicks the similar move of os-release which was done in systemd. These
+files are not configuration, but part of the OS.
+
+Still symlinks are in place for compatibility, but those should probably be
+dropped eventually.
+---
+ modules.d/98systemd/dracut-cmdline-ask.service | 2 +-
+ modules.d/98systemd/dracut-cmdline.service     | 2 +-
+ modules.d/98systemd/dracut-cmdline.sh          | 2 +-
+ modules.d/98systemd/dracut-initqueue.service   | 2 +-
+ modules.d/98systemd/dracut-mount.service       | 2 +-
+ modules.d/98systemd/dracut-pre-mount.service   | 2 +-
+ modules.d/98systemd/dracut-pre-pivot.service   | 2 +-
+ modules.d/98systemd/dracut-pre-trigger.service | 2 +-
+ modules.d/98systemd/dracut-pre-udev.service    | 2 +-
+ modules.d/98systemd/initrd.target              | 2 +-
+ modules.d/99base/dracut-lib.sh                 | 2 +-
+ modules.d/99base/init.sh                       | 2 +-
+ modules.d/99base/module-setup.sh               | 4 +++-
+ 13 files changed, 15 insertions(+), 13 deletions(-)
+
+diff --git a/modules.d/98systemd/dracut-cmdline-ask.service b/modules.d/98systemd/dracut-cmdline-ask.service
+index 9993671..9a34b35 100644
+--- a/modules.d/98systemd/dracut-cmdline-ask.service
++++ b/modules.d/98systemd/dracut-cmdline-ask.service
+@@ -13,7 +13,7 @@ DefaultDependencies=no
+ Before=dracut-cmdline.service
+ After=systemd-journald.socket
+ Wants=systemd-journald.socket
+-ConditionPathExists=/etc/initrd-release
++ConditionPathExists=/usr/lib/initrd-release
+ ConditionKernelCommandLine=rd.cmdline=ask
+ 
+ [Service]
+diff --git a/modules.d/98systemd/dracut-cmdline.service b/modules.d/98systemd/dracut-cmdline.service
+index f888bf4..6eeb991 100644
+--- a/modules.d/98systemd/dracut-cmdline.service
++++ b/modules.d/98systemd/dracut-cmdline.service
+@@ -14,7 +14,7 @@ DefaultDependencies=no
+ Before=dracut-pre-udev.service
+ After=systemd-journald.socket
+ Wants=systemd-journald.socket
+-ConditionPathExists=/etc/initrd-release
++ConditionPathExists=/usr/lib/initrd-release
+ ConditionPathExistsGlob=|/etc/cmdline.d/*.conf
+ ConditionDirectoryNotEmpty=|/lib/dracut/hooks/cmdline
+ ConditionKernelCommandLine=|rd.break=cmdline
+diff --git a/modules.d/98systemd/dracut-cmdline.sh b/modules.d/98systemd/dracut-cmdline.sh
+index ad81501..871f81b 100755
+--- a/modules.d/98systemd/dracut-cmdline.sh
++++ b/modules.d/98systemd/dracut-cmdline.sh
+@@ -5,7 +5,7 @@ if [ -f /dracut-state.sh ]; then
+ fi
+ type getarg >/dev/null 2>&1 || . /lib/dracut-lib.sh
+ 
+-[ -f /etc/initrd-release ] && . /etc/initrd-release
++[ -f /usr/lib/initrd-release ] && . /usr/lib/initrd-release
+ [ -n "$VERSION" ] && info "dracut-$VERSION"
+ 
+ if ! getargbool 1 'rd.hostonly'; then
+diff --git a/modules.d/98systemd/dracut-initqueue.service b/modules.d/98systemd/dracut-initqueue.service
+index 1b9e701..5d772f7 100644
+--- a/modules.d/98systemd/dracut-initqueue.service
++++ b/modules.d/98systemd/dracut-initqueue.service
+@@ -15,7 +15,7 @@ Before=remote-fs-pre.target
+ Wants=remote-fs-pre.target
+ After=systemd-udev-trigger.service
+ Wants=systemd-udev-trigger.service
+-ConditionPathExists=/etc/initrd-release
++ConditionPathExists=/usr/lib/initrd-release
+ ConditionPathExists=|/lib/dracut/need-initqueue
+ ConditionPathExistsGlob=|/lib/dracut/hooks/initqueue/*.sh
+ ConditionPathExistsGlob=|/lib/dracut/hooks/initqueue/settled/*.sh
+diff --git a/modules.d/98systemd/dracut-mount.service b/modules.d/98systemd/dracut-mount.service
+index 20c633d..1b14f4a 100644
+--- a/modules.d/98systemd/dracut-mount.service
++++ b/modules.d/98systemd/dracut-mount.service
+@@ -12,7 +12,7 @@ Description=dracut mount hook
+ Documentation=man:dracut-mount.service(8)
+ After=initrd-root-fs.target initrd-parse-etc.service
+ After=dracut-initqueue.service dracut-pre-mount.service
+-ConditionPathExists=/etc/initrd-release
++ConditionPathExists=/usr/lib/initrd-release
+ ConditionDirectoryNotEmpty=|/lib/dracut/hooks/mount
+ ConditionKernelCommandLine=|rd.break=mount
+ 
+diff --git a/modules.d/98systemd/dracut-pre-mount.service b/modules.d/98systemd/dracut-pre-mount.service
+index d7be48d..96ea995 100644
+--- a/modules.d/98systemd/dracut-pre-mount.service
++++ b/modules.d/98systemd/dracut-pre-mount.service
+@@ -14,7 +14,7 @@ DefaultDependencies=no
+ Before=initrd-root-fs.target sysroot.mount
+ After=dracut-initqueue.service
+ After=cryptsetup.target
+-ConditionPathExists=/etc/initrd-release
++ConditionPathExists=/usr/lib/initrd-release
+ ConditionDirectoryNotEmpty=|/lib/dracut/hooks/pre-mount
+ ConditionKernelCommandLine=|rd.break=pre-mount
+ 
+diff --git a/modules.d/98systemd/dracut-pre-pivot.service b/modules.d/98systemd/dracut-pre-pivot.service
+index d7c7b1d..f5a85ce 100644
+--- a/modules.d/98systemd/dracut-pre-pivot.service
++++ b/modules.d/98systemd/dracut-pre-pivot.service
+@@ -15,7 +15,7 @@ After=dracut-initqueue.service dracut-pre-mount.service dracut-mount.service
+ Before=initrd-cleanup.service
+ Wants=remote-fs.target
+ After=remote-fs.target
+-ConditionPathExists=/etc/initrd-release
++ConditionPathExists=/usr/lib/initrd-release
+ ConditionDirectoryNotEmpty=|/lib/dracut/hooks/pre-pivot
+ ConditionDirectoryNotEmpty=|/lib/dracut/hooks/cleanup
+ ConditionKernelCommandLine=|rd.break=pre-pivot
+diff --git a/modules.d/98systemd/dracut-pre-trigger.service b/modules.d/98systemd/dracut-pre-trigger.service
+index 69b4cce..826b89b 100644
+--- a/modules.d/98systemd/dracut-pre-trigger.service
++++ b/modules.d/98systemd/dracut-pre-trigger.service
+@@ -14,7 +14,7 @@ DefaultDependencies=no
+ Before=systemd-udev-trigger.service dracut-initqueue.service
+ After=dracut-pre-udev.service systemd-udevd.service systemd-tmpfiles-setup-dev.service
+ Wants=dracut-pre-udev.service systemd-udevd.service
+-ConditionPathExists=/etc/initrd-release
++ConditionPathExists=/usr/lib/initrd-release
+ ConditionDirectoryNotEmpty=|/lib/dracut/hooks/pre-trigger
+ ConditionKernelCommandLine=|rd.break=pre-trigger
+ 
+diff --git a/modules.d/98systemd/dracut-pre-udev.service b/modules.d/98systemd/dracut-pre-udev.service
+index d125b37..73740be 100644
+--- a/modules.d/98systemd/dracut-pre-udev.service
++++ b/modules.d/98systemd/dracut-pre-udev.service
+@@ -14,7 +14,7 @@ DefaultDependencies=no
+ Before=systemd-udevd.service dracut-pre-trigger.service
+ After=dracut-cmdline.service
+ Wants=dracut-cmdline.service
+-ConditionPathExists=/etc/initrd-release
++ConditionPathExists=/usr/lib/initrd-release
+ ConditionDirectoryNotEmpty=|/lib/dracut/hooks/pre-udev
+ ConditionKernelCommandLine=|rd.break=pre-udev
+ ConditionKernelCommandLine=|rd.driver.blacklist
+diff --git a/modules.d/98systemd/initrd.target b/modules.d/98systemd/initrd.target
+index 19494d4..4b7e7da 100644
+--- a/modules.d/98systemd/initrd.target
++++ b/modules.d/98systemd/initrd.target
+@@ -6,4 +6,4 @@ After=basic.target rescue.service rescue.target
+ AllowIsolate=yes
+ OnFailure=emergency.target
+ OnFailureIsolate=yes
+-ConditionPathExists=/etc/initrd-release
++ConditionPathExists=/usr/lib/initrd-release
+diff --git a/modules.d/99base/dracut-lib.sh b/modules.d/99base/dracut-lib.sh
+index 0a89cc8..5fc5615 100755
+--- a/modules.d/99base/dracut-lib.sh
++++ b/modules.d/99base/dracut-lib.sh
+@@ -393,7 +393,7 @@ splitsep() {
+ }
+ 
+ setdebug() {
+-    [ -f /etc/initrd-release ] || return
++    [ -f /usr/lib/initrd-release ] || return
+     if [ -z "$RD_DEBUG" ]; then
+         if [ -e /proc/cmdline ]; then
+             RD_DEBUG=no
+diff --git a/modules.d/99base/init.sh b/modules.d/99base/init.sh
+index 5f66d1f..7fcea4a 100755
+--- a/modules.d/99base/init.sh
++++ b/modules.d/99base/init.sh
+@@ -106,7 +106,7 @@ else
+     exec 0<>/dev/console 1<>/dev/console 2<>/dev/console
+ fi
+ 
+-[ -f /etc/initrd-release ] && . /etc/initrd-release
++[ -f /usr/lib/initrd-release ] && . /usr/lib/initrd-release
+ [ -n "$VERSION_ID" ] && info "$NAME-$VERSION_ID"
+ 
+ source_conf /etc/conf.d
+diff --git a/modules.d/99base/module-setup.sh b/modules.d/99base/module-setup.sh
+index fab4a78..7d30320 100755
+--- a/modules.d/99base/module-setup.sh
++++ b/modules.d/99base/module-setup.sh
+@@ -88,8 +88,10 @@ install() {
+         echo VERSION_ID=$VERSION_ID
+         echo PRETTY_NAME=\"$PRETTY_NAME\"
+         echo ANSI_COLOR=\"$ANSI_COLOR\"
+-    } > $initdir/etc/initrd-release
++    } > $initdir/usr/lib/initrd-release
+     echo dracut-$DRACUT_VERSION > $initdir/lib/dracut/dracut-$DRACUT_VERSION
++    ln -sf ../usr/lib/initrd-release $initdir/etc/initrd-release
++    ln -sf initrd-release $initdir/usr/lib/os-release
+     ln -sf initrd-release $initdir/etc/os-release
+ 
+     ## save host_devs which we need bring up

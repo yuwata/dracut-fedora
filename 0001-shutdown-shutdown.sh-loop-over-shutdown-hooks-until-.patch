@@ -1,0 +1,41 @@
+From b09faad8779f5579b2f1c559edf7c0570e8d50ac Mon Sep 17 00:00:00 2001
+From: Lukas Wunner <lukas@wunner.de>
+Date: Mon, 6 Oct 2014 13:43:58 +0200
+Subject: [PATCH] shutdown/shutdown.sh: loop over shutdown hooks until all
+ succeed
+
+Up until now, _check_shutdown() returns true if at least one of
+the shutdown hooks succeeded. Change this to only return true if
+*all* succeeded. To prevent an infinite loop, introduce an upper
+bound of 40 iterations.
+---
+ modules.d/99shutdown/shutdown.sh | 9 ++++++---
+ 1 file changed, 6 insertions(+), 3 deletions(-)
+
+diff --git a/modules.d/99shutdown/shutdown.sh b/modules.d/99shutdown/shutdown.sh
+index 6e5e559..98eab1d 100755
+--- a/modules.d/99shutdown/shutdown.sh
++++ b/modules.d/99shutdown/shutdown.sh
+@@ -90,16 +90,19 @@ _check_shutdown() {
+         ( . "$__f" $1 )
+         if [ $? -eq 0 ]; then
+             rm -f -- $__f
++        else
+             __s=0
+         fi
+     done
+     return $__s
+ }
+ 
+-while _check_shutdown; do
+-:
++_cnt=0
++while [ $_cnt -le 40 ]; do
++    _check_shutdown || break
++    _cnt=$(($_cnt+1))
+ done
+-_check_shutdown final
++[ $_cnt -ge 40 ] && _check_shutdown final
+ 
+ getarg 'rd.break=shutdown' && emergency_shell --shutdown shutdown "Break before shutdown"
+ 

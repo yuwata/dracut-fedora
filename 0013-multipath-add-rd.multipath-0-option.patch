@@ -1,0 +1,47 @@
+From 778b3543609d8c9d32df7111229f4072d00d02f0 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 20 Nov 2014 11:27:40 +0100
+Subject: [PATCH] multipath: add "rd.multipath=0" option
+
+---
+ dracut.cmdline.7.asc                | 7 +++++++
+ modules.d/90multipath/multipathd.sh | 2 +-
+ 2 files changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/dracut.cmdline.7.asc b/dracut.cmdline.7.asc
+index 48356c7..8e4835d 100644
+--- a/dracut.cmdline.7.asc
++++ b/dracut.cmdline.7.asc
+@@ -379,6 +379,11 @@ DM RAID
+    only activate the raid sets with the given UUID. This parameter can be
+    specified multiple times.
+ 
++MULTIPATH
++~~~~~~~~~
++**rd.multipath=0**::
++   disable multipath detection
++
+ FIPS
+ ~~~~
+ **rd.fips**::
+@@ -952,6 +957,8 @@ rd_NO_MD:: rd.md=0
+ 
+ rd_MD_UUID:: rd.md.uuid
+ 
++rd_NO_MULTIPATH: rd.multipath=0
++
+ rd_NFS_DOMAIN:: rd.nfs.domain
+ 
+ iscsi_initiator:: rd.iscsi.initiator
+diff --git a/modules.d/90multipath/multipathd.sh b/modules.d/90multipath/multipathd.sh
+index 1e0e907..2c2dcc8 100755
+--- a/modules.d/90multipath/multipathd.sh
++++ b/modules.d/90multipath/multipathd.sh
+@@ -1,6 +1,6 @@
+ #!/bin/sh
+ 
+-if [ -e /etc/multipath.conf ]; then
++if getargbool 1 rd.multipath -d -n rd_NO_MULTIPATH && [ -e /etc/multipath.conf ]; then
+     modprobe dm-multipath
+     multipathd -B || multipathd
+     need_shutdown

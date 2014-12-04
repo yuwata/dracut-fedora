@@ -1,0 +1,24 @@
+From 972d6b44ba54e44c01801614fb57e128604b4a12 Mon Sep 17 00:00:00 2001
+From: Stefan Reimer <it@startux.de>
+Date: Tue, 28 Oct 2014 17:58:22 -0700
+Subject: [PATCH] Fix location of dracut-install for local mode
+
+---
+ dracut-functions.sh | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/dracut-functions.sh b/dracut-functions.sh
+index 1bcc3b4..3ad8d81 100755
+--- a/dracut-functions.sh
++++ b/dracut-functions.sh
+@@ -741,8 +741,8 @@ if ! [[ $DRACUT_INSTALL ]]; then
+     DRACUT_INSTALL=$(find_binary dracut-install)
+ fi
+ 
+-if ! [[ $DRACUT_INSTALL ]] && [[ -x $dracutbasedir/dracut-install ]]; then
+-    DRACUT_INSTALL=$dracutbasedir/dracut-install
++if ! [[ $DRACUT_INSTALL ]] && [[ -x $dracutbasedir/install/dracut-install ]]; then
++    DRACUT_INSTALL=$dracutbasedir/install/dracut-install
+ fi
+ 
+ if ! [[ -x $DRACUT_INSTALL ]]; then

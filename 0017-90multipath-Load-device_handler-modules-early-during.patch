@@ -1,0 +1,48 @@
+From 856f8265aa8b86ff74802fbfe3e555864794ec2a Mon Sep 17 00:00:00 2001
+From: Hannes Reinecke <hare@suse.de>
+Date: Thu, 20 Nov 2014 15:56:44 +0100
+Subject: [PATCH] 90multipath: Load device_handler modules early during boot
+
+The device handler modules need to be loaded early during boot
+to avoid I/O errors being printed to the system log.
+
+References: bnc#871617
+
+Signed-off-by: Hannes Reinecke <hare@suse.de>
+Signed-off-by: Thomas Renninger <trenn@suse.de>
+---
+ modules.d/90multipath/module-setup.sh | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
+
+diff --git a/modules.d/90multipath/module-setup.sh b/modules.d/90multipath/module-setup.sh
+index a547c07..6f4728a 100755
+--- a/modules.d/90multipath/module-setup.sh
++++ b/modules.d/90multipath/module-setup.sh
+@@ -28,6 +28,15 @@ depends() {
+ }
+ 
+ # called by dracut
++cmdline() {
++    for m in scsi_dh_alua scsi_dh_emc scsi_dh_rdac ; do
++        if module_is_host_only $m ; then
++            printf 'rd.driver.pre=%s ' "$m"
++        fi
++    done
++}
++
++# called by dracut
+ installkernel() {
+     local _ret
+     local _arch=$(uname -m)
+@@ -89,6 +98,11 @@ install() {
+     inst_libdir_file "libmultipath*" "multipath/*"
+     inst_libdir_file 'libgcc_s.so*'
+ 
++    if [[ $hostonly_cmdline ]] ; then
++        local _conf=$(cmdline)
++        [[ $_conf ]] && echo "$_conf" >> "${initdir}/etc/cmdline.d/90multipath.conf"
++    fi
++
+     if dracut_module_included "systemd"; then
+         inst_multiple \
+             $systemdsystemunitdir/multipathd.service
