@@ -1,0 +1,49 @@
+From 25b987fed6bd5926a5c1d4027ec91a3c56d3aa85 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 8 Dec 2014 10:43:54 +0100
+Subject: [PATCH] Fixed the dracut-shutdown.service
+
+Make the service a oneshot service, which remains after exit. This
+ensures, that the ExecStop is executed later on, if a shutdown occurs.
+---
+ dracut-initramfs-restore.sh                 | 4 ++++
+ modules.d/98systemd/dracut-shutdown.service | 7 ++++---
+ 2 files changed, 8 insertions(+), 3 deletions(-)
+
+diff --git a/dracut-initramfs-restore.sh b/dracut-initramfs-restore.sh
+index 8b30af1..8b9b80f 100644
+--- a/dracut-initramfs-restore.sh
++++ b/dracut-initramfs-restore.sh
+@@ -2,6 +2,10 @@
+ 
+ set -e
+ 
++# do some sanity checks first
++[ -e /run/initramfs/bin/sh ] && exit 0
++[ -e /run/initramfs/.need_shutdown ] || exit 0
++
+ KERNEL_VERSION="$(uname -r)"
+ 
+ [[ $dracutbasedir ]] || dracutbasedir=/usr/lib/dracut
+diff --git a/modules.d/98systemd/dracut-shutdown.service b/modules.d/98systemd/dracut-shutdown.service
+index a4a08ca..21c9d29 100644
+--- a/modules.d/98systemd/dracut-shutdown.service
++++ b/modules.d/98systemd/dracut-shutdown.service
+@@ -8,13 +8,14 @@
+ [Unit]
+ Description=Restore /run/initramfs on shutdown
+ Documentation=man:dracut-shutdown.service(8)
+-After=local-fs.target
++After=local-fs.target boot.mount boot.automount
+ Wants=local-fs.target
+-Before=systemd-reboot.service shutdown.target
++Conflicts=shutdown.target umount.target
+ DefaultDependencies=no
+-ConditionPathExists=/run/initramfs/.need_shutdown
+ ConditionPathExists=!/run/initramfs/bin/sh
+ 
+ [Service]
++RemainAfterExit=yes
++Type=oneshot
+ ExecStart=/bin/true
+ ExecStop=/usr/lib/dracut/dracut-initramfs-restore

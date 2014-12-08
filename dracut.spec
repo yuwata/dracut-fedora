@@ -11,7 +11,7 @@
 
 Name: dracut
 Version: 040
-Release: 29.git20141204%{?dist}
+Release: 30.git20141208%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -58,6 +58,7 @@ Patch25: 0025-cms-cms-write-ifcfg.sh-turn-SUBCHANNELS-into-lowerca.patch
 Patch26: 0026-40network-Fix-the-syntax-to-correct-the-judgment-sen.patch
 Patch27: 0027-initrd-release-move-from-etc-to-usr-lib.patch
 Patch28: 0028-dracut.conf.d-fedora.conf.example-turn-on-early_micr.patch
+Patch29: 0029-Fixed-the-dracut-shutdown.service.patch
 
 Source1: https://www.gnu.org/licenses/lgpl-2.1.txt
 
@@ -506,6 +507,9 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Mon Dec 08 2014 Harald Hoyer <harald@redhat.com> 040-30.git20141208
+- fixed dracut-shutdown
+
 * Thu Dec 04 2014 Harald Hoyer <harald@redhat.com> 040-29.git20141204
 - git snapshot
 
