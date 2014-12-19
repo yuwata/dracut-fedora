@@ -1,0 +1,45 @@
+From 8d40852e8cf5a4b5db38cbbb52c42b348d3c7502 Mon Sep 17 00:00:00 2001
+From: Thomas Renninger <trenn@suse.de>
+Date: Thu, 11 Dec 2014 15:46:20 +0100
+Subject: [PATCH] dracut: Do not stop installing drivers if one fails
+
+--add-drivers and --filesystems kernel drivers are added via:
+instmods -c
+The check option makes the function return if one driver could not get
+installed without trying to install further drivers which is bad.
+
+The user is still informed ($_silent is by default no), but all modules
+passed to instmods are tried to be loaded, even if one fails.
+
+Signed-off-by: Thomas Renninger <trenn@suse.de>
+---
+ dracut-functions.sh | 10 ++++------
+ 1 file changed, 4 insertions(+), 6 deletions(-)
+
+diff --git a/dracut-functions.sh b/dracut-functions.sh
+index 7a12a76..b91d8dc 100755
+--- a/dracut-functions.sh
++++ b/dracut-functions.sh
+@@ -1742,18 +1742,16 @@ instmods() {
+         if (($# == 0)); then  # filenames from stdin
+             while read _mod; do
+                 inst1mod "${_mod%.ko*}" || {
+-                    if [[ "$_check" == "yes" ]]; then
+-                        [[ "$_silent" == "no" ]] && dfatal "Failed to install module $_mod"
+-                        return 1
++                    if [[ "$_check" == "yes" ]] && [[ "$_silent" == "no" ]]; then
++                        dfatal "Failed to install module $_mod"
+                     fi
+                 }
+             done
+         fi
+         while (($# > 0)); do  # filenames as arguments
+             inst1mod ${1%.ko*} || {
+-                if [[ "$_check" == "yes" ]]; then
+-                    [[ "$_silent" == "no" ]] && dfatal "Failed to install module $1"
+-                    return 1
++                if [[ "$_check" == "yes" ]] && [[ "$_silent" == "no" ]]; then
++                    dfatal "Failed to install module $1"
+                 fi
+             }
+             shift

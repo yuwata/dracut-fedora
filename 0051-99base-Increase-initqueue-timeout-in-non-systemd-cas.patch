@@ -1,0 +1,28 @@
+From 517d27a75f678d4c295cbb07687453950b55df5a Mon Sep 17 00:00:00 2001
+From: Thomas Renninger <trenn@suse.de>
+Date: Thu, 11 Dec 2014 15:46:12 +0100
+Subject: [PATCH] 99base: Increase initqueue timeout in non systemd case
+
+In case of systemd is used the timeout already is set to 180s, compare
+with file: modules.d/98systemd/dracut-initqueue.sh
+
+Do the same if systemd is not used, e.g. in kdump case.
+
+Signed-off-by: Thomas Renninger <trenn@suse.de>
+---
+ modules.d/99base/init.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/modules.d/99base/init.sh b/modules.d/99base/init.sh
+index 7fcea4a..918dea5 100755
+--- a/modules.d/99base/init.sh
++++ b/modules.d/99base/init.sh
+@@ -166,7 +166,7 @@ make_trace_mem "hook initqueue" '1:shortmem' '2+:mem' '3+:slab'
+ getarg 'rd.break=initqueue' -d 'rdbreak=initqueue' && emergency_shell -n initqueue "Break before initqueue"
+ 
+ RDRETRY=$(getarg rd.retry -d 'rd_retry=')
+-RDRETRY=${RDRETRY:-30}
++RDRETRY=${RDRETRY:-180}
+ RDRETRY=$(($RDRETRY*2))
+ export RDRETRY
+ main_loop=0

@@ -1,0 +1,29 @@
+From a262ad91e82729b661049f24a5d5968d08ce161c Mon Sep 17 00:00:00 2001
+From: Hannes Reinecke <hare@suse.de>
+Date: Thu, 11 Dec 2014 15:46:27 +0100
+Subject: [PATCH] 99base: Add chown binary
+
+nvidia driver needs this via modprobe script.
+Needs to do change the group after a device node got created.
+Add chown instead of chgrp which can also change the owner of a file.
+
+Ask Stefand Dirsch <sndirsch@suse.de> for details.
+
+Signed-off-by: Thomas Renninger <trenn@suse.de>
+---
+ modules.d/99base/module-setup.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/modules.d/99base/module-setup.sh b/modules.d/99base/module-setup.sh
+index 7d30320..a1046af 100755
+--- a/modules.d/99base/module-setup.sh
++++ b/modules.d/99base/module-setup.sh
+@@ -15,7 +15,7 @@ depends() {
+ install() {
+     local _d
+ 
+-    inst_multiple mount mknod mkdir sleep chroot \
++    inst_multiple mount mknod mkdir sleep chroot chown \
+         sed ls flock cp mv dmesg rm ln rmmod mkfifo umount readlink setsid
+     inst $(command -v modprobe) /sbin/modprobe
+ 

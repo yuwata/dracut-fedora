@@ -1,0 +1,30 @@
+From 486030575d3573237e776a630b3df0139c11fab3 Mon Sep 17 00:00:00 2001
+From: Thorsten Behrens <tbehrens@suse.com>
+Date: Thu, 11 Dec 2014 15:46:29 +0100
+Subject: [PATCH] Fix non-export of journal dev boot options.
+
+cmdline_journal does not contain linefeeds anymore, so read
+silently skipped it altogether.
+
+Signed-off-by: Thorsten Behrens <tbehrens@suse.com>
+Signed-off-by: Thomas Renninger <trenn@suse.de>
+---
+ modules.d/95rootfs-block/module-setup.sh | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
+
+diff --git a/modules.d/95rootfs-block/module-setup.sh b/modules.d/95rootfs-block/module-setup.sh
+index 258b32f..c2f71bb 100755
+--- a/modules.d/95rootfs-block/module-setup.sh
++++ b/modules.d/95rootfs-block/module-setup.sh
+@@ -43,9 +43,8 @@ cmdline() {
+ # called by dracut
+ install() {
+     if [[ $hostonly_cmdline == "yes" ]]; then
+-        cmdline_journal | while read journaldev; do
+-            [[ $journaldev ]] && printf "%s\n" "$journaldev" >> "${initdir}/etc/cmdline.d/95root-journaldev.conf"
+-        done
++        local _journaldev=$(cmdline_journal)
++        [[ $_journaldev ]] && printf "%s\n" "$_journaldev" >> "${initdir}/etc/cmdline.d/95root-journaldev.conf"
+     fi
+ 
+     inst_multiple umount

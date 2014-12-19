@@ -1,0 +1,72 @@
+From a17d5cf4941addd0a7e94129062520fd64585a7d Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 17 Dec 2014 11:44:18 +0100
+Subject: [PATCH] Revert "95rootfs-block: Correctly terminate commandline
+ parameter"
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+This reverts commit 4b6b46bb2aa9e6a72f96501888035f2d38b82266.
+
+$ ./dracut.sh -l --print-cmdline
+root=UUID=d5e53483-30bc-4119-8c0c-841d47a2f76brootflags=rw,noatime,compress=lzo,ssd,discard,space_cache,autodefrag,inode_cacherootfstype=btrfs
+
+instead of:
+
+$ ./dracut.sh -l --print-cmdline
+ root=UUID=d5e53483-30bc-4119-8c0c-841d47a2f76b
+rootflags=rw,noatime,compress=lzo,ssd,discard,space_cache,autodefrag,inode_cache
+rootfstype=btrfs
+
+and also
+
+$ make testimage
+…
+ *** Store current command line parameters ***
+Stored kernel commandline:
+root=UUID=d5e53483-30bc-4119-8c0c-841d47a2f76brootflags=rw,noatime,compress=lzo,ssd,discard,space_cache,autodefrag,inode_cacherootfstype=btrfs
+…
+---
+ dracut.sh                                | 1 +
+ modules.d/95rootfs-block/module-setup.sh | 8 ++++----
+ 2 files changed, 5 insertions(+), 4 deletions(-)
+
+diff --git a/dracut.sh b/dracut.sh
+index f384d2d..2eba19b 100755
+--- a/dracut.sh
++++ b/dracut.sh
+@@ -1299,6 +1299,7 @@ if [[ $print_cmdline ]]; then
+         module_cmdline "$_d_mod"
+     done
+     unset moddir
++    printf "\n"
+     exit 0
+ fi
+ 
+diff --git a/modules.d/95rootfs-block/module-setup.sh b/modules.d/95rootfs-block/module-setup.sh
+index 33875f8..81de177 100755
+--- a/modules.d/95rootfs-block/module-setup.sh
++++ b/modules.d/95rootfs-block/module-setup.sh
+@@ -22,7 +22,7 @@ cmdline_journal() {
+             fi
+ 
+             if [ -n "$journaldev" ]; then
+-                echo "root.journaldev=${journaldev}"
++                printf " root.journaldev=%s" "$journaldev"
+             fi
+         done
+     fi
+@@ -32,9 +32,9 @@ cmdline_journal() {
+ cmdline_rootfs() {
+     local dev=/dev/block/$(find_root_block_device)
+     if [ -e $dev ]; then
+-        printf "root=%s" "$(shorten_persistent_dev "$(get_persistent_dev "$dev")")"
+-        printf "rootflags=%s" "$(find_mp_fsopts /)"
+-        printf "rootfstype=%s\n" "$(find_mp_fstype /)"
++        printf " root=%s" "$(shorten_persistent_dev "$(get_persistent_dev "$dev")")"
++        printf " rootflags=%s" "$(find_mp_fsopts /)"
++        printf " rootfstype=%s" "$(find_mp_fstype /)"
+     fi
+ }
+ 

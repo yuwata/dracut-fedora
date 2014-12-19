@@ -1,0 +1,46 @@
+From 332ecaa900a5af83ffae64f3e103270e49de88de Mon Sep 17 00:00:00 2001
+From: Erwan Velu <erwan.velu@enovance.com>
+Date: Wed, 17 Dec 2014 17:04:19 +0100
+Subject: [PATCH] dracut: Don't fail at copying files when including
+ directories
+
+When including a directory, the files were considered in the directory
+name which lead to messages like :
+
+cp: failed to access '/var/tmp/initramfs.L9s2zO///init-func': No such file or directory
+
+This patch does make the destdir more explicit and copy files into the
+destination directory instead of destdir/filename/
+---
+ dracut.sh | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/dracut.sh b/dracut.sh
+index 2eba19b..07e4965 100755
+--- a/dracut.sh
++++ b/dracut.sh
+@@ -1493,12 +1493,13 @@ while pop include_src src && pop include_target tgt; do
+             inst $src $tgt
+         else
+             ddebug "Including directory: $src"
+-            mkdir -p "${initdir}/${tgt}"
++            destdir="${initdir}/${tgt}"
++            mkdir -p "$destdir"
+             # check for preexisting symlinks, so we can cope with the
+             # symlinks to $prefix
+             for i in "$src"/*; do
+                 [[ -e "$i" || -h "$i" ]] || continue
+-                s=${initdir}/${tgt}/${i#$src/}
++                s=${destdir}/${i#$src/}
+                 if [[ -d "$i" ]]; then
+                     if ! [[ -e "$s" ]]; then
+                         mkdir -m 0755 -p "$s"
+@@ -1506,7 +1507,7 @@ while pop include_src src && pop include_target tgt; do
+                     fi
+                     cp --reflink=auto --sparse=auto -fa -t "$s" "$i"/*
+                 else
+-                    cp --reflink=auto --sparse=auto -fa -t "$s" "$i"
++                    cp --reflink=auto --sparse=auto -fa -t "$destdir" "$i"
+                 fi
+             done
+         fi

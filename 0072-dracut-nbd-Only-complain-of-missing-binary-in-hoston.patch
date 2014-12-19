@@ -1,0 +1,39 @@
+From e683985d103f1b0f15a9ccd9678169f4fb7aeb5f Mon Sep 17 00:00:00 2001
+From: Thomas Renninger <trenn@suse.de>
+Date: Thu, 11 Dec 2014 15:46:33 +0100
+Subject: [PATCH] dracut: nbd: Only complain of missing binary in hostonly mode
+ if
+
+ rootfs is on nbd
+
+In not hostonly mode, require_binaries will still complain.
+If in hostonly mode and the module is explicitly added via -a nbd, then
+install() section will still complain later:
+dracut-install: ERROR: installing 'nbd-client'
+
+Signed-off-by: Thomas Renninger <trenn@suse.de>
+---
+ modules.d/95nbd/module-setup.sh | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/modules.d/95nbd/module-setup.sh b/modules.d/95nbd/module-setup.sh
+index 4f9e350..3cb6f49 100755
+--- a/modules.d/95nbd/module-setup.sh
++++ b/modules.d/95nbd/module-setup.sh
+@@ -3,8 +3,6 @@
+ # called by dracut
+ check() {
+     local _rootdev
+-    # If our prerequisites are not met, fail.
+-    require_binaries nbd-client || return 1
+ 
+     # if an nbd device is not somewhere in the chain of devices root is
+     # mounted on, fail the hostonly check.
+@@ -15,6 +13,7 @@ check() {
+         [[ -b /dev/block/$_rootdev ]] || return 1
+         check_block_and_slaves is_nbd "$_rootdev" || return 255
+     }
++    require_binaries nbd-client || return 1
+ 
+     return 0
+ }

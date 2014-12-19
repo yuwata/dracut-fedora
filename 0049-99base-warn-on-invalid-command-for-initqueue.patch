@@ -1,0 +1,31 @@
+From 7c2311660f3f540c2ad9471bcc13686899d677cd Mon Sep 17 00:00:00 2001
+From: Hannes Reinecke <hare@suse.de>
+Date: Thu, 11 Dec 2014 15:46:10 +0100
+Subject: [PATCH] 99base: warn on invalid command for initqueue
+
+When 'initqueue' is called with an invalid command it'll generate
+invalid job scripts. This will lead to confusing error messages
+later on.
+So abort in these cases and print out a warning.
+
+Signed-off-by: Hannes Reinecke <hare@suse.de>
+Signed-off-by: Thomas Renninger <trenn@suse.de>
+---
+ modules.d/99base/initqueue.sh | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/modules.d/99base/initqueue.sh b/modules.d/99base/initqueue.sh
+index 4a07da3..193cc5c 100755
+--- a/modules.d/99base/initqueue.sh
++++ b/modules.d/99base/initqueue.sh
+@@ -42,6 +42,10 @@ exe=$1
+ shift
+ 
+ [ -x "$exe" ] || exe=$(command -v $exe)
++if [ -z "$exe" ] ; then
++    echo "Invalid command"
++    exit 1
++fi
+ 
+ {
+     [ -n "$onetime" ] && echo '[ -e "$job" ] && rm -f -- "$job"'
