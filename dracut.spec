@@ -11,7 +11,7 @@
 
 Name: dracut
 Version: 040
-Release: 78.git20141219%{?dist}
+Release: 83.git20150108%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -107,6 +107,11 @@ Patch74: 0074-Revert-95rootfs-block-Correctly-terminate-commandlin.patch
 Patch75: 0075-resume-make-use-of-systemd-hibernate-resume-if-exist.patch
 Patch76: 0076-systemd-add-systemd-journald-audit.socket.patch
 Patch77: 0077-dracut-Don-t-fail-at-copying-files-when-including-di.patch
+Patch78: 0078-qemu-add-virtio_rng-kernel-module.patch
+Patch79: 0079-AUTHORS-and-.mailmap-update.patch
+Patch80: 0080-Makefile-add-Wformat-to-CFLAGS.patch
+Patch81: 0081-dracut-functions.sh-avoid-tokenizing-ldconfig-output.patch
+Patch82: 0082-90kernel-modules-update-for-xhci-module-split-in-ker.patch
 
 Source1: https://www.gnu.org/licenses/lgpl-2.1.txt
 
@@ -555,6 +560,9 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Thu Jan 08 2015 Harald Hoyer <harald@redhat.com> 040-83.git20150108
+- git snapshot
+
 * Fri Dec 19 2014 Harald Hoyer <harald@redhat.com> 040-78.git20141219
 - git snapshot
 
