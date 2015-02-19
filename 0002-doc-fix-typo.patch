@@ -1,0 +1,36 @@
+From 05b879ed2ae2754f4bc49cf5fb915de3e417dbf2 Mon Sep 17 00:00:00 2001
+From: Jan Synacek <jsynacek@redhat.com>
+Date: Mon, 9 Feb 2015 15:35:01 +0100
+Subject: [PATCH] doc: fix typo
+
+---
+ dracut.8.asc         | 2 +-
+ dracut.cmdline.7.asc | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/dracut.8.asc b/dracut.8.asc
+index 7d11f43..9aecbfb 100644
+--- a/dracut.8.asc
++++ b/dracut.8.asc
+@@ -31,7 +31,7 @@ early userspace.
+ For a complete list of kernel command line options see *dracut.cmdline*(7).
+ 
+ If you are dropped to an emergency shell, while booting your initramfs,
+-the file _/run/initramfs/rdsosreport.txt_ is created, which can be safed to a
++the file _/run/initramfs/rdsosreport.txt_ is created, which can be saved to a
+ (to be mounted by hand) partition (usually /boot) or a USB stick.
+ Additional debugging info can be produced by adding **rd.debug** to the kernel
+ command line. _/run/initramfs/rdsosreport.txt_ contains all logs and the output
+diff --git a/dracut.cmdline.7.asc b/dracut.cmdline.7.asc
+index 5ff84ef..60826a1 100644
+--- a/dracut.cmdline.7.asc
++++ b/dracut.cmdline.7.asc
+@@ -163,7 +163,7 @@ Misc
+ Debug
+ ~~~~~
+ If you are dropped to an emergency shell, the file 
+-_/run/initramfs/rdsosreport.txt_ is created, which can be safed to a (to be
++_/run/initramfs/rdsosreport.txt_ is created, which can be saved to a (to be
+ mounted by hand) partition (usually /boot) or a USB stick. Additional debugging
+ info can be produced by adding **rd.debug** to the kernel command line.
+ _/run/initramfs/rdsosreport.txt_ contains all logs and the output of some tools.

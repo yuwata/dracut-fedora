@@ -1,0 +1,37 @@
+From a7d3ad67c754c3078cd6c228a3807425417c8083 Mon Sep 17 00:00:00 2001
+From: Dimitri John Ledkov <dimitri.j.ledkov@intel.com>
+Date: Mon, 9 Feb 2015 11:55:20 +0000
+Subject: [PATCH] Support /usr/lib/kernel/cmdline fallback path for
+ /etc/kernel/cmdline.
+
+---
+ 50-dracut.install        | 2 ++
+ 51-dracut-rescue.install | 2 ++
+ 2 files changed, 4 insertions(+)
+
+diff --git a/50-dracut.install b/50-dracut.install
+index 5ac74f1..d05abb9 100755
+--- a/50-dracut.install
++++ b/50-dracut.install
+@@ -20,6 +20,8 @@ case "$COMMAND" in
+ 
+         if [[ -f /etc/kernel/cmdline ]]; then
+             readarray -t BOOT_OPTIONS < /etc/kernel/cmdline
++        elif [[ -f /usr/lib/kernel/cmdline ]]; then
++            readarray -t BOOT_OPTIONS < /usr/lib/kernel/cmdline
+         fi
+ 
+         if ! [[ "${BOOT_OPTIONS[@]}" ]]; then
+diff --git a/51-dracut-rescue.install b/51-dracut-rescue.install
+index 9fb0c5d..9abd9d7 100755
+--- a/51-dracut-rescue.install
++++ b/51-dracut-rescue.install
+@@ -41,6 +41,8 @@ fi
+ 
+ if [[ -f /etc/kernel/cmdline ]]; then
+     readarray -t BOOT_OPTIONS < /etc/kernel/cmdline
++elif [[ -f /usr/lib/kernel/cmdline ]]; then
++    readarray -t BOOT_OPTIONS < /usr/lib/kernel/cmdline
+ fi
+ if ! [[ "${BOOT_OPTIONS[@]}" ]]; then
+     read -ar BOOT_OPTIONS < /proc/cmdline

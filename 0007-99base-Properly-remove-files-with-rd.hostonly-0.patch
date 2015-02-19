@@ -1,0 +1,32 @@
+From 7075a402d741b0bab1f47ffdec130926b38e3004 Mon Sep 17 00:00:00 2001
+From: Jonas Jonsson <jonas@websystem.se>
+Date: Sun, 28 Dec 2014 01:03:29 +0100
+Subject: [PATCH] 99base: Properly remove files with rd.hostonly=0
+
+Dracut will generate systemd units for additional devices that should be
+brought up during boot, e.g. swap devices. These unit files are broken
+symlinks with \ in the filename, e.g.
+/etc/systemd/system/initrd.target.wants/dev-disk-by\x2duuid-e6a54f99\x2da4fd\x2d4931\x2da956\x2d1c642bcfee5e.device.
+
+Both the backslash and the broken symlink causes problems for shell
+scripts, [ -e "$file" ] isn't enough and read requires the additional -r
+argument to not react on the \.
+---
+ modules.d/99base/dracut-lib.sh | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/modules.d/99base/dracut-lib.sh b/modules.d/99base/dracut-lib.sh
+index 5c1504f..079c9a2 100755
+--- a/modules.d/99base/dracut-lib.sh
++++ b/modules.d/99base/dracut-lib.sh
+@@ -1286,8 +1286,8 @@ show_memstats()
+ remove_hostonly_files() {
+     rm -fr /etc/cmdline /etc/cmdline.d/*.conf
+     if [ -f /lib/dracut/hostonly-files ]; then
+-        while read line; do
+-            [ -e "$line" ] || continue
++        while read -r line; do
++            [ -e "$line" ] || [ -h "$line" ] || continue
+             rm -f "$line"
+         done < /lib/dracut/hostonly-files
+     fi

@@ -1,0 +1,46 @@
+From 5729ae8029f9b19438f210f3e3ead326cf252645 Mon Sep 17 00:00:00 2001
+From: Lukas Wunner <lukas@wunner.de>
+Date: Tue, 3 Feb 2015 19:32:55 +0100
+Subject: [PATCH] 90dm/dm-shutdown.sh: dmsetup remove_all -> dmsetup remove
+
+The function 99shutdown/shutdown.sh:_check_shutdown() assumes that
+shutdown scripts report success or failure via their return value.
+However, "dmsetup remove_all" always reports success, even if some
+of the device mappings could not be removed.
+
+I submitted a patch for dmsetup but the lvm2 folks rejected it,
+asserting that its behaviour is correct, that "remove_all" should
+only be used by developers and that the proper solution would be
+to invoke "dmsetup remove" on each device. This does report success
+or failure via the return value.
+
+Apart from fixing that issue, this commit also adds the dmsetup
+option "--noudevsync". Without it, dmsetup would hang after removal
+of a device while trying to communicate with systemd-udevd, which
+is no longer running at this shutdown stage.
+
+[harald: replaces backticks with $() ]
+---
+ modules.d/90dm/dm-shutdown.sh | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/modules.d/90dm/dm-shutdown.sh b/modules.d/90dm/dm-shutdown.sh
+index dfdb48b..04c89be 100755
+--- a/modules.d/90dm/dm-shutdown.sh
++++ b/modules.d/90dm/dm-shutdown.sh
+@@ -1,11 +1,12 @@
+ #!/bin/sh
+ 
+ _do_dm_shutdown() {
+-    local ret
++    local ret=0
+     local final=$1
+     info "Disassembling device-mapper devices"
+-    dmsetup -v remove_all
+-    ret=$?
++    for dev in $(dmsetup info -c --noheadings -o name) ; do
++        dmsetup -v --noudevsync remove "$dev" || ret=$?
++    done
+     if [ "x$final" != "x" ]; then
+         info "dmsetup ls --tree"
+         dmsetup ls --tree 2>&1 | vinfo

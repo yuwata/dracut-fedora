@@ -1,0 +1,81 @@
+From d6e34d362a05cda61baaf8e231ad3f0e8665a9cc Mon Sep 17 00:00:00 2001
+From: Fabian Deutsch <fabiand@fedoraproject.org>
+Date: Wed, 18 Feb 2015 14:31:40 +0100
+Subject: [PATCH] dmsquash: Add rd.live.overlay.thin
+
+This option changes the underlying mechanism for the overlay in the
+dmsquash module.
+Instead of a plain dm snapshot a dm thin snapshot is used. The advantage
+of the thin snapshot is, that the TRIM command is recognized, which
+means that at runtime, only the occupied blocks will be claimed from
+memory, and freed blocks will really be freed in ram.
+
+Signed-off-by: Fabian Deutsch <fabiand@fedoraproject.org>
+---
+ dracut.cmdline.7.asc                            |  7 +++++++
+ modules.d/90dmsquash-live/dmsquash-live-root.sh | 27 ++++++++++++++++++++++++-
+ 2 files changed, 33 insertions(+), 1 deletion(-)
+
+diff --git a/dracut.cmdline.7.asc b/dracut.cmdline.7.asc
+index 60826a1..9ddad0f 100644
+--- a/dracut.cmdline.7.asc
++++ b/dracut.cmdline.7.asc
+@@ -834,6 +834,13 @@ Enables debug output from the live boot process.
+ Specifies the directory within the squashfs where the ext3fs.img or rootfs.img
+ can be found.  By default, this is __LiveOS__.
+ 
++**rd.live.overlay.thin=**1::
++Enables the usage of thin snapshots instead of classic dm snapshots.
++The advantage of thin snapshots is, that they support discards, and will free
++blocks which are not claimed by the filesystem. In this use case this means,
++that memory is given back to the kernel, when the filesystem does not claim it
++anymore.
++
+ **rd.writable.fsimg=**1::
+ Enables writable filesystem support.  The system will boot with a fully 
+ writable filesystem without snapshots __(see notes above about available live boot options)__.
+diff --git a/modules.d/90dmsquash-live/dmsquash-live-root.sh b/modules.d/90dmsquash-live/dmsquash-live-root.sh
+index 9c08e94..45f724c 100755
+--- a/modules.d/90dmsquash-live/dmsquash-live-root.sh
++++ b/modules.d/90dmsquash-live/dmsquash-live-root.sh
+@@ -30,6 +30,8 @@ getargbool 0 rd.writable.fsimg -d -y writable_fsimg && writable_fsimg="yes"
+ overlay_size=$(getarg rd.live.overlay.size=)
+ [ -z "$overlay_size" ] && overlay_size=512
+ 
++getargbool 0 rd.live.overlay.thin && thin_snapshot="yes"
++
+ # CD/DVD media check
+ [ -b $livedev ] && fs=$(blkid -s TYPE -o value $livedev)
+ if [ "$fs" = "iso9660" -o "$fs" = "udf" ]; then
+@@ -146,7 +148,30 @@ do_live_overlay() {
+         base=$BASE_LOOPDEV
+         over=$OVERLAY_LOOPDEV
+     fi
+-    echo 0 $sz snapshot $base $over p 8 | dmsetup create live-rw
++    if [ -n "$thin_snapshot" ]; then
++        modprobe dm_thin_pool
++        mkdir /run/initramfs/thin-overlay
++
++        # In block units (512b)
++        thin_data_sz=$(( $overlay_size * 1024 * 1024 / 512 ))
++        thin_meta_sz=$(( $thin_data_sz / 10 ))
++
++        # It is important to have the backing file on a tmpfs
++        # this is needed to let the loopdevice support TRIM
++        dd if=/dev/null of=/run/initramfs/thin-overlay/meta bs=1b count=1 seek=$((thin_meta_sz)) 2> /dev/null
++        dd if=/dev/null of=/run/initramfs/thin-overlay/data bs=1b count=1 seek=$((thin_data_sz)) 2> /dev/null
++
++        THIN_META_LOOPDEV=$( losetup --show -f /run/initramfs/thin-overlay/meta )
++        THIN_DATA_LOOPDEV=$( losetup --show -f /run/initramfs/thin-overlay/data )
++
++        echo 0 $thin_data_sz thin-pool $THIN_META_LOOPDEV $THIN_DATA_LOOPDEV 1024 1024 | dmsetup create live-overlay-pool
++        dmsetup message /dev/mapper/live-overlay-pool 0 "create_thin 0"
++
++        # Create a snapshot of the base image
++        echo 0 $sz thin /dev/mapper/live-overlay-pool 0 $base | dmsetup create live-rw
++    else
++        echo 0 $sz snapshot $base $over p 8 | dmsetup create live-rw
++    fi
+ 
+     # Create a device that always points to a ro base image
+     echo 0 $sz linear $base 0 | dmsetup create --readonly live-base

@@ -1,0 +1,19 @@
+From 38e217704a734cb6ff46d95a46ef04123a6b89e7 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Tue, 10 Feb 2015 12:21:18 +0100
+Subject: [PATCH] fedora.conf: do not store cmdline in image by default
+
+---
+ dracut.conf.d/fedora.conf.example | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/dracut.conf.d/fedora.conf.example b/dracut.conf.d/fedora.conf.example
+index b6c769c..b126b09 100644
+--- a/dracut.conf.d/fedora.conf.example
++++ b/dracut.conf.d/fedora.conf.example
+@@ -15,4 +15,5 @@ systemdsystemunitdir=/usr/lib/systemd/system
+ systemdsystemconfdir=/etc/systemd/system
+ udevdir=/usr/lib/udev
+ hostonly="yes"
++hostonly_cmdline="no"
+ early_microcode="yes"
