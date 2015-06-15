@@ -10,7 +10,7 @@
 %endif
 
 Name: dracut
-Version: 042
+Version: 043
 Release: 1%{?dist}
 
 Summary: Initramfs generator using udev
@@ -466,6 +466,9 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Mon Jun 15 2015 Harald Hoyer <harald@redhat.com> 043-1
+- version 043, now with the complete tarball
+
 * Thu Jun 11 2015 Harald Hoyer <harald@redhat.com> 042-1
 - version 042, the answer to life, the universe and everything
 
