@@ -11,7 +11,7 @@
 
 Name: dracut
 Version: 043
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -466,6 +466,9 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Wed Jun 17 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 043-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_23_Mass_Rebuild
+
 * Mon Jun 15 2015 Harald Hoyer <harald@redhat.com> 043-1
 - version 043, now with the complete tarball
 
