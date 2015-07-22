@@ -11,7 +11,7 @@
 
 Name: dracut
 Version: 043
-Release: 40.git20150710%{?dist}
+Release: 40.git20150710%{?dist}.2
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -134,12 +134,12 @@ Requires: findutils
 Requires: grep
 Requires: kmod
 Requires: sed
+Requires: xz
 
 %if 0%{?fedora} > 22
 Recommends: grubby
 Recommends: hardlink
 Recommends: gzip
-Recommends: xz
 Recommends: kpartx
 %else
 Requires: hardlink
@@ -529,6 +529,9 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Wed Jul 22 2015 Harald Hoyer <harald@redhat.com> 043-40.git20150710.2
+- require "xz" to handle the kernel modules
+
 * Fri Jul 10 2015 Harald Hoyer <harald@redhat.com> 043-40.git20150710
 - git snapshot
 
