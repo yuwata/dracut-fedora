@@ -11,7 +11,7 @@
 
 Name: dracut
 Version: 043
-Release: 40.git20150710%{?dist}.2
+Release: 60.git20150811%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -68,7 +68,27 @@ Patch35: 0035-dracut-functions.sh-simplify-some-for-loops.patch
 Patch36: 0036-dracut.sh-reduce-code.patch
 Patch37: 0037-dracut.sh-remember-0-for-regenerate-all.patch
 Patch38: 0038-dracut.sh-early-check-for-bash-version.patch
-Patch39: 0039-dracut.spec-add-dracut-init.sh.patch
+Patch39: 0039-network-add-rd.peerdns-0-parameter.patch
+Patch40: 0040-TODO-update.patch
+Patch41: 0041-crypt-skip-crypttab-entries-with-the-same-device.patch
+Patch42: 0042-dracut-systemd-dracut-initqueue-only-start-service-i.patch
+Patch43: 0043-Replace-echo-n-with-printf-in-code-with-a-bin-sh-she.patch
+Patch44: 0044-syncheck-Look-for-echo-n-usage-in-modules.patch
+Patch45: 0045-dracut.spec-add-dracut-init.sh.patch
+Patch46: 0046-use-mktemp-p-instead-of-tmpdir-for-busybox.patch
+Patch47: 0047-dmsquash-generator.sh-increase-timeout-for-checkisom.patch
+Patch48: 0048-Cleanup-compressor-handling.patch
+Patch49: 0049-Add-missing-echo-to-output-the-result.patch
+Patch50: 0050-crypt-s-allow-discards-discard-for-crypttab.patch
+Patch51: 0051-qemu-add-spapr-vscsi-kernel-module.patch
+Patch52: 0052-dracut.sh-simplify-modalias-reading.patch
+Patch53: 0053-90qemu-fixed-systemd-detect-virt-output-parsing.patch
+Patch54: 0054-Remove-98integrity-s-dependency-on-selinux.patch
+Patch55: 0055-Extend-evm-enable.sh-to-load-the-EVM-public-key.patch
+Patch56: 0056-Define-new-script-to-load-keys-on-the-IMA-keyring-up.patch
+Patch57: 0057-Revert-securitfs-change.patch
+Patch58: 0058-base-dracut-lib.sh-Dup-stdout-and-stderr.patch
+Patch59: 0059-dracut.sh-remove-quotes-from-install_items-and-insta.patch
 
 Source1: https://www.gnu.org/licenses/lgpl-2.1.txt
 
@@ -99,7 +119,6 @@ BuildRequires: docbook-style-xsl docbook-dtds libxslt
 
 BuildRequires: asciidoc
 %endif
-
 
 %if 0%{?fedora} > 12 || 0%{?rhel}
 # no "provides", because dracut does not offer
@@ -135,16 +154,16 @@ Requires: grep
 Requires: kmod
 Requires: sed
 Requires: xz
+Requires: gzip
 
 %if 0%{?fedora} > 22
 Recommends: grubby
 Recommends: hardlink
-Recommends: gzip
+Recommends: pigz
 Recommends: kpartx
 %else
 Requires: hardlink
 Requires: gzip
-Requires: xz
 Requires: kpartx
 %endif
 
@@ -529,6 +548,12 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Tue Aug 11 2015 Harald Hoyer <harald@redhat.com> 043-60.git20150811
+- fixed checkiso timeout
+- fixed log output although quiet is set
+- fixed qemu detection
+- cleanup compressor handling
+
 * Wed Jul 22 2015 Harald Hoyer <harald@redhat.com> 043-40.git20150710.2
 - require "xz" to handle the kernel modules
 

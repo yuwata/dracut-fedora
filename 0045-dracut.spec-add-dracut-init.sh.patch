@@ -1,4 +1,4 @@
-From d63a455ffda280899bf9d3d7988789a74ac9ad8c Mon Sep 17 00:00:00 2001
+From 7f2ea02b4ad95f59abb73dd4690f6f5ca9191633 Mon Sep 17 00:00:00 2001
 From: Harald Hoyer <harald@redhat.com>
 Date: Fri, 10 Jul 2015 11:21:51 +0200
 Subject: [PATCH] dracut.spec: add dracut-init.sh
