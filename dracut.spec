@@ -666,7 +666,7 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
-* Fr Nov 13 2015 Harald Hoyer <harald@redhat.com> - 043-172.git20151113
+* Fri Nov 13 2015 Harald Hoyer <harald@redhat.com> - 043-172.git20151113
 - git snapshot
 
 * Tue Aug 11 2015 Harald Hoyer <harald@redhat.com> 043-60.git20150811
