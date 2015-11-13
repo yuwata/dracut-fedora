@@ -1,0 +1,27 @@
+From 946722e4655924915e46a50d3f0700e26832fba3 Mon Sep 17 00:00:00 2001
+From: "dyoung@redhat.com" <dyoung@redhat.com>
+Date: Mon, 31 Aug 2015 10:43:18 +0800
+Subject: [PATCH] Revert "dracut-emergency.service: do not start for
+ "action_on_fail=continue""
+
+This reverts commit b78e6ac2c328c76057b17059a761ab44707f9aa0.
+
+action_on_fail is useless thus remove the commits for it one by one.
+
+Signed-off-by: Dave Young <dyoung@redhat.com>
+---
+ modules.d/98dracut-systemd/dracut-emergency.service | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/modules.d/98dracut-systemd/dracut-emergency.service b/modules.d/98dracut-systemd/dracut-emergency.service
+index a4b81bc..a523671 100644
+--- a/modules.d/98dracut-systemd/dracut-emergency.service
++++ b/modules.d/98dracut-systemd/dracut-emergency.service
+@@ -13,7 +13,6 @@ DefaultDependencies=no
+ After=systemd-vconsole-setup.service
+ Wants=systemd-vconsole-setup.service
+ Conflicts=emergency.service emergency.target
+-ConditionKernelCommandLine=!action_on_fail=continue
+ 
+ [Service]
+ Environment=HOME=/

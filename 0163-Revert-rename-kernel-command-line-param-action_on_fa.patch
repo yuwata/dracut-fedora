@@ -1,0 +1,42 @@
+From 927d1e28c9ad63794df6c1a21c2e7b7bca8d86ce Mon Sep 17 00:00:00 2001
+From: "dyoung@redhat.com" <dyoung@redhat.com>
+Date: Mon, 31 Aug 2015 10:43:16 +0800
+Subject: [PATCH] Revert "rename kernel command line param action_on_fail to
+ rd.action_on_fail"
+
+This reverts commit 391d6057908be2fe78f8084eb1b2adc27c781c0b.
+
+action_on_fail is useless thus remove the commits for it one by one.
+
+Signed-off-by: Dave Young <dyoung@redhat.com>
+---
+ dracut.cmdline.7.asc           | 2 +-
+ modules.d/99base/dracut-lib.sh | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/dracut.cmdline.7.asc b/dracut.cmdline.7.asc
+index ad99799..cd8cc66 100644
+--- a/dracut.cmdline.7.asc
++++ b/dracut.cmdline.7.asc
+@@ -159,7 +159,7 @@ Misc
+    specify the controlling terminal for the console.
+    This is useful, if you have multiple "console=" arguments.
+ 
+-**rd.action_on_fail=**_{shell|continue}_::
++**action_on_fail=**_{shell|continue}_::
+    Specify the action after failure. By default it's emergency_shell.
+    'continue' means: ignore the current failure and go ahead.
+ 
+diff --git a/modules.d/99base/dracut-lib.sh b/modules.d/99base/dracut-lib.sh
+index cc5bb42..1ac9b3c 100755
+--- a/modules.d/99base/dracut-lib.sh
++++ b/modules.d/99base/dracut-lib.sh
+@@ -1143,7 +1143,7 @@ emergency_shell()
+ 
+ action_on_fail()
+ {
+-    local _action=$(getarg rd.action_on_fail= -d action_on_fail=)
++    local _action=$(getarg action_on_fail=)
+     case "$_action" in
+         continue)
+             [ "$1" = "-n" ] && shift 2

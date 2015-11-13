@@ -1,0 +1,98 @@
+From 53a738465371db3cb7df533a3ae2b5648dfd13e4 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Tue, 10 Nov 2015 17:55:50 +0100
+Subject: [PATCH] lvm: remove all quirk arguments
+
+https://bugzilla.redhat.com/show_bug.cgi?id=742564
+
+Once lvm2 starts using /run (bug 742554), it should be no longer
+necessary to disable file-based locking in the vgchange call in
+fedora-storage-init.
+Removing '--sysinit' will make it safe to call LVM operations
+concurrently from other units.
+
+The --sysinit is a compound option consisting of:
+
+  -> --ignorelockingfailure - not needed anymore, the /run/lock/lvm is
+available rw soon in boot process
+
+  -> --ignoremonitoring - not needed since /run is available, this would
+require the dm-event.service to be run before
+fedora-storage-init.service (and new lvm2-activation.service when
+deployed). But that's a one line change - I'll have a look whether it
+plays well with other services and if yes, I'll commit the change. N.B.:
+This has a consequence that all volumes activated on vgchange -ay will
+be monitored at the same time they're activated (which is a plus I
+think). The lvm2-monitor will just grab all the other volumes not
+activated at the time of the boot's vgchange -ay call. But that's not an
+issue (for already monitored volumes, calling vgchange --monitor y will
+just be a NOOP).
+
+ -> --poll n - not needed, we can run the polldaemon as the /run is
+available and rw (in case there's unfinished merge or mirror sync from
+previous system run, the poll-daemon will be triggered at boot now).
+Actually, the polldaemon should be triggered as a service like dmeventd
+is, not forked off from the LVM command itself, like from vgchange in
+this case - we still need to change this - there's a bug open for this
+request already (bug #814857). However, we don't have this feature ready
+yet so I need to check whether this is OK with the early boot process
+with the current state.
+---
+ modules.d/90lvm/lvm_scan.sh | 28 ++++++++++++++--------------
+ 1 file changed, 14 insertions(+), 14 deletions(-)
+
+diff --git a/modules.d/90lvm/lvm_scan.sh b/modules.d/90lvm/lvm_scan.sh
+index ead28aa..8bf0864 100755
+--- a/modules.d/90lvm/lvm_scan.sh
++++ b/modules.d/90lvm/lvm_scan.sh
+@@ -69,11 +69,19 @@ min=$2
+ sub=${3%% *}
+ sub=${sub%%\(*};
+ 
++lvm_ignorelockingfailure="--ignorelockingfailure"
++lvm_quirk_args="--ignorelockingfailure --ignoremonitoring"
++
+ check_lvm_ver 2 2 57 $maj $min $sub && \
+-    nopoll="--poll n"
++    lvm_quirk_args="$lvm_quirk_args --poll n"
+ 
+ if check_lvm_ver 2 2 65 $maj $min $sub; then
+-    sysinit=" --sysinit $extraargs"
++    lvm_quirk_args=" --sysinit $extraargs"
++fi
++
++if check_lvm_ver 2 2 221 $maj $min $sub; then
++    lvm_quirk_args=" $extraargs"
++    unset lvm_ignorelockingfailure
+ fi
+ 
+ unset extraargs
+@@ -104,24 +112,16 @@ fi
+ 
+ if [ -n "$LVS" ] ; then
+     info "Scanning devices $lvmdevs for LVM logical volumes $LVS"
+-    lvm lvscan --ignorelockingfailure 2>&1 | vinfo
++    lvm lvscan $lvm_ignorelockingfailure 2>&1 | vinfo
+     for LV in $LVS; do
+-        if [ -z "$sysinit" ]; then
+-            lvm lvchange --yes -ay --ignorelockingfailure $nopoll --ignoremonitoring $LV 2>&1 | vinfo
+-        else
+-            lvm lvchange --yes -ay $sysinit $LV 2>&1 | vinfo
+-        fi
++        lvm lvchange --yes -ay $lvm_quirk_args $LV 2>&1 | vinfo
+     done
+ fi
+ 
+ if [ -z "$LVS" -o -n "$VGS" ]; then
+     info "Scanning devices $lvmdevs for LVM volume groups $VGS"
+-    lvm vgscan --ignorelockingfailure 2>&1 | vinfo
+-    if [ -z "$sysinit" ]; then
+-        lvm vgchange -ay --ignorelockingfailure $nopoll --ignoremonitoring $VGS 2>&1 | vinfo
+-    else
+-        lvm vgchange -ay $sysinit $VGS 2>&1 | vinfo
+-    fi
++    lvm vgscan $lvm_ignorelockingfailure 2>&1 | vinfo
++    lvm vgchange -ay $lvm_quirk_args $VGS 2>&1 | vinfo
+ fi
+ 
+ if [ "$lvmwritten" ]; then

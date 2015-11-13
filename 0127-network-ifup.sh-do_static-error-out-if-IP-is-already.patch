@@ -1,0 +1,31 @@
+From 27a5aecf56fbfa9a8d92d86d7e68c2781c0b4523 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 19 Aug 2015 14:00:28 +0200
+Subject: [PATCH] network/ifup.sh:do_static(): error out, if IP is already
+ assigned
+
+(cherry picked from commit 32770ca79a1f6828ca9fdf4b6841e6a6d4e4754a)
+---
+ modules.d/40network/ifup.sh | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/modules.d/40network/ifup.sh b/modules.d/40network/ifup.sh
+index 69a4567..381ff43 100755
+--- a/modules.d/40network/ifup.sh
++++ b/modules.d/40network/ifup.sh
+@@ -155,6 +155,15 @@ do_static() {
+         return 1
+     fi
+ 
++    ip route get "$ip" | {
++        read a rest
++        if [ "$a" = "local" ]; then
++            warn "Not assigning $ip to interface $netif, cause it is already assigned!"
++            return 1
++        fi
++        return 0
++    } || return 1
++
+     [ -n "$macaddr" ] && ip link set address $macaddr dev $netif
+     [ -n "$mtu" ] && ip link set mtu $mtu dev $netif
+     if strglobin $ip '*:*:*'; then

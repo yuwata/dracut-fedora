@@ -1,0 +1,23 @@
+From 50e86bf02be003f3de6214f8012e62edde0085fc Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 12 Aug 2015 14:27:01 +0200
+Subject: [PATCH] nfs/parse-nfsroot.sh: silence useless warning if netroot is
+ not nfs
+
+---
+ modules.d/95nfs/parse-nfsroot.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/modules.d/95nfs/parse-nfsroot.sh b/modules.d/95nfs/parse-nfsroot.sh
+index 2200cad..54f73d8 100755
+--- a/modules.d/95nfs/parse-nfsroot.sh
++++ b/modules.d/95nfs/parse-nfsroot.sh
+@@ -38,7 +38,7 @@ if [ -n "$netroot" ] ; then
+         [ "$n" = "$netroot" ] && break
+     done
+     if [ "$n" = "$netroot" ]; then
+-        warn "Ignoring netroot argument for NFS"
++        #warn "Ignoring netroot argument for NFS"
+         netroot=$root
+     fi
+ else

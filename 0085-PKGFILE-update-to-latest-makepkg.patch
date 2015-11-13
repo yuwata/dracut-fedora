@@ -1,0 +1,26 @@
+From eb150a4feedf5ae3d8393ce365357bc40cced1b8 Mon Sep 17 00:00:00 2001
+From: Silvio Fricke <silvio.fricke@gmail.com>
+Date: Sun, 8 Nov 2015 12:48:26 +0100
+Subject: [PATCH] PKGFILE: update to latest makepkg
+
+makepkg needs now a package-section.
+
+Signed-off-by: Silvio Fricke <silvio.fricke@gmail.com>
+---
+ PKGBUILD | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/PKGBUILD b/PKGBUILD
+index f7c3664..a9f1b5a 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -17,5 +17,9 @@ md5sums=()
+ build() {
+   cd ..
+   make sysconfdir=/etc || return 1
++}
++
++package() {
++  cd ..
+   make DESTDIR="${pkgdir}" sysconfdir=/etc install || return 1
+ }

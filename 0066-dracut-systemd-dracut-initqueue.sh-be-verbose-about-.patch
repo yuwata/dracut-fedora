@@ -1,0 +1,22 @@
+From 8ba684be1c04976204d2b671ab90cb27791f467b Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 12 Aug 2015 14:27:39 +0200
+Subject: [PATCH] dracut-systemd/dracut-initqueue.sh: be verbose about timeout
+
+Issue a warning, if timeout scripts are executed
+---
+ modules.d/98dracut-systemd/dracut-initqueue.sh | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/modules.d/98dracut-systemd/dracut-initqueue.sh b/modules.d/98dracut-systemd/dracut-initqueue.sh
+index af9cec2..881f639 100755
+--- a/modules.d/98dracut-systemd/dracut-initqueue.sh
++++ b/modules.d/98dracut-systemd/dracut-initqueue.sh
+@@ -55,6 +55,7 @@ while :; do
+     done
+ 
+     if [ $main_loop -gt $((2*$RDRETRY/3)) ]; then
++        warn "dracut-initqueue timeout - starting timeout scripts"
+         for job in $hookdir/initqueue/timeout/*.sh; do
+             [ -e "$job" ] || break
+             job=$job . $job

@@ -1,0 +1,38 @@
+From df087c45d820f22e9bf772fa0009d68e647c0af7 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 10 Sep 2015 13:21:53 +0200
+Subject: [PATCH] iscsi/iscsiroot.sh: use all_ifaces_setup()
+
+we want the route and gateway setup
+
+(cherry picked from commit 7cddfbbadbc40a4b6d331be25a3c38ad3a52239b)
+---
+ modules.d/95iscsi/iscsiroot.sh | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/modules.d/95iscsi/iscsiroot.sh b/modules.d/95iscsi/iscsiroot.sh
+index e730cb0..b14a71b 100755
+--- a/modules.d/95iscsi/iscsiroot.sh
++++ b/modules.d/95iscsi/iscsiroot.sh
+@@ -106,7 +106,7 @@ handle_netroot()
+     parse_iscsi_root "$1" || return 1
+ 
+     # Bail out early, if there is no route to the destination
+-    if is_ip "$iscsi_target_ip" && [ "$netif" != "timeout" ] && ! all_ifaces_up && getargbool 1 rd.iscsi.testroute; then
++    if is_ip "$iscsi_target_ip" && [ "$netif" != "timeout" ] && ! all_ifaces_setup && getargbool 1 rd.iscsi.testroute; then
+         ip route get "$iscsi_target_ip" >/dev/null 2>&1 || return 0
+     fi
+ 
+@@ -225,10 +225,10 @@ handle_netroot()
+ ret=0
+ 
+ if [ "$netif" != "timeout" ] && getargbool 1 rd.iscsi.waitnet; then
+-    all_ifaces_up || exit 0
++    all_ifaces_setup || exit 0
+ fi
+ 
+-if [ "$netif" = "timeout" ] && all_ifaces_up; then
++if [ "$netif" = "timeout" ] && all_ifaces_setup; then
+     # s.th. went wrong and the timeout script hits
+     # restart
+     systemctl restart iscsid

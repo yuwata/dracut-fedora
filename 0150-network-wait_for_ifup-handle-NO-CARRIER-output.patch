@@ -1,0 +1,53 @@
+From a49c1f049b1256ef17e94ef94c236f163001fee6 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 25 Sep 2015 10:14:33 -0400
+Subject: [PATCH] network:wait_for_ifup() handle "NO-CARRIER" output
+
+if "NO-CARRIER" is one of the flags, we surely have no link yet.
+
+(cherry picked from commit f059985b14f80a41f3b8103b67cb8fae0d3fc2fc)
+---
+ modules.d/40network/net-lib.sh | 30 ++++++++++++++++--------------
+ 1 file changed, 16 insertions(+), 14 deletions(-)
+
+diff --git a/modules.d/40network/net-lib.sh b/modules.d/40network/net-lib.sh
+index 706a9a5..135c378 100755
+--- a/modules.d/40network/net-lib.sh
++++ b/modules.d/40network/net-lib.sh
+@@ -537,20 +537,22 @@ wait_for_if_up() {
+ 
+     while [ $cnt -lt $timeout ]; do
+         li=$(ip -o link show up dev $1)
+-        if [ -n "$li" ]; then
+-            case "$li" in
+-                *\<UP*)
+-                    return 0;;
+-                *\<*,UP\>*)
+-                    return 0;;
+-                *\<*,UP,*\>*)
+-                    return 0;;
+-            esac
+-        fi
+-        if strstr "$li" "LOWER_UP" \
+-                && strstr "$li" "state UNKNOWN" \
+-                && ! strstr "$li" "DORMANT"; then
+-            return 0
++        if ! strstr "$li" "NO-CARRIER"; then
++            if [ -n "$li" ]; then
++                case "$li" in
++                    *\<UP*)
++                        return 0;;
++                    *\<*,UP\>*)
++                        return 0;;
++                    *\<*,UP,*\>*)
++                        return 0;;
++                esac
++            fi
++            if strstr "$li" "LOWER_UP" \
++                    && strstr "$li" "state UNKNOWN" \
++                    && ! strstr "$li" "DORMANT"; then
++                return 0
++            fi
+         fi
+         sleep 0.1
+         cnt=$(($cnt+1))

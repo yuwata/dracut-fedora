@@ -1,0 +1,35 @@
+From 3632be079bd7aa1cd456dc8aff2cc42d6a449a67 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Tue, 25 Aug 2015 11:16:46 +0200
+Subject: [PATCH] iscsi/parse-iscsiroot.sh: restart iscsid with try-restart
+
+(cherry picked from commit a6befb52eb5eeb87c0c41303fe08e50bd2fde0d3)
+---
+ modules.d/95iscsi/parse-iscsiroot.sh | 7 ++-----
+ 1 file changed, 2 insertions(+), 5 deletions(-)
+
+diff --git a/modules.d/95iscsi/parse-iscsiroot.sh b/modules.d/95iscsi/parse-iscsiroot.sh
+index aa17f8e..dab58db 100755
+--- a/modules.d/95iscsi/parse-iscsiroot.sh
++++ b/modules.d/95iscsi/parse-iscsiroot.sh
+@@ -99,7 +99,7 @@ if [ -n "$netroot" ] && [ "$root" != "/dev/root" ] && [ "$root" != "dhcp" ]; the
+     fi
+ fi
+ 
+-if arg=$(getarg rd.iscsi.initiator -d iscsi_initiator=) && [ -n "$arg" ]; then
++if arg=$(getarg rd.iscsi.initiator -d iscsi_initiator=) && [ -n "$arg" ] && ! [ -f /run/initiatorname.iscsi ] ; then
+     iscsi_initiator=$arg
+     echo "InitiatorName=$iscsi_initiator" > /run/initiatorname.iscsi
+     ln -fs /run/initiatorname.iscsi /dev/.initiatorname.iscsi
+@@ -117,10 +117,7 @@ if [ -z $iscsi_initiator ] && [ -f /sys/firmware/ibft/initiator/initiator-name ]
+     mkdir -p /etc/iscsi
+     ln -fs /run/initiatorname.iscsi /etc/iscsi/initiatorname.iscsi
+     > /tmp/iscsi_set_initiator
+-    if systemctl --quiet is-active iscsid.service; then
+-        systemctl restart iscsid
+-        sleep 1
+-    fi
++    systemctl try-restart iscsid && sleep 1
+ fi
+ 
+ 

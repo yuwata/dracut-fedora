@@ -1,0 +1,23 @@
+From 4483fff87c0a5074f3498bfd59387179c20c7ea3 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Tue, 18 Aug 2015 12:41:12 +0200
+Subject: [PATCH] network/dhclient: exit arping immediatly, if we get an answer
+
+(cherry picked from commit d6bfa7052a620ebdd37f78655462120871c49ebd)
+---
+ modules.d/40network/dhclient-script.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/modules.d/40network/dhclient-script.sh b/modules.d/40network/dhclient-script.sh
+index 1d891cd..4e2090d 100755
+--- a/modules.d/40network/dhclient-script.sh
++++ b/modules.d/40network/dhclient-script.sh
+@@ -117,7 +117,7 @@ case $reason in
+             read layer2 < /sys/class/net/$netif/device/layer2
+         fi
+         if [ "$layer2" != "0" ]; then
+-            if ! arping -q -D -c 2 -I $netif $new_ip_address ; then
++            if ! arping -f -q -D -c 2 -I $netif $new_ip_address ; then
+                 warn "Duplicate address detected for $new_ip_address while doing dhcp. retrying"
+                 exit 1
+             fi

@@ -1,0 +1,22 @@
+From f5753e1861c5eaf688d552ca50a6dd0f8e1d0f85 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Sat, 15 Aug 2015 13:22:07 +0200
+Subject: [PATCH] iscsi/module-setup.sh: iscsid need /var/lib/iscsi
+
+(cherry picked from commit f74b0a9f38838dddcf6f56daa9f20fc3e86087ca)
+---
+ modules.d/95iscsi/module-setup.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/modules.d/95iscsi/module-setup.sh b/modules.d/95iscsi/module-setup.sh
+index 3002591..beb80e3 100755
+--- a/modules.d/95iscsi/module-setup.sh
++++ b/modules.d/95iscsi/module-setup.sh
+@@ -257,6 +257,6 @@ install() {
+             echo "Before=dracut-initqueue.service"
+         ) > "${initdir}/$systemdsystemunitdir/iscsid.service.d/dracut.conf"
+     fi
+-
++    inst_dir /var/lib/iscsi
+     dracut_need_initqueue
+ }

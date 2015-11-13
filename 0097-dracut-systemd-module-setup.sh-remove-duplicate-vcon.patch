@@ -1,0 +1,34 @@
+From 64c34f34593984d93d4781f1e5fa008871e11963 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 11 Nov 2015 12:16:13 +0100
+Subject: [PATCH] dracut-systemd/module-setup.sh: remove duplicate vconsole
+ wants
+
+Adding the dependency on vconsole is already done in the 00systemd
+module and the rescue.service has this already in the unit file.
+---
+ modules.d/98dracut-systemd/module-setup.sh | 11 -----------
+ 1 file changed, 11 deletions(-)
+
+diff --git a/modules.d/98dracut-systemd/module-setup.sh b/modules.d/98dracut-systemd/module-setup.sh
+index d917557..900162c 100755
+--- a/modules.d/98dracut-systemd/module-setup.sh
++++ b/modules.d/98dracut-systemd/module-setup.sh
+@@ -43,17 +43,6 @@ install() {
+ 
+     inst_script "$moddir/rootfs-generator.sh" $systemdutildir/system-generators/dracut-rootfs-generator
+ 
+-    for i in \
+-        emergency.target \
+-        rescue.service \
+-        systemd-ask-password-console.service \
+-        systemd-ask-password-plymouth.service \
+-        ; do
+-        mkdir -p "${initdir}${systemdsystemunitdir}/${i}.wants"
+-        ln_r "${systemdsystemunitdir}/systemd-vconsole-setup.service" \
+-            "${systemdsystemunitdir}/${i}.wants/systemd-vconsole-setup.service"
+-    done
+-
+     mkdir -p "${initdir}/$systemdsystemunitdir/initrd.target.wants"
+     for i in \
+         dracut-cmdline.service \

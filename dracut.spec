@@ -1,6 +1,11 @@
 %define dracutlibdir %{_prefix}/lib/dracut
 %bcond_without doc
 
+# We ship a .pc file but don't want to have a dep on pkg-config. We
+# strip the automatically generated dep here and instead co-own the
+# directory.
+%global __requires_exclude pkg-config
+
 # Variables must be defined
 %define with_nbd                1
 
@@ -11,7 +16,7 @@
 
 Name: dracut
 Version: 043
-Release: 60.git20150811%{?dist}
+Release: 172.git20151113%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -77,18 +82,130 @@ Patch44: 0044-syncheck-Look-for-echo-n-usage-in-modules.patch
 Patch45: 0045-dracut.spec-add-dracut-init.sh.patch
 Patch46: 0046-use-mktemp-p-instead-of-tmpdir-for-busybox.patch
 Patch47: 0047-dmsquash-generator.sh-increase-timeout-for-checkisom.patch
-Patch48: 0048-Cleanup-compressor-handling.patch
-Patch49: 0049-Add-missing-echo-to-output-the-result.patch
-Patch50: 0050-crypt-s-allow-discards-discard-for-crypttab.patch
-Patch51: 0051-qemu-add-spapr-vscsi-kernel-module.patch
-Patch52: 0052-dracut.sh-simplify-modalias-reading.patch
-Patch53: 0053-90qemu-fixed-systemd-detect-virt-output-parsing.patch
-Patch54: 0054-Remove-98integrity-s-dependency-on-selinux.patch
-Patch55: 0055-Extend-evm-enable.sh-to-load-the-EVM-public-key.patch
-Patch56: 0056-Define-new-script-to-load-keys-on-the-IMA-keyring-up.patch
-Patch57: 0057-Revert-securitfs-change.patch
-Patch58: 0058-base-dracut-lib.sh-Dup-stdout-and-stderr.patch
-Patch59: 0059-dracut.sh-remove-quotes-from-install_items-and-insta.patch
+Patch48: 0048-remove-the-incomplete-.img-file.patch
+Patch49: 0049-Cleanup-compressor-handling.patch
+Patch50: 0050-Add-missing-echo-to-output-the-result.patch
+Patch51: 0051-crypt-s-allow-discards-discard-for-crypttab.patch
+Patch52: 0052-qemu-add-spapr-vscsi-kernel-module.patch
+Patch53: 0053-dracut-initramfs-restore-make-mount-error-nonfatal.patch
+Patch54: 0054-dracut.sh-simplify-modalias-reading.patch
+Patch55: 0055-90qemu-fixed-systemd-detect-virt-output-parsing.patch
+Patch56: 0056-Remove-98integrity-s-dependency-on-selinux.patch
+Patch57: 0057-Extend-evm-enable.sh-to-load-the-EVM-public-key.patch
+Patch58: 0058-Define-new-script-to-load-keys-on-the-IMA-keyring-up.patch
+Patch59: 0059-Revert-securitfs-change.patch
+Patch60: 0060-base-dracut-lib.sh-Dup-stdout-and-stderr.patch
+Patch61: 0061-dracut.sh-remove-quotes-from-install_items-and-insta.patch
+Patch62: 0062-network-net-lib.sh-add-is_ip.patch
+Patch63: 0063-systemd-add-systemd-run-and-systemd-escape.patch
+Patch64: 0064-network-parse-ip-opts.sh-assume-rd.neednet-for-multi.patch
+Patch65: 0065-nfs-parse-nfsroot.sh-silence-useless-warning-if-netr.patch
+Patch66: 0066-dracut-systemd-dracut-initqueue.sh-be-verbose-about-.patch
+Patch67: 0067-base-dracut-lib.sh-forget-about-the-idea-of-output-r.patch
+Patch68: 0068-iscsi-integrate-with-systemd-and-improve-robustness.patch
+Patch69: 0069-TEST-30-ISCSI-dhcpd.conf-set-the-LUN.patch
+Patch70: 0070-TEST-30-ISCSI-switch-to-scsi-target-utils.patch
+Patch71: 0071-dracut.cmdline.7.asc-document-rd.iscsi.waitnet-and-r.patch
+Patch72: 0072-iscsi-parse-iscsiroot.sh-use-iBFT-initiator-name.patch
+Patch73: 0073-iscsi-iscsiroot.sh-handle-timeout-with-all-interface.patch
+Patch74: 0074-TEST-30-ISCSI-test-more-and-set-static-initiator-nam.patch
+Patch75: 0075-The-default-gateway-might-need-a-static-route.patch
+Patch76: 0076-dracut-functions.sh-remove-duplicate-declaratio-of-l.patch
+Patch77: 0077-dracut.sh-remove-duplicate-call-of-push_host_devs.patch
+Patch78: 0078-dracut-functions.sh-fixed-dracutbasedir-when-sourced.patch
+Patch79: 0079-systemd-initrd-fix-typo-in-error-message.patch
+Patch80: 0080-systemd-networkd-fix-typo-in-error-message.patch
+Patch81: 0081-install-blob-fix-typos-in-usage.patch
+Patch82: 0082-dracut.8.asc-mention-lsinitrd-1-in-see-also.patch
+Patch83: 0083-dir-locals-Avoid-use-of-setq-which-triggers-Emacs-wa.patch
+Patch84: 0084-lsinitrd-Suppress-cat-write-error-Broken-pipe.patch
+Patch85: 0085-PKGFILE-update-to-latest-makepkg.patch
+Patch86: 0086-PKGFILE-version-is-now-completely-constructed-from-g.patch
+Patch87: 0087-PKGFILE-prevent-out-of-tree-builds.patch
+Patch88: 0088-dracut-logger-prefix-stderr-output-with-dracut.patch
+Patch89: 0089-dmsquash-live-root-Request-overflow-support-for-pers.patch
+Patch90: 0090-dmsquash-live-root-Use-non-persistent-metadata-snaps.patch
+Patch91: 0091-Makefile-fix-VERSION-and-GITVERSION.patch
+Patch92: 0092-dracut.spec-omit-pkg-config-from-dependencies.patch
+Patch93: 0093-fips-add-authenc-and-authencesn-kernel-modules.patch
+Patch94: 0094-lvm-remove-all-quirk-arguments.patch
+Patch95: 0095-dracut.sh-remove-_EARLY-from-CONFIG_MICROCODE_-check.patch
+Patch96: 0096-dracut.sh-quote-outfile-on-error-removal.patch
+Patch97: 0097-dracut-systemd-module-setup.sh-remove-duplicate-vcon.patch
+Patch98: 0098-Makefile-remove-output-file-before-creating-it.patch
+Patch99: 0099-TEST-30-ISCSI-add-rd.scsi.firmware.patch
+Patch100: 0100-initqueue-add-online-queue.patch
+Patch101: 0101-dracut.spec-raise-systemd-requirement-to-219.patch
+Patch102: 0102-iscsi-iscsiroot.sh-handle-firmware-in-online-queue.patch
+Patch103: 0103-iscsi-parse-iscsiroot.sh-do-not-modify-netroot.patch
+Patch104: 0104-network-add-options-to-tweak-timeouts.patch
+Patch105: 0105-fcoe-start-with-fcoemon-instead-of-fipvlan.patch
+Patch106: 0106-fcoe-EDD-parsing-patch-for-i40e.patch
+Patch107: 0107-fcoe-fcoe-edd.sh-cleanup-the-script.patch
+Patch108: 0108-livenet-don-t-attempt-to-download-the-image-for-ever.patch
+Patch109: 0109-multipath-install-all-multipath-path-selector-kernel.patch
+Patch110: 0110-man-page-changed-grub.conf-to-grub2.cfg.patch
+Patch111: 0111-crypt-install-drbg-unconditionally-in-hostonly-mode.patch
+Patch112: 0112-iscsi-module-setup.sh-iscsid-need-var-lib-iscsi.patch
+Patch113: 0113-TEST-30-ISCSI-fix-test-to-run-with-new-iscsi.patch
+Patch114: 0114-iscsi-handle-timeout-case-better.patch
+Patch115: 0115-systemd-dracut-cmdline.sh-print-out-cmdline-in-one-l.patch
+Patch116: 0116-network-ifup.sh-let-dhcp-client-run-in-the-backgroun.patch
+Patch117: 0117-network-ifup.sh-arping-for-static-IPv4-addresses.patch
+Patch118: 0118-network-parse-ip-opts.sh-bind-enx-interface-to-the-M.patch
+Patch119: 0119-udev-rules-install-40-redhat.rules.patch
+Patch120: 0120-fcoe-cleanup-lldpad.patch
+Patch121: 0121-network-net-lib.sh-ibft-unset-gateway-or-dns-if-set-.patch
+Patch122: 0122-network-dhclient-exit-arping-immediatly-if-we-get-an.patch
+Patch123: 0123-dmraid-only-scan-once-because-of-one-device.patch
+Patch124: 0124-test-TEST-04-FULL-SYSTEMD-create-root.sh-modprobe-bt.patch
+Patch125: 0125-TEST-15-BTRFS-load-btrfs-module.patch
+Patch126: 0126-network-ifup.sh-do_static-error-out-if-interface-cou.patch
+Patch127: 0127-network-ifup.sh-do_static-error-out-if-IP-is-already.patch
+Patch128: 0128-iscsi-parse-iscsiroot.sh-handle-firmware-in-online-q.patch
+Patch129: 0129-iscsi-parse-iscsiroot.sh-restart-iscsid-with-try-res.patch
+Patch130: 0130-network-ifup.sh-save-return-value-of-ifup.patch
+Patch131: 0131-network-also-mark-interfaces-up-with-their-MAC.patch
+Patch132: 0132-network-ifup.sh-only-use-dhcp-on-unknown-interfaces-.patch
+Patch133: 0133-cms-cmsifup.sh-do-not-use-ifup-m.patch
+Patch134: 0134-network-ifup-fix-warning-about-not-bringing-interfac.patch
+Patch135: 0135-network-net-lib.sh-fix-wait_for_if_up.patch
+Patch136: 0136-network-net-lib.sh-fix-IPv6-route-parsing.patch
+Patch137: 0137-network-ifup-do-DHCP-for-BOOTDEV.patch
+Patch138: 0138-livenet-livenetroot.sh-fixed-error-condition.patch
+Patch139: 0139-iscsi-parse-iscsiroot.sh-only-set-initiator-name-if-.patch
+Patch140: 0140-network-move-ip-ibft-handling-to-network-module.patch
+Patch141: 0141-network-dhclient-script.sh-fix-RENEW.patch
+Patch142: 0142-network-add-all_ifaces_setup.patch
+Patch143: 0143-iscsi-iscsiroot.sh-use-all_ifaces_setup.patch
+Patch144: 0144-network-netroot.sh-better-handling-of-netroot-and-dh.patch
+Patch145: 0145-iscsi-iscsiroot.sh-handle-iscsi_firmware-in-online-a.patch
+Patch146: 0146-dracut.sh-add-command-line-option-for-install_i18_al.patch
+Patch147: 0147-dracut.sh-do-not-create-microcode-if-no-firmware-is-.patch
+Patch148: 0148-iscsi-parse-iscsiroot.sh-correct-handling-if-netroot.patch
+Patch149: 0149-dracut.sh-no-microcode-if-get_ucode_file-returns-emp.patch
+Patch150: 0150-network-wait_for_ifup-handle-NO-CARRIER-output.patch
+Patch151: 0151-dracut.sh-fixed-typo-in-microcode-generation.patch
+Patch152: 0152-base-dracut-lib.sh-getargs-don-t-return-1-for-empty-.patch
+Patch153: 0153-network-ifup.sh-skip-empty-nameserver-values.patch
+Patch154: 0154-dracut-systemd-rootfs-generator.sh-s-RequiresOverrid.patch
+Patch155: 0155-add-no-reproducible-to-turn-off-reproducible-mode.patch
+Patch156: 0156-reduce-dracut-functions.sh-and-add-to-dracut-init.sh.patch
+Patch157: 0157-repro-squash.patch
+Patch158: 0158-iscsi-iscsiroot.sh-put-variables-in-quotes.patch
+Patch159: 0159-iscsi-only-systemctl-try-restart-iscsid-if-systemd-i.patch
+Patch160: 0160-Add-awk-and-getopt-as-dependencies-of-znetconf.patch
+Patch161: 0161-dracut.sh-Support-mount-with-just-mountpoint-as-para.patch
+Patch162: 0162-Revert-Change-the-implementation-of-action_on_fail.patch
+Patch163: 0163-Revert-rename-kernel-command-line-param-action_on_fa.patch
+Patch164: 0164-Revert-systemd-emergency.service-do-not-run-for-acti.patch
+Patch165: 0165-Revert-dracut-emergency.service-do-not-start-for-act.patch
+Patch166: 0166-Revert-99fs-lib-fs-lib.sh-Let-user-specify-the-actio.patch
+Patch167: 0167-Revert-Let-user-specify-the-action-after-fail.patch
+Patch168: 0168-dracut.sh-remove-the-concept-of-host_modalias.patch
+Patch169: 0169-Check-rd.zfcp-format-in-dracut-hook-cmdline-process-.patch
+Patch170: 0170-dracut-init.sh-libdir-paths-need-dracut-function.sh.patch
+Patch171: 0171-iscsi-parse-iscsiroot.sh-reload-udev-rules.patch
 
 Source1: https://www.gnu.org/licenses/lgpl-2.1.txt
 
@@ -169,7 +286,7 @@ Requires: kpartx
 
 %if 0%{?fedora} || 0%{?rhel} > 6
 Requires: util-linux >= 2.21
-Requires: systemd >= 199
+Requires: systemd >= 219
 Requires: procps-ng
 Conflicts: grubby < 8.23
 Conflicts: initscripts < 8.63-1
@@ -387,6 +504,7 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 %dir %{_sysconfdir}/dracut.conf.d
 %dir %{dracutlibdir}/dracut.conf.d
+%dir %{_datadir}/pkgconfig
 %{_datadir}/pkgconfig/dracut.pc
 
 %if %{with doc}
@@ -548,6 +666,9 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Fr Nov 13 2015 Harald Hoyer <harald@redhat.com> - 043-172.git20151113
+- git snapshot
+
 * Tue Aug 11 2015 Harald Hoyer <harald@redhat.com> 043-60.git20150811
 - fixed checkiso timeout
 - fixed log output although quiet is set

@@ -1,0 +1,41 @@
+From 42b4fc90f2248444da3a769a3706503503df8e80 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Tue, 1 Sep 2015 17:22:56 +0200
+Subject: [PATCH] network/net-lib.sh: fix wait_for_if_up()
+
+wait for <*UP*> and not "state UP"
+
+state can be UNKNOWN
+
+(cherry picked from commit d8572e0bf4d49a8d2ec71726d0fd38d1c73ca3f7)
+---
+ modules.d/40network/net-lib.sh | 16 +++++++++++++++-
+ 1 file changed, 15 insertions(+), 1 deletion(-)
+
+diff --git a/modules.d/40network/net-lib.sh b/modules.d/40network/net-lib.sh
+index b61a1e8..43528e2 100755
+--- a/modules.d/40network/net-lib.sh
++++ b/modules.d/40network/net-lib.sh
+@@ -529,7 +529,21 @@ wait_for_if_up() {
+ 
+     while [ $cnt -lt $timeout ]; do
+         li=$(ip -o link show up dev $1)
+-        [ -n "$li" ] && [ -z "${li##*state UP*}" ] && return 0
++        if [ -n "$li" ]; then
++            case "$li" in
++                *\<UP*)
++                    return 0;;
++                *\<*,UP\>*)
++                    return 0;;
++                *\<*,UP,*\>*)
++                    return 0;;
++            esac
++        fi
++        if strstr "$li" "LOWER_UP" \
++                && strstr "$li" "state UNKNOWN" \
++                && ! strstr "$li" "DORMANT"; then
++            return 0
++        fi
+         sleep 0.1
+         cnt=$(($cnt+1))
+     done

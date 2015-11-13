@@ -1,0 +1,22 @@
+From 0888cf51ab82659ba71bca5ae6c5b6abe9a5ef06 Mon Sep 17 00:00:00 2001
+From: yuwata <watanabe.yu+github@gmail.com>
+Date: Mon, 7 Sep 2015 17:58:40 +0900
+Subject: [PATCH] systemd-networkd: fix typo in error message
+
+---
+ modules.d/02systemd-networkd/module-setup.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/modules.d/02systemd-networkd/module-setup.sh b/modules.d/02systemd-networkd/module-setup.sh
+index df4661f..58842c0 100755
+--- a/modules.d/02systemd-networkd/module-setup.sh
++++ b/modules.d/02systemd-networkd/module-setup.sh
+@@ -5,7 +5,7 @@ check() {
+     [[ $mount_needs ]] && return 1
+ 
+     if ! dracut_module_included "systemd"; then
+-        derror "dracut-systemd needs systemd in the initramfs"
++        derror "systemd-networkd needs systemd in the initramfs"
+         return 1
+     fi
+ 

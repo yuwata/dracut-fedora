@@ -1,0 +1,27 @@
+From 7527b90c886e0c950f4a533fbb4eefb3714a5f9a Mon Sep 17 00:00:00 2001
+From: Zhiguo Deng <bjzgdeng@linux.vnet.ibm.com>
+Date: Fri, 16 Oct 2015 04:04:34 +0200
+Subject: [PATCH] Check rd.zfcp= format in dracut hook:cmdline process stage
+
+When using rd.zfcp= parameter in generic.prm file, wrong format
+parameters will prevent the zfcp driver to add the correct SCSI
+disk. dracut should die when a wrong rd.zfcp= parameter supplied.
+
+Signed-off-by: Zhiguo Deng <bjzgdeng@linux.vnet.ibm.com>
+---
+ modules.d/95zfcp/parse-zfcp.sh | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/modules.d/95zfcp/parse-zfcp.sh b/modules.d/95zfcp/parse-zfcp.sh
+index 223cd32..6e1514f 100755
+--- a/modules.d/95zfcp/parse-zfcp.sh
++++ b/modules.d/95zfcp/parse-zfcp.sh
+@@ -3,6 +3,8 @@
+ getargbool 1 rd.zfcp.conf -d -n rd_NO_ZFCPCONF || rm /etc/zfcp.conf
+ 
+ for zfcp_arg in $(getargs rd.zfcp -d 'rd_ZFCP='); do
++    echo $zfcp_arg | grep '0\.[0-9a-fA-F]\.[0-9a-fA-F]\{4\},0x[0-9a-fA-F]\{16\},0x[0-9a-fA-F]\{16\}' >/dev/null
++    test $? -ne 0 && die "For argument 'rd.zfcp=$zfcp_arg'\nSorry, invalid format."
+     (
+         IFS=","
+         set $zfcp_arg

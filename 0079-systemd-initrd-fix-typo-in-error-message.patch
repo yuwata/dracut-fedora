@@ -1,0 +1,22 @@
+From 5cb1e0efea5a331a743a6abac130003ad08b50ff Mon Sep 17 00:00:00 2001
+From: yuwata <watanabe.yu+github@gmail.com>
+Date: Mon, 7 Sep 2015 17:58:00 +0900
+Subject: [PATCH] systemd-initrd: fix typo in error message.
+
+---
+ modules.d/01systemd-initrd/module-setup.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/modules.d/01systemd-initrd/module-setup.sh b/modules.d/01systemd-initrd/module-setup.sh
+index e313967..fb6a9ea 100755
+--- a/modules.d/01systemd-initrd/module-setup.sh
++++ b/modules.d/01systemd-initrd/module-setup.sh
+@@ -5,7 +5,7 @@ check() {
+     [[ $mount_needs ]] && return 1
+ 
+     if ! dracut_module_included "systemd"; then
+-        derror "dracut-systemd needs systemd in the initramfs"
++        derror "systemd-initrd needs systemd in the initramfs"
+         return 1
+     fi
+ 

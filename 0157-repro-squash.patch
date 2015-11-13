@@ -1,0 +1,23 @@
+From 4a6c14f9875da2373f21cafadfe32c7c9acb39d6 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 13 Nov 2015 13:14:05 +0100
+Subject: [PATCH] repro squash
+
+---
+ dracut.8.asc | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/dracut.8.asc b/dracut.8.asc
+index 1fbbda4..5f45ed9 100644
+--- a/dracut.8.asc
++++ b/dracut.8.asc
+@@ -428,6 +428,9 @@ will not be able to boot.
+ **--reproducible**::
+     Create reproducible images.
+ 
++**--no-reproducible**::
++    Do not create reproducible images.
++
+ **--list-modules**::
+     List all available dracut modules.
+ 

@@ -1,0 +1,32 @@
+From 0d5c02d3ab7b71a09d5d7b52a771f0fe0f32e4e2 Mon Sep 17 00:00:00 2001
+From: Silvio Fricke <silvio.fricke@gmail.com>
+Date: Sun, 8 Nov 2015 12:53:36 +0100
+Subject: [PATCH] PKGFILE: prevent out of tree builds
+
+With makepkg is it possible to build sources away from the PKGFILE. The
+previous behavior was crash on build if this was setup. With this
+patch we prevent this possibility.
+
+Signed-off-by: Silvio Fricke <silvio.fricke@gmail.com>
+---
+ PKGBUILD | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/PKGBUILD b/PKGBUILD
+index c625bdb..05a32b0 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -14,6 +14,13 @@ backup=(etc/dracut.conf)
+ source=()
+ md5sums=()
+ 
++# out of tree builds disallowed for this PKGFILE
++BUILDDIR="${PWD}"
++PKGDEST="${PWD}"
++SRCDEST=""
++SRCPKGDEST=""
++LOGDEST=""
++
+ pkgver() {
+   cd ..
+   desc="$(git describe)"

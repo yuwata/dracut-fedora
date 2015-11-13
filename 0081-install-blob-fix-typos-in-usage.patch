@@ -1,0 +1,23 @@
+From fc212358dab07011398c002849b2ebf8a412ffc8 Mon Sep 17 00:00:00 2001
+From: yuwata <watanabe.yu+github@gmail.com>
+Date: Mon, 7 Sep 2015 18:00:16 +0900
+Subject: [PATCH] install blob: fix typos in usage.
+
+---
+ install/dracut-install.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/install/dracut-install.c b/install/dracut-install.c
+index 0ff5c49..a7bfdb8 100644
+--- a/install/dracut-install.c
++++ b/install/dracut-install.c
+@@ -709,7 +709,8 @@ static void usage(int status)
+                "  -L --logdir <DIR>   Log files, which were installed from the host to <DIR>\n"
+                "  -R --resolvelazy    Only install shebang executables and libraries\n"
+                "                      for all SOURCE files\n"
+-               "  -H --fips           Also install all '.SOURCE.hmac' files\n"
++               "  -H --hostonly       Mark all SOURCE files as hostonly\n\n"
++               "  -f --fips           Also install all '.SOURCE.hmac' files\n"
+                "  -v --verbose        Show more output\n"
+                "     --debug          Show debug output\n"
+                "     --version        Show package version\n"

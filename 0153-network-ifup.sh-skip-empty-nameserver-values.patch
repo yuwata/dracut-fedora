@@ -1,0 +1,36 @@
+From 5b43377d74967bd445fe9c0e06d928194b800dd5 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 9 Oct 2015 11:35:43 +0200
+Subject: [PATCH] network/ifup.sh: skip empty nameserver values
+
+(cherry picked from commit e65825117377a8e1e730912aa4c0e786122d892a)
+---
+ modules.d/40network/ifup.sh | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/modules.d/40network/ifup.sh b/modules.d/40network/ifup.sh
+index 366744f..109fb4b 100755
+--- a/modules.d/40network/ifup.sh
++++ b/modules.d/40network/ifup.sh
+@@ -313,8 +313,8 @@ fi
+ ip=$(getarg ip)
+ 
+ if [ -z "$ip" ]; then
+-    namesrv=$(getargs nameserver)
+-    for s in $namesrv; do
++    for s in $(getargs nameserver); do
++        [ -n "$s" ] || continue
+         echo nameserver $s >> /tmp/net.$netif.resolv.conf
+     done
+ 
+@@ -350,8 +350,8 @@ for p in $(getargs ip=); do
+     [ "$use_vlan" != 'true' ] && continue
+ 
+     # setup nameserver
+-    namesrv="$dns1 $dns2 $(getargs nameserver)"
+-    for s in $namesrv; do
++    for s in "$dns1" "$dns2" $(getargs nameserver); do
++        [ -n "$s" ] || continue
+         echo nameserver $s >> /tmp/net.$netif.resolv.conf
+     done
+ 

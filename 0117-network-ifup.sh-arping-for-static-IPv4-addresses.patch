@@ -1,0 +1,25 @@
+From 9ab5ddf16ab973ae63af8cad33b58e31b53ce170 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Tue, 18 Aug 2015 12:07:41 +0200
+Subject: [PATCH] network/ifup.sh: arping for static IPv4 addresses
+
+(cherry picked from commit 38180271c587f3053710bf38a6cda829d3a7c00f)
+---
+ modules.d/40network/ifup.sh | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/modules.d/40network/ifup.sh b/modules.d/40network/ifup.sh
+index ceb5f5c..7da9171 100755
+--- a/modules.d/40network/ifup.sh
++++ b/modules.d/40network/ifup.sh
+@@ -158,6 +158,10 @@ do_static() {
+         ip addr add $ip/$mask ${srv:+peer $srv} dev $netif
+         wait_for_ipv6_dad $netif
+     else
++        if ! arping -f -q -D -c 2 -I $netif $ip; then
++            warn "Duplicate address detected for $ip for interface $netif."
++            return 1
++        fi
+         ip addr flush dev $netif
+         ip addr add $ip/$mask ${srv:+peer $srv} brd + dev $netif
+     fi

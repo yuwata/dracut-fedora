@@ -1,0 +1,27 @@
+From 69171aa8fa4bdd196709318582d73076677bd16c Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 12 Aug 2015 15:11:17 +0200
+Subject: [PATCH] dracut.cmdline.7.asc: document rd.iscsi.waitnet and
+ rd.iscsi.testroute
+
+---
+ dracut.cmdline.7.asc | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/dracut.cmdline.7.asc b/dracut.cmdline.7.asc
+index 1a54377..8c7e965 100644
+--- a/dracut.cmdline.7.asc
++++ b/dracut.cmdline.7.asc
+@@ -713,6 +713,12 @@ iscsistart -b --param node.session.timeo.replacement_timeout=30
+ **rd.iscsi.ibft** **rd.iscsi.ibft=1**:
+     Turn on iBFT autoconfiguration for the interfaces
+ 
++**rd.iscsi.waitnet=0**:
++    Turn off waiting for all interfaces to be up before trying to login to the iSCSI targets.
++
++**rd.iscsi.testroute=0**:
++    Turn off checking, if the route to the iSCSI target IP is possible before trying to login.
++
+ FCoE
+ ~~~~
+ **fcoe=**__<edd|interface|MAC>__:__{dcb|nodcb}__::

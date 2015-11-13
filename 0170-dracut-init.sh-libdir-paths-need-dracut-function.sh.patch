@@ -1,0 +1,31 @@
+From 456f299ab8e3168d709c35cf7ec09d1683c4cec3 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 13 Nov 2015 14:19:53 +0100
+Subject: [PATCH] dracut-init.sh: libdir paths need dracut-function.sh
+
+---
+ dracut-init.sh | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/dracut-init.sh b/dracut-init.sh
+index f22256c..fc35d7b 100644
+--- a/dracut-init.sh
++++ b/dracut-init.sh
+@@ -78,6 +78,8 @@ export srcmods
+     export hookdirs
+ }
+ 
++. $dracutbasedir/dracut-functions.sh
++
+ # Detect lib paths
+ if ! [[ $libdirs ]] ; then
+     if [[ "$(ldd /bin/sh)" == */lib64/* ]] &>/dev/null \
+@@ -94,8 +96,6 @@ if ! [[ $libdirs ]] ; then
+     export libdirs
+ fi
+ 
+-. $dracutbasedir/dracut-functions.sh
+-
+ # helper function for check() in module-setup.sh
+ # to check for required installed binaries
+ # issues a standardized warning message

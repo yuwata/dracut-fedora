@@ -1,0 +1,226 @@
+From c22c43f81a5f15c8759e6aa69773d0e9010c4741 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 12 Aug 2015 14:42:03 +0200
+Subject: [PATCH] TEST-30-ISCSI: switch to scsi-target-utils
+
+netbsd-iscsi is not available on RHEL
+
+Beef up the testsuite to use the two targets over different
+interfaces.
+
+Test the new iSCSI parameters rd.iscsi.waitnet and rd.iscsi.testroute.
+---
+ README.testsuite                  |  2 +-
+ test/TEST-30-ISCSI/server-init.sh | 17 ++++++++++-
+ test/TEST-30-ISCSI/targets        | 25 ----------------
+ test/TEST-30-ISCSI/test.sh        | 62 ++++++++++++++++++++++++++-------------
+ 4 files changed, 59 insertions(+), 47 deletions(-)
+ delete mode 100644 test/TEST-30-ISCSI/targets
+
+diff --git a/README.testsuite b/README.testsuite
+index b539d90..f9f60d4 100644
+--- a/README.testsuite
++++ b/README.testsuite
+@@ -6,9 +6,9 @@ mdadm \
+ lvm2 \
+ cryptsetup \
+ nfs-utils \
+-netbsd-iscsi \
+ nbd \
+ dhcp-server \
++scsi-target-utils \
+ iscsi-initiator-utils
+ 
+ 
+diff --git a/test/TEST-30-ISCSI/server-init.sh b/test/TEST-30-ISCSI/server-init.sh
+index 0407b17..64a4755 100755
+--- a/test/TEST-30-ISCSI/server-init.sh
++++ b/test/TEST-30-ISCSI/server-init.sh
+@@ -12,10 +12,25 @@ ip link set lo up
+ ip link set dev eth0 name ens3
+ ip addr add 192.168.50.1/24 dev ens3
+ ip link set ens3 up
++ip link set dev eth1 name ens4
++ip addr add 192.168.51.1/24 dev ens4
++ip link set ens4 up
+ >/var/lib/dhcpd/dhcpd.leases
+ chmod 777 /var/lib/dhcpd/dhcpd.leases
+ dhcpd -d -cf /etc/dhcpd.conf -lf /var/lib/dhcpd/dhcpd.leases &
+-/usr/sbin/iscsi-target -D -t iqn.2009-06.dracut &
++
++tgtd
++tgtadm --lld iscsi --mode target --op new --tid 1 --targetname iqn.2009-06.dracut:target0
++tgtadm --lld iscsi --mode target --op new --tid 2 --targetname iqn.2009-06.dracut:target1
++tgtadm --lld iscsi --mode target --op new --tid 3 --targetname iqn.2009-06.dracut:target2
++tgtadm --lld iscsi --mode logicalunit --op new --tid 1 --lun 1 -b /dev/sdb
++tgtadm --lld iscsi --mode logicalunit --op new --tid 2 --lun 2 -b /dev/sdc
++tgtadm --lld iscsi --mode logicalunit --op new --tid 3 --lun 3 -b /dev/sdd
++tgtadm --lld iscsi --mode target --op bind --tid 1 -I 192.168.50.101
++tgtadm --lld iscsi --mode target --op bind --tid 2 -I 192.168.51.101
++tgtadm --lld iscsi --mode target --op bind --tid 3 -I 192.168.50.101
++
++
+ # Wait forever for the VM to die
+ echo "Serving iSCSI"
+ while :; do
+diff --git a/test/TEST-30-ISCSI/targets b/test/TEST-30-ISCSI/targets
+deleted file mode 100644
+index 6a6872e..0000000
+--- a/test/TEST-30-ISCSI/targets
++++ /dev/null
+@@ -1,25 +0,0 @@
+-# $NetBSD: targets,v 1.2 2006/03/04 21:53:16 agc Exp $
+-#
+-# Structure of this file:
+-#
+-# + an extent is a straight (offset, length) pair of a file or device
+-#   it's the lowest common storage denominator
+-#   at least one is needed
+-# + a device is made up of one or more extents or other devices
+-#   devices can be added in a hierachical manner, to enhance resilience
+-# + in this example, no device definitions are necessary, as the target
+-#   will just use a simple extent for persistent storage
+-# + a target is made up of 1 or more devices
+-# The code does not support RAID1 recovery at present
+-
+-# Simple file showing 1 extent, mapped straight into 1 target
+-
+-# extents	file			start	length
+-extent0		/dev/sdb	0	20971520
+-extent1		/dev/sdc	0	20971520
+-extent2		/dev/sdd	0	20971520
+-
+-# target	flags	storage		netmask
+-target0		rw	extent0		192.168.50.0/24
+-target1		rw	extent1		192.168.50.0/24
+-target2		rw	extent2		192.168.50.0/24
+diff --git a/test/TEST-30-ISCSI/test.sh b/test/TEST-30-ISCSI/test.sh
+index 59e9c5b..cc6ec4e 100755
+--- a/test/TEST-30-ISCSI/test.sh
++++ b/test/TEST-30-ISCSI/test.sh
+@@ -3,8 +3,10 @@ TEST_DESCRIPTION="root filesystem over iSCSI"
+ 
+ KVERSION=${KVERSION-$(uname -r)}
+ 
+-#DEBUGFAIL="rd.shell"
+-#SERIAL="tcp:127.0.0.1:9999"
++#DEBUGFAIL="rd.shell rd.break rd.debug loglevel=7 "
++DEBUGFAIL="loglevel=1"
++#SERVER_DEBUG="rd.debug loglevel=7"
++SERIAL="tcp:127.0.0.1:9999"
+ SERIAL="null"
+ 
+ run_server() {
+@@ -16,12 +18,13 @@ run_server() {
+         -drive format=raw,index=1,media=disk,file=$TESTDIR/root.ext3 \
+         -drive format=raw,index=2,media=disk,file=$TESTDIR/iscsidisk2.img \
+         -drive format=raw,index=3,media=disk,file=$TESTDIR/iscsidisk3.img \
+-        -m 256M  -smp 2 \
++        -m 512M  -smp 2 \
+         -display none \
+         -serial $SERIAL \
+         -net nic,macaddr=52:54:00:12:34:56,model=e1000 \
++        -net nic,macaddr=52:54:00:12:34:57,model=e1000 \
+         -net socket,listen=127.0.0.1:12330 \
+-        -append "root=/dev/sda rootfstype=ext3 rw rd.debug loglevel=77 console=ttyS0,115200n81 selinux=0" \
++        -append "root=/dev/sda rootfstype=ext3 rw console=ttyS0,115200n81 selinux=0 $SERVER_DEBUG" \
+         -initrd $TESTDIR/initramfs.server \
+         -pidfile $TESTDIR/server.pid -daemonize || return 1
+     sudo chmod 644 $TESTDIR/server.pid || return 1
+@@ -41,10 +44,11 @@ run_client() {
+ 
+     $testdir/run-qemu \
+         -drive format=raw,index=0,media=disk,file=$TESTDIR/client.img \
+-        -m 256M -smp 2 -nographic \
++        -m 512M -smp 2 -nographic \
+         -net nic,macaddr=52:54:00:12:34:00,model=e1000 \
++        -net nic,macaddr=52:54:00:12:34:01,model=e1000 \
+         -net socket,connect=127.0.0.1:12330 \
+-        -append "$* rw quiet rd.auto rd.retry=5 rd.debug rd.info  console=ttyS0,115200n81 selinux=0 $DEBUGFAIL" \
++        -append "$* rw rd.auto rd.retry=20 console=ttyS0,115200n81 selinux=0 rd.debug=0 $DEBUGFAIL" \
+         -initrd $TESTDIR/initramfs.testing
+     if ! grep -F -m 1 -q iscsi-OK $TESTDIR/client.img; then
+ 	echo "CLIENT TEST END: $test_name [FAILED - BAD EXIT]"
+@@ -56,20 +60,39 @@ run_client() {
+ }
+ 
+ do_test_run() {
++    run_client "root=dhcp" \
++        "root=/dev/root netroot=dhcp ip=ens3:dhcp" \
++        || return 1
+ 
+-#
+-#    run_client "root=dhcp" \
+-#        "root=dhcp" \
+-#	|| return 1
++    run_client "netroot=iscsi target0"\
++        "root=LABEL=singleroot netroot=iscsi:192.168.50.1::::iqn.2009-06.dracut:target0" \
++        "ip=192.168.50.101::192.168.50.1:255.255.255.0:iscsi-1:ens3:off" \
++        || return 1
+ 
+-    run_client "netroot=iscsi  target0"\
+-	"root=LABEL=singleroot netroot=iscsi:192.168.50.1::::iqn.2009-06.dracut:target0" \
+-	"ip=192.168.50.101::192.168.50.1:255.255.255.0:iscsi-1:ens3:off" \
++    run_client "netroot=iscsi target1 target2" \
++                "root=LABEL=sysroot" \
++                "ip=192.168.50.101:::255.255.255.0::ens3:off" \
++                "ip=192.168.51.101:::255.255.255.0::ens4:off" \
++                "netroot=iscsi:192.168.51.1::::iqn.2009-06.dracut:target1" \
++                "netroot=iscsi:192.168.50.1::::iqn.2009-06.dracut:target2" \
++         || return 1
++
++    run_client "netroot=iscsi target1 target2 rd.iscsi.waitnet=0" \
++	       "root=LABEL=sysroot" \
++               "ip=192.168.50.101:::255.255.255.0::ens3:off" \
++               "ip=192.168.51.101:::255.255.255.0::ens4:off" \
++	       "netroot=iscsi:192.168.51.1::::iqn.2009-06.dracut:target1" \
++               "netroot=iscsi:192.168.50.1::::iqn.2009-06.dracut:target2" \
++               "rd.waitnet=0" \
+ 	|| return 1
+ 
+-    run_client "netroot=iscsi target1 target2" \
+-	"root=LABEL=sysroot ip=192.168.50.101::192.168.50.1:255.255.255.0:iscsi-1:ens3:off" \
+-	"netroot=iscsi:192.168.50.1::::iqn.2009-06.dracut:target1 netroot=iscsi:192.168.50.1::::iqn.2009-06.dracut:target2" \
++    run_client "netroot=iscsi target1 target2 rd.iscsi.waitnet=0 rd.iscsi.testroute=0" \
++	       "root=LABEL=sysroot" \
++               "ip=192.168.50.101:::255.255.255.0::ens3:off" \
++               "ip=192.168.51.101:::255.255.255.0::ens4:off" \
++	       "netroot=iscsi:192.168.51.1::::iqn.2009-06.dracut:target1" \
++               "netroot=iscsi:192.168.50.1::::iqn.2009-06.dracut:target2" \
++               "rd.waitnet=0 rd.iscsi.testroute=0" \
+ 	|| return 1
+     return 0
+ }
+@@ -170,7 +193,7 @@ test_setup() {
+         inst_simple ./99-idesymlinks.rules /etc/udev/rules.d/99-idesymlinks.rules
+     )
+     sudo $basedir/dracut.sh -l -i $TESTDIR/overlay / \
+-        -o "dash plymouth dmraid" \
++        -o "dash plymouth dmraid nfs" \
+         -a "debug" \
+         -d "af_packet piix ide-gd_mod ata_piix ext3 sd_mod" \
+         --no-hostonly-cmdline -N \
+@@ -195,13 +218,12 @@ test_setup() {
+             dmesg mkdir cp ping \
+             modprobe tcpdump setsid \
+             /etc/services sleep mount chmod
+-        inst_multiple /usr/sbin/iscsi-target
++        inst_multiple tgtd tgtadm
+         for _terminfodir in /lib/terminfo /etc/terminfo /usr/share/terminfo; do
+             [ -f ${_terminfodir}/l/linux ] && break
+         done
+         inst_multiple -o ${_terminfodir}/l/linux
+         instmods iscsi_tcp crc32c ipv6
+-        inst ./targets /etc/iscsi/targets
+         [ -f /etc/netconfig ] && inst_multiple /etc/netconfig
+         type -P dhcpd >/dev/null && inst_multiple dhcpd
+         [ -x /usr/sbin/dhcpd3 ] && inst /usr/sbin/dhcpd3 /usr/sbin/dhcpd
+@@ -223,7 +245,7 @@ test_setup() {
+     # Make server's dracut image
+     $basedir/dracut.sh -l -i $TESTDIR/overlay / \
+         -a "dash udev-rules base rootfs-block fs-lib debug kernel-modules" \
+-        -d "af_packet piix ide-gd_mod ata_piix ext3 sd_mod e1000" \
++        -d "af_packet piix ide-gd_mod ata_piix ext3 sd_mod e1000 drbg" \
+         --no-hostonly-cmdline -N \
+         -f $TESTDIR/initramfs.server $KVERSION || return 1
+ 

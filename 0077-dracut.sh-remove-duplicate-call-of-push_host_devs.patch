@@ -1,0 +1,22 @@
+From aa169b3bd37b74bdf1e15318ab423ef4b9001fd2 Mon Sep 17 00:00:00 2001
+From: Lidong Zhong <lzhong@suse.com>
+Date: Mon, 24 Aug 2015 18:27:54 +0800
+Subject: [PATCH] dracut.sh: remove duplicate call of push_host_devs
+
+There is no way exit between the two places that call push_host_devs
+---
+ dracut.sh | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/dracut.sh b/dracut.sh
+index f7d31a4..8ca319b 100755
+--- a/dracut.sh
++++ b/dracut.sh
+@@ -1113,7 +1113,6 @@ if [[ $hostonly ]]; then
+         _dev=$(find_block_device "$mp")
+         _bdev=$(readlink -f "/dev/block/$_dev")
+         [[ -b $_bdev ]] && _dev=$_bdev
+-        push_host_devs $_dev
+         [[ "$mp" == "/" ]] && root_devs+=("$_dev")
+         push_host_devs "$_dev"
+         if [[ $(find_mp_fstype "$mp") == btrfs ]]; then

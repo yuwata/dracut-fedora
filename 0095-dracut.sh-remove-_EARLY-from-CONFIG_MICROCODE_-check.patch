@@ -1,0 +1,38 @@
+From 875426f2fc1360401ddb5f97c67df031e54958d5 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 11 Nov 2015 11:38:56 +0100
+Subject: [PATCH] dracut.sh: remove "_EARLY" from CONFIG_MICROCODE_* checks
+
+EARLY is merged in the main driver
+---
+ dracut.sh | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/dracut.sh b/dracut.sh
+index 2712e9e..9ba481b 100755
+--- a/dracut.sh
++++ b/dracut.sh
+@@ -1016,18 +1016,18 @@ fi
+ if [[ $early_microcode = yes ]]; then
+     if [[ $hostonly ]]; then
+         [[ $(get_cpu_vendor) == "AMD" ]] \
+-            && ! check_kernel_config CONFIG_MICROCODE_AMD_EARLY \
++            && ! check_kernel_config CONFIG_MICROCODE_AMD \
+             && unset early_microcode
+         [[ $(get_cpu_vendor) == "Intel" ]] \
+-            && ! check_kernel_config CONFIG_MICROCODE_INTEL_EARLY \
++            && ! check_kernel_config CONFIG_MICROCODE_INTEL \
+             && unset early_microcode
+     else
+-        ! check_kernel_config CONFIG_MICROCODE_AMD_EARLY \
+-            && ! check_kernel_config CONFIG_MICROCODE_INTEL_EARLY \
++        ! check_kernel_config CONFIG_MICROCODE_AMD \
++            && ! check_kernel_config CONFIG_MICROCODE_INTEL \
+             && unset early_microcode
+     fi
+     [[ $early_microcode != yes ]] \
+-        && dwarn "Disabling early microcode, because kernel does not support it. CONFIG_MICROCODE_[AMD|INTEL]_EARLY!=y"
++        && dwarn "Disabling early microcode, because kernel does not support it. CONFIG_MICROCODE_[AMD|INTEL]!=y"
+ fi
+ 
+ # Need to be able to have non-root users read stuff (rpcbind etc)

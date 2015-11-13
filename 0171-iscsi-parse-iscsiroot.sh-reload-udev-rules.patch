@@ -1,0 +1,37 @@
+From 602dce9ff2f865038e8e6c618a24b04157809026 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 13 Nov 2015 16:37:48 +0100
+Subject: [PATCH] iscsi/parse-iscsiroot.sh: reload udev rules
+
+in the DHCP case udev is already running, so reload the rules before
+continuing.
+---
+ modules.d/95iscsi/parse-iscsiroot.sh | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/modules.d/95iscsi/parse-iscsiroot.sh b/modules.d/95iscsi/parse-iscsiroot.sh
+index 1d62b03..43b2e08 100755
+--- a/modules.d/95iscsi/parse-iscsiroot.sh
++++ b/modules.d/95iscsi/parse-iscsiroot.sh
+@@ -41,6 +41,7 @@ if [ "${root%%:*}" = "iscsi" ] ; then
+     netroot=$root
+     # if root is not specified try to mount the whole iSCSI LUN
+     printf 'ENV{DEVTYPE}!="partition", SYMLINK=="disk/by-path/*-iscsi-*-*", SYMLINK+="root"\n' >> /etc/udev/rules.d/99-iscsi-root.rules
++    [ -n "$DRACUT_SYSTEMD" ] && systemctl is-active systemd-udevd && udevadm control --reload-rules
+     root=/dev/root
+ 
+     write_fs_tab /dev/root
+@@ -53,6 +54,13 @@ for nroot in $(getargs netroot); do
+     break
+ done
+ 
++# Root takes precedence over netroot
++if [ "${root}" = "/dev/root" ] && getarg "netroot=dhcp" ; then
++    # if root is not specified try to mount the whole iSCSI LUN
++    printf 'ENV{DEVTYPE}!="partition", SYMLINK=="disk/by-path/*-iscsi-*-*", SYMLINK+="root"\n' >> /etc/udev/rules.d/99-iscsi-root.rules
++    [ -n "$DRACUT_SYSTEMD" ] && systemctl is-active systemd-udevd && udevadm control --reload-rules
++fi
++
+ if [ -n "$iscsiroot" ] ; then
+     [ -z "$netroot" ]  && netroot=$root
+ 

@@ -1,0 +1,61 @@
+From 19b0065cac88259026d43e48454544f7628c2963 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 10 Sep 2015 13:23:32 +0200
+Subject: [PATCH] network/netroot.sh: better handling of $netroot and dhcp
+
+if $netroot is emtpy, get it from cmdline
+
+check cmdline directly for root=dhcp(6) and netroot=dhcp(6)
+
+(cherry picked from commit 17cee31b115a146bca5519b6ac4b422080d764c7)
+---
+ modules.d/40network/netroot.sh | 17 +++++++++++------
+ 1 file changed, 11 insertions(+), 6 deletions(-)
+
+diff --git a/modules.d/40network/netroot.sh b/modules.d/40network/netroot.sh
+index 0fccaf1..c80a59f 100755
+--- a/modules.d/40network/netroot.sh
++++ b/modules.d/40network/netroot.sh
+@@ -12,6 +12,11 @@ command -v setup_net >/dev/null || . /lib/net-lib.sh
+ # no sense in doing something if no (net)root info is available
+ # or root is already there
+ [ -d $NEWROOT/proc ] && exit 0
++
++if [ -z "$netroot" ]; then
++    netroot=$(getarg netroot=)
++fi
++
+ [ -z "$netroot" ] && exit 1
+ 
+ # Set or override primary interface
+@@ -33,7 +38,7 @@ esac
+ # Figure out the handler for root=dhcp by recalling all netroot cmdline
+ # handlers when this is not called from manually network bringing up.
+ if [ -z "$2" ]; then
+-    if [ "$netroot" = "dhcp" ] || [ "$netroot" = "dhcp6" ] ; then
++    if getarg "root=dhcp" || getarg "netroot=dhcp" || getarg "root=dhcp6" || getarg "netroot=dhcp6"; then
+         # Load dhcp options
+         [ -e /tmp/dhclient.$netif.dhcpopts ] && . /tmp/dhclient.$netif.dhcpopts
+ 
+@@ -45,6 +50,8 @@ if [ -z "$2" ]; then
+             exit 1
+         fi
+ 
++        rm -f -- $hookdir/initqueue/finished/dhcp.sh
++
+         # Set netroot to new_root_path, so cmdline parsers don't call
+         netroot=$new_root_path
+ 
+@@ -74,9 +81,7 @@ source_hook netroot $netif
+ 
+ # Run the handler; don't store the root, it may change from device to device
+ # XXX other variables to export?
+-if $handler $netif $netroot $NEWROOT; then
+-    rm -f -- $hookdir/initqueue/finished/dhcp.sh
+-    # Network rootfs mount successful - save interface info for ifcfg etc.
+-    save_netinfo $netif
+-fi
++[ -n "$handler" ] && "$handler" "$netif" "$netroot" "$NEWROOT"
++save_netinfo $netif
++
+ exit 0

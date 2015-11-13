@@ -1,0 +1,30 @@
+From 110858025aab221d135335d85dba9317f5ef15c6 Mon Sep 17 00:00:00 2001
+From: Stijn Hoop <stijn@sandcat.nl>
+Date: Sun, 23 Aug 2015 14:45:53 +0200
+Subject: [PATCH] The default gateway might need a static route
+
+Some hosting providers need a static route set in order to be
+able to reach the default gateway. Be sure to retry adding
+the default gateway after setting the static routes.
+---
+ modules.d/40network/net-lib.sh | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/modules.d/40network/net-lib.sh b/modules.d/40network/net-lib.sh
+index 5c65a2e..2e79619 100755
+--- a/modules.d/40network/net-lib.sh
++++ b/modules.d/40network/net-lib.sh
+@@ -129,6 +129,13 @@ setup_net() {
+         fi
+     done
+ 
++    # If a static route was necessary to reach the gateway, the
++    # first gateway setup call will have failed with
++    #     RTNETLINK answers: Network is unreachable
++    # Replace the default route again after static routes to cover
++    # this scenario.
++    [ -e /tmp/net.$netif.gw ]            && . /tmp/net.$netif.gw
++
+     # Handle STP Timeout: arping the default gateway.
+     # (or the root server, if a) it's local or b) there's no gateway.)
+     # Note: This assumes that if no router is present the

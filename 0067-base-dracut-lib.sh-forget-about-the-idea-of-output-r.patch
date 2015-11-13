@@ -1,0 +1,65 @@
+From f41720c3115011afb9577ed063a4bc521dc707ec Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 12 Aug 2015 14:28:45 +0200
+Subject: [PATCH] base/dracut-lib.sh: forget about the idea of output
+ redirection
+
+It's just not working :-/
+---
+ modules.d/99base/dracut-lib.sh | 24 ++++--------------------
+ 1 file changed, 4 insertions(+), 20 deletions(-)
+
+diff --git a/modules.d/99base/dracut-lib.sh b/modules.d/99base/dracut-lib.sh
+index 200c263..1eaf4b3 100755
+--- a/modules.d/99base/dracut-lib.sh
++++ b/modules.d/99base/dracut-lib.sh
+@@ -51,45 +51,29 @@ str_ends() {
+     [ "${1%*"$2"}" != "$1" ]
+ }
+ 
+-# Dup stdout and stderr, so that subshell redirection does not affect logging.
+-if [ -z "$DRACUT_STDOUT" ]; then
+-    if [ -n "$BASH" ]; then
+-        readonly DRACUT_STDOUT=98
+-        readonly DRACUT_STDERR=98
+-        exec 98>&1
+-        exec 99>&2
+-    else
+-        readonly DRACUT_STDOUT=8
+-        readonly DRACUT_STDERR=9
+-        exec 8>&1
+-        exec 9>&2
+-    fi
+-fi
+-
+-
+ if [ -z "$DRACUT_SYSTEMD" ]; then
+ 
+     warn() {
+         check_quiet
+         echo "<28>dracut Warning: $*" > /dev/kmsg
+-        echo "dracut Warning: $*" >&$DRACUT_STDERR
++        echo "dracut Warning: $*" >&2
+     }
+ 
+     info() {
+         check_quiet
+         echo "<30>dracut: $*" > /dev/kmsg
+         [ "$DRACUT_QUIET" != "yes" ] && \
+-            echo "dracut: $*" >&$DRACUT_STDERR
++            echo "dracut: $*" >&2
+     }
+ 
+ else
+ 
+     warn() {
+-        echo "Warning: $*" >&$DRACUT_STDERR
++        echo "Warning: $*" >&2
+     }
+ 
+     info() {
+-        echo "$*" >&$DRACUT_STDOUT
++        echo "$*"
+     }
+ 
+ fi

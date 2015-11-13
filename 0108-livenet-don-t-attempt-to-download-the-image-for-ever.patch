@@ -1,0 +1,38 @@
+From 3913d061c4bdfad3f496f7a3d0a69e0f3ef51a47 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 3 Jul 2015 14:00:33 +0200
+Subject: [PATCH] livenet: don't attempt to download the image for every
+ interface
+
+https://bugzilla.redhat.com/show_bug.cgi?id=1152485
+(cherry picked from commit e5f4bbd804e337a7efaf3a0cb4fc3a37b7e33b47)
+---
+ modules.d/90livenet/livenetroot.sh | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/modules.d/90livenet/livenetroot.sh b/modules.d/90livenet/livenetroot.sh
+index 1bbee55..2e36ee9 100755
+--- a/modules.d/90livenet/livenetroot.sh
++++ b/modules.d/90livenet/livenetroot.sh
+@@ -7,12 +7,20 @@ type getarg >/dev/null 2>&1 || . /lib/dracut-lib.sh
+ 
+ PATH=/usr/sbin:/usr/bin:/sbin:/bin
+ 
++[ -e /tmp/livenet.downloaded ] && exit 0
++
+ # args get passed from 40network/netroot
+ netroot="$2"
+ liveurl="${netroot#livenet:}"
+ info "fetching $liveurl"
+ imgfile=$(fetch_url "$liveurl")
+-[ $? = 0 ] || die "failed to download live image: error $?"
++
++if [ $? = 0 ]; then
++	warn "failed to download live image: error $?"
++	exit 1
++fi
++
++> /tmp/livenet.downloaded
+ 
+ # TODO: couldn't dmsquash-live-root handle this?
+ if [ ${imgfile##*.} = "iso" ]; then

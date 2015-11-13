@@ -1,0 +1,34 @@
+From 5d90ba4fca3b5e3ca544ff76e6e7286eef16c438 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 10 Sep 2015 13:20:18 +0200
+Subject: [PATCH] network: add all_ifaces_setup()
+
+all_ifaces_up() is true, if all interfaces are up.
+
+all_ifaces_setup() is true, if all interfaces are up and the gateways
+and nameserver are setup.
+
+(cherry picked from commit 63e75dc4cdb14e392e38a8973126c9a29b266411)
+---
+ modules.d/40network/net-lib.sh | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/modules.d/40network/net-lib.sh b/modules.d/40network/net-lib.sh
+index 8096481..706a9a5 100755
+--- a/modules.d/40network/net-lib.sh
++++ b/modules.d/40network/net-lib.sh
+@@ -73,6 +73,14 @@ all_ifaces_up() {
+     done
+ }
+ 
++all_ifaces_setup() {
++    local iface="" IFACES=""
++    [ -e "/tmp/net.ifaces" ] && read IFACES < /tmp/net.ifaces
++    for iface in $IFACES; do
++        [ -e /tmp/net.$iface.did-setup ] || return 1
++    done
++}
++
+ get_netroot_ip() {
+     local prefix="" server="" rest=""
+     splitsep "$1" ":" prefix server rest

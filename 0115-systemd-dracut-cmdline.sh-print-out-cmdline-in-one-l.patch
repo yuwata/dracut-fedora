@@ -1,0 +1,24 @@
+From db7d7398186f025adb746fd9f70fb36249ba6f86 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Tue, 18 Aug 2015 11:52:56 +0200
+Subject: [PATCH] systemd/dracut-cmdline.sh: print out cmdline in one line
+
+(cherry picked from commit 93a5a3d3ca6738e3f0282c4d3fc8be3f38f150d3)
+---
+ modules.d/98dracut-systemd/dracut-cmdline.sh | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/modules.d/98dracut-systemd/dracut-cmdline.sh b/modules.d/98dracut-systemd/dracut-cmdline.sh
+index 871f81b..a1dcf84 100755
+--- a/modules.d/98dracut-systemd/dracut-cmdline.sh
++++ b/modules.d/98dracut-systemd/dracut-cmdline.sh
+@@ -14,8 +14,7 @@ if ! getargbool 1 'rd.hostonly'; then
+     [ -f /tmp/99-cmdline-ask.conf ] && mv /tmp/99-cmdline-ask.conf /etc/cmdline.d/99-cmdline-ask.conf
+ fi
+ 
+-info "Using kernel command line parameters:"
+-getcmdline | vinfo
++info "Using kernel command line parameters:" $(getcmdline)
+ 
+ getargbool 0 rd.udev.log-priority=info -d rd.udev.info -d -n -y rdudevinfo && echo 'udev_log="info"' >> /etc/udev/udev.conf
+ getargbool 0 rd.udev.log-priority=debug -d rd.udev.debug -d -n -y rdudevdebug && echo 'udev_log="debug"' >> /etc/udev/udev.conf

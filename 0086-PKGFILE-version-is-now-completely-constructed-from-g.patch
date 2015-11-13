@@ -1,0 +1,42 @@
+From 4cca17eeeca4254248d58562f2ae6b56a885b91e Mon Sep 17 00:00:00 2001
+From: Silvio Fricke <silvio.fricke@gmail.com>
+Date: Sun, 8 Nov 2015 12:49:45 +0100
+Subject: [PATCH] PKGFILE: version is now completely constructed from git
+
+`pkgver` and `pkgrel` now hard coded to 1. The PKGFILE will getting
+changed on a `makepkg`-run.
+
+To prevent some version crashes no commit with changes to `pkgver` and
+`pkgrel` should be accepted.
+
+Signed-off-by: Silvio Fricke <silvio.fricke@gmail.com>
+---
+ PKGBUILD | 10 ++++++++--
+ 1 file changed, 8 insertions(+), 2 deletions(-)
+
+diff --git a/PKGBUILD b/PKGBUILD
+index a9f1b5a..c625bdb 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -1,6 +1,6 @@
+ pkgname=dracut-git
+-pkgver=$(date +%s)
+-pkgrel=$(git log --pretty=format:%h |head -n 1)
++pkgver=1
++pkgrel=1
+ pkgdesc="Initramfs generation utility"
+ arch=('i686' 'x86_64')
+ url="https://dracut.wiki.kernel.org/"
+@@ -14,6 +14,12 @@ backup=(etc/dracut.conf)
+ source=()
+ md5sums=()
+ 
++pkgver() {
++  cd ..
++  desc="$(git describe)"
++  printf "%s.%s.%s" ${desc//-/ }
++}
++
+ build() {
+   cd ..
+   make sysconfdir=/etc || return 1

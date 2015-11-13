@@ -1,0 +1,32 @@
+From 01b23b6900eabefbfd1f589b9f12c8ff38c5afc0 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 12 Aug 2015 14:24:05 +0200
+Subject: [PATCH] network/net-lib.sh: add is_ip()
+
+add function to test if string is a valid IP
+---
+ modules.d/40network/net-lib.sh | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+
+diff --git a/modules.d/40network/net-lib.sh b/modules.d/40network/net-lib.sh
+index 68bc095..5c65a2e 100755
+--- a/modules.d/40network/net-lib.sh
++++ b/modules.d/40network/net-lib.sh
+@@ -1,5 +1,17 @@
+ #!/bin/sh
+ 
++is_ip() {
++    echo "$1" | {
++        IFS=. read a b c d
++        test "$a" -ge 0 -a "$a" -le 255 \
++             -a "$b" -ge 0 -a "$b" -le 255 \
++             -a "$c" -ge 0 -a "$c" -le 255 \
++             -a "$d" -ge 0 -a "$d" -le 255 \
++             2> /dev/null
++    } && return 0
++    return 1
++}
++
+ get_ip() {
+     local iface="$1" ip=""
+     ip=$(ip -o -f inet addr show $iface)

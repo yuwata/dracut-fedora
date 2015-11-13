@@ -1,0 +1,33 @@
+From 0c004c8e646a2d93d722e65203cc33239b6757be Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Tue, 18 Aug 2015 12:13:55 +0200
+Subject: [PATCH] network/parse-ip-opts.sh: bind enx* interface to the MAC
+
+do it automatically for the persistent naming scheme
+
+(cherry picked from commit 2eb3b00133d572183ca022b626d200549ce4ffa8)
+---
+ modules.d/40network/parse-ip-opts.sh | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/modules.d/40network/parse-ip-opts.sh b/modules.d/40network/parse-ip-opts.sh
+index 33bb068..12f4765 100755
+--- a/modules.d/40network/parse-ip-opts.sh
++++ b/modules.d/40network/parse-ip-opts.sh
+@@ -111,6 +111,16 @@ for p in $(getargs ip=); do
+         die "Server-ip or dhcp for netboot needed, but current arguments say otherwise"
+     fi
+ 
++    if str_starts "$dev" "enx" && [ ${#dev} -eq 15 ]; then
++        printf -- "ifname=%s:%s:%s:%s:%s:%s:%s\n" \
++               "$dev" \
++               "${dev:3:2}" \
++               "${dev:5:2}" \
++               "${dev:7:2}" \
++               "${dev:9:2}" \
++               "${dev:11:2}" \
++               "${dev:13:2}" >> /etc/cmdline.d/80-enx.conf
++    fi
+ done
+ 
+ # put BOOTIF in IFACES to make sure it comes up

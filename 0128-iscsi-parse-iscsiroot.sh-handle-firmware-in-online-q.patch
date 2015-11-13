@@ -1,0 +1,29 @@
+From 782e909eef9c6e2ec5ebc8c2b0bb54761a0d92ad Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Tue, 25 Aug 2015 11:16:29 +0200
+Subject: [PATCH] iscsi/parse-iscsiroot.sh: handle firmware in online queue
+
+(cherry picked from commit 7f59cbd31817c81fa5aec9f86c33dfe1ce23ec6a)
+---
+ modules.d/95iscsi/parse-iscsiroot.sh | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/modules.d/95iscsi/parse-iscsiroot.sh b/modules.d/95iscsi/parse-iscsiroot.sh
+index 35628cc..aa17f8e 100755
+--- a/modules.d/95iscsi/parse-iscsiroot.sh
++++ b/modules.d/95iscsi/parse-iscsiroot.sh
+@@ -77,11 +77,11 @@ if [ -n "$iscsi_firmware" ] || getargbool 0 rd.iscsi.ibft -d "ip=ibft"; then
+     modprobe -b -q iscsi_ibft
+     # if no ip= is given, but firmware
+     echo "[ -f '/tmp/iscsistarted-firmware' ]" > $hookdir/initqueue/finished/iscsi_started.sh
+-    initqueue --unique --onetime --timeout /sbin/iscsiroot timeout "$netroot" "$NEWROOT"
+-    initqueue --unique --onetime --settled /sbin/iscsiroot dummy "'$netroot'" "'$NEWROOT'"
++    initqueue --unique --online /sbin/iscsiroot online "iscsi:" "$NEWROOT"
++    initqueue --unique --onetime --timeout /sbin/iscsiroot timeout "iscsi:" "$NEWROOT"
++    initqueue --unique --onetime --settled /sbin/iscsiroot online "iscsi:" "'$NEWROOT'"
+ fi
+ 
+-
+ [ -z "$netroot" ] || [ "${netroot%%:*}" = "iscsi" ] || return 1
+ 
+ initqueue --unique --onetime --timeout /sbin/iscsiroot timeout "$netroot" "$NEWROOT"

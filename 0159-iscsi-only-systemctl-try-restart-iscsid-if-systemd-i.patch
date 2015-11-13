@@ -1,0 +1,86 @@
+From ed92ecaa3cafa890583e22377c5f5014a332e59f Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 13 Nov 2015 13:16:10 +0100
+Subject: [PATCH] iscsi: only systemctl try-restart iscsid, if systemd is used
+
+---
+ modules.d/95iscsi/iscsiroot.sh       | 20 +++++++++++++++-----
+ modules.d/95iscsi/parse-iscsiroot.sh | 11 ++++++++++-
+ 2 files changed, 25 insertions(+), 6 deletions(-)
+
+diff --git a/modules.d/95iscsi/iscsiroot.sh b/modules.d/95iscsi/iscsiroot.sh
+index 8a98881..38cbc5e 100755
+--- a/modules.d/95iscsi/iscsiroot.sh
++++ b/modules.d/95iscsi/iscsiroot.sh
+@@ -115,9 +115,12 @@ handle_netroot()
+            rm -f /etc/iscsi/initiatorname.iscsi
+            mkdir -p /etc/iscsi
+            ln -fs /run/initiatorname.iscsi /etc/iscsi/initiatorname.iscsi
+-           systemctl restart iscsid
+-           sleep 1
+            > /tmp/iscsi_set_initiator
++           if [ -n "$DRACUT_SYSTEMD" ]; then
++               systemctl try-restart iscsid
++               # FIXME: iscsid is not yet ready, when the service is :-/
++               sleep 1
++           fi
+     fi
+ 
+     if [ -z "$iscsi_initiator" ]; then
+@@ -133,10 +136,12 @@ handle_netroot()
+         rm -f /etc/iscsi/initiatorname.iscsi
+         mkdir -p /etc/iscsi
+         ln -fs /run/initiatorname.iscsi /etc/iscsi/initiatorname.iscsi
+-        systemctl restart iscsid
+         > /tmp/iscsi_set_initiator
+-        # FIXME: iscsid is not yet ready, when the service is :-/
+-        sleep 1
++        if [ -n "$DRACUT_SYSTEMD" ]; then
++            systemctl try-restart iscsid
++            # FIXME: iscsid is not yet ready, when the service is :-/
++            sleep 1
++        fi
+     fi
+ 
+ 
+@@ -157,6 +162,11 @@ handle_netroot()
+     if ! [ -e /etc/iscsi/initiatorname.iscsi ]; then
+         mkdir -p /etc/iscsi
+         ln -fs /run/initiatorname.iscsi /etc/iscsi/initiatorname.iscsi
++        if [ -n "$DRACUT_SYSTEMD" ]; then
++            systemctl try-restart iscsid
++            # FIXME: iscsid is not yet ready, when the service is :-/
++            sleep 1
++        fi
+     fi
+ # FIXME $iscsi_protocol??
+ 
+diff --git a/modules.d/95iscsi/parse-iscsiroot.sh b/modules.d/95iscsi/parse-iscsiroot.sh
+index 971bab2..1d62b03 100755
+--- a/modules.d/95iscsi/parse-iscsiroot.sh
++++ b/modules.d/95iscsi/parse-iscsiroot.sh
+@@ -108,6 +108,11 @@ if arg=$(getarg rd.iscsi.initiator -d iscsi_initiator=) && [ -n "$arg" ] && ! [
+     if ! [ -e /etc/iscsi/initiatorname.iscsi ]; then
+         mkdir -p /etc/iscsi
+         ln -fs /run/initiatorname.iscsi /etc/iscsi/initiatorname.iscsi
++        if [ -n "$DRACUT_SYSTEMD" ]; then
++            systemctl try-restart iscsid
++            # FIXME: iscsid is not yet ready, when the service is :-/
++            sleep 1
++        fi
+     fi
+ fi
+ 
+@@ -120,7 +125,11 @@ if [ -z $iscsi_initiator ] && [ -f /sys/firmware/ibft/initiator/initiator-name ]
+         mkdir -p /etc/iscsi
+         ln -fs /run/initiatorname.iscsi /etc/iscsi/initiatorname.iscsi
+         > /tmp/iscsi_set_initiator
+-        systemctl try-restart iscsid && sleep 1
++        if [ -n "$DRACUT_SYSTEMD" ]; then
++            systemctl try-restart iscsid
++            # FIXME: iscsid is not yet ready, when the service is :-/
++            sleep 1
++        fi
+     fi
+ fi
+ 
