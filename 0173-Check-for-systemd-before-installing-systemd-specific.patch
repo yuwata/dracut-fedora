@@ -1,0 +1,87 @@
+From 2da041d6727e1dac8e751e305c7dc4cf01e34ed5 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 16 Nov 2015 09:41:26 +0100
+Subject: [PATCH] Check for systemd before installing systemd specific files
+
+https://bugzilla.redhat.com/show_bug.cgi?id=1282010
+---
+ dracut.sh                              | 16 +++++++++-------
+ modules.d/90crypt/module-setup.sh      | 21 ++++++++++++---------
+ modules.d/95udev-rules/module-setup.sh |  6 ++++--
+ 3 files changed, 25 insertions(+), 18 deletions(-)
+
+diff --git a/dracut.sh b/dracut.sh
+index be4c107..9e85f50 100755
+--- a/dracut.sh
++++ b/dracut.sh
+@@ -1481,13 +1481,15 @@ if [[ $kernel_only != yes ]]; then
+         cat "$f" >> "${initdir}/etc/fstab"
+     done
+ 
+-    if [ -d ${initdir}/$systemdutildir ]; then
+-        mkdir -p ${initdir}/etc/conf.d
+-        {
+-            printf "%s\n" "systemdutildir=\"$systemdutildir\""
+-            printf "%s\n" "systemdsystemunitdir=\"$systemdsystemunitdir\""
+-            printf "%s\n" "systemdsystemconfdir=\"$systemdsystemconfdir\""
+-        } > ${initdir}/etc/conf.d/systemd.conf
++    if dracut_module_included "systemd"; then
++        if [ -d ${initdir}/$systemdutildir ]; then
++            mkdir -p ${initdir}/etc/conf.d
++            {
++                printf "%s\n" "systemdutildir=\"$systemdutildir\""
++                printf "%s\n" "systemdsystemunitdir=\"$systemdsystemunitdir\""
++                printf "%s\n" "systemdsystemconfdir=\"$systemdsystemconfdir\""
++            } > ${initdir}/etc/conf.d/systemd.conf
++        fi
+     fi
+ 
+     if [[ $DRACUT_RESOLVE_LAZY ]] && [[ $DRACUT_INSTALL ]]; then
+diff --git a/modules.d/90crypt/module-setup.sh b/modules.d/90crypt/module-setup.sh
+index 4df520c..5d964f4 100755
+--- a/modules.d/90crypt/module-setup.sh
++++ b/modules.d/90crypt/module-setup.sh
+@@ -86,14 +86,17 @@ install() {
+ 
+     inst_simple "$moddir/crypt-lib.sh" "/lib/dracut-crypt-lib.sh"
+ 
+-    inst_multiple -o \
+-        $systemdutildir/system-generators/systemd-cryptsetup-generator \
+-        $systemdutildir/systemd-cryptsetup \
+-        $systemdsystemunitdir/systemd-ask-password-console.path \
+-        $systemdsystemunitdir/systemd-ask-password-console.service \
+-        $systemdsystemunitdir/cryptsetup.target \
+-        $systemdsystemunitdir/sysinit.target.wants/cryptsetup.target \
+-        systemd-ask-password systemd-tty-ask-password-agent
+-    inst_script "$moddir"/crypt-run-generator.sh /sbin/crypt-run-generator
++    if dracut_module_included "systemd"; then
++        inst_multiple -o \
++                      $systemdutildir/system-generators/systemd-cryptsetup-generator \
++                      $systemdutildir/systemd-cryptsetup \
++                      $systemdsystemunitdir/systemd-ask-password-console.path \
++                      $systemdsystemunitdir/systemd-ask-password-console.service \
++                      $systemdsystemunitdir/cryptsetup.target \
++                      $systemdsystemunitdir/sysinit.target.wants/cryptsetup.target \
++                      systemd-ask-password systemd-tty-ask-password-agent
++        inst_script "$moddir"/crypt-run-generator.sh /sbin/crypt-run-generator
++    fi
++
+     dracut_need_initqueue
+ }
+diff --git a/modules.d/95udev-rules/module-setup.sh b/modules.d/95udev-rules/module-setup.sh
+index f4f9cf8..6a0625a 100755
+--- a/modules.d/95udev-rules/module-setup.sh
++++ b/modules.d/95udev-rules/module-setup.sh
+@@ -56,8 +56,10 @@ install() {
+     # eudev rules
+     inst_rules 80-drivers-modprobe.rules
+ 
+-    inst_multiple -o ${systemdutildir}/network/*.link
+-    [[ $hostonly ]] && inst_multiple -H -o /etc/systemd/network/*.link
++    if dracut_module_included "systemd"; then
++        inst_multiple -o ${systemdutildir}/network/*.link
++        [[ $hostonly ]] && inst_multiple -H -o /etc/systemd/network/*.link
++    fi
+ 
+     {
+         for i in cdrom tape dialout floppy; do

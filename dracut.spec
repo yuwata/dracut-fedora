@@ -16,7 +16,7 @@
 
 Name: dracut
 Version: 043
-Release: 173.git20151116%{?dist}
+Release: 174.git20151116%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -207,6 +207,7 @@ Patch169: 0169-Check-rd.zfcp-format-in-dracut-hook-cmdline-process-.patch
 Patch170: 0170-dracut-init.sh-libdir-paths-need-dracut-function.sh.patch
 Patch171: 0171-iscsi-parse-iscsiroot.sh-reload-udev-rules.patch
 Patch172: 0172-dracut.sh-add-back-host_modules-part.patch
+Patch173: 0173-Check-for-systemd-before-installing-systemd-specific.patch
 
 Source1: https://www.gnu.org/licenses/lgpl-2.1.txt
 
@@ -667,6 +668,9 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Mon Nov 16 2015 Harald Hoyer <harald@redhat.com> - 043-174.git20151116
+- git snapshot
+
 * Mon Nov 16 2015 Harald Hoyer <harald@redhat.com> - 043-173.git20151116
 - git snapshot
 
