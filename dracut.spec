@@ -16,7 +16,7 @@
 
 Name: dracut
 Version: 044
-Release: 4.git20151127%{?dist}
+Release: 6.git20151201%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -38,6 +38,8 @@ Source0: http://www.kernel.org/pub/linux/utils/boot/dracut/dracut-%{version}.tar
 Patch1: 0001-dmsquash-live-dmsquash-live-root.sh-fixed-typo.patch
 Patch2: 0002-dmraid-61-dmraid-imsm.rules-add-nowatch-option-for-u.patch
 Patch3: 0003-livenet-livenet-generator.sh-mode-0755.patch
+Patch4: 0004-shutdown-guard-against-read-only-run.patch
+Patch5: 0005-dmsquash-live-dmsquash-live-root.sh-SQUASHED-can-be-.patch
 
 Source1: https://www.gnu.org/licenses/lgpl-2.1.txt
 
@@ -498,6 +500,11 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Tue Dec  1 2015 Harald Hoyer <harald@redhat.com> - 044-6.git20151201
+- fix for readonly /run on shutdown
+- fix for the dmsquash-live module
+Resolves: rhbz#1286866
+
 * Wed Nov 25 2015 Harald Hoyer <harald@redhat.com> - 044-4.git20151127
 - fixes for the dmsquash-live module
 - remove udev watch for raid members
