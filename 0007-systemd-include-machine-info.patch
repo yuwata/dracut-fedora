@@ -1,0 +1,21 @@
+From 4bcd41389cabe7a41c4bb3a17eaf668b12cc0668 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 14 Dec 2015 11:16:12 +0100
+Subject: [PATCH] systemd: include machine-info
+
+---
+ modules.d/00systemd/module-setup.sh | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/modules.d/00systemd/module-setup.sh b/modules.d/00systemd/module-setup.sh
+index 50b3b8c..ed59beb 100755
+--- a/modules.d/00systemd/module-setup.sh
++++ b/modules.d/00systemd/module-setup.sh
+@@ -162,6 +162,7 @@ install() {
+             /etc/systemd/system.conf \
+             /etc/hostname \
+             /etc/machine-id \
++            /etc/machine-info \
+             /etc/vconsole.conf \
+             /etc/locale.conf \
+             /etc/modules-load.d/*.conf \

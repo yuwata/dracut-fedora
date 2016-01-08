@@ -1,0 +1,287 @@
+From b070c1d360e86db69a8049b2f040b8223bc484c9 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 14 Dec 2015 13:10:33 +0100
+Subject: [PATCH] nbd: add systemd generator and use nbd export names instead
+ of port numbers
+
+Add a systemd generator for root=nbd:.. so that systemd has a correct
+sysroot.mount unit.
+
+Use export names instead of port numbers, because port number based
+exports are deprecated and were removed.
+---
+ dracut.cmdline.7.asc             | 14 +++++++++++---
+ modules.d/95nbd/module-setup.sh  |  3 +++
+ modules.d/95nbd/nbdroot.sh       | 11 +++++------
+ modules.d/95nbd/parse-nbdroot.sh | 10 ++++++++--
+ test/TEST-40-NBD/dhcpd.conf      | 10 +++++-----
+ test/TEST-40-NBD/server-init.sh  |  3 +--
+ test/TEST-40-NBD/test.sh         | 41 ++++++++++++++++++++++++----------------
+ 7 files changed, 58 insertions(+), 34 deletions(-)
+
+diff --git a/dracut.cmdline.7.asc b/dracut.cmdline.7.asc
+index c34b45b..e160e3b 100644
+--- a/dracut.cmdline.7.asc
++++ b/dracut.cmdline.7.asc
+@@ -755,13 +755,21 @@ NOTE: letters in the MAC-address must be lowercase!
+ 
+ NBD
+ ~~~
+-**root=**??? **netroot=**nbd:__<server>__:__<port>__[:__<fstype>__[:__<mountopts>__[:__<nbdopts>__]]]::
+-    mount nbd share from <server>
++**root=**??? **netroot=**nbd:__<server>__:__<port/exportname>__[:__<fstype>__[:__<mountopts>__[:__<nbdopts>__]]]::
++    mount nbd share from <server>.
+++
++NOTE:
++    If "exportname" instead of "port" is given the standard port is used.
++    Newer versions of nbd are only supported with "exportname".
+ 
+-**root=dhcp** with **dhcp** **root-path=**nbd:__<server>__:__<port>__[:__<fstype>__[:__<mountopts>__[:__<nbdopts>__]]]::
++**root=dhcp** with **dhcp** **root-path=**nbd:__<server>__:__<port/exportname>__[:__<fstype>__[:__<mountopts>__[:__<nbdopts>__]]]::
+     root=dhcp alone directs initrd to look at the DHCP root-path where NBD
+     options can be specified. This syntax is only usable in cases where you are
+     directly mounting the volume as the rootfs.
+++
++NOTE:
++    If "exportname" instead of "port" is given the standard port is used.
++    Newer versions of nbd are only supported with "exportname".
+ 
+ DASD
+ ~~~~
+diff --git a/modules.d/95nbd/module-setup.sh b/modules.d/95nbd/module-setup.sh
+index 3cb6f49..22f6a3b 100755
+--- a/modules.d/95nbd/module-setup.sh
++++ b/modules.d/95nbd/module-setup.sh
+@@ -34,6 +34,9 @@ install() {
+     inst nbd-client
+     inst_hook cmdline 90 "$moddir/parse-nbdroot.sh"
+     inst_script "$moddir/nbdroot.sh" "/sbin/nbdroot"
++    if dracut_module_included "systemd-initrd"; then
++        inst_script "$moddir/nbd-generator.sh" $systemdutildir/system-generators/dracut-nbd-generator
++    fi
+     dracut_need_initqueue
+ }
+ 
+diff --git a/modules.d/95nbd/nbdroot.sh b/modules.d/95nbd/nbdroot.sh
+index dd2bb55..7057f23 100755
+--- a/modules.d/95nbd/nbdroot.sh
++++ b/modules.d/95nbd/nbdroot.sh
+@@ -28,11 +28,6 @@ nbdfstype=${nroot%%:*}; nroot=${nroot#*:}
+ nbdflags=${nroot%%:*}
+ nbdopts=${nroot#*:}
+ 
+-# If nbdport not an integer, then assume name based import
+-if [ ! -z $(echo "$nbdport" | sed 's/[0-9]//g') ]; then
+-    nbdport="-N $nbdport"
+-fi
+-
+ if [ "$nbdopts" = "$nbdflags" ]; then
+     unset nbdopts
+ fi
+@@ -113,7 +108,11 @@ if strstr "$(nbd-client --help 2>&1)" "systemd-mark"; then
+     preopts="--systemd-mark $preopts"
+ fi
+ 
+-nbd-client $preopts "$nbdserver" $nbdport /dev/nbd0 $opts || exit 1
++if [ "$nbdport" -gt 0 ] 2>/dev/null; then
++    nbd-client "$nbdserver" $nbdport /dev/nbd0 $preopts $opts || exit 1
++else
++    nbd-client -name "$nbdport" "$nbdserver" /dev/nbd0 $preopts $opts || exit 1
++fi
+ 
+ # NBD doesn't emit uevents when it gets connected, so kick it
+ echo change > /sys/block/nbd0/uevent
+diff --git a/modules.d/95nbd/parse-nbdroot.sh b/modules.d/95nbd/parse-nbdroot.sh
+index 746fb14..902e9a9 100755
+--- a/modules.d/95nbd/parse-nbdroot.sh
++++ b/modules.d/95nbd/parse-nbdroot.sh
+@@ -1,8 +1,8 @@
+ #!/bin/sh
+ #
+ # Preferred format:
+-#       root=nbd:srv:port[:fstype[:rootflags[:nbdopts]]]
+-#       [root=*] netroot=nbd:srv:port[:fstype[:rootflags[:nbdopts]]]
++#       root=nbd:srv:port/exportname[:fstype[:rootflags[:nbdopts]]]
++#       [root=*] netroot=nbd:srv:port/exportname[:fstype[:rootflags[:nbdopts]]]
+ #
+ # nbdopts is a comma separated list of options to give to nbd-client
+ #
+@@ -45,6 +45,12 @@ fi
+ # If it's not nbd we don't continue
+ [ "${netroot%%:*}" = "nbd" ] || return
+ 
++
++if [ -n "${DRACUT_SYSTEMD}" ] && [ "$root" = "dhcp" ]; then
++    echo "root=$netroot" > /etc/cmdline.d/root.conf
++    systemctl --no-block daemon-reload
++fi
++
+ # Check required arguments
+ netroot_to_var $netroot
+ [ -z "$server" ] && die "Argument server for nbdroot is missing"
+diff --git a/test/TEST-40-NBD/dhcpd.conf b/test/TEST-40-NBD/dhcpd.conf
+index 942bc6a..08461f9 100644
+--- a/test/TEST-40-NBD/dhcpd.conf
++++ b/test/TEST-40-NBD/dhcpd.conf
+@@ -20,7 +20,7 @@ subnet 192.168.50.0 netmask 255.255.255.0 {
+ 
+ 	group {
+ 		host nbd-2 {
+-			option root-path "nbd:192.168.50.1:2000";
++			option root-path "nbd:192.168.50.1:raw";
+ 
+ 			hardware ethernet 52:54:00:12:34:01;
+ 			fixed-address 192.168.50.101;
+@@ -29,7 +29,7 @@ subnet 192.168.50.0 netmask 255.255.255.0 {
+ 
+ 	group {
+ 		host nbd-3 {
+-			option root-path "nbd:192.168.50.1:2000:ext2";
++			option root-path "nbd:192.168.50.1:raw:ext2";
+ 
+ 			hardware ethernet 52:54:00:12:34:02;
+ 			fixed-address 192.168.50.101;
+@@ -38,7 +38,7 @@ subnet 192.168.50.0 netmask 255.255.255.0 {
+ 
+ 	group {
+ 		host nbd-4 {
+-			option root-path "nbd:192.168.50.1:2000::errors=panic";
++			option root-path "nbd:192.168.50.1:raw::errors=panic";
+ 
+ 			hardware ethernet 52:54:00:12:34:03;
+ 			fixed-address 192.168.50.101;
+@@ -47,7 +47,7 @@ subnet 192.168.50.0 netmask 255.255.255.0 {
+ 
+ 	group {
+ 		host nbd-5 {
+-			option root-path "nbd:192.168.50.1:2000:ext2:errors=panic";
++			option root-path "nbd:192.168.50.1:raw:ext2:errors=panic";
+ 
+ 			hardware ethernet 52:54:00:12:34:04;
+ 			fixed-address 192.168.50.101;
+@@ -57,7 +57,7 @@ subnet 192.168.50.0 netmask 255.255.255.0 {
+ 	group {
+ 		host nbd-6 {
+ 			# Use the encrypted image
+-			option root-path "nbd:192.168.50.1:2001:ext2:errors=panic";
++			option root-path "nbd:192.168.50.1:encrypted:ext2:errors=panic";
+ 
+ 			hardware ethernet 52:54:00:12:34:05;
+ 			fixed-address 192.168.50.101;
+diff --git a/test/TEST-40-NBD/server-init.sh b/test/TEST-40-NBD/server-init.sh
+index 73c64d6..0039753 100755
+--- a/test/TEST-40-NBD/server-init.sh
++++ b/test/TEST-40-NBD/server-init.sh
+@@ -13,8 +13,7 @@ ip link set dev eth0 name ens3
+ ip addr add 192.168.50.1/24 dev ens3
+ ip link set ens3 up
+ modprobe af_packet
+-nbd-server 2000 /dev/sdb -C /dev/null
+-nbd-server 2001 /dev/sdc -C /dev/null
++nbd-server
+ >/var/lib/dhcpd/dhcpd.leases
+ chmod 777 /var/lib/dhcpd/dhcpd.leases
+ dhcpd -d -cf /etc/dhcpd.conf -lf /var/lib/dhcpd/dhcpd.leases &
+diff --git a/test/TEST-40-NBD/test.sh b/test/TEST-40-NBD/test.sh
+index 39966ac..28ba6aa 100755
+--- a/test/TEST-40-NBD/test.sh
++++ b/test/TEST-40-NBD/test.sh
+@@ -5,8 +5,8 @@ TEST_DESCRIPTION="root filesystem on NBD"
+ KVERSION=${KVERSION-$(uname -r)}
+ 
+ # Uncomment this to debug failures
+-#DEBUGFAIL="rd.shell rd.break"
+-#SERIAL="udp:127.0.0.1:9999"
++#DEBUGFAIL="rd.shell rd.break rd.debug"
++SERIAL="tcp:127.0.0.1:9999"
+ SERIAL="null"
+ 
+ run_server() {
+@@ -104,36 +104,36 @@ test_run() {
+ client_run() {
+     # The default is ext3,errors=continue so use that to determine
+     # if our options were parsed and used
++    client_test "NBD root=nbd:IP:port" 52:54:00:12:34:00 \
++        "root=nbd:192.168.50.1:raw rd.luks=0" || return 1
++
+     client_test "NBD root=nbd:IP:port::fsopts" 52:54:00:12:34:00 \
+-        "root=nbd:192.168.50.1:2000::errors=panic rd.luks=0" \
++        "root=nbd:192.168.50.1:raw::errors=panic rd.luks=0" \
+         ext3 errors=panic || return 1
+ 
+-    client_test "NBD root=nbd:IP:port" 52:54:00:12:34:00 \
+-        "root=nbd:192.168.50.1:2000 rd.luks=0" || return 1
+-
+     client_test "NBD root=nbd:IP:port:fstype" 52:54:00:12:34:00 \
+-        "root=nbd:192.168.50.1:2000:ext2 rd.luks=0" ext2 || return 1
++        "root=nbd:192.168.50.1:raw:ext2 rd.luks=0" ext2 || return 1
+ 
+     client_test "NBD root=nbd:IP:port:fstype:fsopts" 52:54:00:12:34:00 \
+-        "root=nbd:192.168.50.1:2000:ext2:errors=panic rd.luks=0" \
++        "root=nbd:192.168.50.1:raw:ext2:errors=panic rd.luks=0" \
+         ext2 errors=panic || return 1
+ 
+     client_test "NBD Bridge root=nbd:IP:port:fstype:fsopts" 52:54:00:12:34:00 \
+-        "root=nbd:192.168.50.1:2000:ext2:errors=panic bridge rd.luks=0" \
++        "root=nbd:192.168.50.1:raw:ext2:errors=panic bridge rd.luks=0" \
+         ext2 errors=panic || return 1
+ 
+      # There doesn't seem to be a good way to validate the NBD options, so
+      # just check that we don't screw up the other options
+ 
+     client_test "NBD root=nbd:IP:port:::NBD opts" 52:54:00:12:34:00 \
+-        "root=nbd:192.168.50.1:2000:::bs=2048 rd.luks=0" || return 1
++        "root=nbd:192.168.50.1:raw:::bs=2048 rd.luks=0" || return 1
+ 
+     client_test "NBD root=nbd:IP:port:fstype::NBD opts" 52:54:00:12:34:00 \
+-        "root=nbd:192.168.50.1:2000:ext2::bs=2048 rd.luks=0" ext2 || return 1
++        "root=nbd:192.168.50.1:raw:ext2::bs=2048 rd.luks=0" ext2 || return 1
+ 
+     client_test "NBD root=nbd:IP:port:fstype:fsopts:NBD opts" \
+         52:54:00:12:34:00 \
+-        "root=nbd:192.168.50.1:2000:ext2:errors=panic:bs=2048 rd.luks=0" \
++        "root=nbd:192.168.50.1:raw:ext2:errors=panic:bs=2048 rd.luks=0" \
+         ext2 errors=panic || return 1
+ 
+     # DHCP root-path parsing
+@@ -156,7 +156,7 @@ client_run() {
+     # netroot handling
+ 
+     client_test "NBD netroot=nbd:IP:port" 52:54:00:12:34:00 \
+-        "netroot=nbd:192.168.50.1:2000 rd.luks=0" || return 1
++        "netroot=nbd:192.168.50.1:raw rd.luks=0" || return 1
+ 
+     client_test "NBD netroot=dhcp DHCP root-path nbd:srv:port:fstype:fsopts" \
+         52:54:00:12:34:04 "netroot=dhcp rd.luks=0" ext2 errors=panic || return 1
+@@ -167,7 +167,7 @@ client_run() {
+ 
+     client_test "NBD root=LABEL=dracut netroot=nbd:IP:port" \
+         52:54:00:12:34:00 \
+-        "root=LABEL=dracut rd.luks.uuid=$ID_FS_UUID rd.lv.vg=dracut netroot=nbd:192.168.50.1:2001" || return 1
++        "root=LABEL=dracut rd.luks.uuid=$ID_FS_UUID rd.lv.vg=dracut netroot=nbd:192.168.50.1:encrypted" || return 1
+ 
+     # XXX This should be ext2,errors=panic but that doesn't currently
+     # XXX work when you have a real root= line in addition to netroot=
+@@ -308,11 +308,20 @@ make_server_root() {
+         mkdir -p "$initdir"
+         (
+             cd "$initdir";
+-            mkdir -p dev sys proc etc var/run var/lib/dhcpd tmp
++            mkdir -p dev sys proc etc var/run var/lib/dhcpd tmp etc/nbd-server
+         )
++        cat > "$initdir/etc/nbd-server/config" <<EOF
++[generic]
++[raw]
++exportname = /dev/sdb
++port = 2000
++[encrypted]
++exportname = /dev/sdc
++port = 2001
++EOF
+         inst_multiple sh ls shutdown poweroff stty cat ps ln ip \
+             dmesg mkdir cp ping grep \
+-            sleep nbd-server chmod
++            sleep nbd-server chmod modprobe vi
+         for _terminfodir in /lib/terminfo /etc/terminfo /usr/share/terminfo; do
+             [ -f ${_terminfodir}/l/linux ] && break
+         done

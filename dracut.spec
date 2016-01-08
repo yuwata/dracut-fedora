@@ -16,7 +16,7 @@
 
 Name: dracut
 Version: 044
-Release: 6.git20151201%{?dist}
+Release: 17.git20160108%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -40,6 +40,17 @@ Patch2: 0002-dmraid-61-dmraid-imsm.rules-add-nowatch-option-for-u.patch
 Patch3: 0003-livenet-livenet-generator.sh-mode-0755.patch
 Patch4: 0004-shutdown-guard-against-read-only-run.patch
 Patch5: 0005-dmsquash-live-dmsquash-live-root.sh-SQUASHED-can-be-.patch
+Patch6: 0006-kernel-modules-include-all-HID-driver-in-hostonly-mo.patch
+Patch7: 0007-systemd-include-machine-info.patch
+Patch8: 0008-livenet-module-setup.sh-only-include-systemd-generat.patch
+Patch9: 0009-network-fix-carrier-detection.patch
+Patch10: 0010-nbd-add-systemd-generator-and-use-nbd-export-names-i.patch
+Patch11: 0011-TEST-16-DMSQUASH-do-not-use-with-ldconfig-r.patch
+Patch12: 0012-test-TEST-04-FULL-SYSTEMD-optionally-install-machine.patch
+Patch13: 0013-base-dracut-lib.sh-dev_unit_name-guard-against-dev-b.patch
+Patch14: 0014-nbd-add-missing-generator.patch
+Patch15: 0015-fcoe-no-need-to-copy-lldpad-state.patch
+Patch16: 0016-dracut.sh-restorecon-final-image-file.patch
 
 Source1: https://www.gnu.org/licenses/lgpl-2.1.txt
 
@@ -500,6 +511,14 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Fri Jan  8 2016 Harald Hoyer <harald@redhat.com> - 044-17.git20160108
+- include more HID driver
+- include machine info file
+- fix network carrier detection
+- fix nbd
+- do not copy over lldpad state
+- restorecon the final initramfs image
+
 * Tue Dec  1 2015 Harald Hoyer <harald@redhat.com> - 044-6.git20151201
 - fix for readonly /run on shutdown
 - fix for the dmsquash-live module
