@@ -16,7 +16,7 @@
 
 Name: dracut
 Version: 044
-Release: 17.git20160108%{?dist}
+Release: 18.git20160108%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -511,6 +511,9 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Wed Feb 03 2016 Fedora Release Engineering <releng@fedoraproject.org> - 044-18.git20160108
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_24_Mass_Rebuild
+
 * Fri Jan  8 2016 Harald Hoyer <harald@redhat.com> - 044-17.git20160108
 - include more HID driver
 - include machine info file
