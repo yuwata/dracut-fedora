@@ -1,0 +1,21 @@
+From fe83231e30d5bc94e090d02e65f0e3cbef20c6ac Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 18 Apr 2016 15:49:06 +0200
+Subject: [PATCH] watchdog: clean return of installkernel()
+
+return 0, otherwise if _alldrivers is empty, the return code is fail
+---
+ modules.d/04watchdog/module-setup.sh | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/modules.d/04watchdog/module-setup.sh b/modules.d/04watchdog/module-setup.sh
+index 04686f6..7b2685d 100755
+--- a/modules.d/04watchdog/module-setup.sh
++++ b/modules.d/04watchdog/module-setup.sh
+@@ -74,4 +74,6 @@ installkernel() {
+     # ensure that watchdog module is loaded as early as possible
+     _alldrivers="${!_drivers[*]}"
+     [[ $_alldrivers ]] && echo "rd.driver.pre=${_alldrivers// /,}" > ${initdir}/etc/cmdline.d/00-watchdog.conf
++
++    return 0
+ }

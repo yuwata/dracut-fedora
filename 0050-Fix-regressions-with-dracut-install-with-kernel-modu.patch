@@ -1,0 +1,162 @@
+From 8d9ab2755d1341904ca7889f4e05b2151848a759 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 13 Apr 2016 11:47:20 +0200
+Subject: [PATCH] Fix regressions with dracut-install with kernel modules
+
+Make sure, the same modules are installed as before.
+---
+ install/dracut-install.c                           |  9 +++++----
+ modules.d/50drm/module-setup.sh                    |  4 ++--
+ modules.d/90kernel-modules/module-setup.sh         | 15 ++++++++-------
+ modules.d/90kernel-network-modules/module-setup.sh |  2 +-
+ modules.d/90multipath/module-setup.sh              |  2 +-
+ modules.d/95iscsi/module-setup.sh                  |  2 +-
+ 6 files changed, 18 insertions(+), 16 deletions(-)
+
+diff --git a/install/dracut-install.c b/install/dracut-install.c
+index a20e06c..c246201 100644
+--- a/install/dracut-install.c
++++ b/install/dracut-install.c
+@@ -1202,6 +1202,7 @@ static int install_module(struct kmod_module *mod)
+         if (!check_module_path(path) || !check_module_symbols(mod)) {
+                 log_debug("No symbol or patch match for '%s'", path);
+                 return 0;
++                //return -ENOENT;
+         }
+ 
+         log_debug("dracut_install '%s'", path);
+@@ -1295,7 +1296,7 @@ static int install_modules(int argc, char **argv)
+                         }
+                         kmod_list_foreach(itr, modlist) {
+                                 mod = kmod_module_get_module(itr);
+-                                ret = install_module(mod);
++                                ret += install_module(mod);
+                         }
+                         kmod_module_unref_list(modlist);
+                         modlist = 0;
+@@ -1364,13 +1365,13 @@ static int install_modules(int argc, char **argv)
+                                 }
+                                 kmod_list_foreach(itr, modlist) {
+                                         mod = kmod_module_get_module(itr);
+-                                        ret = install_module(mod);
++                                        ret += install_module(mod);
+                                         kmod_module_unref(mod);
+                                 }
+                                 kmod_module_unref_list(modlist);
+                                 modlist = 0;
+ #else
+-                                ret = install_module(mod_o);
++                                ret += install_module(mod_o);
+                                 kmod_module_unref(mod_o);
+ #endif
+ 
+@@ -1413,7 +1414,7 @@ static int install_modules(int argc, char **argv)
+                         }
+                         kmod_list_foreach(itr, modlist) {
+                                 mod = kmod_module_get_module(itr);
+-                                ret = install_module(mod);
++                                ret += install_module(mod);
+                                 kmod_module_unref(mod);
+                         }
+                         kmod_module_unref_list(modlist);
+diff --git a/modules.d/50drm/module-setup.sh b/modules.d/50drm/module-setup.sh
+index e0b2959..661dde9 100755
+--- a/modules.d/50drm/module-setup.sh
++++ b/modules.d/50drm/module-setup.sh
+@@ -34,8 +34,8 @@ installkernel() {
+     if [[ $hostonly ]]; then
+         for i in /sys/bus/{pci/devices,soc/devices/soc?}/*/modalias; do
+             [[ -e $i ]] || continue
+-            if hostonly="" dracut_instmods -s "drm_crtc_init" $(<$i) 2>/dev/null; then
+-                if strstr $(modinfo -F filename $(<$i) 2>/dev/null) radeon.ko; then
++            if hostonly="" dracut_instmods -s "drm_crtc_init" -S "iw_handler_get_spy" $(<$i) 2>/dev/null; then
++                if strstr "$(modinfo -F filename $(<$i) 2>/dev/null)" radeon.ko; then
+                     hostonly='' instmods amdkfd
+                 fi
+             fi
+diff --git a/modules.d/90kernel-modules/module-setup.sh b/modules.d/90kernel-modules/module-setup.sh
+index e97d598..c30715d 100755
+--- a/modules.d/90kernel-modules/module-setup.sh
++++ b/modules.d/90kernel-modules/module-setup.sh
+@@ -7,20 +7,21 @@ installkernel() {
+     if [[ -z $drivers ]]; then
+         hostonly='' instmods \
+             sr_mod sd_mod scsi_dh ata_piix hid_generic unix \
+-            ehci-hcd ehci-pci \
++            ehci-hcd ehci-pci ehci-platform \
+             ohci-hcd ohci-pci \
+             uhci-hcd \
+             xhci-hcd xhci-pci xhci-plat-hcd \
+-            ehci-platform
+-
+-        instmods \
+             "=drivers/hid" \
+             "=drivers/input/serio" \
+             "=drivers/input/keyboard" \
++            "=drivers/usb/storage" \
++            ${NULL}
++
++        instmods \
+             yenta_socket scsi_dh_rdac scsi_dh_emc scsi_dh_alua \
+             atkbd i8042 usbhid firewire-ohci pcmcia hv-vmbus \
+             virtio virtio_blk virtio_ring virtio_pci virtio_scsi \
+-            "=drivers/pcmcia" =ide "=drivers/usb/storage"
++            "=drivers/pcmcia" =ide
+ 
+         if [[ "$(uname -p)" == arm* ]]; then
+             # arm specific modules
+@@ -33,13 +34,13 @@ installkernel() {
+                 ${NULL}
+         fi
+ 
+-        dracut_instmods -s "${_blockfuncs}" "=drivers"
++        dracut_instmods -o -s "${_blockfuncs}" "=drivers"
+ 
+         # if not on hostonly mode, install all known filesystems,
+         # if the required list is not set via the filesystems variable
+         if ! [[ $hostonly ]]; then
+             if [[ -z $filesystems ]]; then
+-                dracut_instmods -P ".*/(kernel/fs/nfs|kernel/fs/nfsd|kernel/fs/lockd)/.*" '=fs'
++                dracut_instmods -o -P ".*/(kernel/fs/nfs|kernel/fs/nfsd|kernel/fs/lockd)/.*" '=fs'
+             fi
+         else
+             hostonly='' instmods "${host_fs_types[@]}"
+diff --git a/modules.d/90kernel-network-modules/module-setup.sh b/modules.d/90kernel-network-modules/module-setup.sh
+index c004ff8..11fbab9 100755
+--- a/modules.d/90kernel-network-modules/module-setup.sh
++++ b/modules.d/90kernel-network-modules/module-setup.sh
+@@ -21,7 +21,7 @@ installkernel() {
+         _s390drivers="=drivers/s390/net"
+     fi
+ 
+-    dracut_instmods -P ".*${_unwanted_drivers}.*" -s "$_net_drivers" "=drivers/net" ${_s390drivers:+"$_s390drivers"}
++    dracut_instmods -o -P ".*${_unwanted_drivers}.*" -s "$_net_drivers" "=drivers/net" ${_s390drivers:+"$_s390drivers"}
+ 
+     #instmods() will take care of hostonly
+     instmods \
+diff --git a/modules.d/90multipath/module-setup.sh b/modules.d/90multipath/module-setup.sh
+index 27817bd..0af777d 100755
+--- a/modules.d/90multipath/module-setup.sh
++++ b/modules.d/90multipath/module-setup.sh
+@@ -58,7 +58,7 @@ installkernel() {
+         _s390drivers="=drivers/s390/scsi"
+     fi
+ 
+-    hostonly='' dracut_instmods -s "$_funcs" "=drivers/scsi" "=drivers/md" ${_s390drivers:+"$_s390drivers"}
++    hostonly='' dracut_instmods -o -s "$_funcs" "=drivers/scsi" "=drivers/md" ${_s390drivers:+"$_s390drivers"}
+ }
+ 
+ # called by dracut
+diff --git a/modules.d/95iscsi/module-setup.sh b/modules.d/95iscsi/module-setup.sh
+index 203e313..04937b5 100755
+--- a/modules.d/95iscsi/module-setup.sh
++++ b/modules.d/95iscsi/module-setup.sh
+@@ -166,7 +166,7 @@ installkernel() {
+         _s390drivers="=drivers/s390/scsi"
+     fi
+ 
+-    dracut_instmods -s "$_funcs" "=drivers/scsi" ${_s390drivers:+"$_s390drivers"}
++    dracut_instmods -o -s "$_funcs" "=drivers/scsi" ${_s390drivers:+"$_s390drivers"}
+ 
+ }
+ 

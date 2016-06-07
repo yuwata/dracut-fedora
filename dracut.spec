@@ -16,7 +16,7 @@
 
 Name: dracut
 Version: 044
-Release: 18.git20160108%{?dist}
+Release: 75%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -51,11 +51,70 @@ Patch13: 0013-base-dracut-lib.sh-dev_unit_name-guard-against-dev-b.patch
 Patch14: 0014-nbd-add-missing-generator.patch
 Patch15: 0015-fcoe-no-need-to-copy-lldpad-state.patch
 Patch16: 0016-dracut.sh-restorecon-final-image-file.patch
+Patch17: 0017-dracut.cmdline-remove-extra-from-ip-doc.patch
+Patch18: 0018-dracut.sh-fail-hard-if-we-find-modules-and-modules.d.patch
+Patch19: 0019-network-net-lib.sh-correctly-set-mac-address-for-ip-.patch
+Patch20: 0020-dracut-functions.sh-fix-check_vol_slaves-volume-grou.patch
+Patch21: 0021-multipath-fix-majmin_to_mpath_dev.patch
+Patch22: 0022-Fixed-vlan-bonding-bridging-team-logic.patch
+Patch23: 0023-TEST-30-ISCSI-some-tests-have-unknown-return-code.patch
+Patch24: 0024-network-add-mtu-to-list-of-variables-to-store-in-ove.patch
+Patch25: 0025-Correctly-handle-module-aliases.patch
+Patch26: 0026-network-if-rd.neednet-0-we-don-t-need-a-bootdev.patch
+Patch27: 0027-kernel-modules-add-usb-storage.patch
+Patch28: 0028-kernel-modules-join-instmods-and-install-all-usb-sto.patch
+Patch29: 0029-dracut-systemd-dracut-cmdline-ask-fix-dracut-kernel-.patch
+Patch30: 0030-base-init.sh-don-t-remove-99-cmdline-ask-on-hostonly.patch
+Patch31: 0031-documentation-hostonly-i18n-no-hostonly-i18n-i18n_in.patch
+Patch32: 0032-network-dhclient-script.sh-add-classless-static-rout.patch
+Patch33: 0033-dracut-systemd-dracut-pre-pivot.sh-Break-at-switch_r.patch
+Patch34: 0034-dracut-install-catch-ldd-message-cannot-execute-bina.patch
+Patch35: 0035-dracut.conf.5.asc-fix-bold.patch
+Patch36: 0036-watchdog-Do-not-add-hooks-if-systemd-module-is-inclu.patch
+Patch37: 0037-watchdog-install-module-for-active-watchdog.patch
+Patch38: 0038-watchdog-ensure-that-module-is-loaded-as-early-as-po.patch
+Patch39: 0039-lsinitrd-add-unpack-to-lsinitrd.patch
+Patch40: 0040-Do-not-use-deprecated-egrep-fgrep.patch
+Patch41: 0041-nfs-module-setup.sh-Use-colon-instead-of-dot-for-cho.patch
+Patch42: 0042-Clean-up-some-bashisms-from-bin-sh-scripts.patch
+Patch43: 0043-dracut-init.sh-Simplify-udev-rule-grepping.patch
+Patch44: 0044-dracut.sh-call-dracut-install-with-f-in-FIPS-mode.patch
+Patch45: 0045-dracut-init.sh-Add-file-argument-to-sed-s.patch
+Patch46: 0046-lsinitrd.sh-fixed-unpack-and-skipcpio-search.patch
+Patch47: 0047-dracut-init.sh-mark-error-messages-with-FAILED.patch
+Patch48: 0048-Use-dracut-install-to-install-kernel-modules.patch
+Patch49: 0049-Use-pkg-config-for-libkmod-CFLAGS-and-LIBS.patch
+Patch50: 0050-Fix-regressions-with-dracut-install-with-kernel-modu.patch
+Patch51: 0051-dracut-install-simplify-error-logic.patch
+Patch52: 0052-dracut-init.sh-beautify-instmods.patch
+Patch53: 0053-plymouth-plymouth-pretrigger.sh-also-trigger-acpi-su.patch
+Patch54: 0054-dracut-install-add-help-documentation.patch
+Patch55: 0055-NEWS-update-for-045.patch
+Patch56: 0056-Revert-fcoe-no-need-to-copy-lldpad-state.patch
+Patch57: 0057-base-init.sh-don-t-mount-run-with-noexec-if-the-init.patch
+Patch58: 0058-kate-config.patch
+Patch59: 0059-95resume-avoid-possible-symbolic-link-creation-error.patch
+Patch60: 0060-watchdog-module-setup.sh-rewrite.patch
+Patch61: 0061-drop-to-shell-on-die-if-rd.shell-1-is-set-explicitly.patch
+Patch62: 0062-dracut_install-honor-silent-flag.patch
+Patch63: 0063-dracut-install-make-use-of-_cleanup_-macros-and-impr.patch
+Patch64: 0064-removed-obsolete-kernel-module-functions-and-host_mo.patch
+Patch65: 0065-watchdog-clean-return-of-installkernel.patch
+Patch66: 0066-watchdog-start-traversing-the-device-tree-from-the-r.patch
+Patch67: 0067-dracut-10i18n-support-default-loadkeys-setfont-data-.patch
+Patch68: 0068-ensure-parent-dir-for-usr-lib-initrd-release-exists.patch
+Patch69: 0069-Fix-small-typo-in-dracut.cmdline-7.patch
+Patch70: 0070-systemd-ensure-journal-is-volatile.patch
+Patch71: 0071-configure-don-t-hardcode-pkg-config.patch
+Patch72: 0072-dracut-systemd-dracut-cmdline.sh-Don-t-error-out-if-.patch
+Patch73: 0073-move-ln_r-to-dracut-init.sh.patch
+Patch74: 0074-systemd-initrd-add-initrd-root-device.target.patch
 
 Source1: https://www.gnu.org/licenses/lgpl-2.1.txt
 
 
 BuildRequires: bash git
+BuildRequires: kmod-devel >= 15
 
 %if 0%{?fedora} || 0%{?rhel}
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -63,7 +122,6 @@ BuildRequires: pkgconfig
 %endif
 %if 0%{?fedora}
 BuildRequires: bash-completion
-BuildRequires: pkgconfig
 %endif
 
 %if 0%{?suse_version}
@@ -240,10 +298,13 @@ This package contains tools to assemble the local initrd and host configuration.
 cp %{SOURCE1} .
 
 %build
-%configure --systemdsystemunitdir=%{_unitdir} --bashcompletiondir=$(pkg-config --variable=completionsdir bash-completion) --libdir=%{_prefix}/lib \
+%configure  --systemdsystemunitdir=%{_unitdir} \
+            --bashcompletiondir=$(pkg-config --variable=completionsdir bash-completion) \
+            --libdir=%{_prefix}/lib \
 %if %{without doc}
-     --disable-documentation
+            --disable-documentation \
 %endif
+            ${NULL}
 
 make %{?_smp_mflags}
 
@@ -511,6 +572,10 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Tue Jun 07 2016 Harald Hoyer <harald@redhat.com> - 044-75
+- fix for systemd >= 230
+- git snapshot
+
 * Wed Feb 03 2016 Fedora Release Engineering <releng@fedoraproject.org> - 044-18.git20160108
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_24_Mass_Rebuild
 

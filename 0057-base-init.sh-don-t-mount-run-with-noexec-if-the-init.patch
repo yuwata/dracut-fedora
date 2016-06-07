@@ -1,0 +1,32 @@
+From db7d61cff7f5a5be3a56cff39dc278f004b9c461 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 14 Apr 2016 14:56:37 +0200
+Subject: [PATCH] base/init.sh: don't mount /run with noexec, if the initramfs
+ lives there
+
+If the initramfs was built with prefix=/run/... /run can't be mounted
+with noexec, otherwise no binary can be run.
+
+Guard against it by looking where /bin/sh is really located.
+---
+ modules.d/99base/init.sh | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/modules.d/99base/init.sh b/modules.d/99base/init.sh
+index bd7ef70..a563393 100755
+--- a/modules.d/99base/init.sh
++++ b/modules.d/99base/init.sh
+@@ -64,7 +64,12 @@ fi
+ 
+ if ! ismounted /run; then
+     mkdir -m 0755 /newrun
+-    mount -t tmpfs -o mode=0755,noexec,nosuid,nodev,strictatime tmpfs /newrun >/dev/null
++    if ! str_starts "$(readlink -f /bin/sh)" "/run/"; then
++        mount -t tmpfs -o mode=0755,noexec,nosuid,nodev,strictatime tmpfs /newrun >/dev/null
++    else
++        # the initramfs binaries are located in /run, so don't mount it with noexec
++        mount -t tmpfs -o mode=0755,nosuid,nodev,strictatime tmpfs /newrun >/dev/null
++    fi
+     cp -a /run/* /newrun >/dev/null 2>&1
+     mount --move /newrun /run
+     rm -fr -- /newrun

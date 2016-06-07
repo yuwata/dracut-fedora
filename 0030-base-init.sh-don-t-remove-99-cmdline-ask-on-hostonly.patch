@@ -1,0 +1,39 @@
+From 4ab6447c2a9ed105e7fba26ded2b3f3b725de8e9 Mon Sep 17 00:00:00 2001
+From: Evgeny Vereshchagin <evvers@ya.ru>
+Date: Mon, 15 Feb 2016 13:47:18 +0000
+Subject: [PATCH] base/init.sh: don't remove 99-cmdline-ask on 'hostonly'
+ cleanup
+
+How to reproduce:
+host# ./dracut.sh -o 'dracut-systemd systemd systemd-initrd' --local -f ./initramfs.img
+
+host# qemu-system-x86_64 -initrd ./initramfs.img \
+    -append 'root=/dev/sda1 rd.cmdline=ask rd.hostonly=0' \
+    ...
+
+Enter additional kernel command line parameter (end with ctrl-d or .)
+> rd.break
+> .
+...
+There is no "Break before switch_root"
+...
+
+Signed-off-by: Evgeny Vereshchagin <evvers@ya.ru>
+---
+ modules.d/99base/init.sh | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/modules.d/99base/init.sh b/modules.d/99base/init.sh
+index e2e4029..bd7ef70 100755
+--- a/modules.d/99base/init.sh
++++ b/modules.d/99base/init.sh
+@@ -120,7 +120,9 @@ if getarg "rd.cmdline=ask"; then
+ fi
+ 
+ if ! getargbool 1 'rd.hostonly'; then
++    [ -f /etc/cmdline.d/99-cmdline-ask.conf ] && mv /etc/cmdline.d/99-cmdline-ask.conf /tmp/99-cmdline-ask.conf
+     remove_hostonly_files
++    [ -f /tmp/99-cmdline-ask.conf ] && mv /tmp/99-cmdline-ask.conf /etc/cmdline.d/99-cmdline-ask.conf
+ fi
+ 
+ # run scriptlets to parse the command line

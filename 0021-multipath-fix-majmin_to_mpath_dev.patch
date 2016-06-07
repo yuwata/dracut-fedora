@@ -1,0 +1,38 @@
+From 28058a2e373eb268d9b1cd5b65c2ad607961dad1 Mon Sep 17 00:00:00 2001
+From: Pekka Wallendahl <wyrmiyu@gmail.com>
+Date: Mon, 18 Jan 2016 20:28:22 +0200
+Subject: [PATCH] multipath: fix majmin_to_mpath_dev()
+
+* Multipath device names only start with the mpath-prefix if the option
+  use_userfriendly_names is set true in /etc/multipath.conf and if user
+  has not set any aliases in the said file. Thus the for-loop should go
+  through all files in /dev/mapper/, not just ones starting with 'mpath'
+
+* Bash is perfectly capable to extend `/dev/mapper/*` notation without a
+  need to pass it to an external ls
+
+* Changed the function to use a local variable $_dev instead of the
+  global $dev, which seemed to be the original intention as the local
+  _dev was defined but not used
+---
+ modules.d/90multipath/module-setup.sh | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/modules.d/90multipath/module-setup.sh b/modules.d/90multipath/module-setup.sh
+index 831c99f..a808678 100755
+--- a/modules.d/90multipath/module-setup.sh
++++ b/modules.d/90multipath/module-setup.sh
+@@ -9,9 +9,10 @@ is_mpath() {
+ 
+ majmin_to_mpath_dev() {
+     local _dev
+-    for i in `ls -1 /dev/mapper/mpath*`; do
+-        dev=$(get_maj_min $i)
+-        if [ "$dev" = "$1" ]; then
++    for i in /dev/mapper/*; do
++        [[ $i == /dev/mapper/control ]] && continue
++        _dev=$(get_maj_min $i)
++        if [ "$_dev" = "$1" ]; then
+             echo $i
+             return
+         fi

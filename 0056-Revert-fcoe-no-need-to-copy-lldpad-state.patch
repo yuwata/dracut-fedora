@@ -1,0 +1,32 @@
+From b99e72427b517dea0d91d15fe43cf0a37420af36 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 14 Apr 2016 13:38:24 +0200
+Subject: [PATCH] Revert "fcoe: no need to copy lldpad state"
+
+This reverts commit e93ff1cf9aac8f97131b3101a5da240ce5f45239.
+
+seems like the file has to be copied back in the real root.
+
+https://bugzilla.redhat.com/show_bug.cgi?id=1246217
+---
+ modules.d/95fcoe/cleanup-fcoe.sh | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
+
+diff --git a/modules.d/95fcoe/cleanup-fcoe.sh b/modules.d/95fcoe/cleanup-fcoe.sh
+index 856e2d9..5ff4d05 100644
+--- a/modules.d/95fcoe/cleanup-fcoe.sh
++++ b/modules.d/95fcoe/cleanup-fcoe.sh
+@@ -2,8 +2,9 @@
+ # -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
+ # ex: ts=8 sw=4 sts=4 et filetype=sh
+ 
+-if [ -z "$DRACUT_SYSTEMD" ]; then
+-    if [ -e /var/run/lldpad.pid ]; then
+-        lldpad -k
+-    fi
++if [ -e /var/run/lldpad.pid ]; then
++    lldpad -k
++    mkdir -m 0755 -p /run/initramfs/state/dev/shm
++    cp /dev/shm/lldpad.state /run/initramfs/state/dev/shm/ > /dev/null 2>&1
++    echo "files /dev/shm/lldpad.state" >> /run/initramfs/rwtab
+ fi

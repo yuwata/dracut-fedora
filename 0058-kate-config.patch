@@ -1,0 +1,24 @@
+From 2db14045c143e7b0709bed78483a208d2df69ab3 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 15 Apr 2016 10:27:48 +0200
+Subject: [PATCH] kate config
+
+---
+ .kateproject | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/.kateproject b/.kateproject
+index 7a84755..0a0d5da 100644
+--- a/.kateproject
++++ b/.kateproject
+@@ -1,8 +1,8 @@
+ {
+-  "name": "Kate"
++  "name": "Dracut"
+   , "files": [ { "git": 1 } ]
+   , "build": {
+-    "directory": "build"
++    "directory": "./"
+   , "build": "make -j $(getconf _NPROCESSORS_ONLN) all"
+   , "clean": "make clean"
+   }

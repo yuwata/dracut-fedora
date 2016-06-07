@@ -1,0 +1,172 @@
+From 9430ae301e3599d355e8b128a7faffa81dade6ff Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ville=20Skytt=C3=A4?= <ville.skytta@iki.fi>
+Date: Mon, 28 Mar 2016 11:38:34 +0300
+Subject: [PATCH] Do not use deprecated egrep/fgrep
+
+---
+ dracut-init.sh                               |  8 ++++----
+ install/dracut-install.c                     |  2 +-
+ modules.d/00systemd/module-setup.sh          | 10 +++++-----
+ modules.d/02systemd-networkd/module-setup.sh |  8 ++++----
+ modules.d/95debug/module-setup.sh            |  2 +-
+ modules.d/95nfs/module-setup.sh              |  8 ++++----
+ modules.d/95udev-rules/module-setup.sh       |  4 ++--
+ modules.d/99base/module-setup.sh             |  4 ++--
+ test/TEST-04-FULL-SYSTEMD/test.sh            |  2 +-
+ 9 files changed, 24 insertions(+), 24 deletions(-)
+
+diff --git a/dracut-init.sh b/dracut-init.sh
+index fc35d7b..a67aca2 100644
+--- a/dracut-init.sh
++++ b/dracut-init.sh
+@@ -328,15 +328,15 @@ inst_rule_group_owner() {
+ 
+     if grep -qE 'OWNER=?"[^ "]+' "$1"; then
+         for i in $(grep -E 'OWNER=?"[^ "]+' "$1" | sed -r 's/.*OWNER=?"([^ "]+).*/\1/'); do
+-            if ! egrep -q "^$i:" "$initdir/etc/passwd" 2>/dev/null; then
+-                egrep "^$i:" /etc/passwd 2>/dev/null >> "$initdir/etc/passwd"
++            if ! grep -Eq "^$i:" "$initdir/etc/passwd" 2>/dev/null; then
++                grep -E "^$i:" /etc/passwd 2>/dev/null >> "$initdir/etc/passwd"
+             fi
+         done
+     fi
+     if grep -qE 'GROUP=?"[^ "]+' "$1"; then
+         for i in $(grep -E 'GROUP=?"[^ "]+' "$1" | sed -r 's/.*GROUP=?"([^ "]+).*/\1/'); do
+-            if ! egrep -q "^$i:" "$initdir/etc/group" 2>/dev/null; then
+-                egrep "^$i:" /etc/group 2>/dev/null >> "$initdir/etc/group"
++            if ! grep -Eq "^$i:" "$initdir/etc/group" 2>/dev/null; then
++                grep -E "^$i:" /etc/group 2>/dev/null >> "$initdir/etc/group"
+             fi
+         done
+     fi
+diff --git a/install/dracut-install.c b/install/dracut-install.c
+index 8f65d8d..3b48ba8 100644
+--- a/install/dracut-install.c
++++ b/install/dracut-install.c
+@@ -287,7 +287,7 @@ static int library_install(const char *src, const char *lib)
+ 
+         /* Also try to install the same library from one directory above.
+            This fixes the case, where only the HWCAP lib would be installed
+-           # ldconfig -p|fgrep libc.so
++           # ldconfig -p|grep -F libc.so
+            libc.so.6 (libc6,64bit, hwcap: 0x0000001000000000, OS ABI: Linux 2.6.32) => /lib64/power6/libc.so.6
+            libc.so.6 (libc6,64bit, hwcap: 0x0000000000000200, OS ABI: Linux 2.6.32) => /lib64/power6x/libc.so.6
+            libc.so.6 (libc6,64bit, OS ABI: Linux 2.6.32) => /lib64/libc.so.6
+diff --git a/modules.d/00systemd/module-setup.sh b/modules.d/00systemd/module-setup.sh
+index ed59beb..deb5e06 100755
+--- a/modules.d/00systemd/module-setup.sh
++++ b/modules.d/00systemd/module-setup.sh
+@@ -179,11 +179,11 @@ install() {
+ 
+     # install adm user/group for journald
+     inst_multiple nologin
+-    egrep '^systemd-journal:' /etc/passwd 2>/dev/null >> "$initdir/etc/passwd"
+-    egrep '^adm:' /etc/passwd 2>/dev/null >> "$initdir/etc/passwd"
+-    egrep '^systemd-journal:' /etc/group >> "$initdir/etc/group"
+-    egrep '^wheel:' /etc/group >> "$initdir/etc/group"
+-    egrep '^adm:' /etc/group >> "$initdir/etc/group"
++    grep '^systemd-journal:' /etc/passwd 2>/dev/null >> "$initdir/etc/passwd"
++    grep '^adm:' /etc/passwd 2>/dev/null >> "$initdir/etc/passwd"
++    grep '^systemd-journal:' /etc/group >> "$initdir/etc/group"
++    grep '^wheel:' /etc/group >> "$initdir/etc/group"
++    grep '^adm:' /etc/group >> "$initdir/etc/group"
+ 
+     ln_r $systemdutildir/systemd "/init"
+     ln_r $systemdutildir/systemd "/sbin/init"
+diff --git a/modules.d/02systemd-networkd/module-setup.sh b/modules.d/02systemd-networkd/module-setup.sh
+index 58842c0..b86751e 100755
+--- a/modules.d/02systemd-networkd/module-setup.sh
++++ b/modules.d/02systemd-networkd/module-setup.sh
+@@ -48,10 +48,10 @@ install() {
+ 
+     # inst_dir /var/lib/systemd/clock
+ 
+-    egrep '^systemd-network:' /etc/passwd 2>/dev/null >> "$initdir/etc/passwd"
+-    egrep '^systemd-network:' /etc/group >> "$initdir/etc/group"
+-    # egrep '^systemd-timesync:' /etc/passwd 2>/dev/null >> "$initdir/etc/passwd"
+-    # egrep '^systemd-timesync:' /etc/group >> "$initdir/etc/group"
++    grep '^systemd-network:' /etc/passwd 2>/dev/null >> "$initdir/etc/passwd"
++    grep '^systemd-network:' /etc/group >> "$initdir/etc/group"
++    # grep '^systemd-timesync:' /etc/passwd 2>/dev/null >> "$initdir/etc/passwd"
++    # grep '^systemd-timesync:' /etc/group >> "$initdir/etc/group"
+ 
+     _arch=$(uname -m)
+     inst_libdir_file {"tls/$_arch/",tls/,"$_arch/",}"libnss_dns.so.*" \
+diff --git a/modules.d/95debug/module-setup.sh b/modules.d/95debug/module-setup.sh
+index ce5e8e8..97b2a30 100755
+--- a/modules.d/95debug/module-setup.sh
++++ b/modules.d/95debug/module-setup.sh
+@@ -18,6 +18,6 @@ install() {
+                   tcpdump cp less hostname mkdir \
+                   fsck fsck.ext2 fsck.ext4 fsck.ext3 fsck.ext4dev fsck.vfat e2fsck
+ 
+-    egrep '^tcpdump:' /etc/passwd 2>/dev/null >> "$initdir/etc/passwd"
++    grep '^tcpdump:' /etc/passwd 2>/dev/null >> "$initdir/etc/passwd"
+ }
+ 
+diff --git a/modules.d/95nfs/module-setup.sh b/modules.d/95nfs/module-setup.sh
+index 9b5b8c8..aefbc2a 100755
+--- a/modules.d/95nfs/module-setup.sh
++++ b/modules.d/95nfs/module-setup.sh
+@@ -105,14 +105,14 @@ install() {
+ 
+     # Rather than copy the passwd file in, just set a user for rpcbind
+     # We'll save the state and restart the daemon from the root anyway
+-    egrep '^nfsnobody:|^rpc:|^rpcuser:' /etc/passwd >> "$initdir/etc/passwd"
+-    egrep '^nogroup:|^rpc:|^nobody:' /etc/group >> "$initdir/etc/group"
++    grep -E '^nfsnobody:|^rpc:|^rpcuser:' /etc/passwd >> "$initdir/etc/passwd"
++    grep -E '^nogroup:|^rpc:|^nobody:' /etc/group >> "$initdir/etc/group"
+ 
+     # rpc user needs to be able to write to this directory to save the warmstart
+     # file
+     chmod 770 "$initdir/var/lib/rpcbind"
+-    egrep -q '^rpc:' /etc/passwd \
+-        && egrep -q '^rpc:' /etc/group \
++    grep -q '^rpc:' /etc/passwd \
++        && grep -q '^rpc:' /etc/group \
+         && chown rpc.rpc "$initdir/var/lib/rpcbind"
+     dracut_need_initqueue
+ }
+diff --git a/modules.d/95udev-rules/module-setup.sh b/modules.d/95udev-rules/module-setup.sh
+index 6a0625a..a59eca2 100755
+--- a/modules.d/95udev-rules/module-setup.sh
++++ b/modules.d/95udev-rules/module-setup.sh
+@@ -63,8 +63,8 @@ install() {
+ 
+     {
+         for i in cdrom tape dialout floppy; do
+-            if ! egrep -q "^$i:" "$initdir/etc/group" 2>/dev/null; then
+-                if ! egrep "^$i:" /etc/group 2>/dev/null; then
++            if ! grep -q "^$i:" "$initdir/etc/group" 2>/dev/null; then
++                if ! grep "^$i:" /etc/group 2>/dev/null; then
+                         case $i in
+                             cdrom)   echo "$i:x:11:";;
+                             dialout) echo "$i:x:18:";;
+diff --git a/modules.d/99base/module-setup.sh b/modules.d/99base/module-setup.sh
+index cc94d00..5fbf6f7 100755
+--- a/modules.d/99base/module-setup.sh
++++ b/modules.d/99base/module-setup.sh
+@@ -27,8 +27,8 @@ install() {
+     fi
+ 
+     #add common users in /etc/passwd, it will be used by nfs/ssh currently
+-    egrep '^root:' "$initdir/etc/passwd" 2>/dev/null || echo  'root:x:0:0::/root:/bin/sh' >> "$initdir/etc/passwd"
+-    egrep '^nobody:' /etc/passwd >> "$initdir/etc/passwd"
++    grep '^root:' "$initdir/etc/passwd" 2>/dev/null || echo  'root:x:0:0::/root:/bin/sh' >> "$initdir/etc/passwd"
++    grep '^nobody:' /etc/passwd >> "$initdir/etc/passwd"
+ 
+     # install our scripts and hooks
+     inst_script "$moddir/init.sh" "/init"
+diff --git a/test/TEST-04-FULL-SYSTEMD/test.sh b/test/TEST-04-FULL-SYSTEMD/test.sh
+index f5a9d48..c7e08bf 100755
+--- a/test/TEST-04-FULL-SYSTEMD/test.sh
++++ b/test/TEST-04-FULL-SYSTEMD/test.sh
+@@ -197,7 +197,7 @@ EOF
+         ln -fs /proc/self/mounts $initdir/etc/mtab
+ 
+         # install any Execs from the service files
+-        egrep -ho '^Exec[^ ]*=[^ ]+' $initdir/lib/systemd/system/*.service \
++        grep -Eho '^Exec[^ ]*=[^ ]+' $initdir/lib/systemd/system/*.service \
+             | while read i || [ -n "$i" ]; do
+             i=${i##Exec*=}; i=${i##-}
+             inst_multiple -o $i

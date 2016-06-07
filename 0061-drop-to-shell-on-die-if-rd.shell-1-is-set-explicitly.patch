@@ -1,0 +1,22 @@
+From 9d74747f926d038f2e149d70a9c8f955861ab354 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 15 Apr 2016 12:03:03 +0200
+Subject: [PATCH] drop to shell on die() if rd.shell=1 is set explicitly
+
+---
+ modules.d/99base/dracut-lib.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/modules.d/99base/dracut-lib.sh b/modules.d/99base/dracut-lib.sh
+index 0a0b1b9..48fc83d 100755
+--- a/modules.d/99base/dracut-lib.sh
++++ b/modules.d/99base/dracut-lib.sh
+@@ -457,7 +457,7 @@ die() {
+ 
+     > /run/initramfs/.die
+ 
+-    getargbool 0 "rd.debug=" && emergency_shell
++    getargbool 0 "rd.shell=" && emergency_shell
+ 
+     if [ -n "$DRACUT_SYSTEMD" ]; then
+         systemctl --no-block --force halt

@@ -1,0 +1,44 @@
+From f4f8fb5c10cc8d0047123324197aff25f0a63e04 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Tue, 26 Jan 2016 12:26:03 +0100
+Subject: [PATCH] network: if rd.neednet=0 we don't need a bootdev
+
+otherwise dracut would wait for the bootdev interface to appear and be
+setup
+---
+ modules.d/40network/parse-ip-opts.sh | 9 ++++-----
+ 1 file changed, 4 insertions(+), 5 deletions(-)
+
+diff --git a/modules.d/40network/parse-ip-opts.sh b/modules.d/40network/parse-ip-opts.sh
+index 12f4765..5779ef8 100755
+--- a/modules.d/40network/parse-ip-opts.sh
++++ b/modules.d/40network/parse-ip-opts.sh
+@@ -40,6 +40,8 @@ if [ -n "$NEEDBOOTDEV" ] && getargbool 1 rd.neednet; then
+     #[ -z "$BOOTDEV" ] && warn "Please supply bootdev argument for multiple ip= lines"
+     echo "rd.neednet=1" > /etc/cmdline.d/dracut-neednet.conf
+     info "Multiple ip= arguments: assuming rd.neednet=1"
++else
++    unset NEEDBOOTDEV
+ fi
+ 
+ # Check ip= lines
+@@ -48,17 +50,14 @@ for p in $(getargs ip=); do
+     ip_to_var $p
+ 
+     # make first device specified the BOOTDEV
+-    if [ -z "$BOOTDEV" ] && [ -n "$dev" ]; then
++    if [ -n "$NEEDBOOTDEV" ] && [ -z "$BOOTDEV" ] && [ -n "$dev" ]; then
+         BOOTDEV="$dev"
+-        [ -n "$NEEDBOOTDEV" ] && info "Setting bootdev to '$BOOTDEV'"
++        info "Setting bootdev to '$BOOTDEV'"
+     fi
+ 
+     # skip ibft since we did it above
+     [ "$autoconf" = "ibft" ] && continue
+ 
+-    # We need to have an ip= line for the specified bootdev
+-    [ -n "$NEEDBOOTDEV" ] && [ "$dev" = "$BOOTDEV" ] && BOOTDEVOK=1
+-
+     # Empty autoconf defaults to 'dhcp'
+     if [ -z "$autoconf" ] ; then
+         warn "Empty autoconf values default to dhcp"

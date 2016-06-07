@@ -1,0 +1,46 @@
+From 43819af68c7789ec932c25e699c56889fdf7276c Mon Sep 17 00:00:00 2001
+From: Fabian Vogt <fvogt@suse.com>
+Date: Thu, 21 Jan 2016 17:13:07 +0100
+Subject: [PATCH] Correctly handle module aliases
+
+Handle module aliases correctly to not generate unbootable
+initrds with different kernel versions when modules were renamed
+or replaced.
+
+Signed-off-by: Fabian Vogt <fvogt@suse.com>
+---
+ dracut.sh | 21 +++++++++++++++++++++
+ 1 file changed, 21 insertions(+)
+
+diff --git a/dracut.sh b/dracut.sh
+index 98dbe0b..ae8772b 100755
+--- a/dracut.sh
++++ b/dracut.sh
+@@ -1195,6 +1195,27 @@ if [[ $hostonly ]]; then
+     while read m rest || [ -n "$m" ]; do
+         host_modules["$m"]=1
+     done </proc/modules
++
++    # Explanation of the following section:
++    # Since kernel 4.4, mpt3sas is a complete replacement for mpt2sas.
++    # mpt3sas has an alias to mpt2sas now, but since mpt3sas isn't loaded
++    # when generating the initrd from kernel < 4.4, it's not included.
++    # The other direction has the same issue:
++    # When generating the initrd from kernel >= 4.4, mpt2sas isn't loaded,
++    # so it's not included.
++    # Both ways result in an unbootable initrd.
++
++    # also add aliases of loaded modules
++    for mod in "${!host_modules[@]}"; do
++        aliases=$(modinfo -F alias "$mod" 2>&1)
++        for alias in $aliases; do
++            host_modules["$alias"]=1
++        done
++        # mod might be an alias in the target kernel, find the real module
++        mod_filename=$(modinfo -k "$kernel" "$mod" -F filename)
++        [ $? -ne 0 ] && continue
++        host_modules["$(basename -s .ko "$mod_filename")"]=1
++    done
+ fi
+ 
+ unset m
