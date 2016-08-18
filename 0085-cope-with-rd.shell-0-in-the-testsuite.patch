@@ -1,0 +1,2031 @@
+From 781f1971c326da07d22516a4b555138b1978177b Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 8 Jun 2016 09:33:48 +0200
+Subject: [PATCH] cope with "rd.shell=0" in the testsuite
+
+If emergency and shutdown-emergency hooks are called, the systemd should
+poweroff the testsuite, therefore "rd.shell=0" is given on the test
+suite kernel command lines.
+
+"rd.shell=0" has to be parsed correctly by the test suite real root init
+also.
+---
+ test/TEST-01-BASIC/hard-off.sh         |   4 +-
+ test/TEST-01-BASIC/test-init.sh        |  97 +++++++++++++++++++++++++++++++-
+ test/TEST-01-BASIC/test.sh             |   3 +-
+ test/TEST-02-SYSTEMD/hard-off.sh       |   4 +-
+ test/TEST-02-SYSTEMD/test-init.sh      | 100 ++++++++++++++++++++++++++++++++-
+ test/TEST-02-SYSTEMD/test.sh           |   3 +-
+ test/TEST-03-USR-MOUNT/hard-off.sh     |   4 +-
+ test/TEST-03-USR-MOUNT/test-init.sh    |  97 +++++++++++++++++++++++++++++++-
+ test/TEST-03-USR-MOUNT/test.sh         |   3 +-
+ test/TEST-04-FULL-SYSTEMD/hard-off.sh  |   4 +-
+ test/TEST-04-FULL-SYSTEMD/test-init.sh |  97 +++++++++++++++++++++++++++++++-
+ test/TEST-04-FULL-SYSTEMD/test.sh      |   3 +-
+ test/TEST-10-RAID/hard-off.sh          |   4 +-
+ test/TEST-10-RAID/test-init.sh         |  97 +++++++++++++++++++++++++++++++-
+ test/TEST-10-RAID/test.sh              |   3 +-
+ test/TEST-11-LVM/hard-off.sh           |   4 +-
+ test/TEST-11-LVM/test-init.sh          |  97 +++++++++++++++++++++++++++++++-
+ test/TEST-11-LVM/test.sh               |   3 +-
+ test/TEST-12-RAID-DEG/hard-off.sh      |   4 +-
+ test/TEST-12-RAID-DEG/test-init.sh     |  97 +++++++++++++++++++++++++++++++-
+ test/TEST-12-RAID-DEG/test.sh          |   3 +-
+ test/TEST-13-ENC-RAID-LVM/hard-off.sh  |   4 +-
+ test/TEST-13-ENC-RAID-LVM/test.sh      |   3 +-
+ test/TEST-14-IMSM/hard-off.sh          |   4 +-
+ test/TEST-14-IMSM/test-init.sh         |  97 +++++++++++++++++++++++++++++++-
+ test/TEST-14-IMSM/test.sh              |   3 +-
+ test/TEST-15-BTRFSRAID/hard-off.sh     |   4 +-
+ test/TEST-15-BTRFSRAID/test.sh         |   3 +-
+ test/TEST-16-DMSQUASH/hard-off.sh      |   4 +-
+ test/TEST-16-DMSQUASH/test-init.sh     |  97 +++++++++++++++++++++++++++++++-
+ test/TEST-16-DMSQUASH/test.sh          |   3 +-
+ test/TEST-17-LVM-THIN/hard-off.sh      |   2 +-
+ test/TEST-17-LVM-THIN/test-init.sh     |  97 +++++++++++++++++++++++++++++++-
+ test/TEST-17-LVM-THIN/test.sh          |   3 +-
+ test/TEST-20-NFS/client-init.sh        |  97 +++++++++++++++++++++++++++++++-
+ test/TEST-20-NFS/hard-off.sh           |   4 +-
+ test/TEST-20-NFS/test.sh               |   3 +-
+ test/TEST-30-ISCSI/client-init.sh      |  97 +++++++++++++++++++++++++++++++-
+ test/TEST-30-ISCSI/hard-off.sh         |   4 +-
+ test/TEST-30-ISCSI/test.sh             |   3 +-
+ test/TEST-40-NBD/hard-off.sh           |   4 +-
+ test/TEST-40-NBD/test.sh               |   3 +-
+ test/TEST-50-MULTINIC/client-init.sh   |  98 +++++++++++++++++++++++++++++++-
+ test/TEST-50-MULTINIC/hard-off.sh      |   4 +-
+ test/TEST-50-MULTINIC/test.sh          |   3 +-
+ 45 files changed, 1315 insertions(+), 60 deletions(-)
+
+diff --git a/test/TEST-01-BASIC/hard-off.sh b/test/TEST-01-BASIC/hard-off.sh
+index 12c3d5a..01acb19 100755
+--- a/test/TEST-01-BASIC/hard-off.sh
++++ b/test/TEST-01-BASIC/hard-off.sh
+@@ -1,3 +1,3 @@
+ #!/bin/sh
+-getarg rd.shell || poweroff -f
+-getarg failme && poweroff -f
++getargbool 0 rd.shell || poweroff -f
++getargbool 0 failme && poweroff -f
+diff --git a/test/TEST-01-BASIC/test-init.sh b/test/TEST-01-BASIC/test-init.sh
+index ef196ec..a8b6e39 100755
+--- a/test/TEST-01-BASIC/test-init.sh
++++ b/test/TEST-01-BASIC/test-init.sh
+@@ -1,5 +1,100 @@
+ #!/bin/sh
+ >/dev/watchdog
++getcmdline() {
++    while read -r _line || [ -n "$_line" ]; do
++        printf "%s" "$line"
++    done </proc/cmdline;
++}
++
++_dogetarg() {
++    local _o _val _doecho
++    unset _val
++    unset _o
++    unset _doecho
++    CMDLINE=$(getcmdline)
++
++    for _o in $CMDLINE; do
++        if [ "${_o%%=*}" = "${1%%=*}" ]; then
++            if [ -n "${1#*=}" -a "${1#*=*}" != "${1}" ]; then
++                # if $1 has a "=<value>", we want the exact match
++                if [ "$_o" = "$1" ]; then
++                    _val="1";
++                    unset _doecho
++                fi
++                continue
++            fi
++
++            if [ "${_o#*=}" = "$_o" ]; then
++                # if cmdline argument has no "=<value>", we assume "=1"
++                _val="1";
++                unset _doecho
++                continue
++            fi
++
++            _val="${_o#*=}"
++            _doecho=1
++        fi
++    done
++    if [ -n "$_val" ]; then
++        [ "x$_doecho" != "x" ] && echo "$_val";
++        return 0;
++    fi
++    return 1;
++}
++
++getarg() {
++    local _deprecated _newoption
++    while [ $# -gt 0 ]; do
++        case $1 in
++            -d) _deprecated=1; shift;;
++            -y) if _dogetarg $2 >/dev/null; then
++                    if [ "$_deprecated" = "1" ]; then
++                        [ -n "$_newoption" ] && warn "Kernel command line option '$2' is deprecated, use '$_newoption' instead." || warn "Option '$2' is deprecated."
++                    fi
++                    echo 1
++                    return 0
++                fi
++                _deprecated=0
++                shift 2;;
++            -n) if _dogetarg $2 >/dev/null; then
++                    echo 0;
++                    if [ "$_deprecated" = "1" ]; then
++                        [ -n "$_newoption" ] && warn "Kernel command line option '$2' is deprecated, use '$_newoption=0' instead." || warn "Option '$2' is deprecated."
++                    fi
++                    return 1
++                fi
++                _deprecated=0
++                shift 2;;
++            *)  if [ -z "$_newoption" ]; then
++                    _newoption="$1"
++                fi
++                if _dogetarg $1; then
++                    if [ "$_deprecated" = "1" ]; then
++                        [ -n "$_newoption" ] && warn "Kernel command line option '$1' is deprecated, use '$_newoption' instead." || warn "Option '$1' is deprecated."
++                    fi
++                    return 0;
++                fi
++                _deprecated=0
++                shift;;
++        esac
++    done
++    return 1
++}
++
++getargbool() {
++    local _b
++    unset _b
++    local _default
++    _default="$1"; shift
++    _b=$(getarg "$@")
++    [ $? -ne 0 -a -z "$_b" ] && _b="$_default"
++    if [ -n "$_b" ]; then
++        [ $_b = "0" ] && return 1
++        [ $_b = "no" ] && return 1
++        [ $_b = "off" ] && return 1
++    fi
++    return 0
++}
+ export PATH=/sbin:/bin:/usr/sbin:/usr/bin
+ strstr() { [ "${1##*"$2"*}" != "$1" ]; }
+ CMDLINE=$(while read line || [ -n "$line" ]; do echo $line;done < /proc/cmdline)
+@@ -12,7 +107,7 @@ export PS1='initramfs-test:\w\$ '
+ [ -f /etc/fstab ] || ln -sfn /proc/mounts /etc/fstab
+ stty sane
+ echo "made it to the rootfs!"
+-if strstr "$CMDLINE" "rd.shell"; then
++if getargbool 0 rd.shell; then
+ 	strstr "$(setsid --help)" "control" && CTTY="-c"
+ 	setsid $CTTY sh -i
+ fi
+diff --git a/test/TEST-01-BASIC/test.sh b/test/TEST-01-BASIC/test.sh
+index 959ac05..ab84074 100755
+--- a/test/TEST-01-BASIC/test.sh
++++ b/test/TEST-01-BASIC/test.sh
+@@ -14,7 +14,7 @@ test_run() {
+ 	-m 256M -smp 2 -nographic \
+ 	-net none \
+ 	-watchdog i6300esb -watchdog-action poweroff \
+-	-append "root=LABEL=dracut rw systemd.log_level=debug systemd.log_target=console rd.retry=3 rd.debug console=ttyS0,115200n81 $DEBUGFAIL" \
++	-append "root=LABEL=dracut rw systemd.log_level=debug systemd.log_target=console rd.retry=3 rd.debug console=ttyS0,115200n81 rd.shell=0 $DEBUGFAIL" \
+ 	-initrd $TESTDIR/initramfs.testing || return 1
+     grep -F -m 1 -q dracut-root-block-success $TESTDIR/result || return 1
+ }
+@@ -90,6 +90,7 @@ test_setup() {
+ 	. $basedir/dracut-init.sh
+ 	inst_multiple poweroff shutdown
+ 	inst_hook shutdown-emergency 000 ./hard-off.sh
++        inst_hook emergency 000 ./hard-off.sh
+ 	inst_simple ./99-idesymlinks.rules /etc/udev/rules.d/99-idesymlinks.rules
+     )
+     sudo $basedir/dracut.sh -l -i $TESTDIR/overlay / \
+diff --git a/test/TEST-02-SYSTEMD/hard-off.sh b/test/TEST-02-SYSTEMD/hard-off.sh
+index 12c3d5a..01acb19 100755
+--- a/test/TEST-02-SYSTEMD/hard-off.sh
++++ b/test/TEST-02-SYSTEMD/hard-off.sh
+@@ -1,3 +1,3 @@
+ #!/bin/sh
+-getarg rd.shell || poweroff -f
+-getarg failme && poweroff -f
++getargbool 0 rd.shell || poweroff -f
++getargbool 0 failme && poweroff -f
+diff --git a/test/TEST-02-SYSTEMD/test-init.sh b/test/TEST-02-SYSTEMD/test-init.sh
+index b7e0192..0999bc0 100755
+--- a/test/TEST-02-SYSTEMD/test-init.sh
++++ b/test/TEST-02-SYSTEMD/test-init.sh
+@@ -1,4 +1,102 @@
+ #!/bin/sh
++
++getcmdline() {
++    while read -r _line || [ -n "$_line" ]; do
++        printf "%s" "$line"
++    done </proc/cmdline;
++}
++
++_dogetarg() {
++    local _o _val _doecho
++    unset _val
++    unset _o
++    unset _doecho
++    CMDLINE=$(getcmdline)
++
++    for _o in $CMDLINE; do
++        if [ "${_o%%=*}" = "${1%%=*}" ]; then
++            if [ -n "${1#*=}" -a "${1#*=*}" != "${1}" ]; then
++                # if $1 has a "=<value>", we want the exact match
++                if [ "$_o" = "$1" ]; then
++                    _val="1";
++                    unset _doecho
++                fi
++                continue
++            fi
++
++            if [ "${_o#*=}" = "$_o" ]; then
++                # if cmdline argument has no "=<value>", we assume "=1"
++                _val="1";
++                unset _doecho
++                continue
++            fi
++
++            _val="${_o#*=}"
++            _doecho=1
++        fi
++    done
++    if [ -n "$_val" ]; then
++        [ "x$_doecho" != "x" ] && echo "$_val";
++        return 0;
++    fi
++    return 1;
++}
++
++getarg() {
++    local _deprecated _newoption
++    while [ $# -gt 0 ]; do
++        case $1 in
++            -d) _deprecated=1; shift;;
++            -y) if _dogetarg $2 >/dev/null; then
++                    if [ "$_deprecated" = "1" ]; then
++                        [ -n "$_newoption" ] && warn "Kernel command line option '$2' is deprecated, use '$_newoption' instead." || warn "Option '$2' is deprecated."
++                    fi
++                    echo 1
++                    return 0
++                fi
++                _deprecated=0
++                shift 2;;
++            -n) if _dogetarg $2 >/dev/null; then
++                    echo 0;
++                    if [ "$_deprecated" = "1" ]; then
++                        [ -n "$_newoption" ] && warn "Kernel command line option '$2' is deprecated, use '$_newoption=0' instead." || warn "Option '$2' is deprecated."
++                    fi
++                    return 1
++                fi
++                _deprecated=0
++                shift 2;;
++            *)  if [ -z "$_newoption" ]; then
++                    _newoption="$1"
++                fi
++                if _dogetarg $1; then
++                    if [ "$_deprecated" = "1" ]; then
++                        [ -n "$_newoption" ] && warn "Kernel command line option '$1' is deprecated, use '$_newoption' instead." || warn "Option '$1' is deprecated."
++                    fi
++                    return 0;
++                fi
++                _deprecated=0
++                shift;;
++        esac
++    done
++    return 1
++}
++
++getargbool() {
++    local _b
++    unset _b
++    local _default
++    _default="$1"; shift
++    _b=$(getarg "$@")
++    [ $? -ne 0 -a -z "$_b" ] && _b="$_default"
++    if [ -n "$_b" ]; then
++        [ $_b = "0" ] && return 1
++        [ $_b = "no" ] && return 1
++        [ $_b = "off" ] && return 1
++    fi
++    return 0
++}
++
++
+ export PATH=/sbin:/bin:/usr/sbin:/usr/bin
+ strstr() { [ "${1##*"$2"*}" != "$1" ]; }
+ CMDLINE=$(while read line || [ -n "$line" ]; do echo $line;done < /proc/cmdline)
+@@ -11,7 +109,7 @@ export PS1='initramfs-test:\w\$ '
+ [ -f /etc/fstab ] || ln -sfn /proc/mounts /etc/fstab
+ stty sane
+ echo "made it to the rootfs!"
+-if strstr "$CMDLINE" "rd.shell"; then
++if getargbool 0 rd.shell; then
+ 	strstr "$(setsid --help)" "control" && CTTY="-c"
+ 	setsid $CTTY sh -i
+ fi
+diff --git a/test/TEST-02-SYSTEMD/test.sh b/test/TEST-02-SYSTEMD/test.sh
+index 6dc6f42..350cff8 100755
+--- a/test/TEST-02-SYSTEMD/test.sh
++++ b/test/TEST-02-SYSTEMD/test.sh
+@@ -10,7 +10,7 @@ test_run() {
+ 	-drive format=raw,index=0,media=disk,file=$TESTDIR/root.ext3 \
+ 	-m 256M -smp 2 -nographic \
+ 	-net none \
+-	-append "root=LABEL=dracut rw loglevel=77 systemd.log_level=debug systemd.log_target=console rd.retry=3 rd.info console=ttyS0,115200n81 selinux=0 rd.debug init=/sbin/init $DEBUGFAIL" \
++	-append "root=LABEL=dracut rw loglevel=77 systemd.log_level=debug systemd.log_target=console rd.retry=3 rd.info console=ttyS0,115200n81 selinux=0 rd.debug init=/sbin/init rd.shell=0 $DEBUGFAIL" \
+ 	-initrd $TESTDIR/initramfs.testing
+     grep -F -m 1 -q dracut-root-block-success $TESTDIR/root.ext3 || return 1
+ }
+@@ -87,6 +87,7 @@ test_setup() {
+ 	. $basedir/dracut-init.sh
+ 	inst_multiple poweroff shutdown
+ 	inst_hook shutdown-emergency 000 ./hard-off.sh
++        inst_hook emergency 000 ./hard-off.sh
+ 	inst_simple ./99-idesymlinks.rules /etc/udev/rules.d/99-idesymlinks.rules
+     )
+     sudo $basedir/dracut.sh -l -i $TESTDIR/overlay / \
+diff --git a/test/TEST-03-USR-MOUNT/hard-off.sh b/test/TEST-03-USR-MOUNT/hard-off.sh
+index 12c3d5a..01acb19 100755
+--- a/test/TEST-03-USR-MOUNT/hard-off.sh
++++ b/test/TEST-03-USR-MOUNT/hard-off.sh
+@@ -1,3 +1,3 @@
+ #!/bin/sh
+-getarg rd.shell || poweroff -f
+-getarg failme && poweroff -f
++getargbool 0 rd.shell || poweroff -f
++getargbool 0 failme && poweroff -f
+diff --git a/test/TEST-03-USR-MOUNT/test-init.sh b/test/TEST-03-USR-MOUNT/test-init.sh
+index 48fbfea..68eaff0 100755
+--- a/test/TEST-03-USR-MOUNT/test-init.sh
++++ b/test/TEST-03-USR-MOUNT/test-init.sh
+@@ -1,5 +1,100 @@
+ #!/bin/sh
+ >/dev/watchdog
++getcmdline() {
++    while read -r _line || [ -n "$_line" ]; do
++        printf "%s" "$line"
++    done </proc/cmdline;
++}
++
++_dogetarg() {
++    local _o _val _doecho
++    unset _val
++    unset _o
++    unset _doecho
++    CMDLINE=$(getcmdline)
++
++    for _o in $CMDLINE; do
++        if [ "${_o%%=*}" = "${1%%=*}" ]; then
++            if [ -n "${1#*=}" -a "${1#*=*}" != "${1}" ]; then
++                # if $1 has a "=<value>", we want the exact match
++                if [ "$_o" = "$1" ]; then
++                    _val="1";
++                    unset _doecho
++                fi
++                continue
++            fi
++
++            if [ "${_o#*=}" = "$_o" ]; then
++                # if cmdline argument has no "=<value>", we assume "=1"
++                _val="1";
++                unset _doecho
++                continue
++            fi
++
++            _val="${_o#*=}"
++            _doecho=1
++        fi
++    done
++    if [ -n "$_val" ]; then
++        [ "x$_doecho" != "x" ] && echo "$_val";
++        return 0;
++    fi
++    return 1;
++}
++
++getarg() {
++    local _deprecated _newoption
++    while [ $# -gt 0 ]; do
++        case $1 in
++            -d) _deprecated=1; shift;;
++            -y) if _dogetarg $2 >/dev/null; then
++                    if [ "$_deprecated" = "1" ]; then
++                        [ -n "$_newoption" ] && warn "Kernel command line option '$2' is deprecated, use '$_newoption' instead." || warn "Option '$2' is deprecated."
++                    fi
++                    echo 1
++                    return 0
++                fi
++                _deprecated=0
++                shift 2;;
++            -n) if _dogetarg $2 >/dev/null; then
++                    echo 0;
++                    if [ "$_deprecated" = "1" ]; then
++                        [ -n "$_newoption" ] && warn "Kernel command line option '$2' is deprecated, use '$_newoption=0' instead." || warn "Option '$2' is deprecated."
++                    fi
++                    return 1
++                fi
++                _deprecated=0
++                shift 2;;
++            *)  if [ -z "$_newoption" ]; then
++                    _newoption="$1"
++                fi
++                if _dogetarg $1; then
++                    if [ "$_deprecated" = "1" ]; then
++                        [ -n "$_newoption" ] && warn "Kernel command line option '$1' is deprecated, use '$_newoption' instead." || warn "Option '$1' is deprecated."
++                    fi
++                    return 0;
++                fi
++                _deprecated=0
++                shift;;
++        esac
++    done
++    return 1
++}
++
++getargbool() {
++    local _b
++    unset _b
++    local _default
++    _default="$1"; shift
++    _b=$(getarg "$@")
++    [ $? -ne 0 -a -z "$_b" ] && _b="$_default"
++    if [ -n "$_b" ]; then
++        [ $_b = "0" ] && return 1
++        [ $_b = "no" ] && return 1
++        [ $_b = "off" ] && return 1
++    fi
++    return 0
++}
+ export PATH=/sbin:/bin:/usr/sbin:/usr/bin
+ strstr() { [ "${1##*"$2"*}" != "$1" ]; }
+ CMDLINE=$(while read line || [ -n "$line" ]; do echo $line;done < /proc/cmdline)
+@@ -22,7 +117,7 @@ export PS1='initramfs-test:\w\$ '
+ [ -f /etc/fstab ] || ln -sfn /proc/mounts /etc/fstab
+ stty sane
+ echo "made it to the rootfs!"
+-if strstr "$CMDLINE" "rd.shell"; then
++if getargbool 0 rd.shell; then
+ 	strstr "$(setsid --help)" "control" && CTTY="-c"
+ 	setsid $CTTY sh -i
+ fi
+diff --git a/test/TEST-03-USR-MOUNT/test.sh b/test/TEST-03-USR-MOUNT/test.sh
+index 0aca8cf..ed76d35 100755
+--- a/test/TEST-03-USR-MOUNT/test.sh
++++ b/test/TEST-03-USR-MOUNT/test.sh
+@@ -21,7 +21,7 @@ client_run() {
+ 	-m 256M -smp 2 -nographic \
+ 	-net none \
+ 	-watchdog i6300esb -watchdog-action poweroff \
+-	-append "root=LABEL=dracut $client_opts quiet rd.retry=3 rd.info console=ttyS0,115200n81 selinux=0 rd.debug $DEBUGFAIL" \
++	-append "root=LABEL=dracut $client_opts quiet rd.retry=3 rd.info console=ttyS0,115200n81 selinux=0 rd.debug rd.shell=0 $DEBUGFAIL" \
+ 	-initrd $TESTDIR/initramfs.testing
+ 
+     if (($? != 0)); then
+@@ -125,6 +125,7 @@ test_setup() {
+ 	. $basedir/dracut-init.sh
+ 	inst_multiple poweroff shutdown
+ 	inst_hook shutdown-emergency 000 ./hard-off.sh
++        inst_hook emergency 000 ./hard-off.sh
+ 	inst_simple ./99-idesymlinks.rules /etc/udev/rules.d/99-idesymlinks.rules
+     )
+     sudo $basedir/dracut.sh -l -i $TESTDIR/overlay / \
+diff --git a/test/TEST-04-FULL-SYSTEMD/hard-off.sh b/test/TEST-04-FULL-SYSTEMD/hard-off.sh
+index 12c3d5a..01acb19 100755
+--- a/test/TEST-04-FULL-SYSTEMD/hard-off.sh
++++ b/test/TEST-04-FULL-SYSTEMD/hard-off.sh
+@@ -1,3 +1,3 @@
+ #!/bin/sh
+-getarg rd.shell || poweroff -f
+-getarg failme && poweroff -f
++getargbool 0 rd.shell || poweroff -f
++getargbool 0 failme && poweroff -f
+diff --git a/test/TEST-04-FULL-SYSTEMD/test-init.sh b/test/TEST-04-FULL-SYSTEMD/test-init.sh
+index ad516f1..e388afc 100755
+--- a/test/TEST-04-FULL-SYSTEMD/test-init.sh
++++ b/test/TEST-04-FULL-SYSTEMD/test-init.sh
+@@ -1,5 +1,100 @@
+ #!/bin/sh
+ >/dev/watchdog
++getcmdline() {
++    while read -r _line || [ -n "$_line" ]; do
++        printf "%s" "$line"
++    done </proc/cmdline;
++}
++
++_dogetarg() {
++    local _o _val _doecho
++    unset _val
++    unset _o
++    unset _doecho
++    CMDLINE=$(getcmdline)
++
++    for _o in $CMDLINE; do
++        if [ "${_o%%=*}" = "${1%%=*}" ]; then
++            if [ -n "${1#*=}" -a "${1#*=*}" != "${1}" ]; then
++                # if $1 has a "=<value>", we want the exact match
++                if [ "$_o" = "$1" ]; then
++                    _val="1";
++                    unset _doecho
++                fi
++                continue
++            fi
++
++            if [ "${_o#*=}" = "$_o" ]; then
++                # if cmdline argument has no "=<value>", we assume "=1"
++                _val="1";
++                unset _doecho
++                continue
++            fi
++
++            _val="${_o#*=}"
++            _doecho=1
++        fi
++    done
++    if [ -n "$_val" ]; then
++        [ "x$_doecho" != "x" ] && echo "$_val";
++        return 0;
++    fi
++    return 1;
++}
++
++getarg() {
++    local _deprecated _newoption
++    while [ $# -gt 0 ]; do
++        case $1 in
++            -d) _deprecated=1; shift;;
++            -y) if _dogetarg $2 >/dev/null; then
++                    if [ "$_deprecated" = "1" ]; then
++                        [ -n "$_newoption" ] && warn "Kernel command line option '$2' is deprecated, use '$_newoption' instead." || warn "Option '$2' is deprecated."
++                    fi
++                    echo 1
++                    return 0
++                fi
++                _deprecated=0
++                shift 2;;
++            -n) if _dogetarg $2 >/dev/null; then
++                    echo 0;
++                    if [ "$_deprecated" = "1" ]; then
++                        [ -n "$_newoption" ] && warn "Kernel command line option '$2' is deprecated, use '$_newoption=0' instead." || warn "Option '$2' is deprecated."
++                    fi
++                    return 1
++                fi
++                _deprecated=0
++                shift 2;;
++            *)  if [ -z "$_newoption" ]; then
++                    _newoption="$1"
++                fi
++                if _dogetarg $1; then
++                    if [ "$_deprecated" = "1" ]; then
++                        [ -n "$_newoption" ] && warn "Kernel command line option '$1' is deprecated, use '$_newoption' instead." || warn "Option '$1' is deprecated."
++                    fi
++                    return 0;
++                fi
++                _deprecated=0
++                shift;;
++        esac
++    done
++    return 1
++}
++
++getargbool() {
++    local _b
++    unset _b
++    local _default
++    _default="$1"; shift
++    _b=$(getarg "$@")
++    [ $? -ne 0 -a -z "$_b" ] && _b="$_default"
++    if [ -n "$_b" ]; then
++        [ $_b = "0" ] && return 1
++        [ $_b = "no" ] && return 1
++        [ $_b = "off" ] && return 1
++    fi
++    return 0
++}
+ export PATH=/sbin:/bin:/usr/sbin:/usr/bin
+ strstr() { [ "${1##*"$2"*}" != "$1" ]; }
+ CMDLINE=$(while read line || [ -n "$line" ]; do echo $line;done < /proc/cmdline)
+@@ -35,7 +130,7 @@ export PS1='initramfs-test:\w\$ '
+ [ -f /etc/fstab ] || ln -sfn /proc/mounts /etc/fstab
+ stty sane
+ echo "made it to the rootfs!"
+-if strstr "$CMDLINE" "rd.shell"; then
++if getargbool 0 rd.shell; then
+ #	while sleep 1; do sleep 1;done
+ 	strstr "$(setsid --help)" "control" && CTTY="-c"
+ 	setsid $CTTY sh -i
+diff --git a/test/TEST-04-FULL-SYSTEMD/test.sh b/test/TEST-04-FULL-SYSTEMD/test.sh
+index 884f441..88711ef 100755
+--- a/test/TEST-04-FULL-SYSTEMD/test.sh
++++ b/test/TEST-04-FULL-SYSTEMD/test.sh
+@@ -22,7 +22,7 @@ client_run() {
+ 	-drive format=raw,index=2,media=disk,file=$TESTDIR/result \
+ 	-m 256M -smp 2 -nographic \
+ 	-net none \
+-	-append "root=LABEL=dracut $client_opts rd.retry=3 console=ttyS0,115200n81 selinux=0 $DEBUGOUT $DEBUGFAIL" \
++	-append "root=LABEL=dracut $client_opts rd.retry=3 console=ttyS0,115200n81 selinux=0 $DEBUGOUT rd.shell=0 $DEBUGFAIL" \
+ 	-initrd $TESTDIR/initramfs.testing
+ 
+     if (($? != 0)); then
+@@ -262,6 +262,7 @@ EOF
+ 	. $basedir/dracut-init.sh
+ 	inst_multiple poweroff shutdown
+ 	inst_hook shutdown-emergency 000 ./hard-off.sh
++        inst_hook emergency 000 ./hard-off.sh
+ 	inst_simple ./99-idesymlinks.rules /etc/udev/rules.d/99-idesymlinks.rules
+     )
+ 
+diff --git a/test/TEST-10-RAID/hard-off.sh b/test/TEST-10-RAID/hard-off.sh
+index 12c3d5a..01acb19 100755
+--- a/test/TEST-10-RAID/hard-off.sh
++++ b/test/TEST-10-RAID/hard-off.sh
+@@ -1,3 +1,3 @@
+ #!/bin/sh
+-getarg rd.shell || poweroff -f
+-getarg failme && poweroff -f
++getargbool 0 rd.shell || poweroff -f
++getargbool 0 failme && poweroff -f
+diff --git a/test/TEST-10-RAID/test-init.sh b/test/TEST-10-RAID/test-init.sh
+index c7c114e..7eb932a 100755
+--- a/test/TEST-10-RAID/test-init.sh
++++ b/test/TEST-10-RAID/test-init.sh
+@@ -1,5 +1,100 @@
+ #!/bin/sh
+ export PATH=/sbin:/bin:/usr/sbin:/usr/bin
++getcmdline() {
++    while read -r _line || [ -n "$_line" ]; do
++        printf "%s" "$line"
++    done </proc/cmdline;
++}
++
++_dogetarg() {
++    local _o _val _doecho
++    unset _val
++    unset _o
++    unset _doecho
++    CMDLINE=$(getcmdline)
++
++    for _o in $CMDLINE; do
++        if [ "${_o%%=*}" = "${1%%=*}" ]; then
++            if [ -n "${1#*=}" -a "${1#*=*}" != "${1}" ]; then
++                # if $1 has a "=<value>", we want the exact match
++                if [ "$_o" = "$1" ]; then
++                    _val="1";
++                    unset _doecho
++                fi
++                continue
++            fi
++
++            if [ "${_o#*=}" = "$_o" ]; then
++                # if cmdline argument has no "=<value>", we assume "=1"
++                _val="1";
++                unset _doecho
++                continue
++            fi
++
++            _val="${_o#*=}"
++            _doecho=1
++        fi
++    done
++    if [ -n "$_val" ]; then
++        [ "x$_doecho" != "x" ] && echo "$_val";
++        return 0;
++    fi
++    return 1;
++}
++
++getarg() {
++    local _deprecated _newoption
++    while [ $# -gt 0 ]; do
++        case $1 in
++            -d) _deprecated=1; shift;;
++            -y) if _dogetarg $2 >/dev/null; then
++                    if [ "$_deprecated" = "1" ]; then
++                        [ -n "$_newoption" ] && warn "Kernel command line option '$2' is deprecated, use '$_newoption' instead." || warn "Option '$2' is deprecated."
++                    fi
++                    echo 1
++                    return 0
++                fi
++                _deprecated=0
++                shift 2;;
++            -n) if _dogetarg $2 >/dev/null; then
++                    echo 0;
++                    if [ "$_deprecated" = "1" ]; then
++                        [ -n "$_newoption" ] && warn "Kernel command line option '$2' is deprecated, use '$_newoption=0' instead." || warn "Option '$2' is deprecated."
++                    fi
++                    return 1
++                fi
++                _deprecated=0
++                shift 2;;
++            *)  if [ -z "$_newoption" ]; then
++                    _newoption="$1"
++                fi
++                if _dogetarg $1; then
++                    if [ "$_deprecated" = "1" ]; then
++                        [ -n "$_newoption" ] && warn "Kernel command line option '$1' is deprecated, use '$_newoption' instead." || warn "Option '$1' is deprecated."
++                    fi
++                    return 0;
++                fi
++                _deprecated=0
++                shift;;
++        esac
++    done
++    return 1
++}
++
++getargbool() {
++    local _b
++    unset _b
++    local _default
++    _default="$1"; shift
++    _b=$(getarg "$@")
++    [ $? -ne 0 -a -z "$_b" ] && _b="$_default"
++    if [ -n "$_b" ]; then
++        [ $_b = "0" ] && return 1
++        [ $_b = "no" ] && return 1
++        [ $_b = "off" ] && return 1
++    fi
++    return 0
++}
+ strstr() { [ "${1##*"$2"*}" != "$1" ]; }
+ CMDLINE=$(while read line || [ -n "$line" ]; do echo $line;done < /proc/cmdline)
+ command -v plymouth >/dev/null && plymouth --quit
+@@ -11,7 +106,7 @@ export PS1='initramfs-test:\w\$ '
+ [ -f /etc/fstab ] || ln -sfn /proc/mounts /etc/fstab
+ stty sane
+ echo "made it to the rootfs!"
+-strstr "$CMDLINE" "rd.shell" && sh -i
++getargbool 0 rd.shell && sh -i
+ echo "Powering down."
+ mount -n -o remount,ro /
+ #echo " rd.break=shutdown " >> /run/initramfs/etc/cmdline
+diff --git a/test/TEST-10-RAID/test.sh b/test/TEST-10-RAID/test.sh
+index 6ec77a6..2d09314 100755
+--- a/test/TEST-10-RAID/test.sh
++++ b/test/TEST-10-RAID/test.sh
+@@ -12,7 +12,7 @@ test_run() {
+ 	-drive format=raw,index=0,media=disk,file=$DISKIMAGE \
+ 	-m 256M -smp 2 -nographic \
+ 	-net none \
+-	-append "root=/dev/dracut/root rd.auto rw rd.retry=10 console=ttyS0,115200n81 selinux=0 $DEBUGFAIL" \
++	-append "root=/dev/dracut/root rd.auto rw rd.retry=10 console=ttyS0,115200n81 selinux=0 rd.shell=0 $DEBUGFAIL" \
+ 	-initrd $TESTDIR/initramfs.testing
+     grep -F -m 1 -q dracut-root-block-success $DISKIMAGE || return 1
+ }
+@@ -87,6 +87,7 @@ test_setup() {
+ 	. $basedir/dracut-init.sh
+ 	inst_multiple poweroff shutdown
+ 	inst_hook shutdown-emergency 000 ./hard-off.sh
++        inst_hook emergency 000 ./hard-off.sh
+ 	inst ./cryptroot-ask.sh /sbin/cryptroot-ask
+         mkdir -p $initdir/etc
+         echo "testluks UUID=$ID_FS_UUID /etc/key" > $initdir/etc/crypttab
+diff --git a/test/TEST-11-LVM/hard-off.sh b/test/TEST-11-LVM/hard-off.sh
+index 12c3d5a..01acb19 100755
+--- a/test/TEST-11-LVM/hard-off.sh
++++ b/test/TEST-11-LVM/hard-off.sh
+@@ -1,3 +1,3 @@
+ #!/bin/sh
+-getarg rd.shell || poweroff -f
+-getarg failme && poweroff -f
++getargbool 0 rd.shell || poweroff -f
++getargbool 0 failme && poweroff -f
+diff --git a/test/TEST-11-LVM/test-init.sh b/test/TEST-11-LVM/test-init.sh
+index 61a9543..18fd2b3 100755
+--- a/test/TEST-11-LVM/test-init.sh
++++ b/test/TEST-11-LVM/test-init.sh
+@@ -1,5 +1,100 @@
+ #!/bin/sh
+ export PATH=/sbin:/bin:/usr/sbin:/usr/bin
++getcmdline() {
++    while read -r _line || [ -n "$_line" ]; do
++        printf "%s" "$line"
++    done </proc/cmdline;
++}
++
++_dogetarg() {
++    local _o _val _doecho
++    unset _val
++    unset _o
++    unset _doecho
++    CMDLINE=$(getcmdline)
++
++    for _o in $CMDLINE; do
++        if [ "${_o%%=*}" = "${1%%=*}" ]; then
++            if [ -n "${1#*=}" -a "${1#*=*}" != "${1}" ]; then
++                # if $1 has a "=<value>", we want the exact match
++                if [ "$_o" = "$1" ]; then
++                    _val="1";
++                    unset _doecho
++                fi
++                continue
++            fi
++
++            if [ "${_o#*=}" = "$_o" ]; then
++                # if cmdline argument has no "=<value>", we assume "=1"
++                _val="1";
++                unset _doecho
++                continue
++            fi
++
++            _val="${_o#*=}"
++            _doecho=1
++        fi
++    done
++    if [ -n "$_val" ]; then
++        [ "x$_doecho" != "x" ] && echo "$_val";
++        return 0;
++    fi
++    return 1;
++}
++
++getarg() {
++    local _deprecated _newoption
++    while [ $# -gt 0 ]; do
++        case $1 in
++            -d) _deprecated=1; shift;;
++            -y) if _dogetarg $2 >/dev/null; then
++                    if [ "$_deprecated" = "1" ]; then
++                        [ -n "$_newoption" ] && warn "Kernel command line option '$2' is deprecated, use '$_newoption' instead." || warn "Option '$2' is deprecated."
++                    fi
++                    echo 1
++                    return 0
++                fi
++                _deprecated=0
++                shift 2;;
++            -n) if _dogetarg $2 >/dev/null; then
++                    echo 0;
++                    if [ "$_deprecated" = "1" ]; then
++                        [ -n "$_newoption" ] && warn "Kernel command line option '$2' is deprecated, use '$_newoption=0' instead." || warn "Option '$2' is deprecated."
++                    fi
++                    return 1
++                fi
++                _deprecated=0
++                shift 2;;
++            *)  if [ -z "$_newoption" ]; then
++                    _newoption="$1"
++                fi
++                if _dogetarg $1; then
++                    if [ "$_deprecated" = "1" ]; then
++                        [ -n "$_newoption" ] && warn "Kernel command line option '$1' is deprecated, use '$_newoption' instead." || warn "Option '$1' is deprecated."
++                    fi
++                    return 0;
++                fi
++                _deprecated=0
++                shift;;
++        esac
++    done
++    return 1
++}
++
++getargbool() {
++    local _b
++    unset _b
++    local _default
++    _default="$1"; shift
++    _b=$(getarg "$@")
++    [ $? -ne 0 -a -z "$_b" ] && _b="$_default"
++    if [ -n "$_b" ]; then
++        [ $_b = "0" ] && return 1
++        [ $_b = "no" ] && return 1
++        [ $_b = "off" ] && return 1
++    fi
++    return 0
++}
+ strstr() { [ "${1##*"$2"*}" != "$1" ]; }
+ CMDLINE=$(while read line || [ -n "$line" ]; do echo $line;done < /proc/cmdline)
+ plymouth --quit
+@@ -11,7 +106,7 @@ export PS1='initramfs-test:\w\$ '
+ [ -f /etc/fstab ] || ln -sfn /proc/mounts /etc/fstab
+ stty sane
+ echo "made it to the rootfs!"
+-strstr "$CMDLINE" "rd.shell" && sh -i
++getargbool 0 rd.shell && sh -i
+ echo "Powering down."
+ mount -n -o remount,ro /
+ poweroff -f
+diff --git a/test/TEST-11-LVM/test.sh b/test/TEST-11-LVM/test.sh
+index 412a065..97c2f97 100755
+--- a/test/TEST-11-LVM/test.sh
++++ b/test/TEST-11-LVM/test.sh
+@@ -11,7 +11,7 @@ test_run() {
+ 	-drive format=raw,index=0,media=disk,file=$TESTDIR/root.ext2 \
+ 	-m 256M -smp 2 -nographic \
+ 	-net none \
+-	-append "root=/dev/dracut/root rw rd.auto=1 quiet rd.retry=3 rd.info console=ttyS0,115200n81 selinux=0 rd.debug  $DEBUGFAIL" \
++	-append "root=/dev/dracut/root rw rd.auto=1 quiet rd.retry=3 rd.info console=ttyS0,115200n81 selinux=0 rd.debug rd.shell=0 $DEBUGFAIL" \
+ 	-initrd $TESTDIR/initramfs.testing
+     grep -F -m 1 -q dracut-root-block-success $TESTDIR/root.ext2 || return 1
+ }
+@@ -80,6 +80,7 @@ test_setup() {
+ 	. $basedir/dracut-init.sh
+ 	inst_multiple poweroff shutdown
+ 	inst_hook shutdown-emergency 000 ./hard-off.sh
++        inst_hook emergency 000 ./hard-off.sh
+ 	inst_simple ./99-idesymlinks.rules /etc/udev/rules.d/99-idesymlinks.rules
+     )
+     sudo $basedir/dracut.sh -l -i $TESTDIR/overlay / \
+diff --git a/test/TEST-12-RAID-DEG/hard-off.sh b/test/TEST-12-RAID-DEG/hard-off.sh
+index 07a8f1f..cf44fb0 100755
+--- a/test/TEST-12-RAID-DEG/hard-off.sh
++++ b/test/TEST-12-RAID-DEG/hard-off.sh
+@@ -1,3 +1,3 @@
+ #!/bin/sh
+-getarg rd.shell || poweroff -f
+-! getarg rd.break && getarg failme && poweroff -f
++getargbool 0 rd.shell || poweroff -f
++! getargbool 0 rd.break && getargbool 0 failme && poweroff -f
+diff --git a/test/TEST-12-RAID-DEG/test-init.sh b/test/TEST-12-RAID-DEG/test-init.sh
+index c7c114e..7eb932a 100755
+--- a/test/TEST-12-RAID-DEG/test-init.sh
++++ b/test/TEST-12-RAID-DEG/test-init.sh
+@@ -1,5 +1,100 @@
+ #!/bin/sh
+ export PATH=/sbin:/bin:/usr/sbin:/usr/bin
++getcmdline() {
++    while read -r _line || [ -n "$_line" ]; do
++        printf "%s" "$line"
++    done </proc/cmdline;
++}
++
++_dogetarg() {
++    local _o _val _doecho
++    unset _val
++    unset _o
++    unset _doecho
++    CMDLINE=$(getcmdline)
++
++    for _o in $CMDLINE; do
++        if [ "${_o%%=*}" = "${1%%=*}" ]; then
++            if [ -n "${1#*=}" -a "${1#*=*}" != "${1}" ]; then
++                # if $1 has a "=<value>", we want the exact match
++                if [ "$_o" = "$1" ]; then
++                    _val="1";
++                    unset _doecho
++                fi
++                continue
++            fi
++
++            if [ "${_o#*=}" = "$_o" ]; then
++                # if cmdline argument has no "=<value>", we assume "=1"
++                _val="1";
++                unset _doecho
++                continue
++            fi
++
++            _val="${_o#*=}"
++            _doecho=1
++        fi
++    done
++    if [ -n "$_val" ]; then
++        [ "x$_doecho" != "x" ] && echo "$_val";
++        return 0;
++    fi
++    return 1;
++}
++
++getarg() {
++    local _deprecated _newoption
++    while [ $# -gt 0 ]; do
++        case $1 in
++            -d) _deprecated=1; shift;;
++            -y) if _dogetarg $2 >/dev/null; then
++                    if [ "$_deprecated" = "1" ]; then
++                        [ -n "$_newoption" ] && warn "Kernel command line option '$2' is deprecated, use '$_newoption' instead." || warn "Option '$2' is deprecated."
++                    fi
++                    echo 1
++                    return 0
++                fi
++                _deprecated=0
++                shift 2;;
++            -n) if _dogetarg $2 >/dev/null; then
++                    echo 0;
++                    if [ "$_deprecated" = "1" ]; then
++                        [ -n "$_newoption" ] && warn "Kernel command line option '$2' is deprecated, use '$_newoption=0' instead." || warn "Option '$2' is deprecated."
++                    fi
++                    return 1
++                fi
++                _deprecated=0
++                shift 2;;
++            *)  if [ -z "$_newoption" ]; then
++                    _newoption="$1"
++                fi
++                if _dogetarg $1; then
++                    if [ "$_deprecated" = "1" ]; then
++                        [ -n "$_newoption" ] && warn "Kernel command line option '$1' is deprecated, use '$_newoption' instead." || warn "Option '$1' is deprecated."
++                    fi
++                    return 0;
++                fi
++                _deprecated=0
++                shift;;
++        esac
++    done
++    return 1
++}
++
++getargbool() {
++    local _b
++    unset _b
++    local _default
++    _default="$1"; shift
++    _b=$(getarg "$@")
++    [ $? -ne 0 -a -z "$_b" ] && _b="$_default"
++    if [ -n "$_b" ]; then
++        [ $_b = "0" ] && return 1
++        [ $_b = "no" ] && return 1
++        [ $_b = "off" ] && return 1
++    fi
++    return 0
++}
+ strstr() { [ "${1##*"$2"*}" != "$1" ]; }
+ CMDLINE=$(while read line || [ -n "$line" ]; do echo $line;done < /proc/cmdline)
+ command -v plymouth >/dev/null && plymouth --quit
+@@ -11,7 +106,7 @@ export PS1='initramfs-test:\w\$ '
+ [ -f /etc/fstab ] || ln -sfn /proc/mounts /etc/fstab
+ stty sane
+ echo "made it to the rootfs!"
+-strstr "$CMDLINE" "rd.shell" && sh -i
++getargbool 0 rd.shell && sh -i
+ echo "Powering down."
+ mount -n -o remount,ro /
+ #echo " rd.break=shutdown " >> /run/initramfs/etc/cmdline
+diff --git a/test/TEST-12-RAID-DEG/test.sh b/test/TEST-12-RAID-DEG/test.sh
+index 444dca6..09d78dd 100755
+--- a/test/TEST-12-RAID-DEG/test.sh
++++ b/test/TEST-12-RAID-DEG/test.sh
+@@ -19,7 +19,7 @@ client_run() {
+ 	-drive format=raw,index=2,media=disk,file=$TESTDIR/disk2.img.new \
+ 	-drive format=raw,index=3,media=disk,file=$TESTDIR/disk3.img.new \
+ 	-net none \
+-	-append "$* root=LABEL=root rw rd.retry=10 rd.info console=ttyS0,115200n81 selinux=0 rd.debug $DEBUGFAIL " \
++	-append "$* root=LABEL=root rw rd.retry=10 rd.info console=ttyS0,115200n81 selinux=0 rd.debug rd.shell=0 $DEBUGFAIL " \
+ 	-initrd $TESTDIR/initramfs.testing
+     if ! grep -F -m 1 -q dracut-root-block-success $TESTDIR/root.ext2; then
+ 	echo "CLIENT TEST END: $@ [FAIL]"
+@@ -130,6 +130,7 @@ test_setup() {
+ 	. $basedir/dracut-init.sh
+ 	inst_multiple poweroff shutdown
+ 	inst_hook shutdown-emergency 000 ./hard-off.sh
++        inst_hook emergency 000 ./hard-off.sh
+ 	inst_simple ./99-idesymlinks.rules /etc/udev/rules.d/99-idesymlinks.rules
+ 	inst ./cryptroot-ask.sh /sbin/cryptroot-ask
+         mkdir -p $initdir/etc
+diff --git a/test/TEST-13-ENC-RAID-LVM/hard-off.sh b/test/TEST-13-ENC-RAID-LVM/hard-off.sh
+index 12c3d5a..01acb19 100755
+--- a/test/TEST-13-ENC-RAID-LVM/hard-off.sh
++++ b/test/TEST-13-ENC-RAID-LVM/hard-off.sh
+@@ -1,3 +1,3 @@
+ #!/bin/sh
+-getarg rd.shell || poweroff -f
+-getarg failme && poweroff -f
++getargbool 0 rd.shell || poweroff -f
++getargbool 0 failme && poweroff -f
+diff --git a/test/TEST-13-ENC-RAID-LVM/test.sh b/test/TEST-13-ENC-RAID-LVM/test.sh
+index 2a814f8..3e8c3e2 100755
+--- a/test/TEST-13-ENC-RAID-LVM/test.sh
++++ b/test/TEST-13-ENC-RAID-LVM/test.sh
+@@ -19,7 +19,7 @@ test_run() {
+ 	-drive format=raw,index=1,media=disk,file=$TESTDIR/check-success.img \
+ 	-m 256M -smp 2 -nographic \
+ 	-net none \
+-	-append "root=/dev/dracut/root rw rd.auto rd.retry=20 console=ttyS0,115200n81 selinux=0 rd.debug rootwait $LUKSARGS $DEBUGFAIL" \
++	-append "root=/dev/dracut/root rw rd.auto rd.retry=20 console=ttyS0,115200n81 selinux=0 rd.debug rootwait $LUKSARGS rd.shell=0 $DEBUGFAIL" \
+ 	-initrd $TESTDIR/initramfs.testing
+     grep -F -m 1 -q dracut-root-block-success $TESTDIR/check-success.img || return 1
+     echo "CLIENT TEST END: [OK]"
+@@ -124,6 +124,7 @@ test_setup() {
+ 	. $basedir/dracut-init.sh
+ 	inst_multiple poweroff shutdown
+ 	inst_hook shutdown-emergency 000 ./hard-off.sh
++        inst_hook emergency 000 ./hard-off.sh
+ 	inst_simple ./99-idesymlinks.rules /etc/udev/rules.d/99-idesymlinks.rules
+ 	inst ./cryptroot-ask.sh /sbin/cryptroot-ask
+         mkdir -p $initdir/etc
+diff --git a/test/TEST-14-IMSM/hard-off.sh b/test/TEST-14-IMSM/hard-off.sh
+index f340d2d..780a0b2 100755
+--- a/test/TEST-14-IMSM/hard-off.sh
++++ b/test/TEST-14-IMSM/hard-off.sh
+@@ -1,3 +1,3 @@
+ #!/bin/sh
+-getarg rd.shell || poweroff -f 
+-getarg failme && poweroff -f 
++getargbool 0 rd.shell || poweroff -f 
++getargbool 0 failme && poweroff -f 
+diff --git a/test/TEST-14-IMSM/test-init.sh b/test/TEST-14-IMSM/test-init.sh
+index ba63245..127185a 100755
+--- a/test/TEST-14-IMSM/test-init.sh
++++ b/test/TEST-14-IMSM/test-init.sh
+@@ -1,4 +1,99 @@
+ #!/bin/sh
++getcmdline() {
++    while read -r _line || [ -n "$_line" ]; do
++        printf "%s" "$line"
++    done </proc/cmdline;
++}
++
++_dogetarg() {
++    local _o _val _doecho
++    unset _val
++    unset _o
++    unset _doecho
++    CMDLINE=$(getcmdline)
++
++    for _o in $CMDLINE; do
++        if [ "${_o%%=*}" = "${1%%=*}" ]; then
++            if [ -n "${1#*=}" -a "${1#*=*}" != "${1}" ]; then
++                # if $1 has a "=<value>", we want the exact match
++                if [ "$_o" = "$1" ]; then
++                    _val="1";
++                    unset _doecho
++                fi
++                continue
++            fi
++
++            if [ "${_o#*=}" = "$_o" ]; then
++                # if cmdline argument has no "=<value>", we assume "=1"
++                _val="1";
++                unset _doecho
++                continue
++            fi
++
++            _val="${_o#*=}"
++            _doecho=1
++        fi
++    done
++    if [ -n "$_val" ]; then
++        [ "x$_doecho" != "x" ] && echo "$_val";
++        return 0;
++    fi
++    return 1;
++}
++
++getarg() {
++    local _deprecated _newoption
++    while [ $# -gt 0 ]; do
++        case $1 in
++            -d) _deprecated=1; shift;;
++            -y) if _dogetarg $2 >/dev/null; then
++                    if [ "$_deprecated" = "1" ]; then
++                        [ -n "$_newoption" ] && warn "Kernel command line option '$2' is deprecated, use '$_newoption' instead." || warn "Option '$2' is deprecated."
++                    fi
++                    echo 1
++                    return 0
++                fi
++                _deprecated=0
++                shift 2;;
++            -n) if _dogetarg $2 >/dev/null; then
++                    echo 0;
++                    if [ "$_deprecated" = "1" ]; then
++                        [ -n "$_newoption" ] && warn "Kernel command line option '$2' is deprecated, use '$_newoption=0' instead." || warn "Option '$2' is deprecated."
++                    fi
++                    return 1
++                fi
++                _deprecated=0
++                shift 2;;
++            *)  if [ -z "$_newoption" ]; then
++                    _newoption="$1"
++                fi
++                if _dogetarg $1; then
++                    if [ "$_deprecated" = "1" ]; then
++                        [ -n "$_newoption" ] && warn "Kernel command line option '$1' is deprecated, use '$_newoption' instead." || warn "Option '$1' is deprecated."
++                    fi
++                    return 0;
++                fi
++                _deprecated=0
++                shift;;
++        esac
++    done
++    return 1
++}
++
++getargbool() {
++    local _b
++    unset _b
++    local _default
++    _default="$1"; shift
++    _b=$(getarg "$@")
++    [ $? -ne 0 -a -z "$_b" ] && _b="$_default"
++    if [ -n "$_b" ]; then
++        [ $_b = "0" ] && return 1
++        [ $_b = "no" ] && return 1
++        [ $_b = "off" ] && return 1
++    fi
++    return 0
++}
+ export PATH=/sbin:/bin:/usr/sbin:/usr/bin
+ strstr() { [ "${1##*"$2"*}" != "$1" ]; }
+ CMDLINE=$(while read line || [ -n "$line" ]; do echo $line;done < /proc/cmdline)
+@@ -11,7 +106,7 @@ cat /proc/mdstat
+ [ -f /etc/fstab ] || ln -s /proc/mounts /etc/fstab
+ stty sane
+ echo "made it to the rootfs!"
+-strstr "$CMDLINE" "rd.shell" && sh -i
++getargbool 0 rd.shell && sh -i
+ echo "Powering down."
+ mount -n -o remount,ro /
+ poweroff -f
+diff --git a/test/TEST-14-IMSM/test.sh b/test/TEST-14-IMSM/test.sh
+index 315bc5a..9083fd5 100755
+--- a/test/TEST-14-IMSM/test.sh
++++ b/test/TEST-14-IMSM/test.sh
+@@ -15,7 +15,7 @@ client_run() {
+ 	-drive format=raw,index=2,media=disk,file=$TESTDIR/disk2 \
+ 	-m 256M -nographic \
+ 	-net none \
+-	-append "$* root=LABEL=root rw debug rd.retry=5 rd.debug console=ttyS0,115200n81 selinux=0 rd.info $DEBUGFAIL" \
++	-append "$* root=LABEL=root rw debug rd.retry=5 rd.debug console=ttyS0,115200n81 selinux=0 rd.info rd.shell=0 $DEBUGFAIL" \
+ 	-initrd $TESTDIR/initramfs.testing
+     if ! grep -F -m 1 -q dracut-root-block-success $TESTDIR/root.ext2; then
+ 	echo "CLIENT TEST END: $@ [FAIL]"
+@@ -114,6 +114,7 @@ test_setup() {
+ 	. $basedir/dracut-init.sh
+ 	inst_multiple poweroff shutdown
+ 	inst_hook shutdown-emergency 000 ./hard-off.sh
++        inst_hook emergency 000 ./hard-off.sh
+ 	inst_simple ./99-idesymlinks.rules /etc/udev/rules.d/99-idesymlinks.rules
+     )
+     sudo $basedir/dracut.sh -l -i $TESTDIR/overlay / \
+diff --git a/test/TEST-15-BTRFSRAID/hard-off.sh b/test/TEST-15-BTRFSRAID/hard-off.sh
+index 12c3d5a..01acb19 100755
+--- a/test/TEST-15-BTRFSRAID/hard-off.sh
++++ b/test/TEST-15-BTRFSRAID/hard-off.sh
+@@ -1,3 +1,3 @@
+ #!/bin/sh
+-getarg rd.shell || poweroff -f
+-getarg failme && poweroff -f
++getargbool 0 rd.shell || poweroff -f
++getargbool 0 failme && poweroff -f
+diff --git a/test/TEST-15-BTRFSRAID/test.sh b/test/TEST-15-BTRFSRAID/test.sh
+index 8e2ea49..281f856 100755
+--- a/test/TEST-15-BTRFSRAID/test.sh
++++ b/test/TEST-15-BTRFSRAID/test.sh
+@@ -11,7 +11,7 @@ test_run() {
+ 	-drive format=raw,index=0,media=disk,file=$DISKIMAGE \
+ 	-m 256M  -smp 2 -nographic \
+ 	-net none \
+-	-append "root=LABEL=root rw rd.retry=3 rd.info console=ttyS0,115200n81 selinux=0 $DEBUGFAIL" \
++	-append "root=LABEL=root rw rd.retry=3 rd.info console=ttyS0,115200n81 selinux=0 rd.shell=0 $DEBUGFAIL" \
+ 	-initrd $TESTDIR/initramfs.testing
+     dd if=$DISKIMAGE bs=512 count=4 skip=2048 | grep -F -m 1 -q dracut-root-block-success $DISKIMAGE || return 1
+ }
+@@ -88,6 +88,7 @@ test_setup() {
+ 	. $basedir/dracut-init.sh
+ 	inst_multiple poweroff shutdown
+ 	inst_hook shutdown-emergency 000 ./hard-off.sh
++        inst_hook emergency 000 ./hard-off.sh
+ 	inst_simple ./99-idesymlinks.rules /etc/udev/rules.d/99-idesymlinks.rules
+     )
+     sudo $basedir/dracut.sh -l -i $TESTDIR/overlay / \
+diff --git a/test/TEST-16-DMSQUASH/hard-off.sh b/test/TEST-16-DMSQUASH/hard-off.sh
+index 12c3d5a..01acb19 100755
+--- a/test/TEST-16-DMSQUASH/hard-off.sh
++++ b/test/TEST-16-DMSQUASH/hard-off.sh
+@@ -1,3 +1,3 @@
+ #!/bin/sh
+-getarg rd.shell || poweroff -f
+-getarg failme && poweroff -f
++getargbool 0 rd.shell || poweroff -f
++getargbool 0 failme && poweroff -f
+diff --git a/test/TEST-16-DMSQUASH/test-init.sh b/test/TEST-16-DMSQUASH/test-init.sh
+index 206298d..5fe523c 100755
+--- a/test/TEST-16-DMSQUASH/test-init.sh
++++ b/test/TEST-16-DMSQUASH/test-init.sh
+@@ -1,4 +1,99 @@
+ #!/bin/sh
++getcmdline() {
++    while read -r _line || [ -n "$_line" ]; do
++        printf "%s" "$line"
++    done </proc/cmdline;
++}
++
++_dogetarg() {
++    local _o _val _doecho
++    unset _val
++    unset _o
++    unset _doecho
++    CMDLINE=$(getcmdline)
++
++    for _o in $CMDLINE; do
++        if [ "${_o%%=*}" = "${1%%=*}" ]; then
++            if [ -n "${1#*=}" -a "${1#*=*}" != "${1}" ]; then
++                # if $1 has a "=<value>", we want the exact match
++                if [ "$_o" = "$1" ]; then
++                    _val="1";
++                    unset _doecho
++                fi
++                continue
++            fi
++
++            if [ "${_o#*=}" = "$_o" ]; then
++                # if cmdline argument has no "=<value>", we assume "=1"
++                _val="1";
++                unset _doecho
++                continue
++            fi
++
++            _val="${_o#*=}"
++            _doecho=1
++        fi
++    done
++    if [ -n "$_val" ]; then
++        [ "x$_doecho" != "x" ] && echo "$_val";
++        return 0;
++    fi
++    return 1;
++}
++
++getarg() {
++    local _deprecated _newoption
++    while [ $# -gt 0 ]; do
++        case $1 in
++            -d) _deprecated=1; shift;;
++            -y) if _dogetarg $2 >/dev/null; then
++                    if [ "$_deprecated" = "1" ]; then
++                        [ -n "$_newoption" ] && warn "Kernel command line option '$2' is deprecated, use '$_newoption' instead." || warn "Option '$2' is deprecated."
++                    fi
++                    echo 1
++                    return 0
++                fi
++                _deprecated=0
++                shift 2;;
++            -n) if _dogetarg $2 >/dev/null; then
++                    echo 0;
++                    if [ "$_deprecated" = "1" ]; then
++                        [ -n "$_newoption" ] && warn "Kernel command line option '$2' is deprecated, use '$_newoption=0' instead." || warn "Option '$2' is deprecated."
++                    fi
++                    return 1
++                fi
++                _deprecated=0
++                shift 2;;
++            *)  if [ -z "$_newoption" ]; then
++                    _newoption="$1"
++                fi
++                if _dogetarg $1; then
++                    if [ "$_deprecated" = "1" ]; then
++                        [ -n "$_newoption" ] && warn "Kernel command line option '$1' is deprecated, use '$_newoption' instead." || warn "Option '$1' is deprecated."
++                    fi
++                    return 0;
++                fi
++                _deprecated=0
++                shift;;
++        esac
++    done
++    return 1
++}
++
++getargbool() {
++    local _b
++    unset _b
++    local _default
++    _default="$1"; shift
++    _b=$(getarg "$@")
++    [ $? -ne 0 -a -z "$_b" ] && _b="$_default"
++    if [ -n "$_b" ]; then
++        [ $_b = "0" ] && return 1
++        [ $_b = "no" ] && return 1
++        [ $_b = "off" ] && return 1
++    fi
++    return 0
++}
+ export PATH=/sbin:/bin:/usr/sbin:/usr/bin
+ strstr() { [ "${1##*"$2"*}" != "$1" ]; }
+ CMDLINE=$(while read line || [ -n "$line" ]; do echo $line;done < /proc/cmdline)
+@@ -11,7 +106,7 @@ export PS1='initramfs-test:\w\$ '
+ [ -f /etc/fstab ] || ln -sfn /proc/mounts /etc/fstab
+ stty sane
+ echo "made it to the rootfs!"
+-strstr "$CMDLINE" "rd.shell" && sh -i
++getargbool 0 rd.shell && sh -i
+ echo "Powering down."
+ mount -n -o remount,ro /
+ poweroff -f
+diff --git a/test/TEST-16-DMSQUASH/test.sh b/test/TEST-16-DMSQUASH/test.sh
+index b255492..4d72470 100755
+--- a/test/TEST-16-DMSQUASH/test.sh
++++ b/test/TEST-16-DMSQUASH/test.sh
+@@ -22,7 +22,7 @@ test_run() {
+         -m 256M -smp 2 \
+         -nographic \
+         -net none \
+-        -append "root=live:CDLABEL=LiveCD live rw quiet rd.retry=3 rd.info console=ttyS0,115200n81 selinux=0 $DEBUGFAIL" \
++        -append "root=live:CDLABEL=LiveCD live rw quiet rd.retry=3 rd.info console=ttyS0,115200n81 selinux=0 rd.shell=0 $DEBUGFAIL" \
+         -initrd "$TESTDIR"/initramfs.testing
+ 
+     # mediacheck test with qemu GUI
+@@ -44,6 +44,7 @@ test_setup() {
+ 	. "$basedir"/dracut-init.sh
+ 	inst_multiple poweroff shutdown
+ 	inst_hook shutdown-emergency 000 ./hard-off.sh
++        inst_hook emergency 000 ./hard-off.sh
+ 	inst_simple ./99-idesymlinks.rules /etc/udev/rules.d/99-idesymlinks.rules
+     )
+ 
+diff --git a/test/TEST-17-LVM-THIN/hard-off.sh b/test/TEST-17-LVM-THIN/hard-off.sh
+index 12c3d5a..f4d19dc 100755
+--- a/test/TEST-17-LVM-THIN/hard-off.sh
++++ b/test/TEST-17-LVM-THIN/hard-off.sh
+@@ -1,3 +1,3 @@
+ #!/bin/sh
+-getarg rd.shell || poweroff -f
++getargbool 0 rd.shell || poweroff -f
+ getarg failme && poweroff -f
+diff --git a/test/TEST-17-LVM-THIN/test-init.sh b/test/TEST-17-LVM-THIN/test-init.sh
+index 61a9543..77fb346 100755
+--- a/test/TEST-17-LVM-THIN/test-init.sh
++++ b/test/TEST-17-LVM-THIN/test-init.sh
+@@ -1,4 +1,99 @@
+ #!/bin/sh
++getcmdline() {
++    while read -r _line || [ -n "$_line" ]; do
++        printf "%s" "$line"
++    done </proc/cmdline;
++}
++
++_dogetarg() {
++    local _o _val _doecho
++    unset _val
++    unset _o
++    unset _doecho
++    CMDLINE=$(getcmdline)
++
++    for _o in $CMDLINE; do
++        if [ "${_o%%=*}" = "${1%%=*}" ]; then
++            if [ -n "${1#*=}" -a "${1#*=*}" != "${1}" ]; then
++                # if $1 has a "=<value>", we want the exact match
++                if [ "$_o" = "$1" ]; then
++                    _val="1";
++                    unset _doecho
++                fi
++                continue
++            fi
++
++            if [ "${_o#*=}" = "$_o" ]; then
++                # if cmdline argument has no "=<value>", we assume "=1"
++                _val="1";
++                unset _doecho
++                continue
++            fi
++
++            _val="${_o#*=}"
++            _doecho=1
++        fi
++    done
++    if [ -n "$_val" ]; then
++        [ "x$_doecho" != "x" ] && echo "$_val";
++        return 0;
++    fi
++    return 1;
++}
++
++getarg() {
++    local _deprecated _newoption
++    while [ $# -gt 0 ]; do
++        case $1 in
++            -d) _deprecated=1; shift;;
++            -y) if _dogetarg $2 >/dev/null; then
++                    if [ "$_deprecated" = "1" ]; then
++                        [ -n "$_newoption" ] && warn "Kernel command line option '$2' is deprecated, use '$_newoption' instead." || warn "Option '$2' is deprecated."
++                    fi
++                    echo 1
++                    return 0
++                fi
++                _deprecated=0
++                shift 2;;
++            -n) if _dogetarg $2 >/dev/null; then
++                    echo 0;
++                    if [ "$_deprecated" = "1" ]; then
++                        [ -n "$_newoption" ] && warn "Kernel command line option '$2' is deprecated, use '$_newoption=0' instead." || warn "Option '$2' is deprecated."
++                    fi
++                    return 1
++                fi
++                _deprecated=0
++                shift 2;;
++            *)  if [ -z "$_newoption" ]; then
++                    _newoption="$1"
++                fi
++                if _dogetarg $1; then
++                    if [ "$_deprecated" = "1" ]; then
++                        [ -n "$_newoption" ] && warn "Kernel command line option '$1' is deprecated, use '$_newoption' instead." || warn "Option '$1' is deprecated."
++                    fi
++                    return 0;
++                fi
++                _deprecated=0
++                shift;;
++        esac
++    done
++    return 1
++}
++
++getargbool() {
++    local _b
++    unset _b
++    local _default
++    _default="$1"; shift
++    _b=$(getarg "$@")
++    [ $? -ne 0 -a -z "$_b" ] && _b="$_default"
++    if [ -n "$_b" ]; then
++        [ $_b = "0" ] && return 1
++        [ $_b = "no" ] && return 1
++        [ $_b = "off" ] && return 1
++    fi
++    return 0
++}
+ export PATH=/sbin:/bin:/usr/sbin:/usr/bin
+ strstr() { [ "${1##*"$2"*}" != "$1" ]; }
+ CMDLINE=$(while read line || [ -n "$line" ]; do echo $line;done < /proc/cmdline)
+@@ -11,7 +106,7 @@ export PS1='initramfs-test:\w\$ '
+ [ -f /etc/fstab ] || ln -sfn /proc/mounts /etc/fstab
+ stty sane
+ echo "made it to the rootfs!"
+-strstr "$CMDLINE" "rd.shell" && sh -i
++getargbool 0 rd.shell && sh -i
+ echo "Powering down."
+ mount -n -o remount,ro /
+ poweroff -f
+diff --git a/test/TEST-17-LVM-THIN/test.sh b/test/TEST-17-LVM-THIN/test.sh
+index e337591..1485f72 100755
+--- a/test/TEST-17-LVM-THIN/test.sh
++++ b/test/TEST-17-LVM-THIN/test.sh
+@@ -11,7 +11,7 @@ test_run() {
+ 	-drive format=raw,index=0,media=disk,file=$TESTDIR/root.ext2 \
+ 	-m 256M -smp 2 -nographic \
+ 	-net none \
+-	-append "root=/dev/dracut/root rw rd.auto=1 quiet rd.retry=3 rd.info console=ttyS0,115200n81 selinux=0 rd.debug  $DEBUGFAIL" \
++	-append "root=/dev/dracut/root rw rd.auto=1 quiet rd.retry=3 rd.info console=ttyS0,115200n81 selinux=0 rd.debug rd.shell=0 $DEBUGFAIL" \
+ 	-initrd $TESTDIR/initramfs.testing
+     grep -F -m 1 -q dracut-root-block-success $TESTDIR/root.ext2 || return 1
+ }
+@@ -80,6 +80,7 @@ test_setup() {
+ 	. $basedir/dracut-init.sh
+ 	inst_multiple poweroff shutdown
+ 	inst_hook shutdown-emergency 000 ./hard-off.sh
++        inst_hook emergency 000 ./hard-off.sh
+ 	inst_simple ./99-idesymlinks.rules /etc/udev/rules.d/99-idesymlinks.rules
+     )
+     sudo $basedir/dracut.sh -l -i $TESTDIR/overlay / \
+diff --git a/test/TEST-20-NFS/client-init.sh b/test/TEST-20-NFS/client-init.sh
+index a443289..eea162c 100755
+--- a/test/TEST-20-NFS/client-init.sh
++++ b/test/TEST-20-NFS/client-init.sh
+@@ -1,4 +1,99 @@
+ #!/bin/sh
++getcmdline() {
++    while read -r _line || [ -n "$_line" ]; do
++        printf "%s" "$line"
++    done </proc/cmdline;
++}
++
++_dogetarg() {
++    local _o _val _doecho
++    unset _val
++    unset _o
++    unset _doecho
++    CMDLINE=$(getcmdline)
++
++    for _o in $CMDLINE; do
++        if [ "${_o%%=*}" = "${1%%=*}" ]; then
++            if [ -n "${1#*=}" -a "${1#*=*}" != "${1}" ]; then
++                # if $1 has a "=<value>", we want the exact match
++                if [ "$_o" = "$1" ]; then
++                    _val="1";
++                    unset _doecho
++                fi
++                continue
++            fi
++
++            if [ "${_o#*=}" = "$_o" ]; then
++                # if cmdline argument has no "=<value>", we assume "=1"
++                _val="1";
++                unset _doecho
++                continue
++            fi
++
++            _val="${_o#*=}"
++            _doecho=1
++        fi
++    done
++    if [ -n "$_val" ]; then
++        [ "x$_doecho" != "x" ] && echo "$_val";
++        return 0;
++    fi
++    return 1;
++}
++
++getarg() {
++    local _deprecated _newoption
++    while [ $# -gt 0 ]; do
++        case $1 in
++            -d) _deprecated=1; shift;;
++            -y) if _dogetarg $2 >/dev/null; then
++                    if [ "$_deprecated" = "1" ]; then
++                        [ -n "$_newoption" ] && warn "Kernel command line option '$2' is deprecated, use '$_newoption' instead." || warn "Option '$2' is deprecated."
++                    fi
++                    echo 1
++                    return 0
++                fi
++                _deprecated=0
++                shift 2;;
++            -n) if _dogetarg $2 >/dev/null; then
++                    echo 0;
++                    if [ "$_deprecated" = "1" ]; then
++                        [ -n "$_newoption" ] && warn "Kernel command line option '$2' is deprecated, use '$_newoption=0' instead." || warn "Option '$2' is deprecated."
++                    fi
++                    return 1
++                fi
++                _deprecated=0
++                shift 2;;
++            *)  if [ -z "$_newoption" ]; then
++                    _newoption="$1"
++                fi
++                if _dogetarg $1; then
++                    if [ "$_deprecated" = "1" ]; then
++                        [ -n "$_newoption" ] && warn "Kernel command line option '$1' is deprecated, use '$_newoption' instead." || warn "Option '$1' is deprecated."
++                    fi
++                    return 0;
++                fi
++                _deprecated=0
++                shift;;
++        esac
++    done
++    return 1
++}
++
++getargbool() {
++    local _b
++    unset _b
++    local _default
++    _default="$1"; shift
++    _b=$(getarg "$@")
++    [ $? -ne 0 -a -z "$_b" ] && _b="$_default"
++    if [ -n "$_b" ]; then
++        [ $_b = "0" ] && return 1
++        [ $_b = "no" ] && return 1
++        [ $_b = "off" ] && return 1
++    fi
++    return 0
++}
+ export PATH=/sbin:/bin:/usr/sbin:/usr/bin
+ exec >/dev/console 2>&1
+ export TERM=linux
+@@ -7,7 +102,7 @@ CMDLINE=$(while read line || [ -n "$line" ]; do echo $line;done < /proc/cmdline)
+ strstr() { [ "${1##*"$2"*}" != "$1" ]; }
+ 
+ stty sane
+-if strstr "$CMDLINE" "rd.shell"; then
++if getargbool 0 rd.shell; then
+     [ -c /dev/watchdog ] && printf 'V' > /dev/watchdog
+ 	strstr "$(setsid --help)" "control" && CTTY="-c"
+ 	setsid $CTTY sh -i
+diff --git a/test/TEST-20-NFS/hard-off.sh b/test/TEST-20-NFS/hard-off.sh
+index 12c3d5a..01acb19 100755
+--- a/test/TEST-20-NFS/hard-off.sh
++++ b/test/TEST-20-NFS/hard-off.sh
+@@ -1,3 +1,3 @@
+ #!/bin/sh
+-getarg rd.shell || poweroff -f
+-getarg failme && poweroff -f
++getargbool 0 rd.shell || poweroff -f
++getargbool 0 failme && poweroff -f
+diff --git a/test/TEST-20-NFS/test.sh b/test/TEST-20-NFS/test.sh
+index 1dfdfc4..d7df71e 100755
+--- a/test/TEST-20-NFS/test.sh
++++ b/test/TEST-20-NFS/test.sh
+@@ -54,7 +54,7 @@ client_test() {
+         -net nic,macaddr=$mac,model=e1000 \
+         -net socket,connect=127.0.0.1:12320 \
+         -watchdog i6300esb -watchdog-action poweroff \
+-        -append "$cmdline $DEBUGFAIL rd.debug rd.retry=10 rd.info quiet  ro console=ttyS0,115200n81 selinux=0" \
++        -append "rd.shell=0 $cmdline $DEBUGFAIL rd.debug rd.retry=10 rd.info quiet  ro console=ttyS0,115200n81 selinux=0" \
+         -initrd $TESTDIR/initramfs.testing
+ 
+     if [[ $? -ne 0 ]] || ! grep -F -m 1 -q nfs-OK $TESTDIR/client.img; then
+@@ -335,6 +335,7 @@ test_setup() {
+         mkdir $TESTDIR/overlay
+         inst_multiple poweroff shutdown
+         inst_hook shutdown-emergency 000 ./hard-off.sh
++        inst_hook emergency 000 ./hard-off.sh
+         inst_simple ./99-idesymlinks.rules /etc/udev/rules.d/99-idesymlinks.rules
+     )
+ 
+diff --git a/test/TEST-30-ISCSI/client-init.sh b/test/TEST-30-ISCSI/client-init.sh
+index 2e422cd..7279987 100755
+--- a/test/TEST-30-ISCSI/client-init.sh
++++ b/test/TEST-30-ISCSI/client-init.sh
+@@ -1,4 +1,99 @@
+ #!/bin/sh
++getcmdline() {
++    while read -r _line || [ -n "$_line" ]; do
++        printf "%s" "$line"
++    done </proc/cmdline;
++}
++
++_dogetarg() {
++    local _o _val _doecho
++    unset _val
++    unset _o
++    unset _doecho
++    CMDLINE=$(getcmdline)
++
++    for _o in $CMDLINE; do
++        if [ "${_o%%=*}" = "${1%%=*}" ]; then
++            if [ -n "${1#*=}" -a "${1#*=*}" != "${1}" ]; then
++                # if $1 has a "=<value>", we want the exact match
++                if [ "$_o" = "$1" ]; then
++                    _val="1";
++                    unset _doecho
++                fi
++                continue
++            fi
++
++            if [ "${_o#*=}" = "$_o" ]; then
++                # if cmdline argument has no "=<value>", we assume "=1"
++                _val="1";
++                unset _doecho
++                continue
++            fi
++
++            _val="${_o#*=}"
++            _doecho=1
++        fi
++    done
++    if [ -n "$_val" ]; then
++        [ "x$_doecho" != "x" ] && echo "$_val";
++        return 0;
++    fi
++    return 1;
++}
++
++getarg() {
++    local _deprecated _newoption
++    while [ $# -gt 0 ]; do
++        case $1 in
++            -d) _deprecated=1; shift;;
++            -y) if _dogetarg $2 >/dev/null; then
++                    if [ "$_deprecated" = "1" ]; then
++                        [ -n "$_newoption" ] && warn "Kernel command line option '$2' is deprecated, use '$_newoption' instead." || warn "Option '$2' is deprecated."
++                    fi
++                    echo 1
++                    return 0
++                fi
++                _deprecated=0
++                shift 2;;
++            -n) if _dogetarg $2 >/dev/null; then
++                    echo 0;
++                    if [ "$_deprecated" = "1" ]; then
++                        [ -n "$_newoption" ] && warn "Kernel command line option '$2' is deprecated, use '$_newoption=0' instead." || warn "Option '$2' is deprecated."
++                    fi
++                    return 1
++                fi
++                _deprecated=0
++                shift 2;;
++            *)  if [ -z "$_newoption" ]; then
++                    _newoption="$1"
++                fi
++                if _dogetarg $1; then
++                    if [ "$_deprecated" = "1" ]; then
++                        [ -n "$_newoption" ] && warn "Kernel command line option '$1' is deprecated, use '$_newoption' instead." || warn "Option '$1' is deprecated."
++                    fi
++                    return 0;
++                fi
++                _deprecated=0
++                shift;;
++        esac
++    done
++    return 1
++}
++
++getargbool() {
++    local _b
++    unset _b
++    local _default
++    _default="$1"; shift
++    _b=$(getarg "$@")
++    [ $? -ne 0 -a -z "$_b" ] && _b="$_default"
++    if [ -n "$_b" ]; then
++        [ $_b = "0" ] && return 1
++        [ $_b = "no" ] && return 1
++        [ $_b = "off" ] && return 1
++    fi
++    return 0
++}
+ export PATH=/sbin:/bin:/usr/sbin:/usr/bin
+ exec >/dev/console 2>&1
+ strstr() { [ "${1##*"$2"*}" != "$1" ]; }
+@@ -13,7 +108,7 @@ while read dev fs fstype opts rest || [ -n "$dev" ]; do
+     break
+ done < /proc/mounts
+ #sh -i
+-if strstr "$CMDLINE" "rd.shell"; then
++if getargbool 0 rd.shell; then
+ 	strstr "$(setsid --help)" "control" && CTTY="-c"
+ 	setsid $CTTY sh -i
+ fi
+diff --git a/test/TEST-30-ISCSI/hard-off.sh b/test/TEST-30-ISCSI/hard-off.sh
+index 12c3d5a..01acb19 100755
+--- a/test/TEST-30-ISCSI/hard-off.sh
++++ b/test/TEST-30-ISCSI/hard-off.sh
+@@ -1,3 +1,3 @@
+ #!/bin/sh
+-getarg rd.shell || poweroff -f
+-getarg failme && poweroff -f
++getargbool 0 rd.shell || poweroff -f
++getargbool 0 failme && poweroff -f
+diff --git a/test/TEST-30-ISCSI/test.sh b/test/TEST-30-ISCSI/test.sh
+index 1c06b06..83fd623 100755
+--- a/test/TEST-30-ISCSI/test.sh
++++ b/test/TEST-30-ISCSI/test.sh
+@@ -49,7 +49,7 @@ run_client() {
+         -net nic,macaddr=52:54:00:12:34:00,model=e1000 \
+         -net nic,macaddr=52:54:00:12:34:01,model=e1000 \
+         -net socket,connect=127.0.0.1:12330 \
+-        -append "rw rd.auto rd.retry=50 console=ttyS0,115200n81 selinux=0 rd.debug=0 $DEBUGFAIL $*" \
++        -append "rw rd.auto rd.retry=50 console=ttyS0,115200n81 selinux=0 rd.debug=0 rd.shell=0 $DEBUGFAIL $*" \
+         -initrd $TESTDIR/initramfs.testing
+     if ! grep -F -m 1 -q iscsi-OK $TESTDIR/client.img; then
+ 	echo "CLIENT TEST END: $test_name [FAILED - BAD EXIT]"
+@@ -214,6 +214,7 @@ test_setup() {
+         . $basedir/dracut-init.sh
+         inst_multiple poweroff shutdown
+         inst_hook shutdown-emergency 000 ./hard-off.sh
++        inst_hook emergency 000 ./hard-off.sh
+         inst_simple ./99-idesymlinks.rules /etc/udev/rules.d/99-idesymlinks.rules
+     )
+     sudo $basedir/dracut.sh -l -i $TESTDIR/overlay / \
+diff --git a/test/TEST-40-NBD/hard-off.sh b/test/TEST-40-NBD/hard-off.sh
+index 12c3d5a..01acb19 100755
+--- a/test/TEST-40-NBD/hard-off.sh
++++ b/test/TEST-40-NBD/hard-off.sh
+@@ -1,3 +1,3 @@
+ #!/bin/sh
+-getarg rd.shell || poweroff -f
+-getarg failme && poweroff -f
++getargbool 0 rd.shell || poweroff -f
++getargbool 0 failme && poweroff -f
+diff --git a/test/TEST-40-NBD/test.sh b/test/TEST-40-NBD/test.sh
+index 2061392..40e09b7 100755
+--- a/test/TEST-40-NBD/test.sh
++++ b/test/TEST-40-NBD/test.sh
+@@ -58,7 +58,7 @@ client_test() {
+         -nographic \
+         -net nic,macaddr=$mac,model=e1000 \
+         -net socket,connect=127.0.0.1:12340 \
+-        -append "$cmdline $DEBUGFAIL rd.auto rd.info rd.retry=10 ro console=ttyS0,115200n81  selinux=0  " \
++        -append "rd.shell=0 $cmdline $DEBUGFAIL rd.auto rd.info rd.retry=10 ro console=ttyS0,115200n81  selinux=0  " \
+         -initrd $TESTDIR/initramfs.testing
+ 
+     if [[ $? -ne 0 ]] || ! grep -F -m 1 -q nbd-OK $TESTDIR/flag.img; then
+@@ -227,6 +227,7 @@ make_encrypted_root() {
+         )
+         inst_multiple mke2fs poweroff cp umount tune2fs
+         inst_hook shutdown-emergency 000 ./hard-off.sh
++        inst_hook emergency 000 ./hard-off.sh
+         inst_hook initqueue 01 ./create-root.sh
+         inst_hook initqueue/finished 01 ./finished-false.sh
+         inst_simple ./99-idesymlinks.rules /etc/udev/rules.d/99-idesymlinks.rules
+diff --git a/test/TEST-50-MULTINIC/client-init.sh b/test/TEST-50-MULTINIC/client-init.sh
+index e6157af..d9ba45e 100755
+--- a/test/TEST-50-MULTINIC/client-init.sh
++++ b/test/TEST-50-MULTINIC/client-init.sh
+@@ -1,4 +1,100 @@
+ #!/bin/sh
++getcmdline() {
++    while read -r _line || [ -n "$_line" ]; do
++        printf "%s" "$line"
++    done </proc/cmdline;
++}
++
++_dogetarg() {
++    local _o _val _doecho
++    unset _val
++    unset _o
++    unset _doecho
++    CMDLINE=$(getcmdline)
++
++    for _o in $CMDLINE; do
++        if [ "${_o%%=*}" = "${1%%=*}" ]; then
++            if [ -n "${1#*=}" -a "${1#*=*}" != "${1}" ]; then
++                # if $1 has a "=<value>", we want the exact match
++                if [ "$_o" = "$1" ]; then
++                    _val="1";
++                    unset _doecho
++                fi
++                continue
++            fi
++
++            if [ "${_o#*=}" = "$_o" ]; then
++                # if cmdline argument has no "=<value>", we assume "=1"
++                _val="1";
++                unset _doecho
++                continue
++            fi
++
++            _val="${_o#*=}"
++            _doecho=1
++        fi
++    done
++    if [ -n "$_val" ]; then
++        [ "x$_doecho" != "x" ] && echo "$_val";
++        return 0;
++    fi
++    return 1;
++}
++
++getarg() {
++    local _deprecated _newoption
++    while [ $# -gt 0 ]; do
++        case $1 in
++            -d) _deprecated=1; shift;;
++            -y) if _dogetarg $2 >/dev/null; then
++                    if [ "$_deprecated" = "1" ]; then
++                        [ -n "$_newoption" ] && warn "Kernel command line option '$2' is deprecated, use '$_newoption' instead." || warn "Option '$2' is deprecated."
++                    fi
++                    echo 1
++                    return 0
++                fi
++                _deprecated=0
++                shift 2;;
++            -n) if _dogetarg $2 >/dev/null; then
++                    echo 0;
++                    if [ "$_deprecated" = "1" ]; then
++                        [ -n "$_newoption" ] && warn "Kernel command line option '$2' is deprecated, use '$_newoption=0' instead." || warn "Option '$2' is deprecated."
++                    fi
++                    return 1
++                fi
++                _deprecated=0
++                shift 2;;
++            *)  if [ -z "$_newoption" ]; then
++                    _newoption="$1"
++                fi
++                if _dogetarg $1; then
++                    if [ "$_deprecated" = "1" ]; then
++                        [ -n "$_newoption" ] && warn "Kernel command line option '$1' is deprecated, use '$_newoption' instead." || warn "Option '$1' is deprecated."
++                    fi
++                    return 0;
++                fi
++                _deprecated=0
++                shift;;
++        esac
++    done
++    return 1
++}
++
++getargbool() {
++    local _b
++    unset _b
++    local _default
++    _default="$1"; shift
++    _b=$(getarg "$@")
++    [ $? -ne 0 -a -z "$_b" ] && _b="$_default"
++    if [ -n "$_b" ]; then
++        [ $_b = "0" ] && return 1
++        [ $_b = "no" ] && return 1
++        [ $_b = "off" ] && return 1
++    fi
++    return 0
++}
++
+ exec >/dev/console 2>&1
+ set -x
+ export PATH=/sbin:/bin:/usr/sbin:/usr/bin
+@@ -20,5 +116,5 @@ done
+     echo "$IFACES"
+ } > /dev/sda
+ 
+-strstr "$CMDLINE" "rd.shell" && sh -i
++getargbool 0 rd.shell && sh -i
+ poweroff -f
+diff --git a/test/TEST-50-MULTINIC/hard-off.sh b/test/TEST-50-MULTINIC/hard-off.sh
+index 12c3d5a..01acb19 100755
+--- a/test/TEST-50-MULTINIC/hard-off.sh
++++ b/test/TEST-50-MULTINIC/hard-off.sh
+@@ -1,3 +1,3 @@
+ #!/bin/sh
+-getarg rd.shell || poweroff -f
+-getarg failme && poweroff -f
++getargbool 0 rd.shell || poweroff -f
++getargbool 0 failme && poweroff -f
+diff --git a/test/TEST-50-MULTINIC/test.sh b/test/TEST-50-MULTINIC/test.sh
+index e0bf7d2..656c237 100755
+--- a/test/TEST-50-MULTINIC/test.sh
++++ b/test/TEST-50-MULTINIC/test.sh
+@@ -54,7 +54,7 @@ client_test() {
+         -net nic,macaddr=52:54:00:12:34:$mac2,model=e1000 \
+         -net nic,macaddr=52:54:00:12:34:$mac3,model=e1000 \
+         -watchdog i6300esb -watchdog-action poweroff \
+-        -append "$cmdline $DEBUGFAIL rd.retry=5 ro console=ttyS0,115200n81 selinux=0 init=/sbin/init rd.debug systemd.log_target=console loglevel=7" \
++        -append "rd.shell=0 $cmdline $DEBUGFAIL rd.retry=5 ro console=ttyS0,115200n81 selinux=0 init=/sbin/init rd.debug systemd.log_target=console loglevel=7" \
+         -initrd "$TESTDIR"/initramfs.testing
+ 
+     { read OK; read IFACES; } < "$TESTDIR"/client.img
+@@ -270,6 +270,7 @@ test_setup() {
+         . "$basedir"/dracut-init.sh
+         inst_multiple poweroff shutdown
+         inst_hook shutdown-emergency 000 ./hard-off.sh
++        inst_hook emergency 000 ./hard-off.sh
+         inst_simple ./99-idesymlinks.rules /etc/udev/rules.d/99-idesymlinks.rules
+     )
+ 

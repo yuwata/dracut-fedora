@@ -1,0 +1,62 @@
+From 9e19c0512d12be15d02125bce0e25d6b9bb2b333 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Tue, 7 Jun 2016 13:24:47 +0200
+Subject: [PATCH] Revert "network: remove awk call and replace it with a shell
+ function"
+
+This reverts commit 71867b665cea6b4d9814ea0386baf0500db06806.
+
+network needs posix shell
+---
+ dracut-functions.sh                 | 10 ----------
+ modules.d/40network/module-setup.sh |  2 +-
+ modules.d/40network/net-lib.sh      |  2 +-
+ 3 files changed, 2 insertions(+), 12 deletions(-)
+
+diff --git a/dracut-functions.sh b/dracut-functions.sh
+index 146dbea..4496bfe 100755
+--- a/dracut-functions.sh
++++ b/dracut-functions.sh
+@@ -37,16 +37,6 @@ str_starts() { [ "${1#"$2"*}" != "$1" ]; }
+ # returns OK if $1 contains literal string $2 at the end, and isn't empty
+ str_ends() { [ "${1%*"$2"}" != "$1" ]; }
+ 
+-uniq_lines() {
+-    local -A lines
+-    while read -r line; do
+-        if ! [[ ${lines[$line]} ]]; then
+-            echo "$line"
+-            lines[$line]=1
+-        fi
+-    done
+-}
+-
+ # find a binary.  If we were not passed the full path directly,
+ # search in the usual places to find the binary.
+ find_binary() {
+diff --git a/modules.d/40network/module-setup.sh b/modules.d/40network/module-setup.sh
+index 4bf93cc..53b4b60 100755
+--- a/modules.d/40network/module-setup.sh
++++ b/modules.d/40network/module-setup.sh
+@@ -23,7 +23,7 @@ installkernel() {
+ # called by dracut
+ install() {
+     local _arch _i _dir
+-    inst_multiple ip arping dhclient sed
++    inst_multiple ip arping dhclient sed awk
+     inst_multiple -o ping ping6
+     inst_multiple -o brctl
+     inst_multiple -o teamd teamdctl teamnl
+diff --git a/modules.d/40network/net-lib.sh b/modules.d/40network/net-lib.sh
+index 4fd274e..005ad1b 100755
+--- a/modules.d/40network/net-lib.sh
++++ b/modules.d/40network/net-lib.sh
+@@ -120,7 +120,7 @@ setup_net() {
+     [ -e /tmp/dhclient.$netif.dhcpopts ] && . /tmp/dhclient.$netif.dhcpopts
+     # set up resolv.conf
+     [ -e /tmp/net.$netif.resolv.conf ] && \
+-        uniq_lines < /tmp/net.$netif.resolv.conf > /etc/resolv.conf
++        awk '!array[$0]++' /tmp/net.$netif.resolv.conf > /etc/resolv.conf
+     [ -e /tmp/net.$netif.gw ]            && . /tmp/net.$netif.gw
+ 
+     # add static route

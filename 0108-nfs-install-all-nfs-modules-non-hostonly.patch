@@ -1,0 +1,26 @@
+From 88f9d6140da2667b58ddde082ede0f99aead2078 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 22 Jul 2016 08:30:36 +0200
+Subject: [PATCH] nfs: install all nfs modules non-hostonly
+
+If nfs is used, we should include all nfs modules, in the case, where
+$host_fs_types contains nfs.
+
+(cherry picked from commit b077d18963436f6771e7ce3c486bcb2ae80165db)
+---
+ modules.d/95nfs/module-setup.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/modules.d/95nfs/module-setup.sh b/modules.d/95nfs/module-setup.sh
+index 9767e57..0f87761 100755
+--- a/modules.d/95nfs/module-setup.sh
++++ b/modules.d/95nfs/module-setup.sh
+@@ -25,7 +25,7 @@ depends() {
+ 
+ # called by dracut
+ installkernel() {
+-    instmods =net/sunrpc =fs/nfs ipv6 nfs_acl nfs_layout_nfsv41_files
++    hostonly='' instmods =net/sunrpc =fs/nfs ipv6 nfs_acl nfs_layout_nfsv41_files
+ }
+ 
+ cmdline() {

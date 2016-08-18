@@ -1,0 +1,26 @@
+From 55b99a0e4c37b3b7ee58e1369ab00430795acdc6 Mon Sep 17 00:00:00 2001
+From: Colin Guthrie <colin@mageia.org>
+Date: Tue, 7 Jun 2016 09:16:05 +0100
+Subject: [PATCH] dracut.sh: fix $tmpfilesdir fallback when systemd-devel is
+ not installed.
+
+Bug introduced in 3a04bddeed in Dec 2014.
+---
+ dracut.sh | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/dracut.sh b/dracut.sh
+index 8232fa4..a50eaff 100755
+--- a/dracut.sh
++++ b/dracut.sh
+@@ -1260,8 +1260,8 @@ fi
+     || tmpfilesdir=$(pkg-config systemd --variable=tmpfilesdir 2>/dev/null)
+ 
+ if ! [[ -d "$tmpfilesdir" ]]; then
+-    [[ -f /lib/tmpfiles.d ]] && tmpfilesdir=/lib/tmpfiles.d
+-    [[ -f /usr/lib/tmpfiles.d ]] && tmpfilesdir=/usr/lib/tmpfiles.d
++    [[ -d /lib/tmpfiles.d ]] && tmpfilesdir=/lib/tmpfiles.d
++    [[ -d /usr/lib/tmpfiles.d ]] && tmpfilesdir=/usr/lib/tmpfiles.d
+ fi
+ 
+ export initdir dracutbasedir \

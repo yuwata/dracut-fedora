@@ -1,0 +1,30 @@
+From 2602a74edf543f98f2aa1eb79db3de3a1cda13f0 Mon Sep 17 00:00:00 2001
+From: Nicolas Chauvet <kwizart@gmail.com>
+Date: Thu, 12 May 2016 17:28:21 +0200
+Subject: [PATCH] dracut: Add drivers/clk by default on arm
+
+This will bundle clock drivers into the initramfs on arm
+
+Tested on ti dm8148-t410 where adpll is needed on 4.6+ kernel
+This will avoid to rely on (maybe broken) bootloader clocks.
+
+Theses modules are also usually loaded early. Having them bundled into
+the initramfs will avoid lot of deferred probes and others delay.
+
+Signed-off-by: Nicolas Chauvet <kwizart@gmail.com>
+---
+ modules.d/90kernel-modules/module-setup.sh | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/modules.d/90kernel-modules/module-setup.sh b/modules.d/90kernel-modules/module-setup.sh
+index c30715d..7904c02 100755
+--- a/modules.d/90kernel-modules/module-setup.sh
++++ b/modules.d/90kernel-modules/module-setup.sh
+@@ -26,6 +26,7 @@ installkernel() {
+         if [[ "$(uname -p)" == arm* ]]; then
+             # arm specific modules
+             instmods \
++                "=drivers/clk" \
+                 "=drivers/i2c/busses" \
+                 "=drivers/regulator" \
+                 "=drivers/rtc" \

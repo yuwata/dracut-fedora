@@ -1,0 +1,86 @@
+From cf376023e6d0d4abd9816fa954bb917fc2557713 Mon Sep 17 00:00:00 2001
+From: Xunlei Pang <xlpang@redhat.com>
+Date: Tue, 26 Apr 2016 18:05:10 +0800
+Subject: [PATCH] network: dhcp before parsing specified dns through cmdline
+
+I met a problem when passing kdump dns to dracut via "nameserver=x.x.x.x",
+the dns I provided didn't appear in the "/etc/resolv.conf".
+
+After some debugging, found that when setup dhcp DNS, in setup_interface()
+and setup_interface6(), it has:
+    echo "search $search $domain" > /tmp/net.$netif.resolv.conf
+
+So if "$search $domain" isn't NULL(this is ture in my kdump environment),
+the dns contents(that is, dns1, dns2, nameserver) in "ifup" before dhcp
+will be discarded.
+
+This patch addresses it by handling dhcp first. In fact this is also the
+way the NetworkManager in 1st kernel works.
+
+Signed-off-by: Xunlei Pang <xlpang@redhat.com>
+---
+ modules.d/40network/ifup.sh | 32 ++++++++++++++++----------------
+ 1 file changed, 16 insertions(+), 16 deletions(-)
+
+diff --git a/modules.d/40network/ifup.sh b/modules.d/40network/ifup.sh
+index 1185523..41282e7 100755
+--- a/modules.d/40network/ifup.sh
++++ b/modules.d/40network/ifup.sh
+@@ -321,16 +321,16 @@ fi
+ ip=$(getarg ip)
+ 
+ if [ -z "$NO_AUTO_DHCP" ] && [ -z "$ip" ]; then
+-    for s in $(getargs nameserver); do
+-        [ -n "$s" ] || continue
+-        echo nameserver $s >> /tmp/net.$netif.resolv.conf
+-    done
+-
+     if [ "$netroot" = "dhcp6" ]; then
+         do_dhcp -6
+     else
+         do_dhcp -4
+     fi
++
++    for s in $(getargs nameserver); do
++        [ -n "$s" ] || continue
++        echo nameserver $s >> /tmp/net.$netif.resolv.conf
++    done
+ fi
+ 
+ 
+@@ -355,17 +355,6 @@ for p in $(getargs ip=); do
+     # If this option isn't directed at our interface, skip it
+     [ -n "$dev" ] && [ "$dev" != "$netif" ] && continue
+ 
+-    # setup nameserver
+-    for s in "$dns1" "$dns2" $(getargs nameserver); do
+-        [ -n "$s" ] || continue
+-        echo nameserver $s >> /tmp/net.$netif.resolv.conf
+-    done
+-
+-    # Store config for later use
+-    for i in ip srv gw mask hostname macaddr mtu dns1 dns2; do
+-        eval '[ "$'$i'" ] && echo '$i'="$'$i'"'
+-    done > /tmp/net.$netif.override
+-
+     for autoopt in $(str_replace "$autoconf" "," " "); do
+         case $autoopt in
+             dhcp|on|any)
+@@ -381,6 +370,17 @@ for p in $(getargs ip=); do
+     done
+     ret=$?
+ 
++    # setup nameserver
++    for s in "$dns1" "$dns2" $(getargs nameserver); do
++        [ -n "$s" ] || continue
++        echo nameserver $s >> /tmp/net.$netif.resolv.conf
++    done
++
++    # Store config for later use
++    for i in ip srv gw mask hostname macaddr mtu dns1 dns2; do
++        eval '[ "$'$i'" ] && echo '$i'="$'$i'"'
++    done > /tmp/net.$netif.override
++
+     if [ $ret -eq 0 ]; then
+         > /tmp/net.${netif}.up
+ 

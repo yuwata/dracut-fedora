@@ -16,7 +16,7 @@
 
 Name: dracut
 Version: 044
-Release: 76%{?dist}
+Release: 109%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -102,16 +102,47 @@ Patch64: 0064-removed-obsolete-kernel-module-functions-and-host_mo.patch
 Patch65: 0065-watchdog-clean-return-of-installkernel.patch
 Patch66: 0066-watchdog-start-traversing-the-device-tree-from-the-r.patch
 Patch67: 0067-dracut-10i18n-support-default-loadkeys-setfont-data-.patch
-Patch68: 0068-ensure-parent-dir-for-usr-lib-initrd-release-exists.patch
-Patch69: 0069-Fix-small-typo-in-dracut.cmdline-7.patch
-Patch70: 0070-systemd-ensure-journal-is-volatile.patch
-Patch71: 0071-configure-don-t-hardcode-pkg-config.patch
-Patch72: 0072-dracut-systemd-dracut-cmdline.sh-Don-t-error-out-if-.patch
-Patch73: 0073-move-ln_r-to-dracut-init.sh.patch
-Patch74: 0074-systemd-initrd-add-initrd-root-device.target.patch
-
-# Backport from master to fix RHBZ #1358416
-Patch1000:  https://github.com/dracutdevs/dracut/commit/7e51abc81f53c08e464decd4103e8c4ec25fef87.patch
+Patch68: 0068-network-dhcp-before-parsing-specified-dns-through-cm.patch
+Patch69: 0069-network-net-lib.sh-delete-duplicated-DNS-items-from-.patch
+Patch70: 0070-ensure-parent-dir-for-usr-lib-initrd-release-exists.patch
+Patch71: 0071-Fix-small-typo-in-dracut.cmdline-7.patch
+Patch72: 0072-systemd-ensure-journal-is-volatile.patch
+Patch73: 0073-configure-don-t-hardcode-pkg-config.patch
+Patch74: 0074-dracut-systemd-dracut-cmdline.sh-Don-t-error-out-if-.patch
+Patch75: 0075-move-ln_r-to-dracut-init.sh.patch
+Patch76: 0076-systemd-initrd-add-initrd-root-device.target.patch
+Patch77: 0077-dracut.sh-fix-tmpfilesdir-fallback-when-systemd-deve.patch
+Patch78: 0078-dracut-Add-drivers-clk-by-default-on-arm.patch
+Patch79: 0079-network-remove-awk-call-and-replace-it-with-a-shell-.patch
+Patch80: 0080-dracut-init.sh-set-default-firmware-path-if-not-spec.patch
+Patch81: 0081-use-shutdown-emergency-hook-in-testsuite-to-poweroff.patch
+Patch82: 0082-Revert-network-remove-awk-call-and-replace-it-with-a.patch
+Patch83: 0083-dracut-systemd-dracut-emergency.sh-call-shutdown-eme.patch
+Patch84: 0084-systemd-add-udev.hwdb-and-udev.conf.patch
+Patch85: 0085-cope-with-rd.shell-0-in-the-testsuite.patch
+Patch86: 0086-test-TEST-99-RPM-fixed-test-suite.patch
+Patch87: 0087-test-handle-kernel-panic-in-testsuite.patch
+Patch88: 0088-systemd-add-missing-.slice-unit.patch
+Patch89: 0089-dracut-systemd-.service-conflict-with-shutdown-targe.patch
+Patch90: 0090-network-dhclient.conf-add-missing-commata.patch
+Patch91: 0091-TEST-20-NFS-skip-root-dev-nfs-tests-with-systemd-v23.patch
+Patch92: 0092-fcoe-cleanup-fcoe.sh-don-t-copy-shm-files-to-state.patch
+Patch93: 0093-test-correct-cmdline-reading-functions.patch
+Patch94: 0094-40network-Update-iBFT-scanning-code-to-handle-IPv6.patch
+Patch95: 0095-dracut.sh-make-tmp-dirs-after-the-trap-function-is-i.patch
+Patch96: 0096-add-support-to-F2FS-filesystem-fsck.patch
+Patch97: 0097-systemd-install-missing-drop-in-configs.patch
+Patch98: 0098-fs-lib-add-crc32c-kernel-module-for-f2fs.patch
+Patch99: 0099-dracut.png-Optimize-with-zopflipng-m.patch
+Patch100: 0100-fs-lib-f2fs-needs-crc32-not-crc32c.patch
+Patch101: 0101-dracut-install.c-really-add-a-inbetween-destdir-and-.patch
+Patch102: 0102-fcoe-check-if-needed-for-hostonly.patch
+Patch103: 0103-network-use-arping2-if-available.patch
+Patch104: 0104-dracut.conf.5.asc-remove-duplicate-i18n_install_all-.patch
+Patch105: 0105-add-rd.emergency-reboot-poweroff-halt.patch
+Patch106: 0106-fips-module-add-missing-space.patch
+Patch107: 0107-network-support-macaddr-in-brackets.patch
+Patch108: 0108-nfs-install-all-nfs-modules-non-hostonly.patch
 
 Source1: https://www.gnu.org/licenses/lgpl-2.1.txt
 
@@ -575,6 +606,9 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Thu Aug 18 2016 Harald Hoyer <harald@redhat.com> - 044-109
+- git snapshot
+
 * Fri Aug 05 2016 Adam Williamson <awilliam@redhat.com> - 044-76
 - backport a single commit to fix RHBZ #1358416 (anaconda network init)
 

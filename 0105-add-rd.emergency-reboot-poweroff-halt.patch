@@ -1,0 +1,107 @@
+From c45e856a659a37537c107f7ef3e680abf60a96a5 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 22 Jul 2016 13:32:47 +0200
+Subject: [PATCH] add rd.emergency=[reboot|poweroff|halt]
+
+specifies what action to execute in case of a critical failure
+---
+ dracut.cmdline.7.asc                           |  3 +++
+ modules.d/98dracut-systemd/dracut-emergency.sh | 13 +++++++++++--
+ modules.d/99base/dracut-lib.sh                 | 24 ++++++++++++++++--------
+ 3 files changed, 30 insertions(+), 10 deletions(-)
+
+diff --git a/dracut.cmdline.7.asc b/dracut.cmdline.7.asc
+index bf00719..a2d1f95 100644
+--- a/dracut.cmdline.7.asc
++++ b/dracut.cmdline.7.asc
+@@ -129,6 +129,9 @@ menuentry 'Live Fedora 20' --class fedora --class gnu-linux --class gnu --class
+ 
+ Misc
+ ~~~~
++**rd.emergency=**__[reboot|poweroff|halt]__::
++    specify, what action to execute in case of a critical failure.
++
+ **rd.driver.blacklist=**__<drivername>__[,__<drivername>__,...]::
+     do not load kernel module <drivername>. This parameter can be specified
+     multiple times.
+diff --git a/modules.d/98dracut-systemd/dracut-emergency.sh b/modules.d/98dracut-systemd/dracut-emergency.sh
+index 63311c2..548f64b 100755
+--- a/modules.d/98dracut-systemd/dracut-emergency.sh
++++ b/modules.d/98dracut-systemd/dracut-emergency.sh
+@@ -11,7 +11,7 @@ source_conf /etc/conf.d
+ type plymouth >/dev/null 2>&1 && plymouth quit
+ 
+ export _rdshell_name="dracut" action="Boot" hook="emergency"
+-
++_emergency_action=$(getarg rd.emergency)
+ 
+ if getargbool 1 rd.shell -d -y rdshell || getarg rd.break -d rdbreak; then
+     source_hook "$hook"
+@@ -32,9 +32,18 @@ else
+     export hook="shutdown-emergency"
+     warn "$action has failed. To debug this issue add \"rd.shell rd.debug\" to the kernel command line."
+     source_hook "$hook"
+-    exit 1
++    [ -z "$_emergency_action" ] && _emergency_action=halt
+ fi
+ 
+ /bin/rm -f -- /.console_lock
+ 
++case "$_emergency_action" in
++    reboot)
++        reboot || exit 1;;
++    poweroff)
++        poweroff || exit 1;;
++    halt)
++        halt || exit 1;;
++esac
++
+ exit 0
+diff --git a/modules.d/99base/dracut-lib.sh b/modules.d/99base/dracut-lib.sh
+index 94e4614..060b3fe 100755
+--- a/modules.d/99base/dracut-lib.sh
++++ b/modules.d/99base/dracut-lib.sh
+@@ -1111,6 +1111,8 @@ emergency_shell()
+     local _ctty
+     set +e
+     local _rdshell_name="dracut" action="Boot" hook="emergency"
++    local _emergency_action
++
+     if [ "$1" = "-n" ]; then
+         _rdshell_name=$2
+         shift 2
+@@ -1129,20 +1131,26 @@ emergency_shell()
+     source_hook "$hook"
+     echo
+ 
++    _emergency_action=$(getarg rd.emergency)
++    [ -z "$_emergency_action" ] \
++        && [ -e /run/initramfs/.die ] \
++        && _emergency_action=halt
++
+     if getargbool 1 rd.shell -d -y rdshell || getarg rd.break -d rdbreak; then
+         _emergency_shell $_rdshell_name
+     else
+         warn "$action has failed. To debug this issue add \"rd.shell rd.debug\" to the kernel command line."
+-        # cause a kernel panic
+-        exit 1
++        [ -z "$_emergency_action" ] && _emergency_action=halt
+     fi
+ 
+-    if [ -e /run/initramfs/.die ]; then
+-        if [ -n "$DRACUT_SYSTEMD" ]; then
+-            systemctl --no-block --force halt
+-        fi
+-        exit 1
+-    fi
++    case "$_emergency_action" in
++        reboot)
++            reboot || exit 1;;
++        poweroff)
++            poweroff || exit 1;;
++        halt)
++            halt || exit 1;;
++    esac
+ }
+ 
+ # Retain the values of these variables but ensure that they are unexported

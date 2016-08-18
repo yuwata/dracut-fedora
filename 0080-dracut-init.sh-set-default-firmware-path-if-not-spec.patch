@@ -1,0 +1,22 @@
+From 8e010957557621c1a71d7289c4210d3ad5932893 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 25 May 2016 17:05:03 +0200
+Subject: [PATCH] dracut-init.sh: set default firmware path, if not specified
+
+---
+ dracut-init.sh | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/dracut-init.sh b/dracut-init.sh
+index d2bb845..7f628ce 100644
+--- a/dracut-init.sh
++++ b/dracut-init.sh
+@@ -69,6 +69,8 @@ srcmods="/lib/modules/$kernel/"
+ }
+ export srcmods
+ 
++[[ $DRACUT_FIRMWARE_PATH ]] || export DRACUT_FIRMWARE_PATH="/lib/firmware/updates:/lib/firmware:/lib/firmware/$kernel"
++
+ # export standard hookdirs
+ [[ $hookdirs ]] || {
+     hookdirs="cmdline pre-udev pre-trigger netroot "

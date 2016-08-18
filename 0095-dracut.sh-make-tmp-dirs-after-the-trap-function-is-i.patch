@@ -1,0 +1,43 @@
+From 3889234f7116d7f0b39a609d5d65c490251f7d5e Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 29 Jun 2016 17:32:31 +0200
+Subject: [PATCH] dracut.sh: make tmp dirs after the trap function is installed
+
+otherwise a good timed ctrl-c will leave the tmp dir around
+---
+ dracut.sh | 14 ++++++++------
+ 1 file changed, 8 insertions(+), 6 deletions(-)
+
+diff --git a/dracut.sh b/dracut.sh
+index a50eaff..36607cf 100755
+--- a/dracut.sh
++++ b/dracut.sh
+@@ -823,13 +823,7 @@ readonly DRACUT_TMPDIR="$(mktemp -p "$TMPDIR/" -d -t dracut.XXXXXX)"
+     printf "%s\n" "dracut: mktemp -p '$TMPDIR/' -d -t dracut.XXXXXX failed." >&2
+     exit 1
+ }
+-readonly initdir="${DRACUT_TMPDIR}/initramfs"
+-mkdir "$initdir"
+ 
+-if [[ $early_microcode = yes ]] || ( [[ $acpi_override = yes ]] && [[ -d $acpi_table_dir ]] ); then
+-    readonly early_cpio_dir="${DRACUT_TMPDIR}/earlycpio"
+-    mkdir "$early_cpio_dir"
+-fi
+ # clean up after ourselves no matter how we die.
+ trap '
+     ret=$?;
+@@ -840,6 +834,14 @@ trap '
+ # clean up after ourselves no matter how we die.
+ trap 'exit 1;' SIGINT
+ 
++readonly initdir="${DRACUT_TMPDIR}/initramfs"
++mkdir "$initdir"
++
++if [[ $early_microcode = yes ]] || ( [[ $acpi_override = yes ]] && [[ -d $acpi_table_dir ]] ); then
++    readonly early_cpio_dir="${DRACUT_TMPDIR}/earlycpio"
++    mkdir "$early_cpio_dir"
++fi
++
+ export DRACUT_RESOLVE_LAZY="1"
+ 
+ if [[ $print_cmdline ]]; then

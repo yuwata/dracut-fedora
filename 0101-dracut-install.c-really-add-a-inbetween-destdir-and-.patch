@@ -1,0 +1,37 @@
+From 24113c3a1126c7f0e46e7f3c0866e5f8c715775a Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 14 Jul 2016 13:53:24 +0200
+Subject: [PATCH] dracut-install.c: really add a "/" inbetween destdir and
+ target
+
+using dracut-install with
+
+find . -print0 | xargs dracut-install -D /tmp/test -a
+
+resulted in /tmp/test./.... files
+---
+ install/dracut-install.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/install/dracut-install.c b/install/dracut-install.c
+index 9a0d53f..0cffa39 100644
+--- a/install/dracut-install.c
++++ b/install/dracut-install.c
+@@ -617,7 +617,7 @@ static int dracut_install(const char *src, const char *dst, bool isdir, bool res
+ 
+         hashmap_put(items, i, i);
+ 
+-        ret = asprintf(&fulldstpath, "%s%s", destrootdir, dst);
++        ret = asprintf(&fulldstpath, "%s/%s", destrootdir, dst);
+         if (ret < 0) {
+                 log_error("Out of memory!");
+                 exit(EXIT_FAILURE);
+@@ -704,7 +704,7 @@ static int dracut_install(const char *src, const char *dst, bool isdir, bool res
+                 if (lstat(fulldstpath, &sb) != 0) {
+                         _cleanup_free_ char *absdestpath = NULL;
+ 
+-                        ret = asprintf(&absdestpath, "%s%s", destrootdir, abspath);
++                        ret = asprintf(&absdestpath, "%s/%s", destrootdir, abspath);
+                         if (ret < 0) {
+                                 log_error("Out of memory!");
+                                 exit(EXIT_FAILURE);
