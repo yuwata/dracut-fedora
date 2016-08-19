@@ -1,0 +1,31 @@
+From f47090f918be67ca3b9a33090088d3164db2e6a8 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 17 Aug 2016 16:41:21 +0200
+Subject: [PATCH] url-lib: ca-bundle.crt changed to a symlink
+
+use inst() instead of inst_simple()
+
+/etc/pki/tls/certs/ca-bundle.crt is a symlink to
+../../ca-trust/extracted/pem/tls-ca-bundle.pem
+
+with inst() we install the original file also.
+
+https://bugzilla.redhat.com/show_bug.cgi?id=1341280
+(cherry picked from commit 1b23c6c65c39630cb62faa2503817759f83d880b)
+---
+ modules.d/45url-lib/module-setup.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/modules.d/45url-lib/module-setup.sh b/modules.d/45url-lib/module-setup.sh
+index c87f718..1ece400 100755
+--- a/modules.d/45url-lib/module-setup.sh
++++ b/modules.d/45url-lib/module-setup.sh
+@@ -32,7 +32,7 @@ install() {
+             _crt=$(grep -F --binary-files=text -z .crt $_lib)
+             [[ $_crt ]] || continue
+             [[ $_crt == /*/* ]] || continue
+-            if ! inst_simple "$_crt"; then
++            if ! inst "$_crt"; then
+                 dwarn "Couldn't install '$_crt' SSL CA cert bundle; HTTPS might not work."
+                 continue
+             fi

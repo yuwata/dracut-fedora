@@ -16,7 +16,7 @@
 
 Name: dracut
 Version: 044
-Release: 109%{?dist}
+Release: 117%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -143,6 +143,14 @@ Patch105: 0105-add-rd.emergency-reboot-poweroff-halt.patch
 Patch106: 0106-fips-module-add-missing-space.patch
 Patch107: 0107-network-support-macaddr-in-brackets.patch
 Patch108: 0108-nfs-install-all-nfs-modules-non-hostonly.patch
+Patch109: 0109-network-use-require_any_binary-instead-of-require_an.patch
+Patch110: 0110-TEST-20-NFS-remove-stale-pid-file.patch
+Patch111: 0111-dracut-functions.sh-catch-all-lvm-slaves.patch
+Patch112: 0112-systemd-dracut-cmdline.sh-unset-UNSET-root.patch
+Patch113: 0113-url-lib-ca-bundle.crt-changed-to-a-symlink.patch
+Patch114: 0114-dracut.sh-document-hostonly-i18n-and-no-hostonly-i18.patch
+Patch115: 0115-dracut.cmdline.7.asc-document-rd.shell-0-for-rd.emer.patch
+Patch116: 0116-network-ibft-put-IPv6-IP-in-brackets.patch
 
 Source1: https://www.gnu.org/licenses/lgpl-2.1.txt
 
@@ -606,6 +614,9 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Fri Aug 19 2016 Harald Hoyer <harald@redhat.com> - 044-117
+- git snapshot
+
 * Thu Aug 18 2016 Harald Hoyer <harald@redhat.com> - 044-109
 - git snapshot
 
