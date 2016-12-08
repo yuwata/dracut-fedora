@@ -16,7 +16,7 @@
 
 Name: dracut
 Version: 044
-Release: 117%{?dist}
+Release: 176%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -141,16 +141,75 @@ Patch103: 0103-network-use-arping2-if-available.patch
 Patch104: 0104-dracut.conf.5.asc-remove-duplicate-i18n_install_all-.patch
 Patch105: 0105-add-rd.emergency-reboot-poweroff-halt.patch
 Patch106: 0106-fips-module-add-missing-space.patch
-Patch107: 0107-network-support-macaddr-in-brackets.patch
-Patch108: 0108-nfs-install-all-nfs-modules-non-hostonly.patch
-Patch109: 0109-network-use-require_any_binary-instead-of-require_an.patch
-Patch110: 0110-TEST-20-NFS-remove-stale-pid-file.patch
-Patch111: 0111-dracut-functions.sh-catch-all-lvm-slaves.patch
-Patch112: 0112-systemd-dracut-cmdline.sh-unset-UNSET-root.patch
-Patch113: 0113-url-lib-ca-bundle.crt-changed-to-a-symlink.patch
-Patch114: 0114-dracut.sh-document-hostonly-i18n-and-no-hostonly-i18.patch
-Patch115: 0115-dracut.cmdline.7.asc-document-rd.shell-0-for-rd.emer.patch
-Patch116: 0116-network-ibft-put-IPv6-IP-in-brackets.patch
+Patch107: 0107-qemu-include-the-qemu_fw_cfg-kernel-module.patch
+Patch108: 0108-network-support-macaddr-in-brackets.patch
+Patch109: 0109-nfs-install-all-nfs-modules-non-hostonly.patch
+Patch110: 0110-network-use-require_any_binary-instead-of-require_an.patch
+Patch111: 0111-TEST-20-NFS-remove-stale-pid-file.patch
+Patch112: 0112-dracut-functions.sh-catch-all-lvm-slaves.patch
+Patch113: 0113-systemd-dracut-cmdline.sh-unset-UNSET-root.patch
+Patch114: 0114-url-lib-ca-bundle.crt-changed-to-a-symlink.patch
+Patch115: 0115-dracut.sh-document-hostonly-i18n-and-no-hostonly-i18.patch
+Patch116: 0116-dracut.cmdline.7.asc-document-rd.shell-0-for-rd.emer.patch
+Patch117: 0117-network-ibft-put-IPv6-IP-in-brackets.patch
+Patch118: 0118-livenet-support-nfs-urls-in-livenet-generator.patch
+Patch119: 0119-Update-nfs-lib.sh.patch
+Patch120: 0120-dracut-systemd-dracut-mount.service-add-DefaultDepen.patch
+Patch121: 0121-kernel-modules-add-nvme-kernel-module.patch
+Patch122: 0122-test-TEST-30-ISCSI-depend-on-tgtd-and-tgtadm.patch
+Patch123: 0123-network-arping2-use-0.0.0.0-as-source-address.patch
+Patch124: 0124-TEST-30-ISCSI-add-message-that-all-tests-passed.patch
+Patch125: 0125-caps-make-it-a-non-default-module.patch
+Patch126: 0126-correctly-install-rsyslog.conf-template.patch
+Patch127: 0127-source-dracut-lib-for-warn.patch
+Patch128: 0128-move-start-from-udev-to-initqueue-online.patch
+Patch129: 0129-fixup-No-such-file-or-directory-errors-when-module-i.patch
+Patch130: 0130-subshell-and-set-f-to-prevent-expansion.patch
+Patch131: 0131-add-imjournal.so-to-read-systemd-journal.patch
+Patch132: 0132-dracut-install-fallback-to-non-hostonly-mode-if-lsmo.patch
+Patch133: 0133-dmsquash-live-dmsquash-live-root-det_img_fs-redirect.patch
+Patch134: 0134-98integrity-support-validating-the-IMA-policy-file-s.patch
+Patch135: 0135-rescue-use-proper-path-for-0-rescue.conf.patch
+Patch136: 0136-integrity-ima-policy-load.sh-s-echo-n-printf.patch
+Patch137: 0137-test-test-rhel-7.2.rpms.patch
+Patch138: 0138-add-README.md.patch
+Patch139: 0139-README.md-update.patch
+Patch140: 0140-README.md-update.patch
+Patch141: 0141-dracut-install-preserve-extended-attributes-when-cop.patch
+Patch142: 0142-README-correct-github-URLs.patch
+Patch143: 0143-dracut.8-document-INITRD_COMPRESS-environment-variab.patch
+Patch144: 0144-README.md-remove-CI-badge.patch
+Patch145: 0145-README-update.patch
+Patch146: 0146-TODO-remove-some-items.patch
+Patch147: 0147-50-dracut.install-use-bin-bash-shebang.patch
+Patch148: 0148-dracut.sh-create-the-initramfs-non-world-readable-al.patch
+Patch149: 0149-NEWS-update-for-045.patch
+Patch150: 0150-Use-versioned-Obsoletes.patch
+Patch151: 0151-Makefile-create-rpms-in-DESTDIR-for-target-rpm.patch
+Patch152: 0152-TEST-99-RPM-create-dracut-rpms-to-install-first.patch
+Patch153: 0153-TEST-99-RPM-add-test_check-for-rpm-dnf-yum.patch
+Patch154: 0154-TEST-30-ISCSI-fixed-dhcpd.conf-and-disabled-nowait.patch
+Patch155: 0155-TEST-99-RPM-actually-use-the-generated-rpms-with-dnf.patch
+Patch156: 0156-TEST-99-RPM-set-release-version-and-disable-update-t.patch
+Patch157: 0157-README.testsuite-add-more-requirements.patch
+Patch158: 0158-TEST-30-ISCSI-give-server-more-time-for-the-head-sta.patch
+Patch159: 0159-Makefile-fixed-DESTDIR-in-rpm-target.patch
+Patch160: 0160-TEST-99-RPM-append-to-DESTDIR.patch
+Patch161: 0161-README.testsuite-add-dmraid.patch
+Patch162: 0162-network-Try-to-load-xennet.patch
+Patch163: 0163-dracut.spec-add-systemd-udev-requirement.patch
+Patch164: 0164-test-TEST-99-RPM-speedup-test.patch
+Patch165: 0165-test-TEST-99-RPM-dnf-does-not-like-any-dracut-subpac.patch
+Patch166: 0166-README.md-add-CentOS-badge.patch
+Patch167: 0167-TEST-99-RPM-use-best-and-install-all-rpms.patch
+Patch168: 0168-Revert-TEST-99-RPM-use-best-and-install-all-rpms.patch
+Patch169: 0169-test-test-rhel-7.2.rpms-remove-file.patch
+Patch170: 0170-README.md-change-centosci-badge.patch
+Patch171: 0171-testsuite-add-cpu-host-to-kvm-call.patch
+Patch172: 0172-TEST-99-RPM-retry-dnf-5-times-in-case-http-fails.patch
+Patch173: 0173-test-Makefile-proper-return-code-for-make-check.patch
+Patch174: 0174-.dir-locals.el-changed-to-sane-style.patch
+Patch175: 0175-dracut.sh-add-default-path-for-uefi.patch
 
 Source1: https://www.gnu.org/licenses/lgpl-2.1.txt
 
@@ -232,6 +291,7 @@ Requires: kpartx
 %if 0%{?fedora} || 0%{?rhel} > 6
 Requires: util-linux >= 2.21
 Requires: systemd >= 219
+Requires: systemd-udev >= 219
 Requires: procps-ng
 Conflicts: grubby < 8.23
 Conflicts: initscripts < 8.63-1
@@ -614,6 +674,9 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Thu Dec 08 2016 Harald Hoyer <harald@redhat.com> - 044-176
+- git snapshot
+
 * Fri Aug 19 2016 Harald Hoyer <harald@redhat.com> - 044-117
 - git snapshot
 

@@ -1,0 +1,22 @@
+From ff6077789ee6f265014617186a67e5a6099ee8fb Mon Sep 17 00:00:00 2001
+From: Brendan Germain <brendan.germain@nasdaqomx.com>
+Date: Tue, 24 May 2016 15:37:30 -0400
+Subject: [PATCH] correctly install rsyslog.conf template
+
+---
+ modules.d/98syslog/module-setup.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/modules.d/98syslog/module-setup.sh b/modules.d/98syslog/module-setup.sh
+index 22bc497..4458229 100755
+--- a/modules.d/98syslog/module-setup.sh
++++ b/modules.d/98syslog/module-setup.sh
+@@ -34,7 +34,7 @@ install() {
+         inst_simple "$moddir/rsyslogd-start.sh" /sbin/rsyslogd-start
+         inst_simple "$moddir/rsyslogd-stop.sh" /sbin/rsyslogd-stop
+         mkdir -m 0755 -p ${initdir}/etc/templates
+-        inst_simple "${moddir}/rsyslog.conf" /etc/templates
++        inst_simple "${moddir}/rsyslog.conf" /etc/templates/rsyslog.conf
+     fi
+     dracut_need_initqueue
+ }

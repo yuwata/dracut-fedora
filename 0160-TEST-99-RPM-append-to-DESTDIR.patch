@@ -1,0 +1,22 @@
+From 924a669a1bcb46a9090231269270b9f2f0a6daa6 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 7 Nov 2016 17:52:52 +0100
+Subject: [PATCH] TEST-99-RPM: append "/" to DESTDIR
+
+---
+ test/TEST-99-RPM/test.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/test/TEST-99-RPM/test.sh b/test/TEST-99-RPM/test.sh
+index 9e52b72..0e3a1a6 100755
+--- a/test/TEST-99-RPM/test.sh
++++ b/test/TEST-99-RPM/test.sh
+@@ -86,7 +86,7 @@ EOF
+ }
+ 
+ test_setup() {
+-    make -C "$basedir" DESTDIR="$TESTDIR" rpm
++    make -C "$basedir" DESTDIR="$TESTDIR/" rpm
+     return 0
+ }
+ 

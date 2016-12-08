@@ -1,0 +1,25 @@
+From dba974844eaff2beb31a3c248965f5789d22bbb6 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 22 Aug 2016 13:32:03 +0200
+Subject: [PATCH] test/TEST-30-ISCSI: depend on tgtd and tgtadm
+
+the testsuite now needs tgtd and tgtadm and not iscsi-target
+---
+ test/TEST-30-ISCSI/test.sh | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/test/TEST-30-ISCSI/test.sh b/test/TEST-30-ISCSI/test.sh
+index 63944b3..d4f0f8c 100755
+--- a/test/TEST-30-ISCSI/test.sh
++++ b/test/TEST-30-ISCSI/test.sh
+@@ -138,8 +138,8 @@ test_run() {
+ }
+ 
+ test_setup() {
+-    if [ ! -x /usr/sbin/iscsi-target ]; then
+-        echo "Need iscsi-target from netbsd-iscsi"
++    if ! command -v tgtd &>/dev/null || ! command -v tgtadm &>/dev/null; then
++        echo "Need tgtd and tgtadm from scsi-target-utils"
+         return 1
+     fi
+ 

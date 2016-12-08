@@ -1,0 +1,88 @@
+From eac751f1e0493b5736ff84ef0ca64017545f24bf Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 11 Nov 2016 16:04:31 +0100
+Subject: [PATCH] test/TEST-99-RPM: speedup test
+
+---
+ test/TEST-99-RPM/finished-false.sh |  2 --
+ test/TEST-99-RPM/test.sh           | 32 +++++++++++++++++++++++---------
+ 2 files changed, 23 insertions(+), 11 deletions(-)
+ delete mode 100755 test/TEST-99-RPM/finished-false.sh
+
+diff --git a/test/TEST-99-RPM/finished-false.sh b/test/TEST-99-RPM/finished-false.sh
+deleted file mode 100755
+index ecdbef9..0000000
+--- a/test/TEST-99-RPM/finished-false.sh
++++ /dev/null
+@@ -1,2 +0,0 @@
+-#!/bin/sh
+-exit 1
+diff --git a/test/TEST-99-RPM/test.sh b/test/TEST-99-RPM/test.sh
+index 0e3a1a6..1485278 100755
+--- a/test/TEST-99-RPM/test.sh
++++ b/test/TEST-99-RPM/test.sh
+@@ -16,6 +16,7 @@ test_run() {
+     mkdir -p "$rootdir/proc"
+     mkdir -p "$rootdir/sys"
+     mkdir -p "$rootdir/dev"
++    mkdir -p "$rootdir/boot"
+ 
+ trap 'ret=$?; [[ -d $rootdir ]] && { umount "$rootdir/proc"; umount "$rootdir/sys"; umount "$rootdir/dev"; rm -rf -- "$rootdir"; } || :; exit $ret;' EXIT
+ trap '[[ -d $rootdir ]] && { umount "$rootdir/proc"; umount "$rootdir/sys"; umount "$rootdir/dev"; rm -rf -- "$rootdir"; } || :; exit 1;' SIGINT
+@@ -24,26 +25,38 @@ trap '[[ -d $rootdir ]] && { umount "$rootdir/proc"; umount "$rootdir/sys"; umou
+     mount --bind /sys "$rootdir/sys"
+     mount -t devtmpfs devtmpfs "$rootdir/dev"
+ 
++    mkdir -p "$rootdir/$TESTDIR"
++    cp --reflink=auto -a \
++       "$TESTDIR"/dracut-[0-9]*.$(arch).rpm \
++       "$TESTDIR"/dracut-network-[0-9]*.$(arch).rpm \
++       "$rootdir/$TESTDIR/"
++
+     dnf_or_yum=yum
+-    command -v dnf >/dev/null && dnf_or_yum=dnf
+-    $dnf_or_yum --nogpgcheck --installroot "$rootdir"/ --releasever 25 --disablerepo=updates-testing install --allowerasing -y \
++    dnf_or_yum_cmd=yum
++    command -v dnf >/dev/null && { dnf_or_yum="dnf"; dnf_or_yum_cmd="dnf --allowerasing"; }
++    $dnf_or_yum_cmd -v --nogpgcheck --installroot "$rootdir"/ --releasever 25 --disablerepo='*' \
++                --enablerepo=fedora \
++                install -y \
+ 	$dnf_or_yum \
+ 	passwd \
+ 	rootfiles \
+ 	systemd \
++    systemd-udev \
+ 	kernel \
+-	fedora-release \
++	kernel-core \
++	redhat-release \
+ 	device-mapper-multipath \
+ 	lvm2 \
+ 	mdadm \
+-        bash \
+-        iscsi-initiator-utils \
+-        "$TESTDIR"/dracut-[0-9]*.$(arch).rpm \
+-        "$TESTDIR"/dracut-network-[0-9]*.$(arch).rpm
++    bash \
++    iscsi-initiator-utils \
++    "$TESTDIR"/dracut-[0-9]*.$(arch).rpm \
++    "$TESTDIR"/dracut-network-[0-9]*.$(arch).rpm \
++    ${NULL}
+ 
+     cat >"$rootdir"/test.sh <<EOF
+ #!/bin/bash
+-set -xe
++set -x
+ export LC_MESSAGES=C
+ rpm -Va |& grep -F -v '85-display-manager.preset' &> /test.output
+ find / -xdev -type f -not -path '/var/*' \
+@@ -61,7 +74,8 @@ find / -xdev -type f -not -path '/var/*' \
+   -not -path '/dev/null' \
+   -not -path "/boot/loader/entries/\$(cat /etc/machine-id)-*" \
+   -not -path "/boot/\$(cat /etc/machine-id)/*" \
+-  -exec rpm -qf '{}' ';' | \
++  -not -path '/etc/openldap/certs/*' \
++  -print0 | xargs -0 rpm -qf | \
+   grep -F 'not owned' &>> /test.output || :
+ exit 0
+ EOF

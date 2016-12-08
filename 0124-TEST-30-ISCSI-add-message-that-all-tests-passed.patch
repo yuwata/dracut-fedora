@@ -1,0 +1,33 @@
+From d7c9ad504e9d3926324e749831938d74919b3a31 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 22 Aug 2016 14:39:25 +0200
+Subject: [PATCH] TEST-30-ISCSI: add message, that all tests passed
+
+---
+ test/TEST-30-ISCSI/test.sh | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/test/TEST-30-ISCSI/test.sh b/test/TEST-30-ISCSI/test.sh
+index d4f0f8c..c5315bb 100755
+--- a/test/TEST-30-ISCSI/test.sh
++++ b/test/TEST-30-ISCSI/test.sh
+@@ -110,16 +110,17 @@ do_test_run() {
+ 	|| :
+ 
+     run_client "FAILME: netroot=iscsi target1 target2 rd.iscsi.waitnet=0 rd.iscsi.testroute=0 default GW" \
+-	       "root=LABEL=sysroot" \
++	           "root=LABEL=sysroot" \
+                "ip=192.168.50.101::192.168.50.1:255.255.255.0::ens3:off" \
+                "ip=192.168.51.101::192.168.51.1:255.255.255.0::ens4:off" \
+-	       "netroot=iscsi:192.168.51.1::::iqn.2009-06.dracut:target1" \
++	           "netroot=iscsi:192.168.51.1::::iqn.2009-06.dracut:target1" \
+                "netroot=iscsi:192.168.50.1::::iqn.2009-06.dracut:target2" \
+                "rd.iscsi.firmware" \
+                "rd.iscsi.initiator=$initiator" \
+                "rd.iscsi.waitnet=0 rd.iscsi.testroute=0" \
+ 	|| :
+ 
++    echo "All tests passed [OK]"
+     return 0
+ }
+ 

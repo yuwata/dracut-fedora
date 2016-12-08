@@ -1,0 +1,25 @@
+From e22e04ae151c5aa806fc44de8294292c1df2429f Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 7 Nov 2016 13:20:35 +0100
+Subject: [PATCH] TEST-99-RPM: add test_check() for rpm,dnf,yum
+
+---
+ test/TEST-99-RPM/test.sh | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/test/TEST-99-RPM/test.sh b/test/TEST-99-RPM/test.sh
+index 04bf0bc..23fa72c 100755
+--- a/test/TEST-99-RPM/test.sh
++++ b/test/TEST-99-RPM/test.sh
+@@ -1,7 +1,10 @@
+ #!/bin/bash
+ 
+ TEST_DESCRIPTION="rpm integrity after dracut and kernel install"
+-$TESTDIR
++
++test_check() {
++    command -v rpm &>/dev/null && ( command -v yum || command -v dnf ) &>/dev/null
++}
+ 
+ test_run() {
+     set -x

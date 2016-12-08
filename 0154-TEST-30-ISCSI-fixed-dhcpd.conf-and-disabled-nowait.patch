@@ -1,0 +1,72 @@
+From 86f0904004540b63664b2707ad782d788b2112e4 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 7 Nov 2016 13:23:39 +0100
+Subject: [PATCH] TEST-30-ISCSI: fixed dhcpd.conf and disabled nowait
+
+---
+ test/TEST-30-ISCSI/dhcpd.conf | 23 +++++++++++++++++++++++
+ test/TEST-30-ISCSI/test.sh    | 20 ++++++++++----------
+ 2 files changed, 33 insertions(+), 10 deletions(-)
+
+diff --git a/test/TEST-30-ISCSI/dhcpd.conf b/test/TEST-30-ISCSI/dhcpd.conf
+index 22c1790..5fa1c15 100644
+--- a/test/TEST-30-ISCSI/dhcpd.conf
++++ b/test/TEST-30-ISCSI/dhcpd.conf
+@@ -23,3 +23,26 @@ subnet 192.168.50.0 netmask 255.255.255.0 {
+ 		}
+ 	}
+ }
++
++subnet 192.168.51.0 netmask 255.255.255.0 {
++        option subnet-mask      255.255.255.0;
++        option routers          192.168.51.1;
++        next-server             192.168.51.1;
++        server-identifier       192.168.51.1;
++        option domain-name-servers 192.168.51.1;
++        option domain-search "example.com";
++        option domain-name "other.com";
++
++        # MAC numbering scheme:
++        # NFSv3: last octect starts at 0x00 and works up
++
++        group {
++                option root-path "iscsi:192.168.51.1:::1:iqn.2009-06.dracut:target1";
++
++                host iscsi-2 {
++                        hardware ethernet 52:54:00:12:34:01;
++                        fixed-address 192.168.51.101;
++                }
++
++        }
++}
+diff --git a/test/TEST-30-ISCSI/test.sh b/test/TEST-30-ISCSI/test.sh
+index c5315bb..85ce29e 100755
+--- a/test/TEST-30-ISCSI/test.sh
++++ b/test/TEST-30-ISCSI/test.sh
+@@ -87,16 +87,16 @@ do_test_run() {
+                "rd.iscsi.initiator=$initiator" \
+         || return 1
+ 
+-    run_client "netroot=iscsi target1 target2 rd.iscsi.waitnet=0" \
+-	       "root=LABEL=sysroot" \
+-               "ip=192.168.50.101:::255.255.255.0::ens3:off" \
+-               "ip=192.168.51.101:::255.255.255.0::ens4:off" \
+-	       "netroot=iscsi:192.168.51.1::::iqn.2009-06.dracut:target1" \
+-               "netroot=iscsi:192.168.50.1::::iqn.2009-06.dracut:target2" \
+-               "rd.iscsi.firmware" \
+-               "rd.iscsi.initiator=$initiator" \
+-               "rd.iscsi.waitnet=0" \
+-	|| return 1
++#    run_client "netroot=iscsi target1 target2 rd.iscsi.waitnet=0" \
++#	       "root=LABEL=sysroot" \
++#               "ip=192.168.50.101:::255.255.255.0::ens3:off" \
++#               "ip=192.168.51.101:::255.255.255.0::ens4:off" \
++#	       "netroot=iscsi:192.168.51.1::::iqn.2009-06.dracut:target1" \
++#               "netroot=iscsi:192.168.50.1::::iqn.2009-06.dracut:target2" \
++#               "rd.iscsi.firmware" \
++#               "rd.iscsi.initiator=$initiator" \
++#               "rd.iscsi.waitnet=0" \
++#	|| return 1
+ 
+     run_client "FAILME: netroot=iscsi target1 target2 rd.iscsi.waitnet=0 rd.iscsi.testroute=0" \
+ 	       "root=LABEL=sysroot" \

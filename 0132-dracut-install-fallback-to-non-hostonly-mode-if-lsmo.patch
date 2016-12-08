@@ -1,0 +1,84 @@
+From bb47ec54994e9fbac2117b8133cd328a2bb3b28f Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 8 Sep 2016 15:55:21 +0200
+Subject: [PATCH] dracut-install: fallback to non-hostonly mode if lsmod fails
+
+if libkmod fails to get the list of loaded modules, fallback
+to non-hostonly mode, to at least try to assemble a working initrd.
+---
+ install/dracut-install.c | 58 +++++++++++++++++++++++++-----------------------
+ 1 file changed, 30 insertions(+), 28 deletions(-)
+
+diff --git a/install/dracut-install.c b/install/dracut-install.c
+index 0cffa39..fe30bba 100644
+--- a/install/dracut-install.c
++++ b/install/dracut-install.c
+@@ -1288,38 +1288,40 @@ static int install_modules(int argc, char **argv)
+ 
+         ctx = kmod_new(kerneldir, NULL);
+ 
+-        err = kmod_module_new_from_loaded(ctx, &loaded_list);
+-        if (err < 0) {
+-                errno = err;
+-                log_error("Could not get list of loaded modules: %m");
+-                return err;
+-        }
+-
+-        kmod_list_foreach(itr, loaded_list) {
+-                _cleanup_kmod_module_unref_list_ struct kmod_list *modlist = NULL;
++        if (arg_hostonly) {
++                err = kmod_module_new_from_loaded(ctx, &loaded_list);
++                if (err < 0) {
++                        errno = err;
++                        log_error("Could not get list of loaded modules: %m. Switching to non-hostonly mode.");
++                        arg_hostonly = false;
++                } else {
++                        kmod_list_foreach(itr, loaded_list) {
++                                _cleanup_kmod_module_unref_list_ struct kmod_list *modlist = NULL;
+ 
+-                struct kmod_module *mod = kmod_module_get_module(itr);
+-                char *name = strdup(kmod_module_get_name(mod));
+-                hashmap_put(modules_loaded, name, name);
+-                kmod_module_unref(mod);
++                                struct kmod_module *mod = kmod_module_get_module(itr);
++                                char *name = strdup(kmod_module_get_name(mod));
++                                hashmap_put(modules_loaded, name, name);
++                                kmod_module_unref(mod);
+ 
+-                /* also put the modules from the new kernel in the hashmap,
+-                 * which resolve the name as an alias, in case a kernel module is
+-                 * renamed.
+-                 */
+-                err = kmod_module_new_from_lookup(ctx, name, &modlist);
+-                if (err < 0)
+-                        continue;
+-                if (!modlist)
+-                        continue;
+-                kmod_list_foreach(l, modlist) {
+-                        mod = kmod_module_get_module(l);
+-                        char *name = strdup(kmod_module_get_name(mod));
+-                        hashmap_put(modules_loaded, name, name);
+-                        kmod_module_unref(mod);
++                                /* also put the modules from the new kernel in the hashmap,
++                                 * which resolve the name as an alias, in case a kernel module is
++                                 * renamed.
++                                 */
++                                err = kmod_module_new_from_lookup(ctx, name, &modlist);
++                                if (err < 0)
++                                        continue;
++                                if (!modlist)
++                                        continue;
++                                kmod_list_foreach(l, modlist) {
++                                        mod = kmod_module_get_module(l);
++                                        char *name = strdup(kmod_module_get_name(mod));
++                                        hashmap_put(modules_loaded, name, name);
++                                        kmod_module_unref(mod);
++                                }
++                        }
++                        kmod_module_unref_list(loaded_list);
+                 }
+         }
+-        kmod_module_unref_list(loaded_list);
+ 
+         for (i = 0; i < argc; i++) {
+                 int r = 0;

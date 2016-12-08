@@ -1,0 +1,89 @@
+From ae69ae9a28f76729c6f54fb586e33abbad2afd7d Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 14 Nov 2016 17:14:30 +0100
+Subject: [PATCH] TEST-99-RPM: retry dnf 5 times in case http fails
+
+---
+ test/TEST-99-RPM/test.sh | 55 +++++++++++++++++++++++++-----------------------
+ 1 file changed, 29 insertions(+), 26 deletions(-)
+
+diff --git a/test/TEST-99-RPM/test.sh b/test/TEST-99-RPM/test.sh
+index 345d524..a670b55 100755
+--- a/test/TEST-99-RPM/test.sh
++++ b/test/TEST-99-RPM/test.sh
+@@ -18,8 +18,8 @@ test_run() {
+     mkdir -p "$rootdir/dev"
+     mkdir -p "$rootdir/boot"
+ 
+-trap 'ret=$?; [[ -d $rootdir ]] && { umount "$rootdir/proc"; umount "$rootdir/sys"; umount "$rootdir/dev"; rm -rf -- "$rootdir"; } || :; exit $ret;' EXIT
+-trap '[[ -d $rootdir ]] && { umount "$rootdir/proc"; umount "$rootdir/sys"; umount "$rootdir/dev"; rm -rf -- "$rootdir"; } || :; exit 1;' SIGINT
++    trap 'ret=$?; [[ -d $rootdir ]] && { umount "$rootdir/proc"; umount "$rootdir/sys"; umount "$rootdir/dev"; rm -rf -- "$rootdir"; } || :; exit $ret;' EXIT
++    trap '[[ -d $rootdir ]] && { umount "$rootdir/proc"; umount "$rootdir/sys"; umount "$rootdir/dev"; rm -rf -- "$rootdir"; } || :; exit 1;' SIGINT
+ 
+     mount --bind /proc "$rootdir/proc"
+     mount --bind /sys "$rootdir/sys"
+@@ -34,27 +34,30 @@ trap '[[ -d $rootdir ]] && { umount "$rootdir/proc"; umount "$rootdir/sys"; umou
+     dnf_or_yum=yum
+     dnf_or_yum_cmd=yum
+     command -v dnf >/dev/null && { dnf_or_yum="dnf"; dnf_or_yum_cmd="dnf --allowerasing"; }
+-    $dnf_or_yum_cmd -v --nogpgcheck --installroot "$rootdir"/ --releasever 25 --disablerepo='*' \
+-                --enablerepo=fedora --enablerepo=updates \
+-                install -y \
+-	$dnf_or_yum \
+-	passwd \
+-	rootfiles \
+-	systemd \
+-    systemd-udev \
+-	kernel \
+-	kernel-core \
+-	redhat-release \
+-	device-mapper-multipath \
+-	lvm2 \
+-	mdadm \
+-    bash \
+-    iscsi-initiator-utils \
+-    "$TESTDIR"/dracut-[0-9]*.$(arch).rpm \
+-    ${NULL}
+-    #"$TESTDIR"/dracut-config-rescue-[0-9]*.$(arch).rpm \
+-    #"$TESTDIR"/dracut-network-[0-9]*.$(arch).rpm \
+-#    ${NULL}
++    for (( i=0; i < 5 ; i++)); do
++        $dnf_or_yum_cmd -v --nogpgcheck --installroot "$rootdir"/ --releasever 25 --disablerepo='*' \
++                        --enablerepo=fedora --enablerepo=updates \
++                        install -y \
++                        $dnf_or_yum \
++                        passwd \
++                        rootfiles \
++                        systemd \
++                        systemd-udev \
++                        kernel \
++                        kernel-core \
++                        redhat-release \
++                        device-mapper-multipath \
++                        lvm2 \
++                        mdadm \
++                        bash \
++                        iscsi-initiator-utils \
++                        "$TESTDIR"/dracut-[0-9]*.$(arch).rpm \
++                        ${NULL} || continue
++        #"$TESTDIR"/dracut-config-rescue-[0-9]*.$(arch).rpm \
++            #"$TESTDIR"/dracut-network-[0-9]*.$(arch).rpm \
++            #    ${NULL}
++    done
++    (( i < 5 ))
+ 
+     cat >"$rootdir"/test.sh <<EOF
+ #!/bin/bash
+@@ -87,9 +90,9 @@ EOF
+     chroot "$rootdir" /test.sh || :
+ 
+     if [[ -s "$rootdir"/test.output ]]; then
+-	failed=1
+-	echo TEST Failed >&2
+-	cat "$rootdir"/test.output >&2
++        failed=1
++        echo TEST Failed >&2
++        cat "$rootdir"/test.output >&2
+     fi
+ 
+     umount "$rootdir/proc"

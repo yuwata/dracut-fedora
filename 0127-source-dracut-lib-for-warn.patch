@@ -1,0 +1,28 @@
+From 3568d947db73cbe0d8bf75e46b2dce8f7bb44f43 Mon Sep 17 00:00:00 2001
+From: Brendan Germain <brendan.germain@nasdaqomx.com>
+Date: Wed, 25 May 2016 08:29:55 -0400
+Subject: [PATCH] source dracut-lib for warn()
+
+---
+ modules.d/98syslog/rsyslogd-stop.sh | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/modules.d/98syslog/rsyslogd-stop.sh b/modules.d/98syslog/rsyslogd-stop.sh
+index 010d56a..52c8edf 100755
+--- a/modules.d/98syslog/rsyslogd-stop.sh
++++ b/modules.d/98syslog/rsyslogd-stop.sh
+@@ -1,5 +1,7 @@
+ #!/bin/sh
+ 
++type getarg >/dev/null 2>&1 || . /lib/dracut-lib.sh
++
+ # Kills rsyslogd
+ 
+ if [ -f /var/run/syslogd.pid ]; then
+@@ -8,4 +10,4 @@ if [ -f /var/run/syslogd.pid ]; then
+     kill -0 $pid && kill -9 $pid
+ else
+     warn "rsyslogd-stop: Could not find a pid for rsyslogd. Won't kill it."
+-fi
+\ No newline at end of file
++fi

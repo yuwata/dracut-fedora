@@ -1,0 +1,30 @@
+From ec44ed1d9d02d8be8d220074ecd68d32aa01047a Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 26 Oct 2016 13:41:21 +0200
+Subject: [PATCH] README: correct github URLs
+
+---
+ README | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/README b/README
+index b07bbb7..c974c08 100644
+--- a/README
++++ b/README
+@@ -62,14 +62,14 @@ Git:
+ 	http://git.kernel.org/pub/scm/boot/dracut/dracut.git
+ 	https://git.kernel.org/pub/scm/boot/dracut/dracut.git
+ 
+-	git://github.com/haraldh/dracut.git
++	git@github.com:dracutdevs/dracut.git
+ 
+ 	git://dracut.git.sourceforge.net/gitroot/dracut/dracut
+ 
+ Git Web:
+ 	http://git.kernel.org/?p=boot/dracut/dracut.git
+ 
+-	https://haraldh@github.com/haraldh/dracut.git
++	https://github.com/dracutdevs/dracut.git
+ 
+ 	http://dracut.git.sourceforge.net/git/gitweb.cgi?p=dracut/dracut
+ 

@@ -1,0 +1,23 @@
+From ffcbde7fe23a5960236bfe398937342a6fa316c9 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 7 Nov 2016 17:20:18 +0100
+Subject: [PATCH] TEST-99-RPM: set release version and disable update-testing
+ repo
+
+---
+ test/TEST-99-RPM/test.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/test/TEST-99-RPM/test.sh b/test/TEST-99-RPM/test.sh
+index 6c71e13..9e52b72 100755
+--- a/test/TEST-99-RPM/test.sh
++++ b/test/TEST-99-RPM/test.sh
+@@ -26,7 +26,7 @@ trap '[[ -d $rootdir ]] && { umount "$rootdir/proc"; umount "$rootdir/sys"; umou
+ 
+     dnf_or_yum=yum
+     command -v dnf >/dev/null && dnf_or_yum=dnf
+-    $dnf_or_yum --nogpgcheck --installroot "$rootdir"/ install --allowerasing -y \
++    $dnf_or_yum --nogpgcheck --installroot "$rootdir"/ --releasever 25 --disablerepo=updates-testing install --allowerasing -y \
+ 	$dnf_or_yum \
+ 	passwd \
+ 	rootfiles \

@@ -1,0 +1,34 @@
+From f81806db208a55bc4a6b04eb89cabf062c79f3ef Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 14 Nov 2016 12:27:33 +0100
+Subject: [PATCH] TEST-99-RPM: use --best and install all rpms
+
+---
+ test/TEST-99-RPM/test.sh | 6 ++----
+ 1 file changed, 2 insertions(+), 4 deletions(-)
+
+diff --git a/test/TEST-99-RPM/test.sh b/test/TEST-99-RPM/test.sh
+index 345d524..f2efea0 100755
+--- a/test/TEST-99-RPM/test.sh
++++ b/test/TEST-99-RPM/test.sh
+@@ -36,6 +36,7 @@ trap '[[ -d $rootdir ]] && { umount "$rootdir/proc"; umount "$rootdir/sys"; umou
+     command -v dnf >/dev/null && { dnf_or_yum="dnf"; dnf_or_yum_cmd="dnf --allowerasing"; }
+     $dnf_or_yum_cmd -v --nogpgcheck --installroot "$rootdir"/ --releasever 25 --disablerepo='*' \
+                 --enablerepo=fedora --enablerepo=updates \
++                --best \
+                 install -y \
+ 	$dnf_or_yum \
+ 	passwd \
+@@ -50,11 +51,8 @@ trap '[[ -d $rootdir ]] && { umount "$rootdir/proc"; umount "$rootdir/sys"; umou
+ 	mdadm \
+     bash \
+     iscsi-initiator-utils \
+-    "$TESTDIR"/dracut-[0-9]*.$(arch).rpm \
++    "$TESTDIR"/dracut-*.rpm \
+     ${NULL}
+-    #"$TESTDIR"/dracut-config-rescue-[0-9]*.$(arch).rpm \
+-    #"$TESTDIR"/dracut-network-[0-9]*.$(arch).rpm \
+-#    ${NULL}
+ 
+     cat >"$rootdir"/test.sh <<EOF
+ #!/bin/bash

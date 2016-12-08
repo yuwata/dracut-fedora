@@ -1,0 +1,21 @@
+From e80ac43710440ef87829a2f6736acb421aad8493 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 11 Nov 2016 16:04:09 +0100
+Subject: [PATCH] dracut.spec: add systemd-udev requirement
+
+---
+ dracut.spec | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/dracut.spec b/dracut.spec
+index 0515006..d4566cf 100644
+--- a/dracut.spec
++++ b/dracut.spec
+@@ -115,6 +115,7 @@ Requires: kpartx
+ %if 0%{?fedora} || 0%{?rhel} > 6
+ Requires: util-linux >= 2.21
+ Requires: systemd >= 219
++Requires: systemd-udev >= 219
+ Requires: procps-ng
+ Conflicts: grubby < 8.23
+ Conflicts: initscripts < 8.63-1

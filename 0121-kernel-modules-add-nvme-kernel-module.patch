@@ -1,0 +1,22 @@
+From a84c391b8771e0238a0edb8b382ecbf7f2d2bfd3 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 22 Aug 2016 11:04:23 +0200
+Subject: [PATCH] kernel-modules: add nvme kernel module
+
+---
+ modules.d/90kernel-modules/module-setup.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/modules.d/90kernel-modules/module-setup.sh b/modules.d/90kernel-modules/module-setup.sh
+index 7904c02..868341c 100755
+--- a/modules.d/90kernel-modules/module-setup.sh
++++ b/modules.d/90kernel-modules/module-setup.sh
+@@ -21,7 +21,7 @@ installkernel() {
+             yenta_socket scsi_dh_rdac scsi_dh_emc scsi_dh_alua \
+             atkbd i8042 usbhid firewire-ohci pcmcia hv-vmbus \
+             virtio virtio_blk virtio_ring virtio_pci virtio_scsi \
+-            "=drivers/pcmcia" =ide
++            "=drivers/pcmcia" =ide nvme
+ 
+         if [[ "$(uname -p)" == arm* ]]; then
+             # arm specific modules

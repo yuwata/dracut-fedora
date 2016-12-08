@@ -1,0 +1,24 @@
+From de7ab164dd0aa68100c290f355b858900193e004 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 13 Oct 2016 09:20:33 +0200
+Subject: [PATCH] dmsquash-live/dmsquash-live-root: det_img_fs() redirect
+ udevadm output to stderr
+
+Otherwise the output is taken as input for modprobe.
+---
+ modules.d/90dmsquash-live/dmsquash-live-root.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/modules.d/90dmsquash-live/dmsquash-live-root.sh b/modules.d/90dmsquash-live/dmsquash-live-root.sh
+index 68d076c..e58d7c2 100755
+--- a/modules.d/90dmsquash-live/dmsquash-live-root.sh
++++ b/modules.d/90dmsquash-live/dmsquash-live-root.sh
+@@ -57,7 +57,7 @@ ln -s $livedev /run/initramfs/livedev
+ 
+ # determine filesystem type for a filesystem image
+ det_img_fs() {
+-    udevadm settle
++    udevadm settle >&2
+     blkid -s TYPE -u noraid -o value "$1"
+ }
+ 

@@ -1,0 +1,22 @@
+From 86eb0b1b83845185ee9ba00609e6169d9f24d4a1 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 22 Aug 2016 11:03:01 +0200
+Subject: [PATCH] dracut-systemd/dracut-mount.service: add
+ DefaultDependencies=no
+
+---
+ modules.d/98dracut-systemd/dracut-mount.service | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/modules.d/98dracut-systemd/dracut-mount.service b/modules.d/98dracut-systemd/dracut-mount.service
+index baa8edb..4c699dd 100644
+--- a/modules.d/98dracut-systemd/dracut-mount.service
++++ b/modules.d/98dracut-systemd/dracut-mount.service
+@@ -15,6 +15,7 @@ After=dracut-initqueue.service dracut-pre-mount.service
+ ConditionPathExists=/usr/lib/initrd-release
+ ConditionDirectoryNotEmpty=|/lib/dracut/hooks/mount
+ ConditionKernelCommandLine=|rd.break=mount
++DefaultDependencies=no
+ Conflicts=shutdown.target emergency.target
+ Before=shutdown.target emergency.target
+ 

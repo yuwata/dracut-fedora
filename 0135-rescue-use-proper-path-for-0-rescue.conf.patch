@@ -1,0 +1,33 @@
+From b29901c083ba22a0794849c1e93afc40c11588a2 Mon Sep 17 00:00:00 2001
+From: Yu Watanabe <watanabe.yu+github@gmail.com>
+Date: Wed, 19 Oct 2016 12:22:48 +0900
+Subject: [PATCH] rescue: use proper path for 0-rescue.conf
+
+---
+ 51-dracut-rescue.install | 7 +++----
+ 1 file changed, 3 insertions(+), 4 deletions(-)
+
+diff --git a/51-dracut-rescue.install b/51-dracut-rescue.install
+index 60d7372..0a5f14b 100755
+--- a/51-dracut-rescue.install
++++ b/51-dracut-rescue.install
+@@ -59,16 +59,15 @@ if ! [[ ${BOOT_OPTIONS[*]} ]]; then
+     exit 1
+ fi
+ 
+-LOADER_ENTRY="/boot/loader/entries/${MACHINE_ID}-0-rescue.conf"
+ BOOT_DIR="/${MACHINE_ID}/0-rescue"
++BOOT_ROOT=${BOOT_DIR_ABS%$BOOT_DIR}
++LOADER_ENTRY="$BOOT_ROOT/loader/entries/${MACHINE_ID}-0-rescue.conf"
+ 
+ ret=0
+ 
+ case "$COMMAND" in
+     add)
+-        for i in "/boot/loader/entries/${MACHINE_ID}-0-rescue.conf"; do
+-            [[ -f $i ]] && exit 0
+-        done
++        [[ -f "$LOADER_ENTRY" ]] && exit 0
+ 
+         # source our config dir
+         for f in $(dropindirs_sort ".conf" "/etc/dracut.conf.d" "/usr/lib/dracut/dracut.conf.d"); do

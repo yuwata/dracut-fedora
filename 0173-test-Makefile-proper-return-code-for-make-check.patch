@@ -1,0 +1,32 @@
+From 45ab6b164724e3c7540bbc723f437806d3791098 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 11 Nov 2016 12:18:06 +0100
+Subject: [PATCH] test/Makefile: proper return code for "make check"
+
+(cherry picked from commit aa40b82145ecc923edfade8149c2ba892bfb664d)
+---
+ test/Makefile | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/test/Makefile b/test/Makefile
+index f71f854..eaa944f 100644
+--- a/test/Makefile
++++ b/test/Makefile
+@@ -2,13 +2,14 @@
+ 
+ check:
+ 	@[ "$$EUID" == "0" ] || { echo "'check' must be run as root! Please use 'sudo'."; exit 1; }
+-	@for i in TEST-[0-9]*; do \
++	@{ ret=0; \
++	for i in TEST-[0-9]*; do \
+ 		[ -d $$i ] || continue ; \
+ 		[ -f $$i/Makefile ] || continue ; \
+ 		if [ -n "$$TESTS" ]; then t=$${i##TEST-}; t=$${t%%-*}; [ "$${TESTS#*$$t*}" != "$$TESTS" ] || continue; fi; \
+ 		if [ -n "$$SKIP" ]; then t=$${i##TEST-}; t=$${t%%-*}; [ "$${SKIP#*$$t*}" != "$$SKIP" ] && continue; fi; \
+-		$(MAKE) -C $$i all ; \
+-	done
++		$(MAKE) -C $$i all ; ret=$$((ret + $$?)); \
++	done; exit $$ret; }
+ 
+ clean:
+ 	@for i in TEST-[0-9]*; do \

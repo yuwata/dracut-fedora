@@ -1,0 +1,23 @@
+From 69c6435acd7796547d24156691601fa35c400258 Mon Sep 17 00:00:00 2001
+From: honza801 <honza801@gmail.com>
+Date: Thu, 1 Sep 2016 15:37:58 +0200
+Subject: [PATCH] Update nfs-lib.sh
+
+anaconda_nfsv6_to_var(): fix options parsing. $1 contains  : at the end, this is done by previous functions.
+---
+ modules.d/95nfs/nfs-lib.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/modules.d/95nfs/nfs-lib.sh b/modules.d/95nfs/nfs-lib.sh
+index 67608b1..1ba4f5f 100755
+--- a/modules.d/95nfs/nfs-lib.sh
++++ b/modules.d/95nfs/nfs-lib.sh
+@@ -88,7 +88,7 @@ anaconda_nfs_to_var() {
+ # IPv6 nfs path will be treated separately
+ anaconda_nfsv6_to_var() {
+     nfs="nfs"
+-    path="$1:"
++    path="$1"
+     options="${path#*:/}"
+     path="/${options%%:*}"
+     server="${1#*nfs:}"

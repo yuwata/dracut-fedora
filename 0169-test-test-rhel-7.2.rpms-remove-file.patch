@@ -1,0 +1,28 @@
+From e63ac4433a2a46d69e45edabaccf0ae7457383f8 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 14 Nov 2016 12:30:52 +0100
+Subject: [PATCH] test/test-rhel-7.2.rpms: remove file
+
+---
+ test/test-rhel-7.2.rpms | 12 ------------
+ 1 file changed, 12 deletions(-)
+ delete mode 100644 test/test-rhel-7.2.rpms
+
+diff --git a/test/test-rhel-7.2.rpms b/test/test-rhel-7.2.rpms
+deleted file mode 100644
+index edec0cc..0000000
+--- a/test/test-rhel-7.2.rpms
++++ /dev/null
+@@ -1,12 +0,0 @@
+-dash
+-bridge-utils
+-asciidoc
+-mdadm
+-lvm2
+-cryptsetup
+-nfs-utils
+-nbd
+-dhcp-server
+-scsi-target-utils
+-iscsi-initiator-utils
+-

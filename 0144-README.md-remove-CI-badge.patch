@@ -1,0 +1,18 @@
+From 2afd60baa6aa5e8d64d24e7e3dd4f9e316520b0d Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 3 Nov 2016 14:48:31 +0100
+Subject: [PATCH] README.md: remove CI badge
+
+---
+ README.md | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/README.md b/README.md
+index 40b22de..27ad3ea 100644
+--- a/README.md
++++ b/README.md
+@@ -2,4 +2,3 @@
+ 
+ dracut is an initramfs infrastructure.
+ 
+-CentOS CI Status: [![Build Status](https://ci.centos.org/buildStatus/icon?job=dracut-pr-build)](https://ci.centos.org/job/dracut-pr-build/)

@@ -1,0 +1,22 @@
+From fc44fdb5ac0bf73377439a9ea1458f235033f3ea Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 20 Oct 2016 13:58:25 +0200
+Subject: [PATCH] integrity/ima-policy-load.sh: s/echo -n/printf
+
+---
+ modules.d/98integrity/ima-policy-load.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/modules.d/98integrity/ima-policy-load.sh b/modules.d/98integrity/ima-policy-load.sh
+index 5460d02..85cd3b9 100755
+--- a/modules.d/98integrity/ima-policy-load.sh
++++ b/modules.d/98integrity/ima-policy-load.sh
+@@ -30,7 +30,7 @@ load_ima_policy()
+     # check the existence of the IMA policy file
+     [ -f "${IMAPOLICYPATH}" ] && {
+         info "Loading the provided IMA custom policy";
+-        echo -n "${IMAPOLICYPATH}" > ${IMASECDIR}/policy || \
++        printf '%s' "${IMAPOLICYPATH}" > ${IMASECDIR}/policy || \
+             cat "${IMAPOLICYPATH}" > ${IMASECDIR}/policy
+     }
+ 

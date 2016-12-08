@@ -1,0 +1,29 @@
+From ddfcfdf1992c22af8336950b44e594592b34d6c9 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 20 Oct 2016 13:58:53 +0200
+Subject: [PATCH] test/test-rhel-7.2.rpms
+
+list of rpms to install to run the testsuite on rhel-7.2
+---
+ test/test-rhel-7.2.rpms | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+ create mode 100644 test/test-rhel-7.2.rpms
+
+diff --git a/test/test-rhel-7.2.rpms b/test/test-rhel-7.2.rpms
+new file mode 100644
+index 0000000..edec0cc
+--- /dev/null
++++ b/test/test-rhel-7.2.rpms
+@@ -0,0 +1,12 @@
++dash
++bridge-utils
++asciidoc
++mdadm
++lvm2
++cryptsetup
++nfs-utils
++nbd
++dhcp-server
++scsi-target-utils
++iscsi-initiator-utils
++

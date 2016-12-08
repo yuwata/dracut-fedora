@@ -1,0 +1,19 @@
+From b8278a99abcefc0a02548e95ab7da2ed5355845b Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 20 Oct 2016 15:35:08 +0200
+Subject: [PATCH] README.md: update
+
+---
+ README.md | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/README.md b/README.md
+index 4c53f28..40b22de 100644
+--- a/README.md
++++ b/README.md
+@@ -1,4 +1,4 @@
+-# dracut
++# dracut - master branch
+ 
+ dracut is an initramfs infrastructure.
+ 
