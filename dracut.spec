@@ -16,7 +16,7 @@
 
 Name: dracut
 Version: 044
-Release: 176%{?dist}
+Release: 177%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -674,6 +674,9 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Fri Feb 10 2017 Fedora Release Engineering <releng@fedoraproject.org> - 044-177
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_26_Mass_Rebuild
+
 * Thu Dec 08 2016 Harald Hoyer <harald@redhat.com> - 044-176
 - git snapshot
 
