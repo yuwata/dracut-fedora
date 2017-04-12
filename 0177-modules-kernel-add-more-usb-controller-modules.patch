@@ -1,0 +1,32 @@
+From 0c5e5f271be8cb99e4f65fd6cb37ed70dd63754d Mon Sep 17 00:00:00 2001
+From: Peter Robinson <pbrobinson@gmail.com>
+Date: Fri, 3 Feb 2017 10:29:12 +0000
+Subject: [PATCH 127/159] modules: kernel: add more usb controller modules
+
+There's a number of usb controllers that are common yet aren't
+contained in the host directory. Include these for generic host.
+
+Signed-off-by: Peter Robinson <pbrobinson@gmail.com>
+---
+ modules.d/90kernel-modules/module-setup.sh | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/modules.d/90kernel-modules/module-setup.sh b/modules.d/90kernel-modules/module-setup.sh
+index ae65de8a..deb3709c 100755
+--- a/modules.d/90kernel-modules/module-setup.sh
++++ b/modules.d/90kernel-modules/module-setup.sh
+@@ -32,7 +32,11 @@ installkernel() {
+                 "=drivers/power" \
+                 "=drivers/regulator" \
+                 "=drivers/rtc" \
++                "=drivers/usb/chipidea" \
++                "=drivers/usb/dwc2" \
++                "=drivers/usb/dwc3" \
+                 "=drivers/usb/host" \
++                "=drivers/usb/musb" \
+                 "=drivers/usb/phy" \
+                 ${NULL}
+         fi
+-- 
+2.12.2
+

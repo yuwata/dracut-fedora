@@ -16,7 +16,7 @@
 
 Name: dracut
 Version: 044
-Release: 177%{?dist}
+Release: 178%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -210,6 +210,10 @@ Patch172: 0172-TEST-99-RPM-retry-dnf-5-times-in-case-http-fails.patch
 Patch173: 0173-test-Makefile-proper-return-code-for-make-check.patch
 Patch174: 0174-.dir-locals.el-changed-to-sane-style.patch
 Patch175: 0175-dracut.sh-add-default-path-for-uefi.patch
+Patch176: 0176-modules-kernel-add-phy-and-power-modules-to-generic-.patch
+Patch177: 0177-modules-kernel-add-more-usb-controller-modules.patch
+Patch178: 0178-Add-aarch64-to-drm-modules-along-side-ARM.patch
+Patch179: 0179-Add-check-for-aarch64-to-the-arm-kernel-module-list.patch
 
 Source1: https://www.gnu.org/licenses/lgpl-2.1.txt
 
@@ -674,6 +678,9 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Wed Apr 12 2017 Peter Robinson <pbrobinson@fedoraproject.org> 044-178
+- Add upstream patches needed for ARMv7/aarch64 fixes
+
 * Fri Feb 10 2017 Fedora Release Engineering <releng@fedoraproject.org> - 044-177
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_26_Mass_Rebuild
 

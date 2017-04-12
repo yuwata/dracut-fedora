@@ -1,0 +1,30 @@
+From e752d42de9c37dd9906a802a5cdf528fbd360453 Mon Sep 17 00:00:00 2001
+From: Peter Robinson <pbrobinson@gmail.com>
+Date: Mon, 4 Jul 2016 16:57:39 +0100
+Subject: [PATCH 126/159] modules: kernel: add phy and power modules to generic
+ initrd
+
+The phy and power modules are needed by some of the recent ARM
+devices that have appeared like CHIP and some exynos devices.
+
+Signed-off-by: Peter Robinson <pbrobinson@gmail.com>
+---
+ modules.d/90kernel-modules/module-setup.sh | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/modules.d/90kernel-modules/module-setup.sh b/modules.d/90kernel-modules/module-setup.sh
+index 868341cb..ae65de8a 100755
+--- a/modules.d/90kernel-modules/module-setup.sh
++++ b/modules.d/90kernel-modules/module-setup.sh
+@@ -28,6 +28,8 @@ installkernel() {
+             instmods \
+                 "=drivers/clk" \
+                 "=drivers/i2c/busses" \
++                "=drivers/phy" \
++                "=drivers/power" \
+                 "=drivers/regulator" \
+                 "=drivers/rtc" \
+                 "=drivers/usb/host" \
+-- 
+2.12.2
+
