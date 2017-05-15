@@ -1,0 +1,37 @@
+From feaaee4278077dd67fe24acebfbe47ba20738955 Mon Sep 17 00:00:00 2001
+From: Hans de Goede <hdegoede@redhat.com>
+Date: Sat, 13 May 2017 17:23:36 +0200
+Subject: [PATCH] drm: Install pwm modules on all architectures
+
+At least on x86 on Bay and Cherry Trail devices the pmw-lpss modules must
+be in the initrd too, otherwise the i915 driver will still load, but
+it will report the following error:
+
+[drm:pwm_setup_backlight [i915]] *ERROR* Failed to own the pwm chip
+
+And not register /sys/class/backlight/intel_backlight and users will
+not be able to control their backlight.
+
+Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+---
+ modules.d/50drm/module-setup.sh | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/modules.d/50drm/module-setup.sh b/modules.d/50drm/module-setup.sh
+index 42a5e7bc..2014539a 100755
+--- a/modules.d/50drm/module-setup.sh
++++ b/modules.d/50drm/module-setup.sh
+@@ -21,12 +21,11 @@ installkernel() {
+             "=drivers/gpu/drm/i2c" \
+             "=drivers/gpu/drm/panel" \
+             "=drivers/gpu/drm/bridge" \
+-            "=drivers/pwm" \
+             "=drivers/video/backlight" \
+             ${NULL}
+     fi
+ 
+-    instmods amdkfd hyperv_fb
++    instmods amdkfd hyperv_fb "=drivers/pwm"
+ 
+     # if the hardware is present, include module even if it is not currently loaded,
+     # as we could e.g. be in the installer; nokmsboot boot parameter will disable

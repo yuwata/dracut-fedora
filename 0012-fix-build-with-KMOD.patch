@@ -1,0 +1,24 @@
+From f59548aeab5da479493e2c49400993a6502f6f8e Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tomasz=20Pawe=C5=82=20Gajc?= <tpgxyz@gmail.com>
+Date: Mon, 24 Apr 2017 21:37:56 +0200
+Subject: [PATCH] fix build with KMOD
+
+---
+ Makefile | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index 64b46e75..414fb330 100644
+--- a/Makefile
++++ b/Makefile
+@@ -12,8 +12,8 @@ pkglibdir ?= ${libdir}/dracut
+ sysconfdir ?= ${prefix}/etc
+ bindir ?= ${prefix}/bin
+ mandir ?= ${prefix}/share/man
+-CFLAGS ?= -O2 -g -Wall $(KMOD_CFLAGS)
+-CFLAGS += -std=gnu99 -D_FILE_OFFSET_BITS=64 -Wformat -Werror=format-security -Wp,-D_FORTIFY_SOURCE=2
++CFLAGS ?= -O2 -g -Wall
++CFLAGS += -std=gnu99 -D_FILE_OFFSET_BITS=64 -Wformat -Werror=format-security -Wp,-D_FORTIFY_SOURCE=2 $(KMOD_CFLAGS)
+ bashcompletiondir ?= ${datadir}/bash-completion/completions
+ pkgconfigdatadir ?= $(datadir)/pkgconfig
+ 

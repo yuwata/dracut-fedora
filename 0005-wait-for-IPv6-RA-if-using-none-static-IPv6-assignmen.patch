@@ -1,0 +1,21 @@
+From c603419030136570b5944dc4620f62d07b9e82bb Mon Sep 17 00:00:00 2001
+From: pallotron <pallotron@fb.com>
+Date: Tue, 4 Apr 2017 08:31:21 -0700
+Subject: [PATCH] wait for IPv6 RA if using none/static IPv6 assignment
+
+---
+ modules.d/40network/net-lib.sh | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/modules.d/40network/net-lib.sh b/modules.d/40network/net-lib.sh
+index 75051544..b74fdbdd 100755
+--- a/modules.d/40network/net-lib.sh
++++ b/modules.d/40network/net-lib.sh
+@@ -671,6 +671,7 @@ wait_for_ipv6_dad() {
+ 
+     while [ $cnt -lt $timeout ]; do
+         [ -z "$(ip -6 addr show dev "$1" tentative)" ] \
++            && [ -n "$(ip -6 route list proto ra dev "$1")" ] \
+             && return 0
+         [ -n "$(ip -6 addr show dev "$1" dadfailed)" ] \
+             && return 1

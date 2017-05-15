@@ -1,0 +1,22 @@
+From ab66ef2d4a4297642fa059e9df4f86ccefbed4aa Mon Sep 17 00:00:00 2001
+From: Jason Dana <jasondana@quarksecurity.com>
+Date: Thu, 27 Apr 2017 07:55:58 -0400
+Subject: [PATCH] Check the proper variable for a custom IMA keys directory
+
+---
+ modules.d/98integrity/ima-keys-load.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/modules.d/98integrity/ima-keys-load.sh b/modules.d/98integrity/ima-keys-load.sh
+index 659b7222..e142f74d 100755
+--- a/modules.d/98integrity/ima-keys-load.sh
++++ b/modules.d/98integrity/ima-keys-load.sh
+@@ -13,7 +13,7 @@ load_x509_keys()
+         . ${IMACONFIG}
+     fi
+ 
+-    if [ -z "${IMAKEYDIR}" ]; then
++    if [ -z "${IMAKEYSDIR}" ]; then
+         IMAKEYSDIR="/etc/keys/ima"
+     fi
+ 

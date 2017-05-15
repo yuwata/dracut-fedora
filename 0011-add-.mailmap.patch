@@ -1,0 +1,18 @@
+From 538ff0fd802589587734ccdcc811d78e2c0816a4 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 10 Apr 2017 14:50:21 +0200
+Subject: [PATCH] add .mailmap
+
+---
+ .mailmap | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/.mailmap b/.mailmap
+index 53d61f2a..fd7ab839 100644
+--- a/.mailmap
++++ b/.mailmap
+@@ -16,3 +16,4 @@ Frederick Grose <fgrose@sugarlabs.org> 		<fgrose@gmail.com>
+ Frederic Crozat <fcrozat@suse.com> 		<fcrozat@mandriva.com>
+ Shawn W Dunn <sfalken@opensuse.org> 		<sfalken@opensuse.org>
+ Kyle McMartin <kmcmarti@redhat.com>             <kyle@redhat.com>
++Angelo "pallotron" Failla <pallotron@fb.com>     <pallotron@fb.com>

@@ -1,0 +1,33 @@
+From ea765c0ee17178fe74c73873505f7c86f40f9ec7 Mon Sep 17 00:00:00 2001
+From: Frederick Grose <fgrose@sugarlabs.org>
+Date: Sat, 8 Apr 2017 21:01:19 -0400
+Subject: [PATCH] dmsquash-live-root: Avoid mount source conflict on
+ $BASE_LOOPDEV.
+
+The newer mount utilities are more strict about directly shared
+devices. For OverlayFS boots, which mount $BASE_LOOPDEV directly,
+avoid a mount error by indirectly sharing the read-only base
+filesystem through a second, over-attached $BASE_LOOPDEV for
+the DM live-base target.
+---
+ modules.d/90dmsquash-live/dmsquash-live-root.sh | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/modules.d/90dmsquash-live/dmsquash-live-root.sh b/modules.d/90dmsquash-live/dmsquash-live-root.sh
+index 264983f5..3a25465c 100755
+--- a/modules.d/90dmsquash-live/dmsquash-live-root.sh
++++ b/modules.d/90dmsquash-live/dmsquash-live-root.sh
+@@ -241,7 +241,12 @@ do_live_overlay() {
+     fi
+ 
+     # Create a device that always points to a ro base image
+-    echo 0 $sz linear $BASE_LOOPDEV 0 | dmsetup create --readonly live-base
++    if [ -n "$overlayfs" ]; then
++        BASE_LOOPDUP=$(losetup -f --show -r $BASE_LOOPDEV)
++        echo 0 $sz linear $BASE_LOOPDUP 0 | dmsetup create --readonly live-base
++    else
++        echo 0 $sz linear $BASE_LOOPDEV 0 | dmsetup create --readonly live-base
++    fi
+ }
+ 
+ # we might have a genMinInstDelta delta file for anaconda to take advantage of
