@@ -16,7 +16,7 @@
 
 Name: dracut
 Version: 045
-Release: 18.git20170515%{?dist}
+Release: 19.git20170515%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -516,6 +516,9 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Wed Jul 26 2017 Fedora Release Engineering <releng@fedoraproject.org> - 045-19.git20170515
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_27_Mass_Rebuild
+
 * Mon May 15 2017 Harald Hoyer <harald@redhat.com> - 045-18.git20170515
 - git snapshot
 
