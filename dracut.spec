@@ -16,7 +16,7 @@
 
 Name: dracut
 Version: 045
-Release: 20.git20170515%{?dist}
+Release: 21.git20170515%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -52,11 +52,13 @@ Patch14: 0014-TEST-50-MULTINIC-fix-bridge-test.patch
 Patch15: 0015-Check-the-proper-variable-for-a-custom-IMA-keys-dire.patch
 Patch16: 0016-Handle-curl-using-libnssckbi-for-TLS-RHBZ-1447777.patch
 Patch17: 0017-drm-Install-pwm-modules-on-all-architectures.patch
+Patch18: 0018-add-options-to-pickup-dw_mmc-submodules-to-blockfunc.patch
+Patch19: 0019-arm-add-soc-extcon-mfd-as-they-re-often-needed-for-U.patch
 
 Source1: https://www.gnu.org/licenses/lgpl-2.1.txt
 
 
-BuildRequires: bash git
+BuildRequires: bash git-core
 BuildRequires: kmod-devel >= 15
 
 %if 0%{?fedora} || 0%{?rhel}
@@ -321,8 +323,6 @@ echo 'dracut_rescue_image="yes"' > $RPM_BUILD_ROOT%{dracutlibdir}/dracut.conf.d/
 > $RPM_BUILD_ROOT/etc/system-fips
 %endif
 
-%clean
-rm -rf -- $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root,0755)
@@ -516,6 +516,9 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Mon Aug  7 2017 Peter Robinson <pbrobinson@fedoraproject.org> 045-21.git20170515
+- Add upstream patches to fix a number of ARM devices with generic initrd
+
 * Wed Aug 02 2017 Fedora Release Engineering <releng@fedoraproject.org> - 045-20.git20170515
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_27_Binutils_Mass_Rebuild
 
