@@ -1,0 +1,23 @@
+From 15d00459c3ec0fe665037e3b7f5834ca8ef35cfe Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@hoyer.xyz>
+Date: Wed, 23 Aug 2017 09:31:53 +0200
+Subject: [PATCH] Merge pull request #272 from yzygitzh/no-lsinitrd-if-quiet
+
+dracut.sh: disable lsinitrd logging when quiet
+---
+ dracut.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/dracut.sh b/dracut.sh
+index 681a6b7a..06127ca4 100755
+--- a/dracut.sh
++++ b/dracut.sh
+@@ -1759,7 +1759,7 @@ if ! (
+     exit 1
+ fi
+ 
+-if (( maxloglvl >= 5 )); then
++if (( maxloglvl >= 5 )) && (( verbosity_mod_l >= 0 )); then
+     if [[ $allowlocal ]]; then
+ 	"$dracutbasedir/lsinitrd.sh" "${DRACUT_TMPDIR}/initramfs.img"| ddebug
+     else

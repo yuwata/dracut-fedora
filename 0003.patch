@@ -1,0 +1,24 @@
+From 3bd3ef5819141b06eb4d5c9e139e047efccb6d1f Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 14 Aug 2017 14:58:47 +0200
+Subject: [PATCH] kernel-modules: don't call instmods with empty arguments
+
+otherwise it will try to read from stdin and stall
+---
+ modules.d/90kernel-modules/module-setup.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/modules.d/90kernel-modules/module-setup.sh b/modules.d/90kernel-modules/module-setup.sh
+index 462b5417..c6405e95 100755
+--- a/modules.d/90kernel-modules/module-setup.sh
++++ b/modules.d/90kernel-modules/module-setup.sh
+@@ -57,7 +57,7 @@ installkernel() {
+             if [[ -z $filesystems ]]; then
+                 dracut_instmods -o -P ".*/(kernel/fs/nfs|kernel/fs/nfsd|kernel/fs/lockd)/.*" '=fs'
+             fi
+-        else
++        elif [[ "${host_fs_types[*]}" ]]; then
+             hostonly='' instmods "${host_fs_types[@]}"
+         fi
+     fi
+

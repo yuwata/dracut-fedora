@@ -1,0 +1,24 @@
+From 00f3525a300c5a09d9b379832c17457be2e2d0f4 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 14 Aug 2017 09:45:31 +0200
+Subject: [PATCH] lvmmerge: depend on systemd
+
+Fixes https://github.com/dracutdevs/dracut/issues/267
+---
+ modules.d/80lvmmerge/module-setup.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/modules.d/80lvmmerge/module-setup.sh b/modules.d/80lvmmerge/module-setup.sh
+index dddb6ec1..89c93f31 100755
+--- a/modules.d/80lvmmerge/module-setup.sh
++++ b/modules.d/80lvmmerge/module-setup.sh
+@@ -10,7 +10,7 @@ check() {
+ 
+ # called by dracut
+ depends() {
+-    echo lvm
++    echo lvm dracut-systemd systemd
+     return 0
+ }
+ 
+
