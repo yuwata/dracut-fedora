@@ -1,6 +1,6 @@
-%global gitcommit 5abd692fe46215c38f564b59db50193daf745af5
+%global gitcommit 15d00459c3ec0fe665037e3b7f5834ca8ef35cfe
 %{?gitcommit:%global gitcommitshort %(c=%{gitcommit}; echo ${c:0:7})}
-%global gitdate 20170811
+%global gitdate 20170823
 
 %define dracutlibdir %{_prefix}/lib/dracut
 %bcond_without doc
@@ -18,7 +18,7 @@
 %define with_nbd 0
 %endif
 
-%define dist_free_release 2.git%{gitdate}
+%define dist_free_release 2.1.git%{gitdate}
 
 Name: dracut
 Version: 046
@@ -528,6 +528,9 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Thu Aug 24 2017 Yu Watanabe <watanabe.yu@gmail.com> - 046-2.1.git20170823
+- Update to latest git snapshot 15d00459c3ec0fe665037e3b7f5834ca8ef35cfe
+
 * Fri Aug 11 2017 Harald Hoyer <harald@redhat.com> - 046-2
 - add support for dist-tag less build
 
