@@ -1,0 +1,25 @@
+From 424c065cd99cc9c35a92a68d34c161beff5f5497 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@hoyer.xyz>
+Date: Wed, 30 Aug 2017 11:51:12 +0200
+Subject: [PATCH] Merge pull request #276 from danimo/copy_multipath_confd
+
+95multipath: Pickup files in /etc/multipath/conf.d
+---
+ modules.d/90multipath/module-setup.sh | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/modules.d/90multipath/module-setup.sh b/modules.d/90multipath/module-setup.sh
+index e5683395..28857ebc 100755
+--- a/modules.d/90multipath/module-setup.sh
++++ b/modules.d/90multipath/module-setup.sh
+@@ -65,7 +65,8 @@ install() {
+         xdrgetprio \
+         /etc/xdrdevices.conf \
+         /etc/multipath.conf \
+-        /etc/multipath/*
++        /etc/multipath/* \
++        /etc/multipath/conf.d/*
+ 
+     inst $(command -v partx) /sbin/partx
+ 
+

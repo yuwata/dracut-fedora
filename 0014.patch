@@ -1,0 +1,37 @@
+From 0d947530b2b8928b5b2040c2e56cb966a5ea941f Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 9 Oct 2017 12:50:25 +0200
+Subject: [PATCH] TEST-70: sort interfaces for validation
+
+---
+ test/TEST-70-BONDBRIDGETEAMVLAN/client-init.sh | 2 +-
+ test/TEST-70-BONDBRIDGETEAMVLAN/test.sh        | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/test/TEST-70-BONDBRIDGETEAMVLAN/client-init.sh b/test/TEST-70-BONDBRIDGETEAMVLAN/client-init.sh
+index 2018393b..8c33ff0f 100755
+--- a/test/TEST-70-BONDBRIDGETEAMVLAN/client-init.sh
++++ b/test/TEST-70-BONDBRIDGETEAMVLAN/client-init.sh
+@@ -10,7 +10,7 @@ echo "made it to the rootfs! Powering down."
+ 
+ (
+     echo OK
+-    ip -o -4 address show scope global | while read n if rest; do echo $if;done
++    ip -o -4 address show scope global | while read n if rest; do echo $if;done | sort
+     for i in /run/initramfs/state/etc/sysconfig/network-scripts/ifcfg-*; do
+ 	echo $i
+ 	grep -v 'UUID=' $i
+diff --git a/test/TEST-70-BONDBRIDGETEAMVLAN/test.sh b/test/TEST-70-BONDBRIDGETEAMVLAN/test.sh
+index 6b4e10df..277bbd01 100755
+--- a/test/TEST-70-BONDBRIDGETEAMVLAN/test.sh
++++ b/test/TEST-70-BONDBRIDGETEAMVLAN/test.sh
+@@ -235,7 +235,7 @@ test_setup() {
+         export initdir="$TESTDIR"/mnt/nfs/client
+         . "$basedir"/dracut-init.sh
+         inst_multiple sh shutdown poweroff stty cat ps ln ip \
+-            mount dmesg mkdir cp ping grep ls
++            mount dmesg mkdir cp ping grep ls sort
+         for _terminfodir in /lib/terminfo /etc/terminfo /usr/share/terminfo; do
+             [[ -f ${_terminfodir}/l/linux ]] && break
+         done
+

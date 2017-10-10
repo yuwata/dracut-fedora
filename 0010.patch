@@ -1,0 +1,24 @@
+From 32618b456e4ba4b02e595eae067ec77df526ab9b Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@hoyer.xyz>
+Date: Mon, 9 Oct 2017 09:38:37 +0200
+Subject: [PATCH] Merge pull request #277 from imran1008/bond-master-mtu
+
+Set MTU on bond master as opposed to a bond slave
+---
+ modules.d/40network/ifup.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/modules.d/40network/ifup.sh b/modules.d/40network/ifup.sh
+index 687b5707..0db3c021 100755
+--- a/modules.d/40network/ifup.sh
++++ b/modules.d/40network/ifup.sh
+@@ -257,7 +257,7 @@ if [ -z "$NO_BOND_MASTER" ]; then
+             done
+ 
+             # Set mtu on bond master
+-            [ -n "$bondmtu" ] && ip link set mtu $bondmtu dev $netif
++            [ -n "$bondmtu" ] && ip link set mtu $bondmtu dev $bondname
+ 
+             # add the bits to setup the needed post enslavement parameters
+             for arg in $bondoptions ; do
+

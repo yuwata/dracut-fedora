@@ -21,3 +21,4 @@ index 681a6b7a..06127ca4 100755
      if [[ $allowlocal ]]; then
  	"$dracutbasedir/lsinitrd.sh" "${DRACUT_TMPDIR}/initramfs.img"| ddebug
      else
+

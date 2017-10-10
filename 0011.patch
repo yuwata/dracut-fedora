@@ -1,0 +1,180 @@
+From 7c9e64272ef250a4b8804beaba24a3da7c157ca4 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@hoyer.xyz>
+Date: Mon, 9 Oct 2017 11:39:10 +0200
+Subject: [PATCH] Merge pull request #280 from tpgxyz/zstd
+
+add support for Zstandard
+---
+ dracut-bash-completion.sh           |  2 +-
+ dracut-initramfs-restore.sh         |  2 ++
+ dracut.8.asc                        |  8 ++++++++
+ dracut.conf.5.asc                   |  2 +-
+ dracut.sh                           | 10 +++++++++-
+ lsinitrd.sh                         |  3 +++
+ modules.d/99img-lib/img-lib.sh      |  5 +++--
+ modules.d/99img-lib/module-setup.sh |  2 +-
+ 8 files changed, 28 insertions(+), 6 deletions(-)
+
+diff --git a/dracut-bash-completion.sh b/dracut-bash-completion.sh
+index 09330a67..9e5806cc 100644
+--- a/dracut-bash-completion.sh
++++ b/dracut-bash-completion.sh
+@@ -29,7 +29,7 @@ _dracut() {
+                               --hardlink --nohardlink --noprefix --mdadmconf --nomdadmconf
+                               --lvmconf --nolvmconf --debug --profile --verbose --quiet
+                               --local --hostonly --no-hostonly --fstab --help --bzip2 --lzma
+-                              --xz --no-compress --gzip --list-modules --show-modules --keep
++                              --xz --zstd --no-compress --gzip --list-modules --show-modules --keep
+                               --printsize --regenerate-all --noimageifnotneeded --early-microcode
+                               --no-early-microcode --print-cmdline --prelink --noprelink --reproducible
+                               --uefi
+diff --git a/dracut-initramfs-restore.sh b/dracut-initramfs-restore.sh
+index 0c41a59c..94794804 100644
+--- a/dracut-initramfs-restore.sh
++++ b/dracut-initramfs-restore.sh
+@@ -31,6 +31,8 @@ elif $SKIP "$IMG" | xzcat | cpio -id --no-absolute-filenames --quiet >/dev/null;
+     rm -f -- .need_shutdown
+ elif $SKIP "$IMG" | lz4 -d -c | cpio -id --no-absolute-filenames --quiet >/dev/null; then
+     rm -f -- .need_shutdown
++elif $SKIP "$IMG" | zstd -d -c | cpio -id --no-absolute-filenames --quiet >/dev/null; then
++    rm -f -- .need_shutdown
+ else
+     # something failed, so we clean up
+     echo "Unpacking of $IMG to /run/initramfs failed" >&2
+diff --git a/dracut.8.asc b/dracut.8.asc
+index 23c53cc4..64c0207f 100644
+--- a/dracut.8.asc
++++ b/dracut.8.asc
+@@ -432,6 +432,14 @@ Make sure your kernel has lz4 decompression support compiled in, otherwise you
+ will not be able to boot.
+ ====
+ 
++**--zstd**::
++    Compress the generated initramfs using Zstandard.
++[WARNING]
++====
++Make sure your kernel has zstd decompression support compiled in, otherwise you
++will not be able to boot.
++====
++
+ **--compress** _<compressor>_::
+     Compress the generated initramfs using the passed compression program. If
+     you pass it just the name of a compression program, it will call that
+diff --git a/dracut.conf.5.asc b/dracut.conf.5.asc
+index 907a2fd4..6e8f3eba 100644
+--- a/dracut.conf.5.asc
++++ b/dracut.conf.5.asc
+@@ -79,7 +79,7 @@ Configuration files must have the extension .conf; other extensions are ignored.
+     Specify additional files to include in the initramfs, separated by spaces,
+     if they exist.
+ 
+-*compress=*"__{bzip2|lzma|xz|gzip|lzo|lz4|<compressor [args ...]>}__"::
++*compress=*"__{bzip2|lzma|xz|gzip|lzo|lz4|zstd|<compressor [args ...]>}__"::
+     Compress the generated initramfs using the passed compression program. If
+     you pass it just the name of a compression program, it will call that
+     program with known-working arguments. If you pass arguments, it will be called
+diff --git a/dracut.sh b/dracut.sh
+index 06127ca4..5ad0f464 100755
+--- a/dracut.sh
++++ b/dracut.sh
+@@ -197,6 +197,9 @@ Creates initial ramdisk images for preloading modules
+   --lz4                 Compress the generated initramfs using lz4.
+                          Make sure that your kernel has lz4 support compiled
+                          in, otherwise you will not be able to boot.
++  --zstd                Compress the generated initramfs using Zstandard.
++                         Make sure that your kernel has zstd support compiled
++                         in, otherwise you will not be able to boot.
+   --compress [COMPRESSION] Compress the generated initramfs with the
+                          passed compression program.  Make sure your kernel
+                          knows how to decompress the generated initramfs,
+@@ -358,6 +361,7 @@ rearrange_params()
+         --long xz \
+         --long lzo \
+         --long lz4 \
++        --long zstd \
+         --long no-compress \
+         --long gzip \
+         --long list-modules \
+@@ -557,6 +561,7 @@ while :; do
+         --xz)          compress_l="xz";;
+         --lzo)         compress_l="lzo";;
+         --lz4)         compress_l="lz4";;
++        --zstd)        compress_l="zstd";;
+         --no-compress) _no_compress_l="cat";;
+         --gzip)        compress_l="gzip";;
+         --list-modules) do_list="yes";;
+@@ -797,7 +802,7 @@ fi
+ 
+ if ! [[ $compress ]]; then
+     # check all known compressors, if none specified
+-    for i in pigz gzip lz4 lzop lzma xz lbzip2 bzip2 cat; do
++    for i in pigz gzip lz4 lzop zstd lzma xz lbzip2 bzip2 cat; do
+         command -v "$i" &>/dev/null || continue
+         compress="$i"
+         break
+@@ -837,6 +842,9 @@ case $compress in
+     lz4)
+         compress="lz4 -l -9"
+         ;;
++    zstd)
++       compress="zstd -15 -q -T0"
++       ;;
+ esac
+ 
+ [[ $hostonly = yes ]] && hostonly="-h"
+diff --git a/lsinitrd.sh b/lsinitrd.sh
+index b19a66a0..f4088453 100755
+--- a/lsinitrd.sh
++++ b/lsinitrd.sh
+@@ -219,6 +219,9 @@ case $bin in
+     $'\x89'LZO$'\0'*)
+         CAT="lzop -d -c"
+         ;;
++    $'0xFD2FB528'*)
++        CAT="zstd -d -c"
++        ;;
+     *)
+         if echo "test"|xz|xzcat --single-stream >/dev/null 2>&1; then
+             CAT="xzcat --single-stream --"
+diff --git a/modules.d/99img-lib/img-lib.sh b/modules.d/99img-lib/img-lib.sh
+index 48e56ce7..43785812 100755
+--- a/modules.d/99img-lib/img-lib.sh
++++ b/modules.d/99img-lib/img-lib.sh
+@@ -8,12 +8,13 @@
+ # works with stdin if $1 is not set.
+ det_archive() {
+     # NOTE: echo -e works in ash and bash, but not dash
+-    local bz="BZh" xz="$(echo -e '\xfd7zXZ')" gz="$(echo -e '\x1f\x8b')"
++    local bz="BZh" xz="$(echo -e '\xfd7zXZ')" gz="$(echo -e '\x1f\x8b')" zs="$(echo -e '0xFD2FB528')"
+     local headerblock="$(dd ${1:+if=$1} bs=262 count=1 2>/dev/null)"
+     case "$headerblock" in
+         $xz*) echo "xz" ;;
+         $gz*) echo "gzip" ;;
+         $bz*) echo "bzip2" ;;
++        $zs*) echo "zstd" ;;
+         07070*) echo "cpio" ;;
+         *ustar) echo "tar" ;;
+     esac
+@@ -33,7 +34,7 @@ unpack_archive() {
+     local img="$1" outdir="$2" archiver="" decompr=""
+     local ft="$(det_archive $img)"
+     case "$ft" in
+-        xz|gzip|bzip2) decompr="$ft -dc" ;;
++        xz|gzip|bzip2|zstd) decompr="$ft -dc" ;;
+         cpio|tar) decompr="cat";;
+         *) return 1 ;;
+     esac
+diff --git a/modules.d/99img-lib/module-setup.sh b/modules.d/99img-lib/module-setup.sh
+index 69346b2f..fe1eca1a 100755
+--- a/modules.d/99img-lib/module-setup.sh
++++ b/modules.d/99img-lib/module-setup.sh
+@@ -16,7 +16,7 @@ depends() {
+ install() {
+     inst_multiple tar gzip dd bash
+     # TODO: make this conditional on a cmdline flag / config option
+-    inst_multiple -o cpio xz bzip2
++    inst_multiple -o cpio xz bzip2 zstd
+     inst_simple "$moddir/img-lib.sh" "/lib/img-lib.sh"
+ }
+ 
+

@@ -14,7 +14,7 @@
 %define with_nbd 0
 %endif
 
-%define dist_free_release 7.git20170824
+%define dist_free_release 19.git20171010
 
 Name: dracut
 Version: 046
@@ -43,6 +43,18 @@ Patch3: 0003.patch
 Patch4: 0004.patch
 Patch5: 0005.patch
 Patch6: 0006.patch
+Patch7: 0007.patch
+Patch8: 0008.patch
+Patch9: 0009.patch
+Patch10: 0010.patch
+Patch11: 0011.patch
+Patch12: 0012.patch
+Patch13: 0013.patch
+Patch14: 0014.patch
+Patch15: 0015.patch
+Patch16: 0017.patch
+Patch17: 0018.patch
+Patch18: 0019.patch
 
 Source1: https://www.gnu.org/licenses/lgpl-2.1.txt
 
@@ -522,6 +534,9 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Tue Oct 10 2017 Harald Hoyer <harald@redhat.com> - 046-19
+- git snapshot
+
 * Thu Aug 24 2017 Harald Hoyer <harald@redhat.com> - 046-7
 - git snapshot
 
