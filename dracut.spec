@@ -1,6 +1,6 @@
-%global gitcommit 8c2aa6161a2435f2af7e7df3a36125e85af0f0ec
+%global gitcommit 2c9bcac1136c6a18aedcdcdac5789ccf5cd18492
 %{?gitcommit:%global gitcommitshort %(c=%{gitcommit}; echo ${c:0:7})}
-%global gitdate 20171009
+%global gitdate 20171010
 
 %define dracutlibdir %{_prefix}/lib/dracut
 %bcond_without doc
@@ -18,7 +18,7 @@
 %define with_nbd 0
 %endif
 
-%define dist_free_release 7.1.git%{gitdate}
+%define dist_free_release 19.1.git%{gitdate}
 
 Name: dracut
 Version: 046
@@ -528,8 +528,11 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
-* Tue Oct 10 2017 Yu Watanabe <watanabe.yu@gmail.com> - 046-7.1.git20171009
-- Update to latest git snapshot 8c2aa6161a2435f2af7e7df3a36125e85af0f0ec
+* Wed Oct 11 2017 Yu Watanabe <watanabe.yu@gmail.com> - 046-19.1.git20171010
+- Update to latest git snapshot 2c9bcac1136c6a18aedcdcdac5789ccf5cd18492
+
+* Tue Oct 10 2017 Harald Hoyer <harald@redhat.com> - 046-19
+- git snapshot
 
 * Thu Aug 24 2017 Harald Hoyer <harald@redhat.com> - 046-7
 - git snapshot
