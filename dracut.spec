@@ -1,6 +1,6 @@
-%global gitcommit 2c9bcac1136c6a18aedcdcdac5789ccf5cd18492
+%global gitcommit 4b758ebe2288e594a1f522334192e5d8fa1f96af
 %{?gitcommit:%global gitcommitshort %(c=%{gitcommit}; echo ${c:0:7})}
-%global gitdate 20171010
+%global gitdate 20171012
 
 %define dracutlibdir %{_prefix}/lib/dracut
 %bcond_without doc
@@ -18,7 +18,7 @@
 %define with_nbd 0
 %endif
 
-%define dist_free_release 19.1.git%{gitdate}
+%define dist_free_release 20.1.git%{gitdate}
 
 Name: dracut
 Version: 046
@@ -528,8 +528,11 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
-* Wed Oct 11 2017 Yu Watanabe <watanabe.yu@gmail.com> - 046-19.1.git20171010
-- Update to latest git snapshot 2c9bcac1136c6a18aedcdcdac5789ccf5cd18492
+* Fri Oct 20 2017 Yu Watanabe <watanabe.yu@gmail.com> - 046-20.1.git20171012
+- Update to latest git snapshot 4b758ebe2288e594a1f522334192e5d8fa1f96af
+
+* Thu Oct 12 2017 Peter Robinson <pbrobinson@fedoraproject.org> 046-20
+- Add fix for some ARM SBCs
 
 * Tue Oct 10 2017 Harald Hoyer <harald@redhat.com> - 046-19
 - git snapshot
