@@ -24,3 +24,4 @@ index 5ad0f464..995d983e 100755
              outfile="/boot/${MACHINE_ID}/$kernel/initrd"
          else
              outfile="/boot/initramfs-$kernel.img"
+

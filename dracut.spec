@@ -14,7 +14,7 @@
 %define with_nbd 0
 %endif
 
-%define dist_free_release 20.git20171010
+%define dist_free_release 33.git20171127
 
 Name: dracut
 Version: 046
@@ -56,6 +56,19 @@ Patch16: 0017.patch
 Patch17: 0018.patch
 Patch18: 0019.patch
 Patch19: 0020.patch
+Patch20: 0021.patch
+Patch21: 0023.patch
+Patch22: 0024.patch
+Patch23: 0025.patch
+Patch24: 0026.patch
+Patch25: 0027.patch
+Patch26: 0028.patch
+Patch27: 0029.patch
+Patch28: 0030.patch
+Patch29: 0031.patch
+Patch30: 0032.patch
+Patch31: 0033.patch
+Patch32: 0034.patch
 
 Source1: https://www.gnu.org/licenses/lgpl-2.1.txt
 
@@ -535,6 +548,9 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Wed Nov 29 2017 Harald Hoyer <harald@redhat.com> - 046-33
+- git snapshot
+
 * Thu Oct 12 2017 Peter Robinson <pbrobinson@fedoraproject.org> 046-20
 - Add fix for some ARM SBCs
 

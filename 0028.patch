@@ -1,0 +1,33 @@
+From e190224345f3a8b2f9e85d84bc879dd96bf265da Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 26 Oct 2017 09:08:28 +0200
+Subject: [PATCH] lsinitrd.sh: dismiss "cat" error messages
+
+nobody wants to see "cat: broken pipe"
+---
+ lsinitrd.sh | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/lsinitrd.sh b/lsinitrd.sh
+index f4088453..f3f727c8 100755
+--- a/lsinitrd.sh
++++ b/lsinitrd.sh
+@@ -172,7 +172,7 @@ fi
+ read -N 6 bin < "$image"
+ case $bin in
+     $'\x71\xc7'*|070701)
+-        CAT="cat --"
++        CAT="cat 2>/dev/null --"
+         is_early=$(cpio --extract --verbose --quiet --to-stdout -- 'early_cpio' < "$image" 2>/dev/null)
+         if [[ "$is_early" ]]; then
+             if [[ -n "$unpackearly" ]]; then
+@@ -211,7 +211,7 @@ case $bin in
+         CAT="bzcat --"
+         ;;
+     $'\x71\xc7'*|070701)
+-        CAT="cat --"
++        CAT="cat 2>/dev/null --"
+         ;;
+     $'\x02\x21'*)
+         CAT="lz4 -d -c"
+

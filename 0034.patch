@@ -1,0 +1,64 @@
+From 1ec2e34adcec7ee17fbf5e0410fd21cd1f2c9e27 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@hoyer.xyz>
+Date: Mon, 6 Nov 2017 09:56:13 +0100
+Subject: [PATCH] Merge pull request #300 from danimo/pick_all_matching_keymaps
+
+10i18n: Load all keymaps for a given locale
+---
+ modules.d/10i18n/module-setup.sh | 35 ++++++++++++++++++++---------------
+ 1 file changed, 20 insertions(+), 15 deletions(-)
+
+diff --git a/modules.d/10i18n/module-setup.sh b/modules.d/10i18n/module-setup.sh
+index 62babb2b..7723f6fa 100755
+--- a/modules.d/10i18n/module-setup.sh
++++ b/modules.d/10i18n/module-setup.sh
+@@ -29,21 +29,24 @@ install() {
+ 
+     # This is from 10redhat-i18n.
+     findkeymap () {
+-        local MAP=$1
++        local MAPS=$1
+         local MAPNAME=${1%.map*}
+-        [[ ! -f $MAP ]] && \
+-            MAP=$(find ${kbddir}/keymaps -type f -name ${MAPNAME} -o -name ${MAPNAME}.map -o -name ${MAPNAME}.map.\* | head -n1)
+-        [[ " $KEYMAPS " = *" $MAP "* ]] && return
+-        KEYMAPS="$KEYMAPS $MAP"
+-        case $MAP in
+-            *.gz) cmd=zgrep;;
+-            *.bz2) cmd=bzgrep;;
+-            *) cmd=grep ;;
+-        esac
+-
+-        for INCL in $($cmd "^include " $MAP | while read a a b || [ -n "$a" ]; do echo ${a//\"/}; done); do
+-            for FN in $(find ${kbddir}/keymaps -type f -name $INCL\*); do
+-                findkeymap $FN
++        local map
++        [[ ! -f $MAPS ]] && \
++            MAPS=$(find ${kbddir}/keymaps -type f -name ${MAPNAME} -o -name ${MAPNAME}.map -o -name ${MAPNAME}.map.\*)
++
++        for map in $MAPS; do
++            KEYMAPS="$KEYMAPS $map"
++            case $map in
++                *.gz) cmd=zgrep;;
++                *.bz2) cmd=bzgrep;;
++                *) cmd=grep ;;
++            esac
++
++            for INCL in $($cmd "^include " $map | while read a a b || [ -n "$a" ]; do echo ${a//\"/}; done); do
++                for FN in $(find ${kbddir}/keymaps -type f -name $INCL\*); do
++                    findkeymap $FN
++                done
+             done
+         done
+     }
+@@ -191,7 +194,9 @@ install() {
+             findkeymap ${map}
+         done
+ 
+-        inst_opt_decompress ${KEYMAPS}
++        for keymap in ${KEYMAPS}; do
++            inst_opt_decompress ${keymap}
++        done
+ 
+         inst_opt_decompress ${kbddir}/consolefonts/${DEFAULT_FONT}.*
+ 

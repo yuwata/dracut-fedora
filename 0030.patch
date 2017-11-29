@@ -1,0 +1,27 @@
+From d976e193256407b7839b02cb888ea95a8d442180 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@hoyer.xyz>
+Date: Fri, 27 Oct 2017 09:10:22 +0200
+Subject: [PATCH] Merge pull request #298 from derekhiggins/master
+
+Skip iscsi attachment if no info
+---
+ modules.d/95iscsi/iscsiroot.sh | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/modules.d/95iscsi/iscsiroot.sh b/modules.d/95iscsi/iscsiroot.sh
+index 379cc296..aefd263d 100755
+--- a/modules.d/95iscsi/iscsiroot.sh
++++ b/modules.d/95iscsi/iscsiroot.sh
+@@ -44,8 +44,9 @@ fi
+ handle_firmware()
+ {
+     if ! iscsistart -f; then
+-        warn "iscistart: Could not get list of targets from firmware."
+-        return 1
++        warn "iscistart: Could not get list of targets from firmware. Skipping."
++        echo 'skipped' > "/tmp/iscsistarted-firmware"
++        return 0
+     fi
+ 
+     for p in $(getargs rd.iscsi.param -d iscsi_param); do
+

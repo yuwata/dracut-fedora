@@ -1,0 +1,109 @@
+From 21789cbb0a6d103176a2e10c9dd456cdcdcb4b94 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 25 Oct 2017 12:53:47 +0200
+Subject: [PATCH] make qemu and qemu-net a default module in non-hostonly mode
+
+---
+ modules.d/90qemu-net/module-setup.sh | 31 ++++++++++++++++--------------
+ modules.d/90qemu/module-setup.sh     | 37 ++++++++++++++++++++----------------
+ 2 files changed, 38 insertions(+), 30 deletions(-)
+
+diff --git a/modules.d/90qemu-net/module-setup.sh b/modules.d/90qemu-net/module-setup.sh
+index 58f12339..121e83df 100755
+--- a/modules.d/90qemu-net/module-setup.sh
++++ b/modules.d/90qemu-net/module-setup.sh
+@@ -2,22 +2,25 @@
+ 
+ # called by dracut
+ check() {
+-    if type -P systemd-detect-virt >/dev/null 2>&1; then
+-        vm=$(systemd-detect-virt --vm >/dev/null 2>&1)
+-        (($? != 0)) && return 255
+-        [[ $vm = "qemu" ]] && return 0
+-        [[ $vm = "kvm" ]] && return 0
+-        [[ $vm = "bochs" ]] && return 0
+-    fi
++    if [[ $hostonly ]] || [[ $mount_needs ]]; then
++        if type -P systemd-detect-virt >/dev/null 2>&1; then
++            vm=$(systemd-detect-virt --vm >/dev/null 2>&1)
++            (($? != 0)) && return 255
++            [[ $vm = "qemu" ]] && return 0
++            [[ $vm = "kvm" ]] && return 0
++            [[ $vm = "bochs" ]] && return 0
++        fi
+ 
+-    for i in /sys/class/dmi/id/*_vendor; do
+-        [[ -f $i ]] || continue
+-        read vendor < $i
+-        [[  "$vendor" == "QEMU" ]] && return 0
+-        [[  "$vendor" == "Bochs" ]] && return 0
+-    done
++        for i in /sys/class/dmi/id/*_vendor; do
++            [[ -f $i ]] || continue
++            read vendor < $i
++            [[  "$vendor" == "QEMU" ]] && return 0
++            [[  "$vendor" == "Bochs" ]] && return 0
++        done
+ 
+-    return 255
++        return 255
++    fi
++    return 0
+ }
+ 
+ # called by dracut
+diff --git a/modules.d/90qemu/module-setup.sh b/modules.d/90qemu/module-setup.sh
+index 9f8495a6..7e5ea6a4 100755
+--- a/modules.d/90qemu/module-setup.sh
++++ b/modules.d/90qemu/module-setup.sh
+@@ -2,28 +2,33 @@
+ 
+ # called by dracut
+ check() {
+-    if type -P systemd-detect-virt >/dev/null 2>&1; then
+-        vm=$(systemd-detect-virt --vm 2>/dev/null)
+-        (($? != 0)) && return 255
+-        [[ $vm = "qemu" ]] && return 0
+-        [[ $vm = "kvm" ]] && return 0
+-        [[ $vm = "bochs" ]] && return 0
++    if [[ $hostonly ]] || [[ $mount_needs ]]; then
++        if type -P systemd-detect-virt >/dev/null 2>&1; then
++            vm=$(systemd-detect-virt --vm 2>/dev/null)
++            (($? != 0)) && return 255
++            [[ $vm = "qemu" ]] && return 0
++            [[ $vm = "kvm" ]] && return 0
++            [[ $vm = "bochs" ]] && return 0
++        fi
++
++        for i in /sys/class/dmi/id/*_vendor; do
++            [[ -f $i ]] || continue
++            read vendor < $i
++            [[ "$vendor" == "QEMU" ]] && return 0
++            [[ "$vendor" == "Red Hat" ]] && return 0
++            [[ "$vendor" == "Bochs" ]] && return 0
++        done
++
++        return 255
+     fi
+ 
+-    for i in /sys/class/dmi/id/*_vendor; do
+-        [[ -f $i ]] || continue
+-        read vendor < $i
+-        [[ "$vendor" == "QEMU" ]] && return 0
+-        [[ "$vendor" == "Red Hat" ]] && return 0
+-        [[ "$vendor" == "Bochs" ]] && return 0
+-    done
+-    return 255
++    return 0
+ }
+ 
+ # called by dracut
+ installkernel() {
+-        # qemu specific modules
+-        hostonly='' instmods \
++    # qemu specific modules
++    hostonly='' instmods \
+             ata_piix ata_generic pata_acpi cdrom sr_mod ahci \
+             virtio_blk virtio virtio_ring virtio_pci \
+             virtio_scsi virtio_console virtio_rng \
+

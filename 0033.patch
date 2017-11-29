@@ -1,0 +1,58 @@
+From 11b3d60f5c20136530c3afe78d9a1a1160e021f2 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@hoyer.xyz>
+Date: Mon, 6 Nov 2017 09:55:54 +0100
+Subject: [PATCH] Merge pull request #303 from FGrose/bootmsg
+
+dmsquash-live-root: Replace incompatible shell syntax.
+---
+ modules.d/90dmsquash-live/dmsquash-live-root.sh | 29 +++++++++++--------------
+ 1 file changed, 13 insertions(+), 16 deletions(-)
+
+diff --git a/modules.d/90dmsquash-live/dmsquash-live-root.sh b/modules.d/90dmsquash-live/dmsquash-live-root.sh
+index 723d7f01..1458329c 100755
+--- a/modules.d/90dmsquash-live/dmsquash-live-root.sh
++++ b/modules.d/90dmsquash-live/dmsquash-live-root.sh
+@@ -178,29 +178,26 @@ do_live_overlay() {
+             warn "Using temporary overlay."
+         elif [ -n "$devspec" -a -n "$pathspec" ]; then
+             [ -z "$m" ] &&
+-                m='  Unable to find a persistent overlay; using a temporary one.'
+-            m=($'\n' "$m" $'\n'
+-               '     All root filesystem changes will be lost on shutdown.'
+-               $'\n' '        Press any key to continue')
+-            echo -e "\n\n\n${m[*]}\n\n\n" > /dev/kmsg
++                m='   Unable to find a persistent overlay; using a temporary one.'
++            m="$m"$'\n      All root filesystem changes will be lost on shutdown.'
++            m="$m"$'\n         Press [Enter] to continue.'
++            echo -e "\n\n\n\n${m}\n\n\n" > /dev/kmsg
+             if [ -n "$DRACUT_SYSTEMD" ]; then
+-                if plymouth --ping ; then
++                if type plymouth >/dev/null 2>&1 && plymouth --ping ; then
+                     if getargbool 0 rhgb || getargbool 0 splash ; then
+-                        m[0]='>>>'$'\n''>>>'$'\n''>>>'$'\n\n'
+-                        m[5]=$'\n''<<<'$'\n''<<<'$'\n''<<<'
+-                        plymouth display-message --text="${m[*]}"
++                        m='>>>'$'\n''>>>'$'\n''>>>'$'\n\n\n'"$m"
++                        m="${m%n.*}"$'n.\n\n\n''<<<'$'\n''<<<'$'\n''<<<'
++                        plymouth display-message --text="${m}"
+                     else
+-                        plymouth ask-question --prompt="${m[*]}" --command=true
++                        plymouth ask-question --prompt="${m}" --command=true
+                     fi
+                 else
+-                    m[0]='>>>'
+-                    m[5]='<<<'
+-                    unset -v m[2] m[4]
+-                    systemd-ask-password --timeout=0 "${m[*]}"
++                    m=">>>${m//.[[:space:]]/.}  <<<"
++                    systemd-ask-password --timeout=0 "${m}"
+                 fi
+             else
+-                plymouth --ping && plymouth --quit
+-                read -s -r -p $'\n\n'"${m[*]}:" -n 1 reply
++                type plymouth >/dev/null 2>&1 && plymouth --ping && plymouth --quit
++                read -s -r -p $'\n\n'"${m}" -n 1 reply
+             fi
+         fi
+         if [ -n "$overlayfs" ]; then
+
