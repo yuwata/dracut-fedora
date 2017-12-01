@@ -1,0 +1,32 @@
+From 96d69bbf34901e054d5f06f14224ae5094804103 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@hoyer.xyz>
+Date: Fri, 1 Dec 2017 09:13:53 +0100
+Subject: [PATCH] Merge pull request #309 from danimo/multipath_bin_error
+
+Fix warning about multipath if not needed
+---
+ modules.d/90multipath/module-setup.sh | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/modules.d/90multipath/module-setup.sh b/modules.d/90multipath/module-setup.sh
+index 28857ebc..0a680b17 100755
+--- a/modules.d/90multipath/module-setup.sh
++++ b/modules.d/90multipath/module-setup.sh
+@@ -10,13 +10,14 @@ is_mpath() {
+ # called by dracut
+ check() {
+     local _rootdev
+-    # if there's no multipath binary, no go.
+-    require_binaries multipath || return 1
+ 
+     [[ $hostonly ]] || [[ $mount_needs ]] && {
+         for_each_host_dev_and_slaves is_mpath || return 255
+     }
+ 
++    # if there's no multipath binary, no go.
++    require_binaries multipath || return 1
++
+     return 0
+ }
+ 
+

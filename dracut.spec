@@ -14,7 +14,7 @@
 %define with_nbd 0
 %endif
 
-%define dist_free_release 33.git20171127
+%define dist_free_release 36.git20171201
 
 Name: dracut
 Version: 046
@@ -69,6 +69,9 @@ Patch29: 0031.patch
 Patch30: 0032.patch
 Patch31: 0033.patch
 Patch32: 0034.patch
+Patch33: 0035.patch
+Patch34: 0036.patch
+Patch35: 0037.patch
 
 Source1: https://www.gnu.org/licenses/lgpl-2.1.txt
 
@@ -235,6 +238,9 @@ Requires: %{name} = %{version}-%{release}
 %endif
 Requires: %{name}-network = %{version}-%{release}
 Requires: tar gzip coreutils bash device-mapper curl
+%if 0%{?fedora}
+Requires: fuse ntfs-3g
+%endif
 
 %description live
 This package requires everything which is needed to build an
@@ -548,6 +554,9 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Fri Dec 01 2017 Harald Hoyer <harald@redhat.com> - 046-36
+- git snapshot
+
 * Wed Nov 29 2017 Harald Hoyer <harald@redhat.com> - 046-33
 - git snapshot
 

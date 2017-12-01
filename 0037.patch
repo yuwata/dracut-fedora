@@ -1,0 +1,23 @@
+From 84fe3c1a20544fbc46d54854ffb516947d751adf Mon Sep 17 00:00:00 2001
+From: Robert Scheck <robert@fedoraproject.org>
+Date: Fri, 1 Dec 2017 14:18:18 +0100
+Subject: [PATCH] Add fuse/ntfs-3g run-time dependencies for -live subpackage
+
+---
+ dracut.spec | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/dracut.spec b/dracut.spec
+index 855adba6..03363fb2 100644
+--- a/dracut.spec
++++ b/dracut.spec
+@@ -202,6 +202,9 @@ Requires: %{name} = %{version}-%{release}
+ %endif
+ Requires: %{name}-network = %{version}-%{release}
+ Requires: tar gzip coreutils bash device-mapper curl
++%if 0%{?fedora}
++Requires: fuse ntfs-3g
++%endif
+ 
+ %description live
+ This package requires everything which is needed to build an
