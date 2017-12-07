@@ -18,7 +18,7 @@
 %define with_nbd 0
 %endif
 
-%define dist_free_release 20.5.git%{gitdate}
+%define dist_free_release 36.1.git%{gitdate}
 
 Name: dracut
 Version: 046
@@ -526,20 +526,14 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
-* Thu Dec 07 2017 Yu Watanabe <watanabe.yu@gmail.com> - 046-20.5.git20171206
+* Thu Dec 07 2017 Yu Watanabe <watanabe.yu@gmail.com> - 046-36.1.git20171206
 - Update to latest git snapshot 825730780a209c1eecc9563b8454ab8bdb71e7cc
 
-* Tue Nov 07 2017 Yu Watanabe <watanabe.yu@gmail.com> - 046-20.4.git20171106
-- Update to latest git snapshot 1ec2e34adcec7ee17fbf5e0410fd21cd1f2c9e27
+* Fri Dec 01 2017 Harald Hoyer <harald@redhat.com> - 046-36
+- git snapshot
 
-* Sat Nov 04 2017 Yu Watanabe <watanabe.yu@gmail.com> - 046-20.3.git20171103
-- Update to latest git snapshot 18a5011ff2465b7923db907100f0f59f01908c4e
-
-* Thu Nov 02 2017 Yu Watanabe <watanabe.yu@gmail.com> - 046-20.2.git20171027
-- Update to latest git snapshot d976e193256407b7839b02cb888ea95a8d442180
-
-* Fri Oct 20 2017 Yu Watanabe <watanabe.yu@gmail.com> - 046-20.1.git20171012
-- Update to latest git snapshot 4b758ebe2288e594a1f522334192e5d8fa1f96af
+* Wed Nov 29 2017 Harald Hoyer <harald@redhat.com> - 046-33
+- git snapshot
 
 * Thu Oct 12 2017 Peter Robinson <pbrobinson@fedoraproject.org> 046-20
 - Add fix for some ARM SBCs
