@@ -1,6 +1,6 @@
-%global gitcommit 3dbf1f078357867b289ec58138fe134e7e99762e
+%global gitcommit 8134db6c335b28b6bd58bac4ef4c2236cc9ea06a
 %{?gitcommit:%global gitcommitshort %(c=%{gitcommit}; echo ${c:0:7})}
-%global gitdate 20171213
+%global gitdate 20171219
 
 %define dracutlibdir %{_prefix}/lib/dracut
 %bcond_without doc
@@ -18,7 +18,7 @@
 %define with_nbd 0
 %endif
 
-%define dist_free_release 36.3.git%{gitdate}
+%define dist_free_release 36.4.git%{gitdate}
 
 Name: dracut
 Version: 046
@@ -529,6 +529,9 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Mon Dec 25 2017 Yu Watanabe <watanabe.yu@gmail.com> - 046-36.4.git20171219
+- Update to latest git snapshot 8134db6c335b28b6bd58bac4ef4c2236cc9ea06a
+
 * Thu Dec 14 2017 Yu Watanabe <watanabe.yu@gmail.com> - 046-36.3.git20171213
 - Update to latest git snapshot 3dbf1f078357867b289ec58138fe134e7e99762e
 
