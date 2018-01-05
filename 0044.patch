@@ -1,0 +1,24 @@
+From 611b8ae0d71cf2562badb82ddc9abf1b3c848d50 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@hoyer.xyz>
+Date: Thu, 14 Dec 2017 15:38:12 +0100
+Subject: [PATCH] Merge pull request #316 from danimo/btrfs-crc32-accel
+
+Include crc32c-intel module when using btrfs
+---
+ modules.d/90btrfs/module-setup.sh | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/modules.d/90btrfs/module-setup.sh b/modules.d/90btrfs/module-setup.sh
+index 9303dbe2..b0d0058b 100755
+--- a/modules.d/90btrfs/module-setup.sh
++++ b/modules.d/90btrfs/module-setup.sh
+@@ -26,6 +26,8 @@ depends() {
+ # called by dracut
+ installkernel() {
+     instmods btrfs
++    # Make sure btfs can use fast crc32c implementations where available (bsc#1011554)
++    instmods crc32c-intel
+ }
+ 
+ # called by dracut
+

@@ -1,0 +1,25 @@
+From 12930f30a1b68ed7cd545a55976a5a1f02346bec Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@hoyer.xyz>
+Date: Mon, 18 Dec 2017 09:43:57 +0100
+Subject: [PATCH] Merge pull request #324 from danimo/mdraid-no-delete-part
+
+90dmraid: do not delete partitions
+---
+ modules.d/90dmraid/61-dmraid-imsm.rules | 3 ---
+ 1 file changed, 3 deletions(-)
+
+diff --git a/modules.d/90dmraid/61-dmraid-imsm.rules b/modules.d/90dmraid/61-dmraid-imsm.rules
+index 4d4d9391..72267d3c 100644
+--- a/modules.d/90dmraid/61-dmraid-imsm.rules
++++ b/modules.d/90dmraid/61-dmraid-imsm.rules
+@@ -23,9 +23,6 @@ ENV{DM_UDEV_DISABLE_OTHER_RULES_FLAG}=="1", GOTO="dm_end"
+ PROGRAM=="/bin/sh -c 'for i in $sys/$devpath/holders/dm-[0-9]*; do [ -e $$i ] && exit 0; done; exit 1;' ", \
+     GOTO="dm_end"
+ 
+-ENV{DEVTYPE}!="partition", \
+-    RUN+="/sbin/partx -d --nr 1-1024 $env{DEVNAME}"
+-
+ RUN+="/sbin/initqueue --onetime --unique --settled /sbin/dmraid_scan $env{DEVNAME}"
+ 
+ LABEL="dm_end"
+

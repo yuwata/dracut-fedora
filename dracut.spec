@@ -14,7 +14,7 @@
 %define with_nbd 0
 %endif
 
-%define dist_free_release 36.git20171201
+%define dist_free_release 64.git20180105
 
 Name: dracut
 Version: 046
@@ -72,6 +72,34 @@ Patch32: 0034.patch
 Patch33: 0035.patch
 Patch34: 0036.patch
 Patch35: 0037.patch
+Patch36: 0038.patch
+Patch37: 0039.patch
+Patch38: 0040.patch
+Patch39: 0041.patch
+Patch40: 0042.patch
+Patch41: 0043.patch
+Patch42: 0044.patch
+Patch43: 0045.patch
+Patch44: 0046.patch
+Patch45: 0047.patch
+Patch46: 0048.patch
+Patch47: 0049.patch
+Patch48: 0050.patch
+Patch49: 0051.patch
+Patch50: 0052.patch
+Patch51: 0054.patch
+Patch52: 0055.patch
+Patch53: 0056.patch
+Patch54: 0057.patch
+Patch55: 0058.patch
+Patch56: 0059.patch
+Patch57: 0060.patch
+Patch58: 0061.patch
+Patch59: 0062.patch
+Patch60: 0063.patch
+Patch61: 0064.patch
+Patch62: 0065.patch
+Patch63: 0066.patch
 
 Source1: https://www.gnu.org/licenses/lgpl-2.1.txt
 
@@ -407,7 +435,6 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %if %{defined _unitdir}
-%{dracutlibdir}/modules.d/00systemd-bootchart
 %else
 %{dracutlibdir}/modules.d/00bootchart
 %endif
@@ -444,6 +471,7 @@ rm -rf -- $RPM_BUILD_ROOT
 %{dracutlibdir}/modules.d/95dasd_mod
 %{dracutlibdir}/modules.d/95dasd_rules
 %{dracutlibdir}/modules.d/95fstab-sys
+%{dracutlibdir}/modules.d/95lunmask
 %{dracutlibdir}/modules.d/95zfcp
 %{dracutlibdir}/modules.d/95zfcp_rules
 %{dracutlibdir}/modules.d/95terminfo
@@ -554,6 +582,9 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Fri Jan 05 2018 Harald Hoyer <harald@redhat.com> - 046-64
+- git snapshot
+
 * Fri Dec 01 2017 Harald Hoyer <harald@redhat.com> - 046-36
 - git snapshot
 

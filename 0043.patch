@@ -1,0 +1,23 @@
+From fb9970ba2d5b9c25cd05f1e37411ad07604474ea Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@hoyer.xyz>
+Date: Thu, 14 Dec 2017 15:37:40 +0100
+Subject: [PATCH] Merge pull request #315 from danimo/emergency-task-limit
+
+Fix task limit in emergency.service (the same change as in dracut-emergency.service) (bsc#1019938)
+---
+ modules.d/98dracut-systemd/emergency.service | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/modules.d/98dracut-systemd/emergency.service b/modules.d/98dracut-systemd/emergency.service
+index 100146a3..cf20806c 100644
+--- a/modules.d/98dracut-systemd/emergency.service
++++ b/modules.d/98dracut-systemd/emergency.service
+@@ -23,6 +23,7 @@ StandardOutput=inherit
+ StandardError=inherit
+ KillMode=process
+ IgnoreSIGPIPE=no
++TasksMax=infinity
+ 
+ # Bash ignores SIGTERM, so we send SIGHUP instead, to ensure that bash
+ # terminates cleanly.
+

@@ -1,0 +1,49 @@
+From 03214e51aeffc60669ee9667cbfedea7b21fc4f0 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@hoyer.xyz>
+Date: Tue, 2 Jan 2018 15:01:15 +0100
+Subject: [PATCH] Merge pull request #343 from lnykryn/boot_image_once_more
+
+01fips: Properly creating path to .hmac of kernel based on BOOT_IMAGE
+---
+ modules.d/01fips/fips.sh | 20 +++++++++++++++-----
+ 1 file changed, 15 insertions(+), 5 deletions(-)
+
+diff --git a/modules.d/01fips/fips.sh b/modules.d/01fips/fips.sh
+index 11de1793..9bc089f2 100755
+--- a/modules.d/01fips/fips.sh
++++ b/modules.d/01fips/fips.sh
+@@ -110,18 +110,28 @@ do_fips()
+         do_rhevh_check /run/initramfs/live/isolinux/vmlinuz0 || return 1
+     else
+         BOOT_IMAGE="$(getarg BOOT_IMAGE)"
+-        if ! [ -e "/boot/${BOOT_IMAGE}" ]; then
++        BOOT_IMAGE_NAME="${BOOT_IMAGE##*/}"
++        BOOT_IMAGE_PATH="${BOOT_IMAGE%${BOOT_IMAGE_NAME}}"
++
++        if [ -z "$BOOT_IMAGE_NAME" ]; then
++            BOOT_IMAGE_NAME="vmlinuz-${KERNEL}"
++        elif ! [ -e "/boot/${BOOT_IMAGE_PATH}/${BOOT_IMAGE}" ]; then
+             #if /boot is not a separate partition BOOT_IMAGE might start with /boot
+-            BOOT_IMAGE=${BOOT_IMAGE#"/boot"}
+-            [ -e "/boot/${BOOT_IMAGE}" ] || BOOT_IMAGE="vmlinuz-${KERNEL}"
++            BOOT_IMAGE_PATH=${BOOT_IMAGE_PATH#"/boot"}
++            #on some achitectures BOOT_IMAGE does not contain path to kernel
++            #so if we can't find anything, let's treat it in the same way as if it was empty
++            if ! [ -e "/boot/${BOOT_IMAGE_PATH}/${BOOT_IMAGE_NAME}" ]; then
++                BOOT_IMAGE_NAME="vmlinuz-${KERNEL}"
++                BOOT_IMAGE_PATH=""
++            fi
+         fi
+-        
+-        BOOT_IMAGE_HMAC="/boot/${BOOT_IMAGE%/*}/.${BOOT_IMAGE##*/}.hmac"
+ 
++        BOOT_IMAGE_HMAC="/boot/${BOOT_IMAGE_PATH}.${BOOT_IMAGE_NAME}.hmac"
+         if ! [ -e "${BOOT_IMAGE_HMAC}" ]; then
+             warn "${BOOT_IMAGE_HMAC} does not exist"
+             return 1
+         fi
++
+         sha512hmac -c "${BOOT_IMAGE_HMAC}" || return 1
+     fi
+ 
+

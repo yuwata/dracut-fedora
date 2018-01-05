@@ -1,0 +1,33 @@
+From ffbe0373e2751cda7014b3a4024074bdac1c48aa Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@hoyer.xyz>
+Date: Mon, 18 Dec 2017 09:01:21 +0100
+Subject: [PATCH] Merge pull request #319 from danimo/modules-load.d-hostonly
+
+Fix loading of modules in modules-load.d
+---
+ modules.d/00systemd/module-setup.sh | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/modules.d/00systemd/module-setup.sh b/modules.d/00systemd/module-setup.sh
+index d022de65..1ed4b34f 100755
+--- a/modules.d/00systemd/module-setup.sh
++++ b/modules.d/00systemd/module-setup.sh
+@@ -160,7 +160,7 @@ install() {
+     }
+ 
+     _mods=$(modules_load_get /usr/lib/modules-load.d)
+-    [[ $_mods ]] && instmods $_mods
++    [[ $_mods ]] && hostonly='' instmods $_mods
+ 
+     if [[ $hostonly ]]; then
+         inst_multiple -H -o \
+@@ -180,7 +180,7 @@ install() {
+             ${NULL}
+ 
+         _mods=$(modules_load_get /etc/modules-load.d)
+-        [[ $_mods ]] && instmods $_mods
++        [[ $_mods ]] && hostonly='' instmods $_mods
+     fi
+ 
+     if ! [[ -e "$initdir/etc/machine-id" ]]; then
+

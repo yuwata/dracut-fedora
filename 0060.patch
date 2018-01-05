@@ -1,0 +1,24 @@
+From 51d2436c22d64e45376c64ad3b6c90c48cc88d78 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@hoyer.xyz>
+Date: Tue, 19 Dec 2017 15:41:33 +0100
+Subject: [PATCH] Merge pull request #340 from danimo/mkinitrd_suse_A
+
+mkinitrd-suse.sh: Implement functionality of -A option
+---
+ mkinitrd-suse.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/mkinitrd-suse.sh b/mkinitrd-suse.sh
+index d9de81b9..20d85da1 100755
+--- a/mkinitrd-suse.sh
++++ b/mkinitrd-suse.sh
+@@ -265,7 +265,7 @@ while (($# > 0)); do
+ 	    ;;
+ 	-M) read_arg map_file "$@" || shift $?
+ 	    ;;
+-	-A) host_only=0;;
++	-A) dracut_args="${dracut_args} --no-host-only";;
+ 	-B) skip_update_bootloader=1;;
+         -v|--verbose) dracut_args="${dracut_args} -v";;
+ 	-L) logfile=;;
+

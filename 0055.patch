@@ -1,0 +1,24 @@
+From 07e413bd0f2cb0578a28c3137f92b491c063f826 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@hoyer.xyz>
+Date: Mon, 18 Dec 2017 11:29:17 +0100
+Subject: [PATCH] Merge pull request #334 from FloGa/master
+
+Use pattern matching function
+---
+ modules.d/99fs-lib/fs-lib.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/modules.d/99fs-lib/fs-lib.sh b/modules.d/99fs-lib/fs-lib.sh
+index 5c831558..d39ca1b7 100755
+--- a/modules.d/99fs-lib/fs-lib.sh
++++ b/modules.d/99fs-lib/fs-lib.sh
+@@ -100,7 +100,7 @@ fsck_drv_com() {
+     local _ret
+     local _out
+ 
+-    if ! strstr "$_fop" "-[ynap]"; then
++    if ! strglobin "$_fop" "-[ynap]"; then
+         _fop="-a ${_fop}"
+     fi
+ 
+

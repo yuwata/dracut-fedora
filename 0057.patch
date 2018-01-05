@@ -1,0 +1,24 @@
+From 598660bbe61ddc4bd3a3f9c754727d5676174b9e Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@hoyer.xyz>
+Date: Tue, 19 Dec 2017 14:36:45 +0100
+Subject: [PATCH] Merge pull request #336 from danimo/add_drivers
+
+Fix possible hang in dracut
+---
+ dracut.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/dracut.sh b/dracut.sh
+index 635fdb1c..8daafc35 100755
+--- a/dracut.sh
++++ b/dracut.sh
+@@ -1466,7 +1466,7 @@ if [[ $no_kernel != yes ]]; then
+         hostonly='' instmods $drivers
+     fi
+ 
+-    if [[ $add_drivers ]]; then
++    if [[ -n "${add_drivers// }" ]]; then
+         hostonly='' instmods -c $add_drivers
+     fi
+     if [[ $force_drivers ]]; then
+

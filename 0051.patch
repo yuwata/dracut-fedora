@@ -1,0 +1,23 @@
+From 1619e731f7e6c257532898efc0a7008e407d427e Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@hoyer.xyz>
+Date: Mon, 18 Dec 2017 09:14:21 +0100
+Subject: [PATCH] Merge pull request #330 from danimo/task_max_emergency
+
+Set TaskMax=inifinite for the emergency shell
+---
+ modules.d/98dracut-systemd/dracut-emergency.service | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/modules.d/98dracut-systemd/dracut-emergency.service b/modules.d/98dracut-systemd/dracut-emergency.service
+index 718c4a78..ac25b9f2 100644
+--- a/modules.d/98dracut-systemd/dracut-emergency.service
++++ b/modules.d/98dracut-systemd/dracut-emergency.service
+@@ -22,6 +22,7 @@ StandardOutput=inherit
+ StandardError=inherit
+ KillMode=process
+ IgnoreSIGPIPE=no
++TasksMax=infinity
+ 
+ # Bash ignores SIGTERM, so we send SIGHUP instead, to ensure that bash
+ # terminates cleanly.
+

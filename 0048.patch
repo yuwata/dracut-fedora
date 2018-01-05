@@ -1,0 +1,69 @@
+From c0f2b6bebc0b2feefdb15a2862308c08bbd4a77e Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@hoyer.xyz>
+Date: Mon, 18 Dec 2017 09:06:54 +0100
+Subject: [PATCH] Merge pull request #323 from danimo/dm-fixes
+
+Two SUSE fixes for 90dm
+---
+ modules.d/90dm/dm-shutdown.sh  | 31 +++++++++++++++++++++++++++++--
+ modules.d/90dm/module-setup.sh |  2 +-
+ 2 files changed, 30 insertions(+), 3 deletions(-)
+
+diff --git a/modules.d/90dm/dm-shutdown.sh b/modules.d/90dm/dm-shutdown.sh
+index 7e4f4a58..b23836f4 100755
+--- a/modules.d/90dm/dm-shutdown.sh
++++ b/modules.d/90dm/dm-shutdown.sh
+@@ -1,11 +1,38 @@
+ #!/bin/sh
+ 
++_remove_dm() {
++    local dev=$1
++    local s
++    local devname
++
++    for s in /sys/block/${dev}/holders/dm-* ; do
++        [ -e ${s} ] || continue
++        _remove_dm ${s##*/}
++    done
++    # multipath devices might have MD devices on top,
++    # which are removed after this script. So do not
++    # remove those to avoid spurious errors
++    case $(cat /sys/block/${dev}/dm/uuid) in
++        mpath-*)
++            return 0
++            ;;
++        *)
++            devname=$(cat /sys/block/${dev}/dm/name)
++            dmsetup -v --noudevsync remove "$devname" || return $?
++            ;;
++    esac
++    return 0
++}
++
+ _do_dm_shutdown() {
+     local ret=0
+     local final=$1
++    local dev
++
+     info "Disassembling device-mapper devices"
+-    for dev in $(dmsetup info -c --noheadings -o name) ; do
+-        dmsetup -v --noudevsync remove "$dev" || ret=$?
++    for dev in /sys/block/dm-* ; do
++        [ -e ${dev} ] || continue
++        _remove_dm ${dev##*/} || ret=$?
+     done
+     if [ "x$final" != "x" ]; then
+         info "dmsetup ls --tree"
+diff --git a/modules.d/90dm/module-setup.sh b/modules.d/90dm/module-setup.sh
+index 2b8e39ff..02d97c24 100755
+--- a/modules.d/90dm/module-setup.sh
++++ b/modules.d/90dm/module-setup.sh
+@@ -38,6 +38,6 @@ install() {
+     inst_rules "$moddir/59-persistent-storage-dm.rules"
+     prepare_udev_rules 59-persistent-storage-dm.rules
+ 
+-    inst_hook shutdown 30 "$moddir/dm-shutdown.sh"
++    inst_hook shutdown 25 "$moddir/dm-shutdown.sh"
+ }
+ 
+

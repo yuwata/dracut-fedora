@@ -1,0 +1,28 @@
+From 8f4f40cb3c1bdef99fe4c9ccb073068415c915ba Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@hoyer.xyz>
+Date: Mon, 18 Dec 2017 09:05:49 +0100
+Subject: [PATCH] Merge pull request #322 from danimo/font_maps
+
+10i18n: Add correct fontmaps
+---
+ modules.d/10i18n/module-setup.sh | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/modules.d/10i18n/module-setup.sh b/modules.d/10i18n/module-setup.sh
+index 7723f6fa..7320a919 100755
+--- a/modules.d/10i18n/module-setup.sh
++++ b/modules.d/10i18n/module-setup.sh
+@@ -209,7 +209,11 @@ install() {
+         if [[ ${FONT_MAP} ]]
+         then
+             FONT_MAP=${FONT_MAP%.trans}
+-            inst_simple ${kbddir}/consoletrans/${FONT_MAP}.trans
++            # There are three different formats that setfont supports
++            inst_simple ${kbddir}/consoletrans/${FONT_MAP} \
++            || inst_simple ${kbddir}/consoletrans/${FONT_MAP}.trans \
++            || inst_simple ${kbddir}/consoletrans/${FONT_MAP}_to_uni.trans \
++            || dwarn "Could not find FONT_MAP ${FONT_MAP}!"
+         fi
+ 
+         if [[ ${FONT_UNIMAP} ]]
+
