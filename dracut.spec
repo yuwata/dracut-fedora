@@ -1,6 +1,6 @@
-%global gitcommit 5a8efed021af6a3a06b484f9ad363935c1a875e3
+%global gitcommit 47f83419a711d540cf758b56c8ad4fadaa964592
 %{?gitcommit:%global gitcommitshort %(c=%{gitcommit}; echo ${c:0:7})}
-%global gitdate 20180110
+%global gitdate 20180111
 
 %define dracutlibdir %{_prefix}/lib/dracut
 %bcond_without doc
@@ -18,7 +18,7 @@
 %define with_nbd 0
 %endif
 
-%define dist_free_release 64.3.git%{gitdate}
+%define dist_free_release 64.4.git%{gitdate}
 
 Name: dracut
 Version: 046
@@ -297,6 +297,10 @@ rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/97masterkey
 rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/98integrity
 %endif
 
+%ifnarch s390x
+rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/95dcssblk
+%endif
+
 mkdir -p $RPM_BUILD_ROOT/boot/dracut
 mkdir -p $RPM_BUILD_ROOT/var/lib/dracut/overlay
 mkdir -p $RPM_BUILD_ROOT%{_localstatedir}/log
@@ -418,6 +422,9 @@ rm -rf -- $RPM_BUILD_ROOT
 %{dracutlibdir}/modules.d/95dasd
 %{dracutlibdir}/modules.d/95dasd_mod
 %{dracutlibdir}/modules.d/95dasd_rules
+%ifarch s390x
+%{dracutlibdir}/modules.d/95dcssblk
+%endif
 %{dracutlibdir}/modules.d/95fstab-sys
 %{dracutlibdir}/modules.d/95lunmask
 %{dracutlibdir}/modules.d/95zfcp
@@ -530,6 +537,9 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Fri Jan 12 2018 Yu Watanabe <watanabe.yu@gmail.com> - 046-64.4.git20180111
+- Update to latest git snapshot 47f83419a711d540cf758b56c8ad4fadaa964592
+
 * Thu Jan 11 2018 Yu Watanabe <watanabe.yu@gmail.com> - 046-64.3.git20180110
 - Update to latest git snapshot 5a8efed021af6a3a06b484f9ad363935c1a875e3
 
