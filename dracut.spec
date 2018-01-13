@@ -1,6 +1,6 @@
-%global gitcommit 47f83419a711d540cf758b56c8ad4fadaa964592
+%global gitcommit 8b4b7dc5b2f1477825cf8a52f412af372b4646f8
 %{?gitcommit:%global gitcommitshort %(c=%{gitcommit}; echo ${c:0:7})}
-%global gitdate 20180111
+%global gitdate 20180112
 
 %define dracutlibdir %{_prefix}/lib/dracut
 %bcond_without doc
@@ -18,7 +18,7 @@
 %define with_nbd 0
 %endif
 
-%define dist_free_release 64.4.git%{gitdate}
+%define dist_free_release 64.5.git%{gitdate}
 
 Name: dracut
 Version: 046
@@ -297,8 +297,17 @@ rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/97masterkey
 rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/98integrity
 %endif
 
-%ifnarch s390x
+%ifnarch s390 s390x
+# remove architecture specific modules
+rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/80cms
+rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/91zipl
+rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/95dasd
+rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/95dasd_mod
+rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/95dasd_rules
 rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/95dcssblk
+rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/95zfcp
+rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/95zfcp_rules
+rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/95znet
 %endif
 
 mkdir -p $RPM_BUILD_ROOT/boot/dracut
@@ -402,7 +411,6 @@ rm -rf -- $RPM_BUILD_ROOT
 %{dracutlibdir}/modules.d/45url-lib
 %{dracutlibdir}/modules.d/50drm
 %{dracutlibdir}/modules.d/50plymouth
-%{dracutlibdir}/modules.d/80cms
 %{dracutlibdir}/modules.d/80lvmmerge
 %{dracutlibdir}/modules.d/90btrfs
 %{dracutlibdir}/modules.d/90crypt
@@ -417,32 +425,34 @@ rm -rf -- $RPM_BUILD_ROOT
 %{dracutlibdir}/modules.d/91crypt-gpg
 %{dracutlibdir}/modules.d/91crypt-loop
 %{dracutlibdir}/modules.d/95debug
-%{dracutlibdir}/modules.d/95resume
-%{dracutlibdir}/modules.d/95rootfs-block
-%{dracutlibdir}/modules.d/95dasd
-%{dracutlibdir}/modules.d/95dasd_mod
-%{dracutlibdir}/modules.d/95dasd_rules
-%ifarch s390x
-%{dracutlibdir}/modules.d/95dcssblk
-%endif
 %{dracutlibdir}/modules.d/95fstab-sys
 %{dracutlibdir}/modules.d/95lunmask
-%{dracutlibdir}/modules.d/95zfcp
-%{dracutlibdir}/modules.d/95zfcp_rules
+%{dracutlibdir}/modules.d/95resume
+%{dracutlibdir}/modules.d/95rootfs-block
 %{dracutlibdir}/modules.d/95terminfo
 %{dracutlibdir}/modules.d/95udev-rules
 %{dracutlibdir}/modules.d/95virtfs
+%ifarch s390 s390x
+%{dracutlibdir}/modules.d/80cms
+%{dracutlibdir}/modules.d/91zipl
+%{dracutlibdir}/modules.d/95dasd
+%{dracutlibdir}/modules.d/95dasd_mod
+%{dracutlibdir}/modules.d/95dasd_rules
+%{dracutlibdir}/modules.d/95dcssblk
+%{dracutlibdir}/modules.d/95zfcp
+%{dracutlibdir}/modules.d/95zfcp_rules
+%endif
 %if %{undefined _unitdir}
 %{dracutlibdir}/modules.d/96securityfs
 %{dracutlibdir}/modules.d/97masterkey
 %{dracutlibdir}/modules.d/98integrity
 %endif
 %{dracutlibdir}/modules.d/97biosdevname
+%{dracutlibdir}/modules.d/98dracut-systemd
 %{dracutlibdir}/modules.d/98ecryptfs
 %{dracutlibdir}/modules.d/98pollcdrom
 %{dracutlibdir}/modules.d/98selinux
 %{dracutlibdir}/modules.d/98syslog
-%{dracutlibdir}/modules.d/98dracut-systemd
 %{dracutlibdir}/modules.d/98usrmount
 %{dracutlibdir}/modules.d/99base
 %{dracutlibdir}/modules.d/99fs-lib
@@ -476,17 +486,19 @@ rm -rf -- $RPM_BUILD_ROOT
 %defattr(-,root,root,0755)
 %{dracutlibdir}/modules.d/02systemd-networkd
 %{dracutlibdir}/modules.d/40network
+%{dracutlibdir}/modules.d/45ifcfg
 %{dracutlibdir}/modules.d/90kernel-network-modules
-%{dracutlibdir}/modules.d/95fcoe
-%{dracutlibdir}/modules.d/95iscsi
 %{dracutlibdir}/modules.d/90qemu-net
 %{dracutlibdir}/modules.d/95cifs
+%{dracutlibdir}/modules.d/95fcoe
+%{dracutlibdir}/modules.d/95fcoe-uefi
+%{dracutlibdir}/modules.d/95iscsi
 %{dracutlibdir}/modules.d/95nbd
 %{dracutlibdir}/modules.d/95nfs
 %{dracutlibdir}/modules.d/95ssh-client
-%{dracutlibdir}/modules.d/45ifcfg
+%ifarch s390 s390x
 %{dracutlibdir}/modules.d/95znet
-%{dracutlibdir}/modules.d/95fcoe-uefi
+%endif
 %{dracutlibdir}/modules.d/99uefi-lib
 
 %if 0%{?fedora} || 0%{?rhel} || 0%{?suse_version}
@@ -537,6 +549,9 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Sat Jan 13 2018 Yu Watanabe <watanabe.yu@gmail.com> - 046-64.5.git20180112
+- Update to latest git snapshot 8b4b7dc5b2f1477825cf8a52f412af372b4646f8
+
 * Fri Jan 12 2018 Yu Watanabe <watanabe.yu@gmail.com> - 046-64.4.git20180111
 - Update to latest git snapshot 47f83419a711d540cf758b56c8ad4fadaa964592
 
