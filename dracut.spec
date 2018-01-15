@@ -1,6 +1,6 @@
-%global gitcommit 8b4b7dc5b2f1477825cf8a52f412af372b4646f8
+%global gitcommit 9ed6eb741f0bc0178167e7063751eb2bb4ac6de5
 %{?gitcommit:%global gitcommitshort %(c=%{gitcommit}; echo ${c:0:7})}
-%global gitdate 20180112
+%global gitdate 20180115
 
 %define dracutlibdir %{_prefix}/lib/dracut
 %bcond_without doc
@@ -18,7 +18,7 @@
 %define with_nbd 0
 %endif
 
-%define dist_free_release 64.5.git%{gitdate}
+%define dist_free_release 64.6.git%{gitdate}
 
 Name: dracut
 Version: 046
@@ -300,6 +300,7 @@ rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/98integrity
 %ifnarch s390 s390x
 # remove architecture specific modules
 rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/80cms
+rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/81cio_ignore
 rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/91zipl
 rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/95dasd
 rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/95dasd_mod
@@ -434,6 +435,7 @@ rm -rf -- $RPM_BUILD_ROOT
 %{dracutlibdir}/modules.d/95virtfs
 %ifarch s390 s390x
 %{dracutlibdir}/modules.d/80cms
+%{dracutlibdir}/modules.d/81cio_ignore
 %{dracutlibdir}/modules.d/91zipl
 %{dracutlibdir}/modules.d/95dasd
 %{dracutlibdir}/modules.d/95dasd_mod
@@ -549,6 +551,9 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Tue Jan 16 2018 Yu Watanabe <watanabe.yu@gmail.com> - 046-64.6.git20180115
+- Update to latest git snapshot 9ed6eb741f0bc0178167e7063751eb2bb4ac6de5
+
 * Sat Jan 13 2018 Yu Watanabe <watanabe.yu@gmail.com> - 046-64.5.git20180112
 - Update to latest git snapshot 8b4b7dc5b2f1477825cf8a52f412af372b4646f8
 
