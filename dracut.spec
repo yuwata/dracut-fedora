@@ -1,6 +1,6 @@
-%global gitcommit 9ed6eb741f0bc0178167e7063751eb2bb4ac6de5
+%global gitcommit cbb9a4e95501a74e91cb6d56d2f74822680f79b2
 %{?gitcommit:%global gitcommitshort %(c=%{gitcommit}; echo ${c:0:7})}
-%global gitdate 20180115
+%global gitdate 20180118
 
 %define dracutlibdir %{_prefix}/lib/dracut
 %bcond_without doc
@@ -18,7 +18,7 @@
 %define with_nbd 0
 %endif
 
-%define dist_free_release 64.6.git%{gitdate}
+%define dist_free_release 64.7.git%{gitdate}
 
 Name: dracut
 Version: 046
@@ -49,7 +49,7 @@ Source0: http://www.kernel.org/pub/linux/utils/boot/dracut/dracut-%{version}.tar
 Source1: https://www.gnu.org/licenses/lgpl-2.1.txt
 
 BuildRequires: bash git
-BuildRequires: kmod-devel >= 15
+BuildRequires: kmod-devel >= 23
 
 %if 0%{?fedora} || 0%{?rhel}
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -551,6 +551,9 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Thu Jan 18 2018 Yu Watanabe <watanabe.yu@gmail.com> - 046-64.7.git20180118
+- Update to latest git snapshot cbb9a4e95501a74e91cb6d56d2f74822680f79b2
+
 * Tue Jan 16 2018 Yu Watanabe <watanabe.yu@gmail.com> - 046-64.6.git20180115
 - Update to latest git snapshot 9ed6eb741f0bc0178167e7063751eb2bb4ac6de5
 
