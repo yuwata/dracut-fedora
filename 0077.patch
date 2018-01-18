@@ -1,0 +1,30 @@
+From 6ccb77e19a80f1be32170d85766f1925fbeb732b Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 12 Jan 2018 09:31:18 +0100
+Subject: [PATCH] dracut-systemd/dracut-pre-udev.service: also run for
+ /etc/cmdline
+
+Fixes #117
+---
+ modules.d/98dracut-systemd/dracut-pre-udev.service | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/modules.d/98dracut-systemd/dracut-pre-udev.service b/modules.d/98dracut-systemd/dracut-pre-udev.service
+index dffb8d55..570ec02d 100644
+--- a/modules.d/98dracut-systemd/dracut-pre-udev.service
++++ b/modules.d/98dracut-systemd/dracut-pre-udev.service
+@@ -10,12 +10,12 @@ Before=systemd-udevd.service dracut-pre-trigger.service
+ After=dracut-cmdline.service
+ Wants=dracut-cmdline.service
+ ConditionPathExists=/usr/lib/initrd-release
+-ConditionPathExists=|/etc/cmdline.d/20-force_drivers.conf
+ ConditionDirectoryNotEmpty=|/lib/dracut/hooks/pre-udev
+ ConditionKernelCommandLine=|rd.break=pre-udev
+ ConditionKernelCommandLine=|rd.driver.blacklist
+ ConditionKernelCommandLine=|rd.driver.pre
+ ConditionKernelCommandLine=|rd.driver.post
++ConditionPathExistsGlob=|/etc/cmdline.d/*.conf
+ Conflicts=shutdown.target emergency.target
+ 
+ [Service]
+

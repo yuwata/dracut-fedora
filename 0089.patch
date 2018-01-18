@@ -1,0 +1,45 @@
+From bce6823a19b3fc0be50ff5c29c5ef90fa58b3430 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Tue, 16 Jan 2018 12:14:15 +0100
+Subject: [PATCH] lsinitrd: no more cat: write error: Broken pipe
+
+silence the cat
+---
+ lsinitrd.sh | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/lsinitrd.sh b/lsinitrd.sh
+index f4088453..4892704a 100755
+--- a/lsinitrd.sh
++++ b/lsinitrd.sh
+@@ -130,7 +130,7 @@ extract_files()
+     for f in "${!filenames[@]}"; do
+         [[ $nofileinfo ]] || echo "initramfs:/$f"
+         [[ $nofileinfo ]] || echo "========================================================================"
+-        $CAT $image | cpio --extract --verbose --quiet --to-stdout $f 2>/dev/null
++        $CAT "$image" 2>/dev/null | cpio --extract --verbose --quiet --to-stdout $f 2>/dev/null
+         ((ret+=$?))
+         [[ $nofileinfo ]] || echo "========================================================================"
+         [[ $nofileinfo ]] || echo
+@@ -149,9 +149,9 @@ list_files()
+ {
+     echo "========================================================================"
+     if [ "$sorted" -eq 1 ]; then
+-        $CAT "$image" | cpio --extract --verbose --quiet --list | sort -n -k5
++        $CAT "$image" 2>/dev/null | cpio --extract --verbose --quiet --list | sort -n -k5
+     else
+-        $CAT "$image" | cpio --extract --verbose --quiet --list | sort -k9
++        $CAT "$image" 2>/dev/null | cpio --extract --verbose --quiet --list | sort -k9
+     fi
+     ((ret+=$?))
+     echo "========================================================================"
+@@ -159,7 +159,7 @@ list_files()
+ 
+ unpack_files()
+ {
+-    $CAT "$image" | cpio -id --quiet $verbose
++    $CAT "$image" 2>/dev/null | cpio -id --quiet $verbose
+     ((ret+=$?))
+ }
+ 
+

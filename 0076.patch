@@ -1,0 +1,24 @@
+From 47f83419a711d540cf758b56c8ad4fadaa964592 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@hoyer.xyz>
+Date: Thu, 11 Jan 2018 15:33:45 +0100
+Subject: [PATCH] Merge pull request #353 from lnykryn/ntfs_3
+
+90dmsquash-live: we don't have find_binary inside initramdisk
+---
+ modules.d/90dmsquash-live/dmsquash-live-root.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/modules.d/90dmsquash-live/dmsquash-live-root.sh b/modules.d/90dmsquash-live/dmsquash-live-root.sh
+index 1458329c..8f3b2bf9 100755
+--- a/modules.d/90dmsquash-live/dmsquash-live-root.sh
++++ b/modules.d/90dmsquash-live/dmsquash-live-root.sh
+@@ -84,7 +84,7 @@ else
+         # Symlinking /usr/bin/ntfs-3g as /sbin/mount.ntfs seems to boot
+         # at the first glance, but ends with lots and lots of squashfs
+         # errors, because systemd attempts to kill the ntfs-3g process?!
+-        if [ -x "$(find_binary "ntfs-3g")" ]; then
++        if [ -x "/usr/bin/ntfs-3g" ]; then
+             ( exec -a @ntfs-3g ntfs-3g -o ${liverw:-ro} $livedev /run/initramfs/live ) | vwarn
+         else
+             die "Failed to mount block device of live image: Missing NTFS support"
+

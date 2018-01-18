@@ -1,0 +1,60 @@
+From 3a6a8d5c83af952f66c7786f17e59da6012da0b6 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@hoyer.xyz>
+Date: Thu, 11 Jan 2018 12:34:40 +0100
+Subject: [PATCH] Merge pull request #346 from danimo/95dcssblk
+
+95dcssblk: Add new module for DCSS block devices
+---
+ modules.d/95dcssblk/module-setup.sh  | 28 ++++++++++++++++++++++++++++
+ modules.d/95dcssblk/parse-dcssblk.sh |  8 ++++++++
+ 2 files changed, 36 insertions(+)
+
+diff --git a/modules.d/95dcssblk/module-setup.sh b/modules.d/95dcssblk/module-setup.sh
+new file mode 100644
+index 00000000..11e38490
+--- /dev/null
++++ b/modules.d/95dcssblk/module-setup.sh
+@@ -0,0 +1,28 @@
++#!/bin/bash
++# -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
++# ex: ts=8 sw=4 sts=4 et filetype=sh
++
++# called by dracut
++check() {
++    local _arch=$(uname -m)
++    [ "$_arch" = "s390" -o "$_arch" = "s390x" ] || return 1
++    return 0
++}
++
++# called by dracut
++installkernel() {
++    if [ -e /sys/devices/dcssblk/*/block/dcssblk* ];then
++	hostonly='' instmods dcssblk
++    fi
++}
++
++# called by dracut
++install() {
++    inst_hook cmdline 30 "$moddir/parse-dcssblk.sh"
++    # If there is a config file which contains avail (best only of root device)
++    # disks to activate add it and use it during boot -> then we do not need
++    # a kernel param anymore
++    #if [[ $hostonly ]]; then
++    #    inst /etc/dcssblk.conf
++    #fi
++}
+diff --git a/modules.d/95dcssblk/parse-dcssblk.sh b/modules.d/95dcssblk/parse-dcssblk.sh
+new file mode 100644
+index 00000000..8f174408
+--- /dev/null
++++ b/modules.d/95dcssblk/parse-dcssblk.sh
+@@ -0,0 +1,8 @@
++#!/bin/sh
++# -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
++# ex: ts=8 sw=4 sts=4 et filetype=sh
++dcssblk_arg=$(getarg rd.dcssblk=)
++if [ $? == 0 ];then
++	info "Loading dcssblk segments=$dcssblk_arg"
++	modprobe dcssblk segments=$dcssblk_arg
++fi
+

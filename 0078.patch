@@ -1,0 +1,212 @@
+From 8e7d0856d0c94e9cc0e17c2f715aa7bc715fd37d Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@hoyer.xyz>
+Date: Fri, 12 Jan 2018 09:34:08 +0100
+Subject: [PATCH] Merge pull request #351 from danimo/91zipl
+
+Add 91zipl, which adds support for indirect booting on s390.
+---
+ dracut.cmdline.7.asc                     | 14 ++++++++
+ dracut.sh                                |  1 +
+ modules.d/91zipl/install_zipl_cmdline.sh | 40 +++++++++++++++++++++
+ modules.d/91zipl/module-setup.sh         | 61 ++++++++++++++++++++++++++++++++
+ modules.d/91zipl/parse-zipl.sh           | 41 +++++++++++++++++++++
+ 5 files changed, 157 insertions(+)
+
+diff --git a/dracut.cmdline.7.asc b/dracut.cmdline.7.asc
+index b5f6f0f6..f95f4d63 100644
+--- a/dracut.cmdline.7.asc
++++ b/dracut.cmdline.7.asc
+@@ -1001,6 +1001,20 @@ be mounted read only through a higher level transient overlay directory, has
+ been implemented through the multiple lower layers feature of OverlayFS.
+ 
+ 
++ZIPL
++~~~~
++**rd.zipl=**__<path to blockdevice>__::
++    Update the dracut commandline with the values found in the
++    _dracut-cmdline.conf_ file on the given device.
++    The values are merged into the existing commandline values
++    and the udev events are regenerated.
+++
++[listing]
++.Example
++--
++rd.zipl=UUID=0fb28157-99e3-4395-adef-da3f7d44835a
++--
++
+ Plymouth Boot Splash
+ ~~~~~~~~~~~~~~~~~~~~
+ **plymouth.enable=0**::
+diff --git a/dracut.sh b/dracut.sh
+index f6a75996..fb23f117 100755
+--- a/dracut.sh
++++ b/dracut.sh
+@@ -1172,6 +1172,7 @@ if [[ $hostonly ]] && [[ "$hostonly_default_device" != "no" ]]; then
+         "/usr/lib64" \
+         "/boot" \
+         "/boot/efi" \
++        "/boot/zipl" \
+         ;
+     do
+         mp=$(readlink -f "$mp")
+diff --git a/modules.d/91zipl/install_zipl_cmdline.sh b/modules.d/91zipl/install_zipl_cmdline.sh
+new file mode 100755
+index 00000000..b7546bef
+--- /dev/null
++++ b/modules.d/91zipl/install_zipl_cmdline.sh
+@@ -0,0 +1,40 @@
++#!/bin/bash
++
++DEV="$1"
++MNT=/boot/zipl
++
++if [ -z "$DEV" ] ; then
++    echo "No IPL device given"
++    > /tmp/install.zipl.cmdline-done
++    exit 1
++fi
++
++[ -d ${MNT} ] || mkdir -p ${MNT}
++
++mount -o ro ${DEV} ${MNT}
++if [ "$?" != "0" ] ; then
++    echo "Failed to mount ${MNT}"
++    > /tmp/install.zipl.cmdline-done
++    exit 1
++fi
++
++if [ -f ${MNT}/dracut-cmdline.conf ] ; then
++    cp ${MNT}/dracut-cmdline.conf /etc/cmdline.d/99zipl.conf
++fi
++
++if [ -f ${MNT}/active_devices.txt ] ; then
++    while read dev etc ; do
++        [ "$dev" = "#" -o "$dev" = "" ] && continue;
++        cio_ignore -r $dev
++    done < ${MNT}/active_devices.txt
++fi
++
++umount ${MNT}
++
++if [ -f /etc/cmdline.d/99zipl.conf ] ; then
++    systemctl restart dracut-cmdline.service
++    systemctl restart systemd-udev-trigger.service
++fi
++> /tmp/install.zipl.cmdline-done
++
++exit 0
+diff --git a/modules.d/91zipl/module-setup.sh b/modules.d/91zipl/module-setup.sh
+new file mode 100755
+index 00000000..d0cd75da
+--- /dev/null
++++ b/modules.d/91zipl/module-setup.sh
+@@ -0,0 +1,61 @@
++#!/bin/bash
++# -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
++# ex: ts=8 sw=4 sts=4 et filetype=sh
++
++# called by dracut
++check() {
++    local _arch=$(uname -m)
++    # Only for systems on s390 using indirect booting via userland grub
++    [ "$_arch" = "s390" -o "$_arch" = "s390x" ] || return 1
++    # /boot/zipl contains a first stage kernel used to launch grub in initrd
++    [ -d /boot/zipl ] || return 1
++    return 0
++}
++
++# called by dracut
++depends() {
++    echo grub2
++    return 0
++}
++
++# called by dracut
++installkernel() {
++    local _boot_zipl
++
++    _boot_zipl=$(sed -n 's/\(.*\)\w*\/boot\/zipl.*/\1/p' /etc/fstab)
++    if [ -n "$_boot_zipl" ] ; then
++        eval $(blkid -s TYPE -o udev ${_boot_zipl})
++        if [ -n "$ID_FS_TYPE" ] ; then
++            case "$ID_FS_TYPE" in
++                ext?)
++                    ID_FS_TYPE=ext4
++                    ;;
++            esac
++            instmods ${ID_FS_TYPE}
++        fi
++    fi
++}
++
++# called by dracut
++cmdline() {
++    local _boot_zipl
++
++    _boot_zipl=$(sed -n 's/\(.*\)\w*\/boot\/zipl.*/\1/p' /etc/fstab)
++    if [ -n "$_boot_zipl" ] ; then
++        echo "rd.zipl=${_boot_zipl}"
++    fi
++}
++
++# called by dracut
++install() {
++    inst_multiple mount umount
++
++    inst_hook cmdline 91 "$moddir/parse-zipl.sh"
++    inst_script "${moddir}/install_zipl_cmdline.sh" /sbin/install_zipl_cmdline.sh
++    if [[ $hostonly_cmdline == "yes" ]] ; then
++        local _zipl=$(cmdline)
++
++        [[ $_zipl ]] && printf "%s\n" "$_zipl" > "${initdir}/etc/cmdline.d/91zipl.conf"
++    fi
++    dracut_need_initqueue
++}
+diff --git a/modules.d/91zipl/parse-zipl.sh b/modules.d/91zipl/parse-zipl.sh
+new file mode 100755
+index 00000000..308f228b
+--- /dev/null
++++ b/modules.d/91zipl/parse-zipl.sh
+@@ -0,0 +1,41 @@
++#!/bin/sh
++# -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
++# ex: ts=8 sw=4 sts=4 et filetype=sh
++
++zipl_arg=$(getarg rd.zipl)
++
++if [ -n "$zipl_arg" ] ; then
++    case "$zipl_arg" in
++    LABEL=*) \
++        zipl_env="ENV{ID_FS_LABEL}"
++        zipl_val=${zipl_arg#LABEL=}
++        zipl_arg="/dev/disk/by-label/${zipl_val}"
++        ;;
++    UUID=*) \
++        zipl_env="ENV{ID_FS_UUID}"
++        zipl_val=${zipl_arg#UUID=}
++        zipl_arg="/dev/disk/by-uuid/${zipl_val}"
++        ;;
++    /dev/mapper/*) \
++        zipl_env="ENV{DM_NAME}"
++        zipl_val=${zipl_arg#/dev/mapper/}
++        ;;
++    /dev/disk/by-*) \
++        zipl_env="SYMLINK"
++        zipl_val=${zipl_arg#/dev/}
++        ;;
++    /dev/*) \
++        zipl_env="KERNEL"
++        zipl_val=${zipl_arg}
++        ;;
++    esac
++    if [ "$zipl_env" ] ; then
++        {
++            printf 'ACTION=="add|change", SUBSYSTEM=="block", %s=="%s", RUN+="/sbin/initqueue --settled --onetime --unique --name install_zipl_cmdline /sbin/install_zipl_cmdline.sh %s"\n' \
++                ${zipl_env} ${zipl_val} ${zipl_arg}
++            echo "[ -f /tmp/install.zipl.cmdline-done ]" >$hookdir/initqueue/finished/wait-zipl-conf.sh
++        } >> /etc/udev/rules.d/99zipl-conf.rules
++        cat /etc/udev/rules.d/99zipl-conf.rules
++    fi
++    wait_for_dev -n "$zipl_arg"
++fi
+

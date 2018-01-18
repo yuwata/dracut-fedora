@@ -1,0 +1,29 @@
+From 8b4b7dc5b2f1477825cf8a52f412af372b4646f8 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 12 Jan 2018 13:45:20 +0100
+Subject: [PATCH] iscsi: remove last iscsid code snippet
+
+---
+ modules.d/95iscsi/iscsiroot.sh | 8 --------
+ 1 file changed, 8 deletions(-)
+
+diff --git a/modules.d/95iscsi/iscsiroot.sh b/modules.d/95iscsi/iscsiroot.sh
+index d6325f7d..f7c99a60 100755
+--- a/modules.d/95iscsi/iscsiroot.sh
++++ b/modules.d/95iscsi/iscsiroot.sh
+@@ -219,14 +219,6 @@ if [ "$netif" != "timeout" ] && getargbool 1 rd.iscsi.waitnet; then
+     all_ifaces_setup || exit 0
+ fi
+ 
+-if [ "$netif" = "timeout" ] && all_ifaces_setup; then
+-    # s.th. went wrong and the timeout script hits
+-    # restart
+-    systemctl restart iscsid
+-    # damn iscsid is not ready after unit says it's ready
+-    sleep 2
+-fi
+-
+ if getargbool 0 rd.iscsi.firmware -d -y iscsi_firmware ; then
+     if [ "$netif" = "timeout" ] || [ "$netif" = "online" ]; then
+         handle_firmware
+

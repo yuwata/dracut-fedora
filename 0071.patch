@@ -1,0 +1,45 @@
+From 5a8efed021af6a3a06b484f9ad363935c1a875e3 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 10 Jan 2018 09:10:19 +0100
+Subject: [PATCH] TEST-3[01]-ISCSI*: increase disk size
+
+---
+ test/TEST-30-ISCSI/test.sh       | 6 +++---
+ test/TEST-31-ISCSI-MULTI/test.sh | 6 +++---
+ 2 files changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/test/TEST-30-ISCSI/test.sh b/test/TEST-30-ISCSI/test.sh
+index d5068e0c..e667587a 100755
+--- a/test/TEST-30-ISCSI/test.sh
++++ b/test/TEST-30-ISCSI/test.sh
+@@ -102,9 +102,9 @@ test_setup() {
+     fi
+ 
+     # Create the blank file to use as a root filesystem
+-    dd if=/dev/null of=$TESTDIR/root.ext3 bs=1M seek=20
+-    dd if=/dev/null of=$TESTDIR/iscsidisk2.img bs=1M seek=20
+-    dd if=/dev/null of=$TESTDIR/iscsidisk3.img bs=1M seek=20
++    dd if=/dev/null of=$TESTDIR/root.ext3 bs=1M seek=40
++    dd if=/dev/null of=$TESTDIR/iscsidisk2.img bs=1M seek=40
++    dd if=/dev/null of=$TESTDIR/iscsidisk3.img bs=1M seek=40
+ 
+     kernel=$KVERSION
+     # Create what will eventually be our root filesystem onto an overlay
+diff --git a/test/TEST-31-ISCSI-MULTI/test.sh b/test/TEST-31-ISCSI-MULTI/test.sh
+index 5dde4b68..2b63ff46 100755
+--- a/test/TEST-31-ISCSI-MULTI/test.sh
++++ b/test/TEST-31-ISCSI-MULTI/test.sh
+@@ -99,9 +99,9 @@ test_setup() {
+     fi
+ 
+     # Create the blank file to use as a root filesystem
+-    dd if=/dev/null of=$TESTDIR/root.ext3 bs=1M seek=20
+-    dd if=/dev/null of=$TESTDIR/iscsidisk2.img bs=1M seek=20
+-    dd if=/dev/null of=$TESTDIR/iscsidisk3.img bs=1M seek=20
++    dd if=/dev/null of=$TESTDIR/root.ext3 bs=1M seek=40
++    dd if=/dev/null of=$TESTDIR/iscsidisk2.img bs=1M seek=40
++    dd if=/dev/null of=$TESTDIR/iscsidisk3.img bs=1M seek=40
+ 
+     kernel=$KVERSION
+     # Create what will eventually be our root filesystem onto an overlay
+

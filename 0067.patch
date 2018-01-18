@@ -1,0 +1,34 @@
+From d300160e70bd2ae038acabb12f18fbf039798b26 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 5 Jan 2018 11:02:12 +0100
+Subject: [PATCH] Revert "mdraid: call mdadm with "--wait-clean" instead of
+ "-W""
+
+This reverts commit bc4ce61efce3e2d8b2be4f4e3e5fdef6ca08409f.
+
+Read wrong man page section. Got confused by
+https://github.com/dracutdevs/dracut/issues/342
+---
+ modules.d/90mdraid/mdraid-waitclean.sh | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/modules.d/90mdraid/mdraid-waitclean.sh b/modules.d/90mdraid/mdraid-waitclean.sh
+index d7f0ffdb..5c901982 100755
+--- a/modules.d/90mdraid/mdraid-waitclean.sh
++++ b/modules.d/90mdraid/mdraid-waitclean.sh
+@@ -13,12 +13,12 @@ if getargbool 0 rd.md.waitclean; then
+             continue
+         fi
+         info "Waiting for $md to become clean"
+-        mdadm $_offroot --wait-clean "$md" >/dev/null 2>&1
++        mdadm $_offroot -W "$md" >/dev/null 2>&1
+     done
+ 
+     for md in $containers; do
+         info "Waiting for $md to become clean"
+-        mdadm $_offroot --wait-clean "$md" >/dev/null 2>&1
++        mdadm $_offroot -W "$md" >/dev/null 2>&1
+     done
+ 
+     unset containers udevinfo _offroot
+

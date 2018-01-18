@@ -1,0 +1,25 @@
+From 17414dd01bd71bb187fee20c2148ccad3b35a887 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@hoyer.xyz>
+Date: Tue, 9 Jan 2018 13:24:46 +0100
+Subject: [PATCH] Merge pull request #344 from yuwata/spec-cleanup
+
+spec: use if-undefined instead of empty if-defined block
+---
+ dracut.spec | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/dracut.spec b/dracut.spec
+index 0b4c2e85..08e5a098 100644
+--- a/dracut.spec
++++ b/dracut.spec
+@@ -370,8 +370,7 @@ rm -rf -- $RPM_BUILD_ROOT
+ %{_mandir}/man5/dracut.conf.5*
+ %endif
+ 
+-%if %{defined _unitdir}
+-%else
++%if %{undefined _unitdir}
+ %{dracutlibdir}/modules.d/00bootchart
+ %endif
+ %{dracutlibdir}/modules.d/00bash
+

@@ -1,0 +1,35 @@
+From d888e21b5d3b830ab2a40fa4194d0ae59cb1b331 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 12 Jan 2018 13:04:34 +0100
+Subject: [PATCH] test/ci-matrix.txt: add file specifying which tests to run
+
+---
+ test/ci-matrix.txt | 19 +++++++++++++++++++
+ 1 file changed, 19 insertions(+)
+
+diff --git a/test/ci-matrix.txt b/test/ci-matrix.txt
+new file mode 100644
+index 00000000..3d6aca62
+--- /dev/null
++++ b/test/ci-matrix.txt
+@@ -0,0 +1,19 @@
++01
++02
++03
++04
++10
++11
++12
++13
++14
++15
++16
++17
++20
++30
++31
++40
++50
++60
++70
+

@@ -1,0 +1,38 @@
+From 83b19de168bf63698c53537bbb662242370fc17a Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@hoyer.xyz>
+Date: Wed, 17 Jan 2018 18:32:52 +0100
+Subject: [PATCH] Merge pull request #363 from danimo/dracut_dmraid_use_udev
+
+0202-dracut_dmraid_use_udev
+---
+ modules.d/90dmraid/dmraid.sh       | 2 --
+ modules.d/90dmraid/module-setup.sh | 2 ++
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/modules.d/90dmraid/dmraid.sh b/modules.d/90dmraid/dmraid.sh
+index e7a09b07..edae9784 100755
+--- a/modules.d/90dmraid/dmraid.sh
++++ b/modules.d/90dmraid/dmraid.sh
+@@ -33,8 +33,6 @@ if [ -n "$DM_RAIDS" ] || getargbool 0 rd.auto; then
+                 if [ "${s##$r}" != "$s" ]; then
+                     info "Activating $s"
+                     dmraid -ay -i -p --rm_partitions "$s" 2>&1 | vinfo
+-                    [ -e "/dev/mapper/$s" ] && kpartx -a "/dev/mapper/$s" 2>&1 | vinfo
+-                    udevsettle
+                 fi
+             done
+         done
+diff --git a/modules.d/90dmraid/module-setup.sh b/modules.d/90dmraid/module-setup.sh
+index e8de5f56..797a58e5 100755
+--- a/modules.d/90dmraid/module-setup.sh
++++ b/modules.d/90dmraid/module-setup.sh
+@@ -74,6 +74,8 @@ install() {
+ 
+     inst "$moddir/dmraid.sh" /sbin/dmraid_scan
+ 
++    inst_rules 66-kpartx.rules 67-kpartx-compat.rules
++
+     inst_libdir_file "libdmraid-events*.so*"
+ 
+     inst_rules "$moddir/61-dmraid-imsm.rules"
+

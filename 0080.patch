@@ -1,0 +1,253 @@
+From 28a68f1f3ce15b40d45e6987ab0997584d4fa901 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Fri, 12 Jan 2018 10:24:20 +0100
+Subject: [PATCH] iSCSI: no more iscsid
+
+According to Cathy Zhou <Cathy.Zhou@Oracle.COM>:
+
+"iscsistart is not designed to be working together with iscsid. When an
+interface gets the dhcp offer successfully, the iscsiroot script is run
+which starts the iscsistart service to establish the iSCSI session. With
+the existence of iscsid, the iscsistart service's attempt to setup its
+own mgmt ipc fails. Instead, the request to login to the iscsi target
+is handled by the mgmt ipc of iscsid. After iscsistart finishes its
+login attempt, it eventually sends a stop_event_loop request to stop
+the mgmt process. As the result, it terminates iscsid."
+
+So, iscsid is kicked out again.
+
+Additionally iscsistart-flocked is used to make sure iscsistart is not
+run in parallel.
+---
+ modules.d/95iscsi/cleanup-iscsi.sh      |  2 +-
+ modules.d/95iscsi/iscsiroot.sh          | 25 +++++--------------------
+ modules.d/95iscsi/iscsistart-flocked.sh |  5 +++++
+ modules.d/95iscsi/module-setup.sh       | 31 +------------------------------
+ modules.d/95iscsi/parse-iscsiroot.sh    | 10 ----------
+ test/TEST-31-ISCSI-MULTI/test.sh        | 32 ++++++++++++++++++++++++++++++++
+ 6 files changed, 44 insertions(+), 61 deletions(-)
+
+diff --git a/modules.d/95iscsi/cleanup-iscsi.sh b/modules.d/95iscsi/cleanup-iscsi.sh
+index bfc8aefc..e97d65ac 100755
+--- a/modules.d/95iscsi/cleanup-iscsi.sh
++++ b/modules.d/95iscsi/cleanup-iscsi.sh
+@@ -1,4 +1,4 @@
+ #!/bin/sh
+ 
+-[ -z "${DRACUT_SYSTEMD}" ] && [ -e /sys/module/bnx2i ] && killproc iscsiuio
++[ -e /sys/module/bnx2i ] && killproc iscsiuio
+ 
+diff --git a/modules.d/95iscsi/iscsiroot.sh b/modules.d/95iscsi/iscsiroot.sh
+index aefd263d..d6325f7d 100755
+--- a/modules.d/95iscsi/iscsiroot.sh
++++ b/modules.d/95iscsi/iscsiroot.sh
+@@ -36,14 +36,14 @@ iroot=${iroot#:}
+ # figured out a way how to check whether this is built-in or not
+ modprobe crc32c 2>/dev/null
+ 
+-if [ -z "${DRACUT_SYSTEMD}" ] && [ -e /sys/module/bnx2i ] && ! [ -e /tmp/iscsiuio-started ]; then
++if [ -e /sys/module/bnx2i ] && ! [ -e /tmp/iscsiuio-started ]; then
+         iscsiuio
+         > /tmp/iscsiuio-started
+ fi
+ 
+ handle_firmware()
+ {
+-    if ! iscsistart -f; then
++    if ! iscsistart-flocked -f; then
+         warn "iscistart: Could not get list of targets from firmware. Skipping."
+         echo 'skipped' > "/tmp/iscsistarted-firmware"
+         return 0
+@@ -53,7 +53,7 @@ handle_firmware()
+ 	iscsi_param="$iscsi_param --param $p"
+     done
+ 
+-    if ! iscsistart -b $iscsi_param; then
++    if ! iscsistart-flocked -b $iscsi_param; then
+         warn "'iscsistart -b $iscsi_param' failed with return code $?"
+     fi
+ 
+@@ -117,11 +117,6 @@ handle_netroot()
+            mkdir -p /etc/iscsi
+            ln -fs /run/initiatorname.iscsi /etc/iscsi/initiatorname.iscsi
+            > /tmp/iscsi_set_initiator
+-           if [ -n "$DRACUT_SYSTEMD" ]; then
+-               systemctl try-restart iscsid
+-               # FIXME: iscsid is not yet ready, when the service is :-/
+-               sleep 1
+-           fi
+     fi
+ 
+     if [ -z "$iscsi_initiator" ]; then
+@@ -138,11 +133,6 @@ handle_netroot()
+         mkdir -p /etc/iscsi
+         ln -fs /run/initiatorname.iscsi /etc/iscsi/initiatorname.iscsi
+         > /tmp/iscsi_set_initiator
+-        if [ -n "$DRACUT_SYSTEMD" ]; then
+-            systemctl try-restart iscsid
+-            # FIXME: iscsid is not yet ready, when the service is :-/
+-            sleep 1
+-        fi
+     fi
+ 
+ 
+@@ -163,11 +153,6 @@ handle_netroot()
+     if ! [ -e /etc/iscsi/initiatorname.iscsi ]; then
+         mkdir -p /etc/iscsi
+         ln -fs /run/initiatorname.iscsi /etc/iscsi/initiatorname.iscsi
+-        if [ -n "$DRACUT_SYSTEMD" ]; then
+-            systemctl try-restart iscsid
+-            # FIXME: iscsid is not yet ready, when the service is :-/
+-            sleep 1
+-        fi
+     fi
+ # FIXME $iscsi_protocol??
+ 
+@@ -193,7 +178,7 @@ handle_netroot()
+                             --description="Login iSCSI Target $iscsi_target_name" \
+                             -p 'DefaultDependencies=no' \
+                             --unit="$netroot_enc" -- \
+-                            $(command -v iscsistart) \
++                            $(command -v iscsistart-flocked) \
+                             -i "$iscsi_initiator" -t "$iscsi_target_name"        \
+                             -g "$iscsi_target_group" -a "$iscsi_target_ip"      \
+                             -p "$iscsi_target_port" \
+@@ -211,7 +196,7 @@ handle_netroot()
+             fi
+         fi
+     else
+-        iscsistart -i "$iscsi_initiator" -t "$iscsi_target_name"        \
++        iscsistart-flocked -i "$iscsi_initiator" -t "$iscsi_target_name"        \
+                    -g "$iscsi_target_group" -a "$iscsi_target_ip"      \
+                    -p "$iscsi_target_port" \
+                    ${iscsi_username:+-u "$iscsi_username"} \
+diff --git a/modules.d/95iscsi/iscsistart-flocked.sh b/modules.d/95iscsi/iscsistart-flocked.sh
+new file mode 100755
+index 00000000..6366335d
+--- /dev/null
++++ b/modules.d/95iscsi/iscsistart-flocked.sh
+@@ -0,0 +1,5 @@
++#!/bin/sh
++{
++    flock -e 9
++    iscsistart "$@"
++} 9>/tmp/.iscsi_lock
+diff --git a/modules.d/95iscsi/module-setup.sh b/modules.d/95iscsi/module-setup.sh
+index 04937b5b..5c47750a 100755
+--- a/modules.d/95iscsi/module-setup.sh
++++ b/modules.d/95iscsi/module-setup.sh
+@@ -194,41 +194,12 @@ install() {
+         [[ $_iscsiconf ]] && printf "%s\n" "$_iscsiconf" >> "${initdir}/etc/cmdline.d/95iscsi.conf"
+     fi
+ 
++    inst "$moddir/iscsistart-flocked.sh" "/bin/iscsistart-flocked"
+     inst_hook cmdline 90 "$moddir/parse-iscsiroot.sh"
+     inst_hook cleanup 90 "$moddir/cleanup-iscsi.sh"
+     inst "$moddir/iscsiroot.sh" "/sbin/iscsiroot"
+     if ! dracut_module_included "systemd"; then
+         inst "$moddir/mount-lun.sh" "/bin/mount-lun.sh"
+-    else
+-        inst_multiple -o \
+-                      $systemdsystemunitdir/iscsi.service \
+-                      $systemdsystemunitdir/iscsid.service \
+-                      $systemdsystemunitdir/iscsid.socket \
+-                      $systemdsystemunitdir/iscsiuio.service \
+-                      $systemdsystemunitdir/iscsiuio.socket \
+-                      iscsiadm iscsid
+-
+-        mkdir -p "${initdir}/$systemdsystemunitdir/sockets.target.wants"
+-        for i in \
+-                iscsiuio.socket \
+-            ; do
+-            ln_r "$systemdsystemunitdir/${i}" "$systemdsystemunitdir/sockets.target.wants/${i}"
+-        done
+-
+-        mkdir -p "${initdir}/$systemdsystemunitdir/basic.target.wants"
+-        for i in \
+-                iscsid.service \
+-            ; do
+-            ln_r "$systemdsystemunitdir/${i}" "$systemdsystemunitdir/basic.target.wants/${i}"
+-        done
+-
+-        # Make sure iscsid is started after dracut-cmdline and ready for the initqueue
+-        mkdir -p "${initdir}/$systemdsystemunitdir/iscsid.service.d"
+-        (
+-            echo "[Unit]"
+-            echo "After=dracut-cmdline.service"
+-            echo "Before=dracut-initqueue.service"
+-        ) > "${initdir}/$systemdsystemunitdir/iscsid.service.d/dracut.conf"
+     fi
+     inst_dir /var/lib/iscsi
+     dracut_need_initqueue
+diff --git a/modules.d/95iscsi/parse-iscsiroot.sh b/modules.d/95iscsi/parse-iscsiroot.sh
+index 43b2e088..c8c66ccf 100755
+--- a/modules.d/95iscsi/parse-iscsiroot.sh
++++ b/modules.d/95iscsi/parse-iscsiroot.sh
+@@ -116,11 +116,6 @@ if arg=$(getarg rd.iscsi.initiator -d iscsi_initiator=) && [ -n "$arg" ] && ! [
+     if ! [ -e /etc/iscsi/initiatorname.iscsi ]; then
+         mkdir -p /etc/iscsi
+         ln -fs /run/initiatorname.iscsi /etc/iscsi/initiatorname.iscsi
+-        if [ -n "$DRACUT_SYSTEMD" ]; then
+-            systemctl try-restart iscsid
+-            # FIXME: iscsid is not yet ready, when the service is :-/
+-            sleep 1
+-        fi
+     fi
+ fi
+ 
+@@ -133,11 +128,6 @@ if [ -z $iscsi_initiator ] && [ -f /sys/firmware/ibft/initiator/initiator-name ]
+         mkdir -p /etc/iscsi
+         ln -fs /run/initiatorname.iscsi /etc/iscsi/initiatorname.iscsi
+         > /tmp/iscsi_set_initiator
+-        if [ -n "$DRACUT_SYSTEMD" ]; then
+-            systemctl try-restart iscsid
+-            # FIXME: iscsid is not yet ready, when the service is :-/
+-            sleep 1
+-        fi
+     fi
+ fi
+ 
+diff --git a/test/TEST-31-ISCSI-MULTI/test.sh b/test/TEST-31-ISCSI-MULTI/test.sh
+index 2b63ff46..2f2b6ed5 100755
+--- a/test/TEST-31-ISCSI-MULTI/test.sh
++++ b/test/TEST-31-ISCSI-MULTI/test.sh
+@@ -73,6 +73,38 @@ do_test_run() {
+                "rd.iscsi.initiator=$initiator" \
+         || return 1
+ 
++    run_client "netroot=iscsi target1 target2 rd.iscsi.waitnet=0" \
++               "root=LABEL=sysroot" \
++               "ip=192.168.50.101:::255.255.255.0::ens3:off" \
++               "ip=192.168.51.101:::255.255.255.0::ens4:off" \
++               "netroot=iscsi:192.168.51.1::::iqn.2009-06.dracut:target1" \
++               "netroot=iscsi:192.168.50.1::::iqn.2009-06.dracut:target2" \
++               "rd.iscsi.firmware" \
++               "rd.iscsi.initiator=$initiator" \
++               "rd.iscsi.waitnet=0" \
++        || return 1
++
++    run_client "netroot=iscsi target1 target2 rd.iscsi.waitnet=0 rd.iscsi.testroute=0" \
++               "root=LABEL=sysroot" \
++               "ip=192.168.50.101:::255.255.255.0::ens3:off" \
++               "ip=192.168.51.101:::255.255.255.0::ens4:off" \
++               "netroot=iscsi:192.168.51.1::::iqn.2009-06.dracut:target1" \
++               "netroot=iscsi:192.168.50.1::::iqn.2009-06.dracut:target2" \
++               "rd.iscsi.firmware" \
++               "rd.iscsi.initiator=$initiator" \
++               "rd.iscsi.waitnet=0 rd.iscsi.testroute=0" \
++        || return 1
++
++    run_client "netroot=iscsi target1 target2 rd.iscsi.waitnet=0 rd.iscsi.testroute=0 default GW" \
++               "root=LABEL=sysroot" \
++               "ip=192.168.50.101::192.168.50.1:255.255.255.0::ens3:off" \
++               "ip=192.168.51.101::192.168.51.1:255.255.255.0::ens4:off" \
++               "netroot=iscsi:192.168.51.1::::iqn.2009-06.dracut:target1" \
++               "netroot=iscsi:192.168.50.1::::iqn.2009-06.dracut:target2" \
++               "rd.iscsi.firmware" \
++               "rd.iscsi.initiator=$initiator" \
++               "rd.iscsi.waitnet=0 rd.iscsi.testroute=0" \
++        || return 1
+ 
+     echo "All tests passed [OK]"
+     return 0
+

@@ -19,3 +19,4 @@ index 50d42a31..0b4c2e85 100644
  %{dracutlibdir}/modules.d/95zfcp
  %{dracutlibdir}/modules.d/95zfcp_rules
  %{dracutlibdir}/modules.d/95terminfo
+

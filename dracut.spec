@@ -14,7 +14,7 @@
 %define with_nbd 0
 %endif
 
-%define dist_free_release 64.git20180105
+%define dist_free_release 92.git20180118
 
 Name: dracut
 Version: 046
@@ -100,11 +100,39 @@ Patch60: 0063.patch
 Patch61: 0064.patch
 Patch62: 0065.patch
 Patch63: 0066.patch
+Patch64: 0067.patch
+Patch65: 0068.patch
+Patch66: 0069.patch
+Patch67: 0070.patch
+Patch68: 0071.patch
+Patch69: 0072.patch
+Patch70: 0073.patch
+Patch71: 0074.patch
+Patch72: 0075.patch
+Patch73: 0076.patch
+Patch74: 0077.patch
+Patch75: 0078.patch
+Patch76: 0079.patch
+Patch77: 0080.patch
+Patch78: 0081.patch
+Patch79: 0082.patch
+Patch80: 0083.patch
+Patch81: 0084.patch
+Patch82: 0085.patch
+Patch83: 0086.patch
+Patch84: 0087.patch
+Patch85: 0088.patch
+Patch86: 0089.patch
+Patch87: 0090.patch
+Patch88: 0091.patch
+Patch89: 0092.patch
+Patch90: 0093.patch
+Patch91: 0094.patch
 
 Source1: https://www.gnu.org/licenses/lgpl-2.1.txt
 
 BuildRequires: bash git
-BuildRequires: kmod-devel >= 15
+BuildRequires: kmod-devel >= 23
 
 %if 0%{?fedora} || 0%{?rhel}
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -348,6 +376,20 @@ rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/97masterkey
 rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/98integrity
 %endif
 
+%ifnarch s390 s390x
+# remove architecture specific modules
+rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/80cms
+rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/81cio_ignore
+rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/91zipl
+rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/95dasd
+rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/95dasd_mod
+rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/95dasd_rules
+rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/95dcssblk
+rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/95zfcp
+rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/95zfcp_rules
+rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/95znet
+%endif
+
 mkdir -p $RPM_BUILD_ROOT/boot/dracut
 mkdir -p $RPM_BUILD_ROOT/var/lib/dracut/overlay
 mkdir -p $RPM_BUILD_ROOT%{_localstatedir}/log
@@ -434,8 +476,7 @@ rm -rf -- $RPM_BUILD_ROOT
 %{_mandir}/man5/dracut.conf.5*
 %endif
 
-%if %{defined _unitdir}
-%else
+%if %{undefined _unitdir}
 %{dracutlibdir}/modules.d/00bootchart
 %endif
 %{dracutlibdir}/modules.d/00bash
@@ -450,7 +491,6 @@ rm -rf -- $RPM_BUILD_ROOT
 %{dracutlibdir}/modules.d/45url-lib
 %{dracutlibdir}/modules.d/50drm
 %{dracutlibdir}/modules.d/50plymouth
-%{dracutlibdir}/modules.d/80cms
 %{dracutlibdir}/modules.d/80lvmmerge
 %{dracutlibdir}/modules.d/90btrfs
 %{dracutlibdir}/modules.d/90crypt
@@ -465,29 +505,35 @@ rm -rf -- $RPM_BUILD_ROOT
 %{dracutlibdir}/modules.d/91crypt-gpg
 %{dracutlibdir}/modules.d/91crypt-loop
 %{dracutlibdir}/modules.d/95debug
-%{dracutlibdir}/modules.d/95resume
-%{dracutlibdir}/modules.d/95rootfs-block
-%{dracutlibdir}/modules.d/95dasd
-%{dracutlibdir}/modules.d/95dasd_mod
-%{dracutlibdir}/modules.d/95dasd_rules
 %{dracutlibdir}/modules.d/95fstab-sys
 %{dracutlibdir}/modules.d/95lunmask
-%{dracutlibdir}/modules.d/95zfcp
-%{dracutlibdir}/modules.d/95zfcp_rules
+%{dracutlibdir}/modules.d/95resume
+%{dracutlibdir}/modules.d/95rootfs-block
 %{dracutlibdir}/modules.d/95terminfo
 %{dracutlibdir}/modules.d/95udev-rules
 %{dracutlibdir}/modules.d/95virtfs
+%ifarch s390 s390x
+%{dracutlibdir}/modules.d/80cms
+%{dracutlibdir}/modules.d/81cio_ignore
+%{dracutlibdir}/modules.d/91zipl
+%{dracutlibdir}/modules.d/95dasd
+%{dracutlibdir}/modules.d/95dasd_mod
+%{dracutlibdir}/modules.d/95dasd_rules
+%{dracutlibdir}/modules.d/95dcssblk
+%{dracutlibdir}/modules.d/95zfcp
+%{dracutlibdir}/modules.d/95zfcp_rules
+%endif
 %if %{undefined _unitdir}
 %{dracutlibdir}/modules.d/96securityfs
 %{dracutlibdir}/modules.d/97masterkey
 %{dracutlibdir}/modules.d/98integrity
 %endif
 %{dracutlibdir}/modules.d/97biosdevname
+%{dracutlibdir}/modules.d/98dracut-systemd
 %{dracutlibdir}/modules.d/98ecryptfs
 %{dracutlibdir}/modules.d/98pollcdrom
 %{dracutlibdir}/modules.d/98selinux
 %{dracutlibdir}/modules.d/98syslog
-%{dracutlibdir}/modules.d/98dracut-systemd
 %{dracutlibdir}/modules.d/98usrmount
 %{dracutlibdir}/modules.d/99base
 %{dracutlibdir}/modules.d/99fs-lib
@@ -521,17 +567,19 @@ rm -rf -- $RPM_BUILD_ROOT
 %defattr(-,root,root,0755)
 %{dracutlibdir}/modules.d/02systemd-networkd
 %{dracutlibdir}/modules.d/40network
+%{dracutlibdir}/modules.d/45ifcfg
 %{dracutlibdir}/modules.d/90kernel-network-modules
-%{dracutlibdir}/modules.d/95fcoe
-%{dracutlibdir}/modules.d/95iscsi
 %{dracutlibdir}/modules.d/90qemu-net
 %{dracutlibdir}/modules.d/95cifs
+%{dracutlibdir}/modules.d/95fcoe
+%{dracutlibdir}/modules.d/95fcoe-uefi
+%{dracutlibdir}/modules.d/95iscsi
 %{dracutlibdir}/modules.d/95nbd
 %{dracutlibdir}/modules.d/95nfs
 %{dracutlibdir}/modules.d/95ssh-client
-%{dracutlibdir}/modules.d/45ifcfg
+%ifarch s390 s390x
 %{dracutlibdir}/modules.d/95znet
-%{dracutlibdir}/modules.d/95fcoe-uefi
+%endif
 %{dracutlibdir}/modules.d/99uefi-lib
 
 %if 0%{?fedora} || 0%{?rhel} || 0%{?suse_version}
@@ -582,6 +630,9 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Thu Jan 18 2018 Harald Hoyer <harald@redhat.com> - 046-92
+- git snapshot
+
 * Fri Jan 05 2018 Harald Hoyer <harald@redhat.com> - 046-64
 - git snapshot
 
