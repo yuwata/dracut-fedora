@@ -18,10 +18,10 @@
 %define with_nbd 0
 %endif
 
-%define dist_free_release 92.2.git%{gitdate}
+%define dist_free_release 1.git%{gitdate}
 
 Name: dracut
-Version: 046
+Version: 047
 Release: %{dist_free_release}%{?dist}
 
 Summary: Initramfs generator using udev
@@ -48,19 +48,16 @@ Source0: http://www.kernel.org/pub/linux/utils/boot/dracut/dracut-%{version}.tar
 
 Source1: https://www.gnu.org/licenses/lgpl-2.1.txt
 
-BuildRequires: bash git
+BuildRequires: bash
+BuildRequires: git
 BuildRequires: kmod-devel >= 23
+BuildRequires: gcc
 
 %if 0%{?fedora} || 0%{?rhel}
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires: pkgconfig
 %endif
 %if 0%{?fedora}
 BuildRequires: bash-completion
-%endif
-
-%if 0%{?suse_version}
-BuildRoot: %{_tmppath}/%{name}-%{version}-build
 %endif
 
 %if %{with doc}
@@ -347,9 +344,6 @@ echo 'dracut_rescue_image="yes"' > $RPM_BUILD_ROOT%{dracutlibdir}/dracut.conf.d/
 > $RPM_BUILD_ROOT/etc/system-fips
 %endif
 
-%clean
-rm -rf -- $RPM_BUILD_ROOT
-
 %files
 %defattr(-,root,root,0755)
 %if %{with doc}
@@ -551,11 +545,11 @@ rm -rf -- $RPM_BUILD_ROOT
 %endif
 
 %changelog
-* Sat Feb 10 2018 Yu Watanabe <watanabe.yu@gmail.com> - 046-92.2.git20180208
-- Update to latest git snapshot 94f61235d760337fdef692fac5ead589e8f3ab0e
+* Mon Feb 19 2018 Harald Hoyer <harald@redhat.com> - 047-1
+- version 047
 
-* Mon Jan 29 2018 Yu Watanabe <watanabe.yu@gmail.com> - 046-92.1.git20180125
-- Update to latest git snapshot f48fb6f4ce277a7ca1a89b6c6423326c42da601e
+* Wed Feb 07 2018 Fedora Release Engineering <releng@fedoraproject.org> - 046-92.git20180118.1
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_28_Mass_Rebuild
 
 * Thu Jan 18 2018 Harald Hoyer <harald@redhat.com> - 046-92
 - git snapshot
