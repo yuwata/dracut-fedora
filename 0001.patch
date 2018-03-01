@@ -1,0 +1,145 @@
+From 5e574046e76eae2af5563f48b3ab910b3553ba56 Mon Sep 17 00:00:00 2001
+From: Javier Martinez Canillas <javierm@redhat.com>
+Date: Wed, 28 Feb 2018 09:39:12 +0100
+Subject: [PATCH 1/1] 5?-dracut*.install: Allow scripts to install the
+ initramfs in /boot dir
+
+The GRUB 2 bootloaders expect the initrd to be installed in /boot instead
+of /boot/$MACHINE_ID/$KERNEL_VERSION/{linux,initrd}, so if that directory
+doesn't exists, install the initramfs images on the /boot directory.
+
+Signed-off-by: Javier Martinez Canillas <javierm@redhat.com>
+---
+ 50-dracut.install        | 17 ++++++++++-----
+ 51-dracut-rescue.install | 55 ++++++++++++++++++++++++++++++++++--------------
+ 2 files changed, 51 insertions(+), 21 deletions(-)
+
+diff --git a/50-dracut.install b/50-dracut.install
+index f1314d0222c8..64e3549f2992 100755
+--- a/50-dracut.install
++++ b/50-dracut.install
+@@ -11,6 +11,13 @@ if ! [[ ${KERNEL_INSTALL_MACHINE_ID-x} ]]; then
+     exit 0
+ fi
+ 
++if [[ -d "$BOOT_DIR_ABS" ]]; then
++    INITRD="initrd"
++else
++    BOOT_DIR_ABS="/boot"
++    INITRD="initramfs-${KERNEL_VERSION}.img"
++fi
++
+ ret=0
+ case "$COMMAND" in
+     add)
+@@ -18,9 +25,9 @@ case "$COMMAND" in
+         if [[ -f ${INITRD_IMAGE_PREGENERATED} ]]; then
+             # we found an initrd at the same place as the kernel
+             # use this and don't generate a new one
+-            cp --reflink=auto "$INITRD_IMAGE_PREGENERATED" "$BOOT_DIR_ABS/initrd" \
+-                && chown root:root "$BOOT_DIR_ABS/initrd" \
+-                && chmod 0600 "$BOOT_DIR_ABS/initrd" \
++            cp --reflink=auto "$INITRD_IMAGE_PREGENERATED" "$BOOT_DIR_ABS/$INITRD" \
++                && chown root:root "$BOOT_DIR_ABS/$INITRD" \
++                && chmod 0600 "$BOOT_DIR_ABS/$INITRD" \
+                 && exit 0
+         fi
+ 
+@@ -42,11 +49,11 @@ case "$COMMAND" in
+                 break
+             fi
+         done
+-	dracut ${noimageifnotneeded:+--noimageifnotneeded} "$BOOT_DIR_ABS"/initrd "$KERNEL_VERSION"
++	dracut ${noimageifnotneeded:+--noimageifnotneeded} "$BOOT_DIR_ABS/$INITRD" "$KERNEL_VERSION"
+         ret=$?
+ 	;;
+     remove)
+-        rm -f -- "$BOOT_DIR_ABS"/initrd
++        rm -f -- "$BOOT_DIR_ABS/$INITRD"
+         ret=$?
+ 	;;
+ esac
+diff --git a/51-dracut-rescue.install b/51-dracut-rescue.install
+index 7fbeac1d4ce6..3f07a698f2f9 100755
+--- a/51-dracut-rescue.install
++++ b/51-dracut-rescue.install
+@@ -63,15 +63,30 @@ if ! [[ ${BOOT_OPTIONS[*]} ]]; then
+     exit 1
+ fi
+ 
+-BOOT_DIR="/${MACHINE_ID}/0-rescue"
+-BOOT_ROOT=${BOOT_DIR_ABS%$BOOT_DIR}
+-LOADER_ENTRY="$BOOT_ROOT/loader/entries/${MACHINE_ID}-0-rescue.conf"
++if [[ -d "$BOOT_DIR_ABS" ]]; then
++    BOOT_DIR="/${MACHINE_ID}/0-rescue"
++    BOOT_ROOT=${BOOT_DIR_ABS%$BOOT_DIR}
++    LOADER_ENTRY="$BOOT_ROOT/loader/entries/${MACHINE_ID}-0-rescue.conf"
++    KERNEL="linux"
++    INITRD="initrd"
++else
++    BLS_DIR="/boot/loader/entries"
++    if [ -d /sys/firmware/efi ]; then
++	BLS_DIR="/boot/efi/EFI/${ID}/loader/entries"
++    fi
++
++    BOOT_DIR_ABS="/boot"
++    LOADER_ENTRY="$BLS_DIR/${MACHINE_ID}-0-rescue.conf"
++    KERNEL="vmlinuz-0-rescue-${MACHINE_ID}"
++    INITRD="initramfs-0-rescue-${MACHINE_ID}.img"
++fi
+ 
+ ret=0
+ 
+ case "$COMMAND" in
+     add)
+-        [[ -f "$LOADER_ENTRY" ]] && exit 0
++        [[ -f "$LOADER_ENTRY" ]] && [[ -f "$BOOT_DIR_ABS/$KERNEL" ]] \
++            && [[ -f "$BOOT_DIR_ABS/$INITRD" ]] && exit 0
+ 
+         # source our config dir
+         for f in $(dropindirs_sort ".conf" "/etc/dracut.conf.d" "/usr/lib/dracut/dracut.conf.d"); do
+@@ -82,21 +97,29 @@ case "$COMMAND" in
+ 
+         [[ -d "$BOOT_DIR_ABS" ]] || mkdir -p "$BOOT_DIR_ABS"
+ 
+-        if ! cp --reflink=auto "$KERNEL_IMAGE" "$BOOT_DIR_ABS"/linux; then
+-            echo "Can't copy '$KERNEL_IMAGE to '$BOOT_DIR_ABS/linux'!" >&2
++        if ! cp --reflink=auto "$KERNEL_IMAGE" "$BOOT_DIR_ABS/$KERNEL"; then
++            echo "Can't copy '$KERNEL_IMAGE to '$BOOT_DIR_ABS/$KERNEL'!" >&2
+         fi
+ 
+-        dracut --no-hostonly -a "rescue" "$BOOT_DIR_ABS"/initrd "$KERNEL_VERSION"
+-        ((ret+=$?))
++        if [[ ! -f "$BOOT_DIR_ABS/$INITRD" ]]; then
++            dracut --no-hostonly -a "rescue" "$BOOT_DIR_ABS/$INITRD" "$KERNEL_VERSION"
++            ((ret+=$?))
++        fi
++
++        if [[ -d "$BOOT_DIR" ]]; then
++            {
++                echo "title      $PRETTY_NAME - Rescue Image"
++                echo "version    $KERNEL_VERSION"
++                echo "machine-id $MACHINE_ID"
++                echo "options    ${BOOT_OPTIONS[@]} rd.auto=1"
++                echo "linux      $BOOT_DIR/linux"
++                echo "initrd     $BOOT_DIR/initrd"
++            } > $LOADER_ENTRY
++        else
++            cp -aT "${KERNEL_IMAGE%/*}/bls.conf" $LOADER_ENTRY
++            sed -i 's/'$KERNEL_VERSION'/0-rescue-'${MACHINE_ID}'/' $LOADER_ENTRY
++        fi
+ 
+-        {
+-            echo "title      $PRETTY_NAME - Rescue Image"
+-            echo "version    $KERNEL_VERSION"
+-            echo "machine-id $MACHINE_ID"
+-            echo "options    ${BOOT_OPTIONS[@]} rd.auto=1"
+-            echo "linux      $BOOT_DIR/linux"
+-            echo "initrd     $BOOT_DIR/initrd"
+-        } > $LOADER_ENTRY
+         ((ret+=$?))
+         ;;
+ 
+-- 
+2.14.3
+
