@@ -1,0 +1,32 @@
+From 0a68b6a5181cf147b5706b52fd032901b347d5cb Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 19 Feb 2018 10:17:36 +0100
+Subject: [PATCH] dracut.spec: remove BuildRoot
+
+---
+ dracut.spec | 5 -----
+ 1 file changed, 5 deletions(-)
+
+diff --git a/dracut.spec b/dracut.spec
+index f16e69f7..445d6adb 100644
+--- a/dracut.spec
++++ b/dracut.spec
+@@ -45,17 +45,12 @@ BuildRequires: kmod-devel >= 23
+ BuildRequires: gcc
+ 
+ %if 0%{?fedora} || 0%{?rhel}
+-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+ BuildRequires: pkgconfig
+ %endif
+ %if 0%{?fedora}
+ BuildRequires: bash-completion
+ %endif
+ 
+-%if 0%{?suse_version}
+-BuildRoot: %{_tmppath}/%{name}-%{version}-build
+-%endif
+-
+ %if %{with doc}
+ %if 0%{?fedora} || 0%{?rhel}
+ BuildRequires: docbook-style-xsl docbook-dtds libxslt
+
