@@ -1,6 +1,6 @@
-%global gitcommit 3aa37cafde734719f2377600a17459fad30edfbc
+%global gitcommit f8e0c7cc6296909cff92f718ed360ff9ef1f7bae
 %{?gitcommit:%global gitcommitshort %(c=%{gitcommit}; echo ${c:0:7})}
-%global gitdate 20180302
+%global gitdate 20180305
 
 %define dracutlibdir %{_prefix}/lib/dracut
 %bcond_without doc
@@ -18,7 +18,7 @@
 %define with_nbd 0
 %endif
 
-%define dist_free_release 2.1.git%{gitdate}
+%define dist_free_release 8.1.git%{gitdate}
 
 Name: dracut
 Version: 047
@@ -546,8 +546,11 @@ echo 'dracut_rescue_image="yes"' > $RPM_BUILD_ROOT%{dracutlibdir}/dracut.conf.d/
 %endif
 
 %changelog
-* Sat Mar 03 2018 Yu Watanabe <watanabe.yu@gmail.com> - 047-2.1.git20180302
-- Update to latest git snapshot 3aa37cafde734719f2377600a17459fad30edfbc
+* Tue Mar 06 2018 Yu Watanabe <watanabe.yu@gmail.com> - 047-8.1.git20180305
+- Update to latest git snapshot f8e0c7cc6296909cff92f718ed360ff9ef1f7bae
+
+* Mon Mar 05 2018 Harald Hoyer <harald@redhat.com> - 047-8
+- git snapshot
 
 * Tue Feb 27 2018 Javier Martinez Canillas <javierm@redhat.com> - 047-2
 - Allow generating initramfs images on the /boot directory
