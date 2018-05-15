@@ -1,0 +1,58 @@
+From 8ad32155907fc4accd0a822365f6fcf1c355cfcb Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 7 May 2018 15:21:35 +0200
+Subject: [PATCH] don't error out, if no modules were installed
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+dracut-install … -m -s drm_crtc_init =drivers/staging
+should not return an error, if no module was found in =drivers/staging
+
+https://bugzilla.redhat.com/show_bug.cgi?id=1575527
+---
+ install/dracut-install.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/install/dracut-install.c b/install/dracut-install.c
+index 4b2ff896..14fc0ab9 100644
+--- a/install/dracut-install.c
++++ b/install/dracut-install.c
+@@ -1394,6 +1394,7 @@ static int install_modules(int argc, char **argv)
+         const char *abskpath = NULL;
+         char *p;
+         int i;
++        int modinst = 0;
+ 
+         ctx = kmod_new(kerneldir, NULL);
+         abskpath = kmod_get_dirname(ctx);
+@@ -1498,6 +1499,7 @@ static int install_modules(int argc, char **argv)
+                                         return -ENOENT;
+                                 };
+                                 ret = ( ret == 0 ? 0 : r );
++                                modinst = 1;
+                         }
+                 } else if (argv[i][0] == '=') {
+                         _cleanup_free_ char *path1 = NULL, *path2 = NULL, *path3 = NULL;
+@@ -1592,6 +1594,7 @@ static int install_modules(int argc, char **argv)
+                                                 return -ENOENT;
+                                         };
+                                         ret = ( ret == 0 ? 0 : r );
++                                        modinst = 1;
+                                 }
+                         }
+                         if (errno) {
+@@ -1638,10 +1641,11 @@ static int install_modules(int argc, char **argv)
+                                         return -ENOENT;
+                                 };
+                                 ret = ( ret == 0 ? 0 : r );
++                                modinst = 1;
+                         }
+                 }
+ 
+-                if ((ret != 0) && (!arg_optional)) {
++                if ((modinst != 0) && (ret != 0) && (!arg_optional)) {
+                         if (!arg_silent)
+                                 log_error("ERROR: installing '%s'", argv[i]);
+                         return EXIT_FAILURE;
+

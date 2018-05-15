@@ -1,0 +1,28 @@
+From 3161dea8e116625ef5267fa745409a4949a36ecf Mon Sep 17 00:00:00 2001
+From: Michael McCracken <michael.mccracken@gmail.com>
+Date: Thu, 26 Apr 2018 23:27:17 -0700
+Subject: [PATCH] Update dracut.modules.7.asc
+
+Update manpage to reflect code behavior for `inst` with >2 args.
+
+Signed-off-by: Michael McCracken <michael.mccracken@gmail.com>
+---
+ dracut.modules.7.asc | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/dracut.modules.7.asc b/dracut.modules.7.asc
+index 9c3f5475..69ac6c44 100644
+--- a/dracut.modules.7.asc
++++ b/dracut.modules.7.asc
+@@ -255,7 +255,9 @@ not lead to an error.
+ ==== inst <src> [<dst>]
+ 
+ installs _one_ file <src> either to the same place in the initramfs or to an
+-optional <dst>.
++optional <dst>. inst with more than two arguments is treated the same as 
++inst_multiple, all arguments are treated as files to install and none as 
++install destinations.
+ 
+ ==== inst_hook <hookdir> <prio> <src>
+ 
+

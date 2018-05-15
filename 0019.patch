@@ -1,0 +1,23 @@
+From 654484b82bf6a3983244e76e4f38e9a2d080cb9b Mon Sep 17 00:00:00 2001
+From: tpgxyz <tpgxyz@gmail.com>
+Date: Wed, 18 Apr 2018 20:57:33 +0200
+Subject: [PATCH] fix zstd magic header
+
+---
+ modules.d/99img-lib/img-lib.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/modules.d/99img-lib/img-lib.sh b/modules.d/99img-lib/img-lib.sh
+index 43785812..f4774153 100755
+--- a/modules.d/99img-lib/img-lib.sh
++++ b/modules.d/99img-lib/img-lib.sh
+@@ -8,7 +8,7 @@
+ # works with stdin if $1 is not set.
+ det_archive() {
+     # NOTE: echo -e works in ash and bash, but not dash
+-    local bz="BZh" xz="$(echo -e '\xfd7zXZ')" gz="$(echo -e '\x1f\x8b')" zs="$(echo -e '0xFD2FB528')"
++    local bz="BZh" xz="$(echo -e '\xfd7zXZ')" gz="$(echo -e '\x1f\x8b')" zs="$(echo -e '\x28\xB5\x2F\xFD')"
+     local headerblock="$(dd ${1:+if=$1} bs=262 count=1 2>/dev/null)"
+     case "$headerblock" in
+         $xz*) echo "xz" ;;
+

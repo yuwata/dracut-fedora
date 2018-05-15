@@ -1,0 +1,99 @@
+From c4f8329cc2b158c8d91ad9d9b7776b3970d3735a Mon Sep 17 00:00:00 2001
+From: Tony Asleson <tasleson@redhat.com>
+Date: Mon, 2 Apr 2018 09:32:12 -0500
+Subject: [PATCH] Initial Stratis support
+
+Ref. https://github.com/stratis-storage
+
+Signed-off-by: Tony Asleson <tasleson@redhat.com>
+---
+ modules.d/90stratis/module-setup.sh       | 34 +++++++++++++++++++++++++++++++
+ modules.d/90stratis/stratisd-init.service | 15 ++++++++++++++
+ modules.d/90stratis/stratisd-start.sh     |  3 +++
+ modules.d/90stratis/stratisd-stop.sh      |  6 ++++++
+ 4 files changed, 58 insertions(+)
+
+diff --git a/modules.d/90stratis/module-setup.sh b/modules.d/90stratis/module-setup.sh
+new file mode 100755
+index 00000000..2787b63b
+--- /dev/null
++++ b/modules.d/90stratis/module-setup.sh
+@@ -0,0 +1,34 @@
++#!/bin/bash
++
++# called by dracut
++check() {
++    require_binaries stratisd-init thin_check thin_repair || return 1
++    return 255
++}
++
++# called by dracut
++depends() {
++    echo dm
++    return 0
++}
++
++# called by dracut
++installkernel() {
++    instmods xfs
++}
++
++# called by dracut
++install() {
++
++    inst_multiple stratisd-init thin_check thin_repair
++
++    if dracut_module_included "systemd"; then
++        inst_simple "${moddir}/stratisd-init.service" "${systemdsystemunitdir}/stratisd-init.service"
++        mkdir -p "${initdir}${systemdsystemunitdir}/sysinit.target.wants"
++        ln -rfs "${initdir}${systemdsystemunitdir}/stratisd-init.service" "${initdir}${systemdsystemunitdir}/sysinit.target.wants/stratisd-init.service"
++    else
++        inst_hook cmdline 25 "$moddir/stratisd-start.sh"
++        inst_hook cleanup 25 "$moddir/stratisd-stop.sh"
++    fi
++}
++
+diff --git a/modules.d/90stratis/stratisd-init.service b/modules.d/90stratis/stratisd-init.service
+new file mode 100644
+index 00000000..318e8c27
+--- /dev/null
++++ b/modules.d/90stratis/stratisd-init.service
+@@ -0,0 +1,15 @@
++[Unit]
++Description=A daemon that manages a pool of block devices to create flexible file systems
++Documentation=man:stratisd(8)
++Before=local-fs-pre.target
++DefaultDependencies=no
++
++[Service]
++Type=simple
++ExecStart=/sbin/stratisd-init --debug
++KillSignal=SIGINT
++StandardOutput=syslog
++StandardError=syslog
++
++[Install]
++WantedBy=sysinit.target
+diff --git a/modules.d/90stratis/stratisd-start.sh b/modules.d/90stratis/stratisd-start.sh
+new file mode 100755
+index 00000000..afcd81fd
+--- /dev/null
++++ b/modules.d/90stratis/stratisd-start.sh
+@@ -0,0 +1,3 @@
++#!/bin/sh
++
++stratisd-init --debug > /dev/kmsg 2>&1 &
+\ No newline at end of file
+diff --git a/modules.d/90stratis/stratisd-stop.sh b/modules.d/90stratis/stratisd-stop.sh
+new file mode 100755
+index 00000000..f394a843
+--- /dev/null
++++ b/modules.d/90stratis/stratisd-stop.sh
+@@ -0,0 +1,6 @@
++#!/bin/sh
++
++[ -f /lib/dracut-lib.sh ] && . /lib/dracut-lib.sh
++
++pid=$(pidof stratisd-init)
++[ -n "$pid" ] && kill ${pid}
+

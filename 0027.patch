@@ -1,0 +1,13 @@
+From b2a024991f82a15e45df7d5eb2cc3e3e894a5dc8 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 7 May 2018 10:40:32 +0200
+Subject: [PATCH] 80lvmmerge/README.md: remove executable bits
+
+---
+ modules.d/80lvmmerge/README.md | 0
+ 1 file changed, 0 insertions(+), 0 deletions(-)
+
+diff --git a/modules.d/80lvmmerge/README.md b/modules.d/80lvmmerge/README.md
+old mode 100755
+new mode 100644
+

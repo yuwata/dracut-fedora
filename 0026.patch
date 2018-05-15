@@ -1,0 +1,23 @@
+From bfa4e45fa74fabf70ca0d80869e3b209f300ef6d Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 7 May 2018 10:26:05 +0200
+Subject: [PATCH] s/find_btrfs_devs/btrfs_devs
+
+---
+ dracut.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/dracut.sh b/dracut.sh
+index f52d38ac..5b5b27e3 100755
+--- a/dracut.sh
++++ b/dracut.sh
+@@ -1236,7 +1236,7 @@ if [[ $hostonly ]] && [[ "$hostonly_default_device" != "no" ]]; then
+ 
+             push_host_devs "$_dev"
+             if [[ "$_t" == btrfs ]]; then
+-                for i in $(find_btrfs_devs "$_m"); do
++                for i in $(btrfs_devs "$_m"); do
+                     push_host_devs "$i"
+                 done
+             fi
+

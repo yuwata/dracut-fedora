@@ -1,0 +1,23 @@
+From ebfd53e1d9f3fabbf336086492f42be0a399ca51 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 15 Mar 2018 09:56:18 +0100
+Subject: [PATCH] lsinitrd.sh: fixed zstd file signature
+
+---
+ lsinitrd.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/lsinitrd.sh b/lsinitrd.sh
+index dbcc330f..80fbf922 100755
+--- a/lsinitrd.sh
++++ b/lsinitrd.sh
+@@ -219,7 +219,7 @@ case $bin in
+     $'\x89'LZO$'\0'*)
+         CAT="lzop -d -c"
+         ;;
+-    $'0xFD2FB528'*)
++    $'\x28\xB5\x2F\xFD'*)
+         CAT="zstd -d -c"
+         ;;
+     *)
+

@@ -1,0 +1,22 @@
+From 2b5192c18d9190980a58abc665b1455c4ac8ab89 Mon Sep 17 00:00:00 2001
+From: Enno Boland <g@s01.de>
+Date: Fri, 30 Mar 2018 15:46:04 +0200
+Subject: [PATCH] make failing installation of drm modules nonfatal
+
+---
+ modules.d/50drm/module-setup.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/modules.d/50drm/module-setup.sh b/modules.d/50drm/module-setup.sh
+index 382f51a9..eb3fc9d3 100755
+--- a/modules.d/50drm/module-setup.sh
++++ b/modules.d/50drm/module-setup.sh
+@@ -40,6 +40,6 @@ installkernel() {
+             fi
+         done
+     else
+-        dracut_instmods -s "drm_crtc_init" "=drivers/gpu/drm" "=drivers/staging"
++        dracut_instmods -o -s "drm_crtc_init" "=drivers/gpu/drm" "=drivers/staging"
+     fi
+ }
+
