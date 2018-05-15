@@ -1,6 +1,6 @@
-%global gitcommit 08e11e30e328ad2789fd0485dc477a48745af4d6
+%global gitcommit df6bb5e959178cba06118493a7c8d019e84d54e7
 %{?gitcommit:%global gitcommitshort %(c=%{gitcommit}; echo ${c:0:7})}
-%global gitdate 20180507
+%global gitdate 20180515
 
 %define dracutlibdir %{_prefix}/lib/dracut
 %bcond_without doc
@@ -9,7 +9,7 @@
 # strip the automatically generated dep here and instead co-own the
 # directory.
 %global __requires_exclude pkg-config
-%define dist_free_release 8.11.git%{gitdate}
+%define dist_free_release 32.1.git%{gitdate}
 
 Name: dracut
 Version: 047
@@ -471,38 +471,11 @@ echo 'dracut_rescue_image="yes"' > $RPM_BUILD_ROOT%{dracutlibdir}/dracut.conf.d/
 %endif
 
 %changelog
-* Wed May 09 2018 Yu Watanabe <watanabe.yu@gmail.com> - 047-8.11.git20180507
-- Update to latest git snapshot 08e11e30e328ad2789fd0485dc477a48745af4d6
+* Wed May 16 2018 Yu Watanabe <watanabe.yu@gmail.com> - 047-32.1.git20180515
+- Update to latest git snapshot df6bb5e959178cba06118493a7c8d019e84d54e7
 
-* Fri May 04 2018 Yu Watanabe <watanabe.yu@gmail.com> - 047-8.10.git20180503
-- Update to latest git snapshot c9b5165daa666d5aec44a3ac6c56786b8df1b58f
-
-* Thu May 03 2018 Yu Watanabe <watanabe.yu@gmail.com> - 047-8.9.git20180502
-- Update to latest git snapshot 740e41b84380bfccf1dd93278f8b89f1403e89ec
-
-* Tue May 01 2018 Yu Watanabe <watanabe.yu@gmail.com> - 047-8.8.git20180430
-- Update to latest git snapshot 3161dea8e116625ef5267fa745409a4949a36ecf
-
-* Fri Apr 27 2018 Yu Watanabe <watanabe.yu@gmail.com> - 047-8.7.git20180426
-- Update to latest git snapshot 3c8a69677b53562dcde0849f5497fd90e7bd358e
-
-* Thu Apr 26 2018 Yu Watanabe <watanabe.yu@gmail.com> - 047-8.6.git20180419
-- Update to latest git snapshot 654484b82bf6a3983244e76e4f38e9a2d080cb9b
-
-* Mon Apr 16 2018 Yu Watanabe <watanabe.yu@gmail.com> - 047-8.5.git20180409
-- Update to latest git snapshot 384eeedd2d24b6953a8591524edde810ab880883
-
-* Mon Mar 26 2018 Yu Watanabe <watanabe.yu@gmail.com> - 047-8.4.git20180323
-- Update to latest git snapshot fe6c7e0f06cde65effb3503a47c31ac39aceefb6
-
-* Tue Mar 20 2018 Yu Watanabe <watanabe.yu@gmail.com> - 047-8.3.git20180316
-- Update to latest git snapshot d23f32dd4b927f4ac6c6a67c2ff17d5c82a132c9
-
-* Tue Mar 13 2018 Yu Watanabe <watanabe.yu@gmail.com> - 047-8.2.git20180312
-- Update to latest git snapshot f8c24964cdde2b8c1569ab33225108573682d3b7
-
-* Tue Mar 06 2018 Yu Watanabe <watanabe.yu@gmail.com> - 047-8.1.git20180305
-- Update to latest git snapshot f8e0c7cc6296909cff92f718ed360ff9ef1f7bae
+* Tue May 15 2018 Harald Hoyer <harald@redhat.com> - 047-32.git20180515
+- git snapshot
 
 * Mon Mar 05 2018 Harald Hoyer <harald@redhat.com> - 047-8
 - git snapshot
