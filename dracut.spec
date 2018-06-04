@@ -5,7 +5,7 @@
 # strip the automatically generated dep here and instead co-own the
 # directory.
 %global __requires_exclude pkg-config
-%define dist_free_release 32.git20180515
+%define dist_free_release 34.git20180604
 
 Name: dracut
 Version: 047
@@ -59,6 +59,8 @@ Patch28: 0028.patch
 Patch29: 0029.patch
 Patch30: 0030.patch
 Patch31: 0031.patch
+Patch32: 0032.patch
+Patch33: 0033.patch
 
 Source1: https://www.gnu.org/licenses/lgpl-2.1.txt
 
@@ -490,6 +492,9 @@ echo 'dracut_rescue_image="yes"' > $RPM_BUILD_ROOT%{dracutlibdir}/dracut.conf.d/
 %endif
 
 %changelog
+* Mon Jun 04 2018 Harald Hoyer <harald@redhat.com> - 047-34.git20180604
+- git snapshot
+
 * Tue May 15 2018 Harald Hoyer <harald@redhat.com> - 047-32.git20180515
 - git snapshot
 
