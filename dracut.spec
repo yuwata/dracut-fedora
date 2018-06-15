@@ -9,7 +9,7 @@
 # strip the automatically generated dep here and instead co-own the
 # directory.
 %global __requires_exclude pkg-config
-%define dist_free_release 32.3.git%{gitdate}
+%define dist_free_release 34.1.git%{gitdate}
 
 Name: dracut
 Version: 047
@@ -102,9 +102,7 @@ Requires: util-linux-ng >= 2.21
 %endif
 
 %if 0%{?fedora} || 0%{?rhel} || 0%{?suse_version}
-Requires: hmaccalc
-Requires: nss
-Requires: nss-softokn-freebl
+Requires: libkcapi-hmaccalc
 %endif
 
 %description
@@ -217,7 +215,6 @@ echo "DRACUT_VERSION=%{version}-%{release}" > $RPM_BUILD_ROOT/%{dracutlibdir}/dr
 
 %if 0%{?fedora} == 0 && 0%{?rhel} == 0 && 0%{?suse_version} == 0
 rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/01fips
-rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/02fips-aesni
 %endif
 
 %if %{defined _unitdir}
@@ -414,7 +411,6 @@ echo 'dracut_rescue_image="yes"' > $RPM_BUILD_ROOT%{dracutlibdir}/dracut.conf.d/
 %if 0%{?fedora} || 0%{?rhel} || 0%{?suse_version}
 %defattr(-,root,root,0755)
 %{dracutlibdir}/modules.d/01fips
-%{dracutlibdir}/modules.d/02fips-aesni
 %endif
 
 %files network
@@ -471,14 +467,11 @@ echo 'dracut_rescue_image="yes"' > $RPM_BUILD_ROOT%{dracutlibdir}/dracut.conf.d/
 %endif
 
 %changelog
-* Fri Jun 15 2018 Yu Watanabe <watanabe.yu@gmail.com> - 047-32.3.git20180614
+* Fri Jun 15 2018 Yu Watanabe <watanabe.yu@gmail.com> - 047-34.1.git20180614
 - Update to latest git snapshot bca1967c90967d5453d8b215ff28552776e4fcb3
 
-* Wed May 30 2018 Yu Watanabe <watanabe.yu@gmail.com> - 047-32.2.git20180529
-- Update to latest git snapshot 67354eebbcd4c358b8194ba5fd1ab1cf7dbd42aa
-
-* Wed May 16 2018 Yu Watanabe <watanabe.yu@gmail.com> - 047-32.1.git20180515
-- Update to latest git snapshot df6bb5e959178cba06118493a7c8d019e84d54e7
+* Mon Jun 04 2018 Harald Hoyer <harald@redhat.com> - 047-34.git20180604
+- git snapshot
 
 * Tue May 15 2018 Harald Hoyer <harald@redhat.com> - 047-32.git20180515
 - git snapshot
