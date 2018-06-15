@@ -1,6 +1,6 @@
-%global gitcommit 67354eebbcd4c358b8194ba5fd1ab1cf7dbd42aa
+%global gitcommit bca1967c90967d5453d8b215ff28552776e4fcb3
 %{?gitcommit:%global gitcommitshort %(c=%{gitcommit}; echo ${c:0:7})}
-%global gitdate 20180529
+%global gitdate 20180614
 
 %define dracutlibdir %{_prefix}/lib/dracut
 %bcond_without doc
@@ -9,7 +9,7 @@
 # strip the automatically generated dep here and instead co-own the
 # directory.
 %global __requires_exclude pkg-config
-%define dist_free_release 32.2.git%{gitdate}
+%define dist_free_release 32.3.git%{gitdate}
 
 Name: dracut
 Version: 047
@@ -471,6 +471,9 @@ echo 'dracut_rescue_image="yes"' > $RPM_BUILD_ROOT%{dracutlibdir}/dracut.conf.d/
 %endif
 
 %changelog
+* Fri Jun 15 2018 Yu Watanabe <watanabe.yu@gmail.com> - 047-32.3.git20180614
+- Update to latest git snapshot bca1967c90967d5453d8b215ff28552776e4fcb3
+
 * Wed May 30 2018 Yu Watanabe <watanabe.yu@gmail.com> - 047-32.2.git20180529
 - Update to latest git snapshot 67354eebbcd4c358b8194ba5fd1ab1cf7dbd42aa
 
