@@ -5,7 +5,7 @@
 # strip the automatically generated dep here and instead co-own the
 # directory.
 %global __requires_exclude pkg-config
-%define dist_free_release 34.git20180604
+%define dist_free_release 34.git20180604.1
 
 Name: dracut
 Version: 047
@@ -61,6 +61,11 @@ Patch30: 0030.patch
 Patch31: 0031.patch
 Patch32: 0032.patch
 Patch33: 0033.patch
+
+# Include virtio DRM drivers in hostonly initramfs
+# Fixes RHBZ#1593028
+# https://github.com/dracutdevs/dracut/pull/418
+Patch1000: 0001-Include-virtio-DRM-drivers-in-hostonly-initramfs.patch
 
 Source1: https://www.gnu.org/licenses/lgpl-2.1.txt
 
@@ -492,6 +497,9 @@ echo 'dracut_rescue_image="yes"' > $RPM_BUILD_ROOT%{dracutlibdir}/dracut.conf.d/
 %endif
 
 %changelog
+* Fri Jun 22 2018 Adam Williamson <awilliam@redhat.com> - 047-34.git20180604.1
+- Test build with proposed fix for #1593028
+
 * Mon Jun 04 2018 Harald Hoyer <harald@redhat.com> - 047-34.git20180604
 - git snapshot
 
