@@ -1351,7 +1351,7 @@ Resolves: rhbz#728863
 * Mon Jul 18 2011 Harald Hoyer <harald@redhat.com> 011-1
 - version 011
 
-* Fri May 20 2011 Harald Hoyer <harald@redhat.com> 011-0.1%{?rdist}
+* Fri May 20 2011 Harald Hoyer <harald@redhat.com> 011-0.1
 - git snapshot of pre-version 011
 
 * Fri Apr 01 2011 Harald Hoyer <harald@redhat.com> 010-1
