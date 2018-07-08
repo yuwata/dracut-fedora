@@ -1,6 +1,6 @@
-%global gitcommit bca1967c90967d5453d8b215ff28552776e4fcb3
+%global gitcommit bc01f822de732d85d4bfc77bae44c6bd4abe43d7
 %{?gitcommit:%global gitcommitshort %(c=%{gitcommit}; echo ${c:0:7})}
-%global gitdate 20180614
+%global gitdate 20180706
 
 %define dracutlibdir %{_prefix}/lib/dracut
 %bcond_without doc
@@ -9,7 +9,7 @@
 # strip the automatically generated dep here and instead co-own the
 # directory.
 %global __requires_exclude pkg-config
-%define dist_free_release 34.1.git%{gitdate}
+%define dist_free_release 34.2.git%{gitdate}
 
 Name: dracut
 Version: 047
@@ -244,6 +244,7 @@ rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/95dasd
 rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/95dasd_mod
 rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/95dasd_rules
 rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/95dcssblk
+rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/95qeth_rules
 rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/95zfcp
 rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/95zfcp_rules
 rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/95znet
@@ -344,7 +345,6 @@ echo 'dracut_rescue_image="yes"' > $RPM_BUILD_ROOT%{dracutlibdir}/dracut.conf.d/
 %{dracutlibdir}/modules.d/90lvm
 %{dracutlibdir}/modules.d/90mdraid
 %{dracutlibdir}/modules.d/90multipath
-%{dracutlibdir}/modules.d/90multipath-hostonly
 %{dracutlibdir}/modules.d/90stratis
 %{dracutlibdir}/modules.d/90qemu
 %{dracutlibdir}/modules.d/91crypt-gpg
@@ -365,6 +365,7 @@ echo 'dracut_rescue_image="yes"' > $RPM_BUILD_ROOT%{dracutlibdir}/dracut.conf.d/
 %{dracutlibdir}/modules.d/95dasd_mod
 %{dracutlibdir}/modules.d/95dasd_rules
 %{dracutlibdir}/modules.d/95dcssblk
+%{dracutlibdir}/modules.d/95qeth_rules
 %{dracutlibdir}/modules.d/95zfcp
 %{dracutlibdir}/modules.d/95zfcp_rules
 %endif
@@ -467,6 +468,9 @@ echo 'dracut_rescue_image="yes"' > $RPM_BUILD_ROOT%{dracutlibdir}/dracut.conf.d/
 %endif
 
 %changelog
+* Mon Jul 09 2018 Yu Watanabe <watanabe.yu@gmail.com> - 047-34.2.git20180706
+- Update to latest git snapshot bc01f822de732d85d4bfc77bae44c6bd4abe43d7
+
 * Fri Jun 15 2018 Yu Watanabe <watanabe.yu@gmail.com> - 047-34.1.git20180614
 - Update to latest git snapshot bca1967c90967d5453d8b215ff28552776e4fcb3
 
