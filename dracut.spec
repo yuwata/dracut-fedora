@@ -9,10 +9,10 @@
 # strip the automatically generated dep here and instead co-own the
 # directory.
 %global __requires_exclude pkg-config
-%define dist_free_release 34.2.git%{gitdate}
+%define dist_free_release 1.1.git%{gitdate}
 
 Name: dracut
-Version: 047
+Version: 048
 Release: %{dist_free_release}%{?dist}
 
 Summary: Initramfs generator using udev
@@ -468,11 +468,14 @@ echo 'dracut_rescue_image="yes"' > $RPM_BUILD_ROOT%{dracutlibdir}/dracut.conf.d/
 %endif
 
 %changelog
-* Mon Jul 09 2018 Yu Watanabe <watanabe.yu@gmail.com> - 047-34.2.git20180706
+* Mon Jul 09 2018 Yu Watanabe <watanabe.yu@gmail.com> - 048-1.1.git20180706
 - Update to latest git snapshot bc01f822de732d85d4bfc77bae44c6bd4abe43d7
 
-* Fri Jun 15 2018 Yu Watanabe <watanabe.yu@gmail.com> - 047-34.1.git20180614
-- Update to latest git snapshot bca1967c90967d5453d8b215ff28552776e4fcb3
+* Fri Jul 06 2018 Harald Hoyer <harald@redhat.com> - 048-1
+- version 048
+
+* Fri Jun 22 2018 Adam Williamson <awilliam@redhat.com> - 047-34.git20180604.1
+- Test build with proposed fix for #1593028
 
 * Mon Jun 04 2018 Harald Hoyer <harald@redhat.com> - 047-34.git20180604
 - git snapshot
@@ -1364,7 +1367,7 @@ Resolves: rhbz#728863
 * Mon Jul 18 2011 Harald Hoyer <harald@redhat.com> 011-1
 - version 011
 
-* Fri May 20 2011 Harald Hoyer <harald@redhat.com> 011-0.1%{?rdist}
+* Fri May 20 2011 Harald Hoyer <harald@redhat.com> 011-0.1
 - git snapshot of pre-version 011
 
 * Fri Apr 01 2011 Harald Hoyer <harald@redhat.com> 010-1
