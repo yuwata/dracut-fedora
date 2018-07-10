@@ -262,7 +262,6 @@ echo 'dracut_rescue_image="yes"' > $RPM_BUILD_ROOT%{dracutlibdir}/dracut.conf.d/
 %endif
 
 %files
-%defattr(-,root,root,0755)
 %if %{with doc}
 %doc README HACKING TODO AUTHORS NEWS dracut.html dracut.png dracut.svg
 %endif
@@ -402,7 +401,6 @@ echo 'dracut_rescue_image="yes"' > $RPM_BUILD_ROOT%{dracutlibdir}/dracut.conf.d/
 %endif
 
 %files network
-%defattr(-,root,root,0755)
 %{dracutlibdir}/modules.d/02systemd-networkd
 %{dracutlibdir}/modules.d/40network
 %{dracutlibdir}/modules.d/45ifcfg
@@ -421,18 +419,15 @@ echo 'dracut_rescue_image="yes"' > $RPM_BUILD_ROOT%{dracutlibdir}/dracut.conf.d/
 %{dracutlibdir}/modules.d/99uefi-lib
 
 %files caps
-%defattr(-,root,root,0755)
 %{dracutlibdir}/modules.d/02caps
 
 %files live
-%defattr(-,root,root,0755)
 %{dracutlibdir}/modules.d/99img-lib
 %{dracutlibdir}/modules.d/90dmsquash-live
 %{dracutlibdir}/modules.d/90dmsquash-live-ntfs
 %{dracutlibdir}/modules.d/90livenet
 
 %files tools
-%defattr(-,root,root,0755)
 
 %if %{with doc}
 %doc %{_mandir}/man8/dracut-catimages.8*
@@ -444,11 +439,9 @@ echo 'dracut_rescue_image="yes"' > $RPM_BUILD_ROOT%{dracutlibdir}/dracut.conf.d/
 %dir /var/lib/dracut/overlay
 
 %files config-generic
-%defattr(-,root,root,0755)
 %{dracutlibdir}/dracut.conf.d/02-generic-image.conf
 
 %files config-rescue
-%defattr(-,root,root,0755)
 %{dracutlibdir}/dracut.conf.d/02-rescue.conf
 %if 0%{?fedora} || 0%{?rhel}
 %{_prefix}/lib/kernel/install.d/51-dracut-rescue.install
