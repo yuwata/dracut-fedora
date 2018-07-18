@@ -1,0 +1,64 @@
+From 7047294617bbdd3ffb2466c73db56fda4e6156db Mon Sep 17 00:00:00 2001
+From: Kairui Song <kasong@redhat.com>
+Date: Tue, 17 Jul 2018 17:16:07 +0800
+Subject: [PATCH] Record loaded kernel modules when hostonly mode is enabled
+
+A hostonly image will not include every possibly required kernel module,
+so if any hardware or configuration changed, the image may fail to boot.
+
+One way to know if there are any hardware change or configuration change
+that will require an image rebuild or not is to check the loaded kernel
+module list. If the loaded kernel module list differs from last build
+time, then the image may require to be rebuilt.
+
+This commit will let dracut record the loaded kernel module list when
+the image is being built, so other tools or services can compare this
+list with currently loaded kernel modules to decide if dracut should be
+called to rebuild the image.
+
+To retrieve the loaded kernel modules list when an image is built, use
+lsinitrd command:
+
+lsinitrd $image -f */lib/dracut/loaded-kernel-modules.txt
+---
+ dracut-functions.sh | 11 +++++++++++
+ dracut.sh           |  3 +++
+ 2 files changed, 14 insertions(+)
+
+diff --git a/dracut-functions.sh b/dracut-functions.sh
+index ccc48971..7c408f83 100755
+--- a/dracut-functions.sh
++++ b/dracut-functions.sh
+@@ -676,6 +676,17 @@ get_ucode_file ()
+     fi
+ }
+ 
++# Get currently loaded modules
++# sorted, and delimited by newline
++get_loaded_kernel_modules ()
++{
++    local modules=( )
++    while read _module _size _used _used_by; do
++        modules+=( "$_module" )
++    done <<< $(lsmod | sed -n '1!p')
++    printf '%s\n' "${modules[@]}" | sort
++}
++
+ # Not every device in /dev/mapper should be examined.
+ # If it is an LVM device, touch only devices which have /dev/VG/LV symlink.
+ lvm_internal_dev() {
+diff --git a/dracut.sh b/dracut.sh
+index cfa4abde..6614d27d 100755
+--- a/dracut.sh
++++ b/dracut.sh
+@@ -1492,6 +1492,9 @@ dinfo "*** Including modules done ***"
+ 
+ ## final stuff that has to happen
+ if [[ $no_kernel != yes ]]; then
++    if [[ $hostonly ]]; then
++        echo "$(get_loaded_kernel_modules)" > $initdir/lib/dracut/loaded-kernel-modules.txt
++    fi
+ 
+     if [[ $drivers ]]; then
+         hostonly='' instmods $drivers
+
