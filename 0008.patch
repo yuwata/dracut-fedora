@@ -1,0 +1,49 @@
+From f81c864eede2a11bfeb849cb2a2634be034ed7fb Mon Sep 17 00:00:00 2001
+From: Kairui Song <kasong@redhat.com>
+Date: Wed, 25 Jul 2018 16:34:08 +0800
+Subject: [PATCH] lsinitrd: allow to only unpack certain files
+
+Before this patch, "--unpack" will always unpack the whole image.
+Make "--unpack" be able to unpack only certain files, it will be
+easier to retrieve files from initramfs image.
+
+Signed-off-by: Kairui Song <kasong@redhat.com>
+---
+ lsinitrd.sh | 16 +++++++++++++---
+ 1 file changed, 13 insertions(+), 3 deletions(-)
+
+diff --git a/lsinitrd.sh b/lsinitrd.sh
+index 80fbf922..1b9a93b6 100755
+--- a/lsinitrd.sh
++++ b/lsinitrd.sh
+@@ -159,8 +159,15 @@ list_files()
+ 
+ unpack_files()
+ {
+-    $CAT "$image" 2>/dev/null | cpio -id --quiet $verbose
+-    ((ret+=$?))
++    if (( ${#filenames[@]} > 0 )); then
++        for f in "${!filenames[@]}"; do
++            $CAT "$image" 2>/dev/null | cpio -id --quiet $verbose $f
++            ((ret+=$?))
++        done
++    else
++        $CAT "$image" 2>/dev/null | cpio -id --quiet $verbose
++        ((ret+=$?))
++    fi
+ }
+ 
+ 
+@@ -175,7 +182,10 @@ case $bin in
+         CAT="cat --"
+         is_early=$(cpio --extract --verbose --quiet --to-stdout -- 'early_cpio' < "$image" 2>/dev/null)
+         if [[ "$is_early" ]]; then
+-            if [[ -n "$unpackearly" ]]; then
++            if [[ -n "$unpack" ]]; then
++                # should use --unpackearly for early CPIO
++                :
++            elif [[ -n "$unpackearly" ]]; then
+                 unpack_files
+             elif (( ${#filenames[@]} > 0 )); then
+                 extract_files
+

@@ -21,3 +21,4 @@ index 001225b4..88bca1d4 100644
                          kmod_module_unref(mod);
                          continue;
                  }
+

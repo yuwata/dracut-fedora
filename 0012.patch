@@ -1,0 +1,22 @@
+From 25111d717eab662bd104295f034ed7d2d6cc606b Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 26 Jul 2018 13:00:24 +0200
+Subject: [PATCH] dracut.spec: add 00warpclock dracut module
+
+---
+ dracut.spec | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/dracut.spec b/dracut.spec
+index 10cd7839..754ed3c9 100644
+--- a/dracut.spec
++++ b/dracut.spec
+@@ -317,6 +317,7 @@ install -m 0755 51-dracut-rescue-postinst.sh $RPM_BUILD_ROOT%{_sysconfdir}/kerne
+ %endif
+ %{dracutlibdir}/modules.d/00bash
+ %{dracutlibdir}/modules.d/00systemd
++%{dracutlibdir}/modules.d/00warpclock
+ %{dracutlibdir}/modules.d/01systemd-initrd
+ %{dracutlibdir}/modules.d/03modsign
+ %{dracutlibdir}/modules.d/03rescue
+

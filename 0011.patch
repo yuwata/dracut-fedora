@@ -1,0 +1,110 @@
+From 819ea3865161d440353b2f961f3dfeaabeed333d Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 26 Jul 2018 12:49:45 +0200
+Subject: [PATCH] Bring back 51-dracut-rescue-postinst.sh
+
+can only be obsoleted after F30
+---
+ 51-dracut-rescue-postinst.sh | 68 ++++++++++++++++++++++++++++++++++++++++++++
+ dracut.spec                  |  6 ++++
+ 2 files changed, 74 insertions(+)
+
+diff --git a/51-dracut-rescue-postinst.sh b/51-dracut-rescue-postinst.sh
+new file mode 100755
+index 00000000..67f5b717
+--- /dev/null
++++ b/51-dracut-rescue-postinst.sh
+@@ -0,0 +1,68 @@
++#!/bin/bash
++
++export LANG=C
++
++KERNEL_VERSION="$1"
++KERNEL_IMAGE="$2"
++
++[[ -f /etc/os-release ]] && . /etc/os-release
++
++if [[ ! -f /etc/machine-id ]] || [[ ! -s /etc/machine-id ]]; then
++    systemd-machine-id-setup
++fi
++
++[[ -f /etc/machine-id ]] && read MACHINE_ID < /etc/machine-id
++
++[[ $MACHINE_ID ]] || exit 1
++[[ -f $KERNEL_IMAGE ]] || exit 1
++
++INITRDFILE="/boot/initramfs-0-rescue-${MACHINE_ID}.img"
++NEW_KERNEL_IMAGE="${KERNEL_IMAGE%/*}/vmlinuz-0-rescue-${MACHINE_ID}"
++
++[[ -f $INITRDFILE ]] && [[ -f $NEW_KERNEL_IMAGE ]] && exit 0
++
++dropindirs_sort()
++{
++    suffix=$1; shift
++    args=("$@")
++    files=$(
++        while (( $# > 0 )); do
++            for i in ${1}/*${suffix}; do
++                [[ -f $i ]] && echo ${i##*/}
++            done
++            shift
++        done | sort -Vu
++    )
++
++    for f in $files; do
++        for d in "${args[@]}"; do
++            if [[ -f "$d/$f" ]]; then
++                echo "$d/$f"
++                continue 2
++            fi
++        done
++    done
++}
++
++# source our config dir
++for f in $(dropindirs_sort ".conf" "/etc/dracut.conf.d" "/usr/lib/dracut/dracut.conf.d"); do
++    [[ -e $f ]] && . "$f"
++done
++
++[[ $dracut_rescue_image != "yes" ]] && exit 0
++
++if [[ ! -f $INITRDFILE ]]; then
++    dracut --no-hostonly -a "rescue" "$INITRDFILE" "$KERNEL_VERSION"
++    ((ret+=$?))
++fi
++
++if [[ ! -f $NEW_KERNEL_IMAGE ]]; then
++    cp --reflink=auto "$KERNEL_IMAGE" "$NEW_KERNEL_IMAGE"
++    ((ret+=$?))
++fi
++
++new-kernel-pkg --install "$KERNEL_VERSION" --kernel-image "$NEW_KERNEL_IMAGE" --initrdfile "$INITRDFILE" --banner "$NAME $VERSION_ID Rescue $MACHINE_ID"
++
++((ret+=$?))
++
++exit $ret
+diff --git a/dracut.spec b/dracut.spec
+index c218b63d..10cd7839 100644
+--- a/dracut.spec
++++ b/dracut.spec
+@@ -259,6 +259,10 @@ rm -f -- $RPM_BUILD_ROOT%{_bindir}/lsinitrd
+ %if 0%{?fedora} || 0%{?rhel}
+ echo 'hostonly="no"' > $RPM_BUILD_ROOT%{dracutlibdir}/dracut.conf.d/02-generic-image.conf
+ echo 'dracut_rescue_image="yes"' > $RPM_BUILD_ROOT%{dracutlibdir}/dracut.conf.d/02-rescue.conf
++
++# FIXME: remove after F30
++mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/kernel/postinst.d
++install -m 0755 51-dracut-rescue-postinst.sh $RPM_BUILD_ROOT%{_sysconfdir}/kernel/postinst.d/51-dracut-rescue-postinst.sh
+ %endif
+ 
+ %files
+@@ -452,6 +456,8 @@ echo 'dracut_rescue_image="yes"' > $RPM_BUILD_ROOT%{dracutlibdir}/dracut.conf.d/
+ %{dracutlibdir}/dracut.conf.d/02-rescue.conf
+ %if 0%{?fedora} || 0%{?rhel}
+ %{_prefix}/lib/kernel/install.d/51-dracut-rescue.install
++# FIXME: remove after F30
++%{_sysconfdir}/kernel/postinst.d/51-dracut-rescue-postinst.sh
+ %endif
+ 
+ %changelog
+

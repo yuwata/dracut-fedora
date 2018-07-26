@@ -1,0 +1,20 @@
+From aac3a0652adc2b200d5b8fedfbce99cfde88b525 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 26 Jul 2018 09:54:13 +0200
+Subject: [PATCH] NEWS: forgot to update the latest version
+
+---
+ NEWS | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/NEWS b/NEWS
+index 2de38ad7..60b430aa 100644
+--- a/NEWS
++++ b/NEWS
+@@ -1,4 +1,4 @@
+-dracut-047
++dracut-048
+ ==========
+ 
+ dracut.sh:
+

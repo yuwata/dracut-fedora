@@ -1,0 +1,49 @@
+From 143420bc05079ffa040a63decbb2585c59e44011 Mon Sep 17 00:00:00 2001
+From: Kairui Song <kasong@redhat.com>
+Date: Wed, 25 Jul 2018 23:50:47 +0800
+Subject: [PATCH] lsinitrd: update help message and man page
+
+Signed-off-by: Kairui Song <kasong@redhat.com>
+---
+ lsinitrd.1.asc | 6 ++++++
+ lsinitrd.sh    | 3 +++
+ 2 files changed, 9 insertions(+)
+
+diff --git a/lsinitrd.1.asc b/lsinitrd.1.asc
+index b6a704c2..193a4471 100644
+--- a/lsinitrd.1.asc
++++ b/lsinitrd.1.asc
+@@ -34,11 +34,17 @@ OPTIONS
+ **-k, --kver** _<kernel version>_::
+     inspect the initramfs of <kernel version>.
+ 
++**-m, --mod**::
++    list dracut modules included of the initramfs image.
++
+ **--unpack**::
+     unpack the initramfs to the current directory, instead of displaying the contents.
++    If optional filenames are given, will only unpack specified files, else the whole image will be unpacked.
++    Won't unpack anything from early cpio part.
+ 
+ **--unpackearly**::
+     unpack the early microcode initramfs to the current directory, instead of displaying the contents.
++    Same as --unpack, but only unpack files from early cpio part.
+ 
+ **-v, --verbose**::
+     unpack verbosely
+diff --git a/lsinitrd.sh b/lsinitrd.sh
+index 0cb89e9c..a2fa4d7a 100755
+--- a/lsinitrd.sh
++++ b/lsinitrd.sh
+@@ -28,7 +28,10 @@ usage()
+         echo "-m, --mod                   list modules."
+         echo "-f, --file <filename>       print the contents of <filename>."
+         echo "--unpack                    unpack the initramfs, instead of displaying the contents."
++        echo "                            If optional filenames are given, will only unpack specified files,"
++        echo "                            else the whole image will be unpacked. Won't unpack anything from early cpio part."
+         echo "--unpackearly               unpack the early microcode part of the initramfs."
++        echo "                            Same as --unpack, but only unpack files from early cpio part."
+         echo "-v, --verbose               unpack verbosely."
+         echo "-k, --kver <kernel version> inspect the initramfs of <kernel version>."
+         echo
+

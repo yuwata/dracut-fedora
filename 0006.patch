@@ -1,0 +1,70 @@
+From a0eadcdc644d571da58f718d73dacb4f68bef56b Mon Sep 17 00:00:00 2001
+From: Hannes Reinecke <hare@suse.de>
+Date: Thu, 5 Dec 2013 09:29:28 +0100
+Subject: [PATCH] 00warpclock: Set correct timezone
+
+Add module for setting correct timezone.
+
+References: bnc#830060
+
+For now, this module will not be included automatically due to different
+expectations (see e.g.  https://bugzilla.redhat.com/show_bug.cgi?id=981617)
+
+Signed-off-by: Hannes Reinecke <hare@suse.de>
+Signed-off-by: Daniel Molkentin <daniel.molkentin@suse.com>
+---
+ modules.d/00warpclock/module-setup.sh | 29 +++++++++++++++++++++++++++++
+ modules.d/00warpclock/warpclock.sh    |  9 +++++++++
+ 2 files changed, 38 insertions(+)
+
+diff --git a/modules.d/00warpclock/module-setup.sh b/modules.d/00warpclock/module-setup.sh
+new file mode 100644
+index 00000000..ea1348ed
+--- /dev/null
++++ b/modules.d/00warpclock/module-setup.sh
+@@ -0,0 +1,29 @@
++#!/bin/bash
++# -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
++# ex: ts=8 sw=4 sts=4 et filetype=sh
++
++# called by dracut
++check() {
++    # hwclock does not exist on S390(x), bail out silently then
++    local _arch=$(uname -m)
++    [ "$_arch" = "s390" -o "$_arch" = "s390x" ] && return 1
++
++    [ -e /etc/localtime -a -e /etc/adjtime ] || return 1
++    require_binaries /sbin/hwclock || return 1
++
++    return 255
++}
++
++# called by dracut
++depends() {
++    return 0
++}
++
++# called by dracut
++install() {
++    inst /usr/share/zoneinfo/UTC
++    inst /etc/localtime
++    inst /etc/adjtime
++    inst_hook pre-trigger 00 "$moddir/warpclock.sh"
++    inst /sbin/hwclock
++}
+diff --git a/modules.d/00warpclock/warpclock.sh b/modules.d/00warpclock/warpclock.sh
+new file mode 100644
+index 00000000..f64818c6
+--- /dev/null
++++ b/modules.d/00warpclock/warpclock.sh
+@@ -0,0 +1,9 @@
++#!/bin/sh
++
++if test -e /etc/adjtime ; then
++    while read line ; do
++	if test "$line" = LOCAL ; then
++	    hwclock --systz
++	fi
++    done < /etc/adjtime
++fi
+

@@ -1,0 +1,58 @@
+From 986b12d391b8de6c820da1af9bfdb4153c340370 Mon Sep 17 00:00:00 2001
+From: Kairui Song <kasong@redhat.com>
+Date: Wed, 25 Jul 2018 16:47:37 +0800
+Subject: [PATCH] lsinitrd: optimize performance when handling multiple files
+
+Currently, when trying to unpack or print the content of multiple
+files, lsinitrd will decompress the image and pipe the decompressed
+content to cpio to retrive each file if the image is compressed.
+Which mean if we want to extract 10 files the image will be decompressed
+10 times, which is a waste of time.
+
+This patch will let lsinitrd decompress the image file to a temp file
+first if multiple file names are given, then cpio will read from the
+decompressed temp file, which will speed up a lot.
+
+Time consumption test for command:
+`lsinitrd initramfs-4.16.15-300.fc28.x86_64.img \
+    usr/lib/dracut/build-parameter.txt \
+    usr/lib/dracut/modules.txt \
+    etc/machine-id \
+    etc/hostname \
+    usr/lib/udev/rules.d/99-systemd.rules`
+
+Before the patch:
+2.37user 0.33system 0:02.12elapsed
+
+After the patch:
+0.50user 0.42system 0:00.72elapsed
+
+There would be a more significant time difference if we try to
+extract more files.
+---
+ lsinitrd.sh | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+diff --git a/lsinitrd.sh b/lsinitrd.sh
+index 1b9a93b6..0cb89e9c 100755
+--- a/lsinitrd.sh
++++ b/lsinitrd.sh
+@@ -251,6 +251,17 @@ if [[ $SKIP ]]; then
+     CAT=skipcpio
+ fi
+ 
++if (( ${#filenames[@]} > 1 )); then
++    TMPFILE="$(mktemp -t --suffix=.cpio lsinitrd.XXXXXX)"
++    $CAT "$image" 2>/dev/null > $TMPFILE
++    trap "rm -f '$TMPFILE'" EXIT
++    pre_decompress()
++    {
++        cat $TMPFILE
++    }
++    CAT=pre_decompress
++fi
++
+ ret=0
+ 
+ if [[ -n "$unpack" ]]; then
+

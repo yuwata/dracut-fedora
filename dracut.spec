@@ -5,11 +5,11 @@
 # strip the automatically generated dep here and instead co-own the
 # directory.
 %global __requires_exclude pkg-config
-%define dist_free_release 6.git20180718
+%define dist_free_release 14.git20180726
 
 Name: dracut
 Version: 048
-Release: %{dist_free_release}%{?dist}.1
+Release: %{dist_free_release}%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -33,6 +33,14 @@ Patch2: 0002.patch
 Patch3: 0003.patch
 Patch4: 0004.patch
 Patch5: 0005.patch
+Patch6: 0006.patch
+Patch7: 0007.patch
+Patch8: 0008.patch
+Patch9: 0009.patch
+Patch10: 0010.patch
+Patch11: 0011.patch
+Patch12: 0012.patch
+Patch13: 0013.patch
 
 Source1: https://www.gnu.org/licenses/lgpl-2.1.txt
 
@@ -265,6 +273,10 @@ rm -f -- $RPM_BUILD_ROOT%{_bindir}/lsinitrd
 %if 0%{?fedora} || 0%{?rhel}
 echo 'hostonly="no"' > $RPM_BUILD_ROOT%{dracutlibdir}/dracut.conf.d/02-generic-image.conf
 echo 'dracut_rescue_image="yes"' > $RPM_BUILD_ROOT%{dracutlibdir}/dracut.conf.d/02-rescue.conf
+
+# FIXME: remove after F30
+mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/kernel/postinst.d
+install -m 0755 51-dracut-rescue-postinst.sh $RPM_BUILD_ROOT%{_sysconfdir}/kernel/postinst.d/51-dracut-rescue-postinst.sh
 %endif
 
 %files
@@ -318,6 +330,7 @@ echo 'dracut_rescue_image="yes"' > $RPM_BUILD_ROOT%{dracutlibdir}/dracut.conf.d/
 %endif
 %{dracutlibdir}/modules.d/00bash
 %{dracutlibdir}/modules.d/00systemd
+%{dracutlibdir}/modules.d/00warpclock
 %{dracutlibdir}/modules.d/01systemd-initrd
 %{dracutlibdir}/modules.d/03modsign
 %{dracutlibdir}/modules.d/03rescue
@@ -451,9 +464,14 @@ echo 'dracut_rescue_image="yes"' > $RPM_BUILD_ROOT%{dracutlibdir}/dracut.conf.d/
 %{dracutlibdir}/dracut.conf.d/02-rescue.conf
 %if 0%{?fedora} || 0%{?rhel}
 %{_prefix}/lib/kernel/install.d/51-dracut-rescue.install
+# FIXME: remove after F30
+%{_sysconfdir}/kernel/postinst.d/51-dracut-rescue-postinst.sh
 %endif
 
 %changelog
+* Thu Jul 26 2018 Harald Hoyer <harald@redhat.com> - 048-14.git20180726
+- bring back 51-dracut-rescue-postinst.sh
+
 * Wed Jul 18 2018 Harald Hoyer <harald@redhat.com> - 048-6.git20180718
 - git snapshot
 
