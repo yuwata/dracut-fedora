@@ -1,6 +1,6 @@
-%global gitcommit bc01f822de732d85d4bfc77bae44c6bd4abe43d7
+%global gitcommit 55a12055c511979be0a471d0d7c24c040b830887
 %{?gitcommit:%global gitcommitshort %(c=%{gitcommit}; echo ${c:0:7})}
-%global gitdate 20180706
+%global gitdate 20180726
 
 %define dracutlibdir %{_prefix}/lib/dracut
 %bcond_without doc
@@ -9,7 +9,7 @@
 # strip the automatically generated dep here and instead co-own the
 # directory.
 %global __requires_exclude pkg-config
-%define dist_free_release 1.1.git%{gitdate}
+%define dist_free_release 14.1.git%{gitdate}
 
 Name: dracut
 Version: 048
@@ -272,10 +272,13 @@ rm -f -- $RPM_BUILD_ROOT%{_bindir}/lsinitrd
 %if 0%{?fedora} || 0%{?rhel}
 echo 'hostonly="no"' > $RPM_BUILD_ROOT%{dracutlibdir}/dracut.conf.d/02-generic-image.conf
 echo 'dracut_rescue_image="yes"' > $RPM_BUILD_ROOT%{dracutlibdir}/dracut.conf.d/02-rescue.conf
+
+# FIXME: remove after F30
+mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/kernel/postinst.d
+install -m 0755 51-dracut-rescue-postinst.sh $RPM_BUILD_ROOT%{_sysconfdir}/kernel/postinst.d/51-dracut-rescue-postinst.sh
 %endif
 
 %files
-%defattr(-,root,root,0755)
 %if %{with doc}
 %doc README HACKING TODO AUTHORS NEWS dracut.html dracut.png dracut.svg
 %endif
@@ -326,6 +329,12 @@ echo 'dracut_rescue_image="yes"' > $RPM_BUILD_ROOT%{dracutlibdir}/dracut.conf.d/
 %endif
 %{dracutlibdir}/modules.d/00bash
 %{dracutlibdir}/modules.d/00systemd
+%ifnarch s390 s390x
+%{dracutlibdir}/modules.d/00warpclock
+%endif
+%if 0%{?fedora} || 0%{?rhel} || 0%{?suse_version}
+%{dracutlibdir}/modules.d/01fips
+%endif
 %{dracutlibdir}/modules.d/01systemd-initrd
 %{dracutlibdir}/modules.d/03modsign
 %{dracutlibdir}/modules.d/03rescue
@@ -409,13 +418,7 @@ echo 'dracut_rescue_image="yes"' > $RPM_BUILD_ROOT%{dracutlibdir}/dracut.conf.d/
 %{_prefix}/lib/kernel/install.d/50-dracut.install
 %endif
 
-%if 0%{?fedora} || 0%{?rhel} || 0%{?suse_version}
-%defattr(-,root,root,0755)
-%{dracutlibdir}/modules.d/01fips
-%endif
-
 %files network
-%defattr(-,root,root,0755)
 %{dracutlibdir}/modules.d/02systemd-networkd
 %{dracutlibdir}/modules.d/40network
 %{dracutlibdir}/modules.d/45ifcfg
@@ -434,19 +437,15 @@ echo 'dracut_rescue_image="yes"' > $RPM_BUILD_ROOT%{dracutlibdir}/dracut.conf.d/
 %{dracutlibdir}/modules.d/99uefi-lib
 
 %files caps
-%defattr(-,root,root,0755)
 %{dracutlibdir}/modules.d/02caps
 
 %files live
-%defattr(-,root,root,0755)
 %{dracutlibdir}/modules.d/99img-lib
 %{dracutlibdir}/modules.d/90dmsquash-live
 %{dracutlibdir}/modules.d/90dmsquash-live-ntfs
 %{dracutlibdir}/modules.d/90livenet
 
 %files tools
-%defattr(-,root,root,0755)
-
 %if %{with doc}
 %doc %{_mandir}/man8/dracut-catimages.8*
 %endif
@@ -457,19 +456,28 @@ echo 'dracut_rescue_image="yes"' > $RPM_BUILD_ROOT%{dracutlibdir}/dracut.conf.d/
 %dir /var/lib/dracut/overlay
 
 %files config-generic
-%defattr(-,root,root,0755)
 %{dracutlibdir}/dracut.conf.d/02-generic-image.conf
 
 %files config-rescue
-%defattr(-,root,root,0755)
 %{dracutlibdir}/dracut.conf.d/02-rescue.conf
 %if 0%{?fedora} || 0%{?rhel}
 %{_prefix}/lib/kernel/install.d/51-dracut-rescue.install
+# FIXME: remove after F30
+%{_sysconfdir}/kernel/postinst.d/51-dracut-rescue-postinst.sh
 %endif
 
 %changelog
-* Mon Jul 09 2018 Yu Watanabe <watanabe.yu@gmail.com> - 048-1.1.git20180706
-- Update to latest git snapshot bc01f822de732d85d4bfc77bae44c6bd4abe43d7
+* Mon Jul 30 2018 Yu Watanabe <watanabe.yu@gmail.com> - 048-14.1.git20180726
+- Update to latest git snapshot 55a12055c511979be0a471d0d7c24c040b830887
+
+* Thu Jul 26 2018 Harald Hoyer <harald@redhat.com> - 048-14.git20180726
+- bring back 51-dracut-rescue-postinst.sh
+
+* Wed Jul 18 2018 Harald Hoyer <harald@redhat.com> - 048-6.git20180718
+- git snapshot
+
+* Thu Jul 12 2018 Fedora Release Engineering <releng@fedoraproject.org> - 048-1.1
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_29_Mass_Rebuild
 
 * Fri Jul 06 2018 Harald Hoyer <harald@redhat.com> - 048-1
 - version 048
