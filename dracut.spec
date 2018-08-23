@@ -1,6 +1,6 @@
-%global gitcommit 55a12055c511979be0a471d0d7c24c040b830887
+%global gitcommit 09ba1b289f2cba613c1950b03f0f549ebb7eb83f
 %{?gitcommit:%global gitcommitshort %(c=%{gitcommit}; echo ${c:0:7})}
-%global gitdate 20180726
+%global gitdate 20180821
 
 %define dracutlibdir %{_prefix}/lib/dracut
 %bcond_without doc
@@ -9,7 +9,7 @@
 # strip the automatically generated dep here and instead co-own the
 # directory.
 %global __requires_exclude pkg-config
-%define dist_free_release 14.1.git%{gitdate}
+%define dist_free_release 14.2.git%{gitdate}
 
 Name: dracut
 Version: 048
@@ -248,6 +248,8 @@ rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/95qeth_rules
 rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/95zfcp
 rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/95zfcp_rules
 rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/95znet
+%else
+rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/00warpclock
 %endif
 
 mkdir -p $RPM_BUILD_ROOT/boot/dracut
@@ -467,6 +469,9 @@ install -m 0755 51-dracut-rescue-postinst.sh $RPM_BUILD_ROOT%{_sysconfdir}/kerne
 %endif
 
 %changelog
+* Thu Aug 23 2018 Yu Watanabe <watanabe.yu@gmail.com> - 048-14.2.git20180821
+- Update to latest git snapshot 09ba1b289f2cba613c1950b03f0f549ebb7eb83f
+
 * Mon Jul 30 2018 Yu Watanabe <watanabe.yu@gmail.com> - 048-14.1.git20180726
 - Update to latest git snapshot 55a12055c511979be0a471d0d7c24c040b830887
 
