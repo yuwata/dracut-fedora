@@ -1,0 +1,149 @@
+From 51d0a545557d535f814e402fff20274f9e125d85 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 16 Aug 2018 10:16:52 +0200
+Subject: [PATCH] travis: use own logtee.c to reduce log output
+
+---
+ .travis.yml         | 12 ++++++------
+ Makefile            |  3 +++
+ fedora-test.sh      |  2 +-
+ logtee.c            | 46 ++++++++++++++++++++++++++++++++++++++++++++++
+ test/test-functions | 15 ++++++++++++++-
+ 5 files changed, 70 insertions(+), 8 deletions(-)
+
+diff --git a/.travis.yml b/.travis.yml
+index 1f50b6d9..5298a816 100644
+--- a/.travis.yml
++++ b/.travis.yml
+@@ -10,12 +10,12 @@ env:
+   - IMAGE=latest  TESTS=50
+   - IMAGE=latest  TESTS=70
+   - IMAGE=latest  TESTS=99
+-  - IMAGE=rawhide TESTS="01 02 03 04 10 11 12 13 15 17 18"
+-  - IMAGE=rawhide TESTS=20
+-  - IMAGE=rawhide TESTS="30 31"
+-  - IMAGE=rawhide TESTS=50
+-  - IMAGE=rawhide TESTS=70
+-  - IMAGE=rawhide TESTS=99
++#  - IMAGE=rawhide TESTS="01 02 03 04 10 11 12 13 15 17 18"
++#  - IMAGE=rawhide TESTS=20
++#  - IMAGE=rawhide TESTS="30 31"
++#  - IMAGE=rawhide TESTS=50
++#  - IMAGE=rawhide TESTS=70
++#  - IMAGE=rawhide TESTS=99
+ 
+ before_script:
+ - docker pull fedora:$IMAGE
+diff --git a/Makefile b/Makefile
+index 414fb330..cd02dab0 100644
+--- a/Makefile
++++ b/Makefile
+@@ -63,6 +63,9 @@ install/strv.o: install/strv.c install/strv.h install/util.h install/macro.h ins
+ install/dracut-install: $(DRACUT_INSTALL_OBJECTS)
+ 	$(CC) $(LDFLAGS) -o $@ $(DRACUT_INSTALL_OBJECTS) $(LDLIBS) $(KMOD_LIBS)
+ 
++logtee: logtee.c
++	$(CC) $(LDFLAGS) -o $@ $<
++
+ dracut-install: install/dracut-install
+ 	ln -fs $< $@
+ 
+diff --git a/fedora-test.sh b/fedora-test.sh
+index e7d0f633..af38bc33 100755
+--- a/fedora-test.sh
++++ b/fedora-test.sh
+@@ -45,7 +45,7 @@ dnf -y install --best --allowerasing \
+ 
+ NCPU=$(getconf _NPROCESSORS_ONLN)
+ 
+-make -j$NCPU all syncheck rpm
++make -j$NCPU all syncheck rpm logtee
+ 
+ cd test
+ 
+diff --git a/logtee.c b/logtee.c
+new file mode 100644
+index 00000000..2f1937d4
+--- /dev/null
++++ b/logtee.c
+@@ -0,0 +1,46 @@
++#define _GNU_SOURCE
++#include <fcntl.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <unistd.h>
++#include <errno.h>
++#include <limits.h>
++
++int
++main(int argc, char *argv[])
++{
++	int fd;
++	int len, slen;
++
++	if (argc != 2) {
++		fprintf(stderr, "Usage: %s <file>\n", argv[0]);
++		exit(EXIT_FAILURE);
++	}
++
++	fd = open(argv[1], O_WRONLY | O_CREAT | O_TRUNC, 0644);
++	if (fd == -1) {
++		perror("open");
++		exit(EXIT_FAILURE);
++	}
++
++	fprintf(stderr, "Logging to %s: ", argv[1]);
++
++	do {
++		len = splice(STDIN_FILENO, NULL, fd, NULL,
++			     65536, SPLICE_F_MOVE);
++
++		if (len < 0) {
++			if (errno == EAGAIN)
++				continue;
++			perror("tee");
++			exit(EXIT_FAILURE);
++		} else
++			if (len == 0)
++				break;
++		fprintf(stderr, ".", len);
++	} while (1);
++	close(fd);
++	fprintf(stderr, "\n");
++	exit(EXIT_SUCCESS);
++}
++
+diff --git a/test/test-functions b/test/test-functions
+index d6b28d20..02ceafec 100644
+--- a/test/test-functions
++++ b/test/test-functions
+@@ -60,7 +60,7 @@ while (($# > 0)); do
+             else
+ 	        echo "TEST: $TEST_DESCRIPTION [STARTED]";
+             fi
+-            if ! [[ "$V" ]]; then
++            if [[ "$V" == "1" ]]; then
+ 	        (
+ 		    test_setup && test_run
+ 		    ret=$?
+@@ -69,6 +69,19 @@ while (($# > 0)); do
+ 		    rm -f -- .testdir${TEST_RUN_ID:+-$TEST_RUN_ID}
+ 		    exit $ret
+ 	        ) </dev/null >test-${TEST_RUN_ID:+-$TEST_RUN_ID}.log 2>&1
++            elif [[ "$V" == "2" ]]; then
++                set -o pipefail
++                (
++		    test_setup && test_run
++		    ret=$?
++		    test_cleanup
++                    if ((ret!=0)) && [[ -f "$TESTDIR"/server.log ]]; then
++                        mv [[ -f "$TESTDIR"/server.log ]] ./server${TEST_RUN_ID:+-$TEST_RUN_ID}.log
++                    fi
++		    rm -fr -- "$TESTDIR"
++		    rm -f -- .testdir${TEST_RUN_ID:+-$TEST_RUN_ID}
++		    exit $ret
++	        ) </dev/null 2>&1 | $basedir/logtee test-${TEST_RUN_ID:+-$TEST_RUN_ID}.log
+             else
+                 set -o pipefail
+                 (
+

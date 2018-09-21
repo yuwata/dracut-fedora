@@ -1,0 +1,44 @@
+From b7774da97ca743ada8a94d5eab4484cb96504ca0 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Tue, 14 Aug 2018 16:18:53 +0200
+Subject: [PATCH] might even run without kvm
+
+---
+ .travis.yml   | 5 +----
+ test/run-qemu | 1 +
+ 2 files changed, 2 insertions(+), 4 deletions(-)
+
+diff --git a/.travis.yml b/.travis.yml
+index 16f9a511..a71d9be2 100644
+--- a/.travis.yml
++++ b/.travis.yml
+@@ -1,15 +1,12 @@
++language: generic
+ sudo: required
+-
+ services:
+   - docker
+-
+ env:
+   matrix:
+     - IMAGE=latest
+     - IMAGE=rawhide
+-    
+ before_script:
+ - docker pull fedora:$IMAGE
+-
+ script:
+ - docker run --privileged -it -v $(pwd)/:/dracut fedora:$IMAGE /dracut/fedora-test.sh $IMAGE-$$
+diff --git a/test/run-qemu b/test/run-qemu
+index a4e15548..c28de2db 100755
+--- a/test/run-qemu
++++ b/test/run-qemu
+@@ -8,6 +8,7 @@ $(lsmod | grep -q '^kqemu ') && BIN=/usr/bin/qemu && ARGS="-kernel-kqemu "
+ [[ -c /dev/kvm && -x /usr/bin/kvm ]] && BIN=/usr/bin/kvm && ARGS=""
+ [[ -c /dev/kvm && -x /usr/bin/qemu-kvm ]] && BIN=/usr/bin/qemu-kvm && ARGS=""
+ [[ -c /dev/kvm && -x /usr/libexec/qemu-kvm ]] && BIN=/usr/libexec/qemu-kvm && ARGS=""
++[[ -x /usr/bin/qemu-system-$(uname -i) ]] && BIN=/usr/bin/qemu-system-$(uname -i) && ARGS=""
+ [[ -c /dev/kvm && -x /usr/bin/qemu-system-$(uname -i) ]] && BIN=/usr/bin/qemu-system-$(uname -i) && ARGS="-enable-kvm"
+ 
+ [[ $BIN ]] || {
+

@@ -5,7 +5,7 @@
 # strip the automatically generated dep here and instead co-own the
 # directory.
 %global __requires_exclude pkg-config
-%define dist_free_release 14.git20180726
+%define dist_free_release 99.git20180921
 
 Name: dracut
 Version: 048
@@ -41,6 +41,91 @@ Patch10: 0010.patch
 Patch11: 0011.patch
 Patch12: 0012.patch
 Patch13: 0013.patch
+Patch14: 0014.patch
+Patch15: 0015.patch
+Patch16: 0016.patch
+Patch17: 0017.patch
+Patch18: 0018.patch
+Patch19: 0019.patch
+Patch20: 0020.patch
+Patch21: 0021.patch
+Patch22: 0022.patch
+Patch23: 0023.patch
+Patch24: 0024.patch
+Patch25: 0025.patch
+Patch26: 0026.patch
+Patch27: 0027.patch
+Patch28: 0028.patch
+Patch29: 0029.patch
+Patch30: 0030.patch
+Patch31: 0031.patch
+Patch32: 0032.patch
+Patch33: 0033.patch
+Patch34: 0034.patch
+Patch35: 0035.patch
+Patch36: 0036.patch
+Patch37: 0037.patch
+Patch38: 0038.patch
+Patch39: 0039.patch
+Patch40: 0040.patch
+Patch41: 0041.patch
+Patch42: 0042.patch
+Patch43: 0043.patch
+Patch44: 0044.patch
+Patch45: 0045.patch
+Patch46: 0046.patch
+Patch47: 0047.patch
+Patch48: 0048.patch
+Patch49: 0049.patch
+Patch50: 0050.patch
+Patch51: 0051.patch
+Patch52: 0052.patch
+Patch53: 0053.patch
+Patch54: 0054.patch
+Patch55: 0055.patch
+Patch56: 0056.patch
+Patch57: 0057.patch
+Patch58: 0058.patch
+Patch59: 0059.patch
+Patch60: 0060.patch
+Patch61: 0061.patch
+Patch62: 0062.patch
+Patch63: 0063.patch
+Patch64: 0064.patch
+Patch65: 0065.patch
+Patch66: 0066.patch
+Patch67: 0067.patch
+Patch68: 0068.patch
+Patch69: 0069.patch
+Patch70: 0070.patch
+Patch71: 0071.patch
+Patch72: 0072.patch
+Patch73: 0073.patch
+Patch74: 0074.patch
+Patch75: 0075.patch
+Patch76: 0076.patch
+Patch77: 0077.patch
+Patch78: 0078.patch
+Patch79: 0079.patch
+Patch80: 0080.patch
+Patch81: 0081.patch
+Patch82: 0082.patch
+Patch83: 0083.patch
+Patch84: 0084.patch
+Patch85: 0085.patch
+Patch86: 0086.patch
+Patch87: 0087.patch
+Patch88: 0088.patch
+Patch89: 0089.patch
+Patch90: 0090.patch
+Patch91: 0091.patch
+Patch92: 0092.patch
+Patch93: 0093.patch
+Patch94: 0094.patch
+Patch95: 0095.patch
+Patch96: 0096.patch
+Patch97: 0097.patch
+Patch98: 0098.patch
 
 Source1: https://www.gnu.org/licenses/lgpl-2.1.txt
 
@@ -63,7 +148,7 @@ BuildRequires: docbook-style-xsl docbook-dtds libxslt
 %endif
 
 %if 0%{?suse_version}
--BuildRequires: docbook-xsl-stylesheets libxslt
+BuildRequires: docbook-xsl-stylesheets libxslt
 %endif
 
 BuildRequires: asciidoc
@@ -192,6 +277,16 @@ Requires: %{name} = %{version}-%{release}
 %description tools
 This package contains tools to assemble the local initrd and host configuration.
 
+%package squash
+Summary: dracut module to build an initramfs with most files in a squashfs image
+Requires: %{name} = %{version}-%{release}
+Requires: squash-tools
+
+%description squash
+This package provides a dracut module to build an initramfs, but store most files
+in a squashfs image, result in a smaller initramfs size and reduce runtime memory
+usage.
+
 %prep
 %autosetup -n %{name}-%{version} -S git_am
 cp %{SOURCE1} .
@@ -249,6 +344,8 @@ rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/95qeth_rules
 rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/95zfcp
 rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/95zfcp_rules
 rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/95znet
+%else
+rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/00warpclock
 %endif
 
 mkdir -p $RPM_BUILD_ROOT/boot/dracut
@@ -330,7 +427,12 @@ install -m 0755 51-dracut-rescue-postinst.sh $RPM_BUILD_ROOT%{_sysconfdir}/kerne
 %endif
 %{dracutlibdir}/modules.d/00bash
 %{dracutlibdir}/modules.d/00systemd
+%ifnarch s390 s390x
 %{dracutlibdir}/modules.d/00warpclock
+%endif
+%if 0%{?fedora} || 0%{?rhel} || 0%{?suse_version}
+%{dracutlibdir}/modules.d/01fips
+%endif
 %{dracutlibdir}/modules.d/01systemd-initrd
 %{dracutlibdir}/modules.d/03modsign
 %{dracutlibdir}/modules.d/03rescue
@@ -414,13 +516,10 @@ install -m 0755 51-dracut-rescue-postinst.sh $RPM_BUILD_ROOT%{_sysconfdir}/kerne
 %{_prefix}/lib/kernel/install.d/50-dracut.install
 %endif
 
-%if 0%{?fedora} || 0%{?rhel} || 0%{?suse_version}
-%defattr(-,root,root,0755)
-%{dracutlibdir}/modules.d/01fips
-%endif
-
 %files network
 %{dracutlibdir}/modules.d/02systemd-networkd
+%{dracutlibdir}/modules.d/35network-manager
+%{dracutlibdir}/modules.d/35network-legacy
 %{dracutlibdir}/modules.d/40network
 %{dracutlibdir}/modules.d/45ifcfg
 %{dracutlibdir}/modules.d/90kernel-network-modules
@@ -447,10 +546,12 @@ install -m 0755 51-dracut-rescue-postinst.sh $RPM_BUILD_ROOT%{_sysconfdir}/kerne
 %{dracutlibdir}/modules.d/90livenet
 
 %files tools
-
 %if %{with doc}
 %doc %{_mandir}/man8/dracut-catimages.8*
 %endif
+
+%files squash
+%{dracutlibdir}/modules.d/99squash
 
 %{_bindir}/dracut-catimages
 %dir /boot/dracut
@@ -469,6 +570,9 @@ install -m 0755 51-dracut-rescue-postinst.sh $RPM_BUILD_ROOT%{_sysconfdir}/kerne
 %endif
 
 %changelog
+* Fri Sep 21 2018 Harald Hoyer <harald@redhat.com> - 048-99.git20180921
+- git snapshot
+
 * Thu Jul 26 2018 Harald Hoyer <harald@redhat.com> - 048-14.git20180726
 - bring back 51-dracut-rescue-postinst.sh
 

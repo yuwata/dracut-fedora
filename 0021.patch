@@ -1,0 +1,32 @@
+From 0a80cda0ea1186bb3b384158aeda491443ae93ff Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 13 Aug 2018 11:30:03 +0200
+Subject: [PATCH] dracut.spec: remove warpclock from z-series, not the other
+ way round
+
+---
+ dracut.spec | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/dracut.spec b/dracut.spec
+index d24c6f36..09c74478 100644
+--- a/dracut.spec
++++ b/dracut.spec
+@@ -224,7 +224,6 @@ rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/98integrity
+ 
+ %ifnarch s390 s390x
+ # remove architecture specific modules
+-rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/00warpclock
+ rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/80cms
+ rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/81cio_ignore
+ rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/91zipl
+@@ -236,6 +235,8 @@ rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/95qeth_rules
+ rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/95zfcp
+ rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/95zfcp_rules
+ rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/95znet
++%else
++rm -fr -- $RPM_BUILD_ROOT/%{dracutlibdir}/modules.d/00warpclock
+ %endif
+ 
+ mkdir -p $RPM_BUILD_ROOT/boot/dracut
+

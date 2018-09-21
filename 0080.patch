@@ -1,0 +1,35 @@
+From ae9bc0d72ffea2c960c95d7b705b1b76ae53d692 Mon Sep 17 00:00:00 2001
+From: Tony Asleson <tasleson@redhat.com>
+Date: Thu, 23 Aug 2018 15:08:59 -0500
+Subject: [PATCH] stratis: Add additional binaries
+
+Include all binaries that could be called by the daemon.
+
+Signed-off-by: Tony Asleson <tasleson@redhat.com>
+---
+ modules.d/90stratis/module-setup.sh | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/modules.d/90stratis/module-setup.sh b/modules.d/90stratis/module-setup.sh
+index 2787b63b..29f0765b 100755
+--- a/modules.d/90stratis/module-setup.sh
++++ b/modules.d/90stratis/module-setup.sh
+@@ -2,7 +2,7 @@
+ 
+ # called by dracut
+ check() {
+-    require_binaries stratisd-init thin_check thin_repair || return 1
++    require_binaries stratisd-init thin_check thin_repair mkfs.xfs xfs_admin xfs_growfs || return 1
+     return 255
+ }
+ 
+@@ -20,7 +20,7 @@ installkernel() {
+ # called by dracut
+ install() {
+ 
+-    inst_multiple stratisd-init thin_check thin_repair
++    inst_multiple stratisd-init thin_check thin_repair mkfs.xfs xfs_admin xfs_growfs
+ 
+     if dracut_module_included "systemd"; then
+         inst_simple "${moddir}/stratisd-init.service" "${systemdsystemunitdir}/stratisd-init.service"
+

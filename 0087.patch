@@ -1,0 +1,32 @@
+From 838f22259a50e5f92429ecdd24b897c1128edc98 Mon Sep 17 00:00:00 2001
+From: Alexander Tsoy <alexander@tsoy.me>
+Date: Sun, 9 Sep 2018 02:47:09 +0300
+Subject: [PATCH] install: avoid non-portable __WORDSIZE
+
+Lets not unnecessarily rely on __WORDSIZE, which is not clearly specified
+by any spec. Use explicit size comparisons if we're not interested in the
+WORDSIZE, anyway.
+
+Patch ported from systemd.
+(commit 8507eb20b64010b26f23822cbf442bb0bf96511c)
+
+Original-patch-by: Emil Renner Berthing <systemd@esmil.dk>
+Bug: https://bugs.gentoo.org/602122
+---
+ install/util.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/install/util.h b/install/util.h
+index 2ad3254d..c13b1a27 100644
+--- a/install/util.h
++++ b/install/util.h
+@@ -167,7 +167,7 @@ int safe_atoi(const char *s, int *ret_i);
+ int safe_atollu(const char *s, unsigned long long *ret_u);
+ int safe_atolli(const char *s, long long int *ret_i);
+ 
+-#if __WORDSIZE == 32
++#if LONG_MAX == INT_MAX
+ static inline int safe_atolu(const char *s, unsigned long *ret_u) {
+         assert_cc(sizeof(unsigned long) == sizeof(unsigned));
+         return safe_atou(s, (unsigned*) ret_u);
+

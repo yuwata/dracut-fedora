@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [[ -e "$HOME/git/dracut/$1" ]]; then
+if [[ -f "$HOME/git/dracut/$1" ]]; then
     srcrpm="$HOME/git/dracut/$1"
 else
     srcrpm="$1"

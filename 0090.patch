@@ -1,0 +1,43 @@
+From 24f3463bff8600d562975c9a7c44365066a50ca4 Mon Sep 17 00:00:00 2001
+From: Kairui Song <kasong@redhat.com>
+Date: Thu, 20 Sep 2018 17:23:19 +0800
+Subject: [PATCH] dracut.spec: Add dracut-squash package
+
+As 99squash module requires extra dependency and it introduces new
+files, add a new sub package for this module.
+---
+ dracut.spec | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
+
+diff --git a/dracut.spec b/dracut.spec
+index 09c74478..d9cfdf1c 100644
+--- a/dracut.spec
++++ b/dracut.spec
+@@ -178,6 +178,16 @@ Requires: %{name} = %{version}-%{release}
+ %description tools
+ This package contains tools to assemble the local initrd and host configuration.
+ 
++%package squash
++Summary: dracut module to build an initramfs with most files in a squashfs image
++Requires: %{name} = %{version}-%{release}
++Requires: squash-tools
++
++%description squash
++This package provides a dracut module to build an initramfs, but store most files
++in a squashfs image, result in a smaller initramfs size and reduce runtime memory
++usage.
++
+ %prep
+ %autosetup -n %{name}-%{version} -S git_am
+ cp %{SOURCE1} .
+@@ -439,6 +449,9 @@ install -m 0755 51-dracut-rescue-postinst.sh $RPM_BUILD_ROOT%{_sysconfdir}/kerne
+ %doc %{_mandir}/man8/dracut-catimages.8*
+ %endif
+ 
++%files squash
++%{dracutlibdir}/modules.d/99squash
++
+ %{_bindir}/dracut-catimages
+ %dir /boot/dracut
+ %dir /var/lib/dracut
+

@@ -1,0 +1,22 @@
+From 9f02b291ac9c315b94d42c4c029645fb1298dac4 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 16 Aug 2018 10:39:49 +0200
+Subject: [PATCH] travis: git pull --tags
+
+---
+ .travis.yml | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/.travis.yml b/.travis.yml
+index 38b29ca4..01be428f 100644
+--- a/.travis.yml
++++ b/.travis.yml
+@@ -13,6 +13,7 @@ env:
+ 
+ before_script:
+   - docker pull fedora:$IMAGE
++  - git pull --tags
+   - |
+     git describe --abbrev=0 --tags || :
+     git describe --tags || :
+

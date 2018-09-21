@@ -1,0 +1,48 @@
+From ab94a204e0cb22bcaa2b2863dee9ffb9f22e91c5 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Tue, 14 Aug 2018 11:03:11 +0200
+Subject: [PATCH] load modules earlier for iscsi via dhcp root-path
+
+---
+ modules.d/95iscsi/parse-iscsiroot.sh | 15 +++++++--------
+ 1 file changed, 7 insertions(+), 8 deletions(-)
+
+diff --git a/modules.d/95iscsi/parse-iscsiroot.sh b/modules.d/95iscsi/parse-iscsiroot.sh
+index f884e684..7a64d888 100755
+--- a/modules.d/95iscsi/parse-iscsiroot.sh
++++ b/modules.d/95iscsi/parse-iscsiroot.sh
+@@ -90,19 +90,13 @@ if [ -n "$iscsi_firmware" ]; then
+     initqueue --unique --onetime --settled /sbin/iscsiroot online "iscsi:" "'$NEWROOT'"
+ fi
+ 
+-if [ -z "$netroot" ] || ! [ "${netroot%%:*}" = "iscsi" ]; then
+-    return 1
+-fi
+-
+-initqueue --unique --onetime --timeout /sbin/iscsiroot timeout "$netroot" "$NEWROOT"
+-
+-initqueue --onetime modprobe --all -b -q qla4xxx cxgb3i cxgb4i bnx2i be2iscsi qedi
+-
+ # ISCSI actually supported?
+ if ! [ -e /sys/module/iscsi_tcp ]; then
+     modprobe -b -q iscsi_tcp || die "iscsiroot requested but kernel/initrd does not support iscsi"
+ fi
+ 
++modprobe --all -b -q qla4xxx cxgb3i cxgb4i bnx2i be2iscsi
++
+ if [ -n "$netroot" ] && [ "$root" != "/dev/root" ] && [ "$root" != "dhcp" ]; then
+     if ! getargbool 1 rd.neednet >/dev/null || ! getarg "ip="; then
+         initqueue --unique --onetime --settled /sbin/iscsiroot dummy "'$netroot'" "'$NEWROOT'"
+@@ -141,6 +135,11 @@ if [ -z $iscsi_initiator ] && [ -f /sys/firmware/ibft/initiator/initiator-name ]
+     fi
+ fi
+ 
++if [ -z "$netroot" ] || ! [ "${netroot%%:*}" = "iscsi" ]; then
++    return 1
++fi
++
++initqueue --unique --onetime --timeout /sbin/iscsiroot timeout "$netroot" "$NEWROOT"
+ 
+ for nroot in $(getargs netroot); do
+     [ "${nroot%%:*}" = "iscsi" ] || continue
+

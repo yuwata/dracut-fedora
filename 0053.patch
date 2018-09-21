@@ -1,0 +1,24 @@
+From 110063c5850ea1cb95dd2af171adff1a03305e60 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 16 Aug 2018 10:29:16 +0200
+Subject: [PATCH] travis: git check
+
+---
+ .travis.yml | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/.travis.yml b/.travis.yml
+index 5298a816..72cfe8f9 100644
+--- a/.travis.yml
++++ b/.travis.yml
+@@ -19,6 +19,9 @@ env:
+ 
+ before_script:
+ - docker pull fedora:$IMAGE
++- git describe --abbrev=0 --tags || :
++- git describe --tags || :
++
+ script:
+ - docker run --privileged -it -v $(pwd)/:/dracut fedora:$IMAGE /dracut/fedora-test.sh $IMAGE-$$ "$TESTS"
+ notifications:
+

@@ -1,0 +1,24 @@
+From 8dd7bb48fcd9d19dd2d7cec2577cd2c6b414fd8b Mon Sep 17 00:00:00 2001
+From: Frederick Grose <fgrose@sugarlabs.org>
+Date: Mon, 3 Sep 2018 19:41:58 -0400
+Subject: [PATCH] dmsquash-live/apply-live-updates: Test proper file link.
+
+Update flag link to /dev/root as required by commit
+789668deb3e6f8584ffab964d2204ddcb75f0a06.
+---
+ modules.d/90dmsquash-live/apply-live-updates.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/modules.d/90dmsquash-live/apply-live-updates.sh b/modules.d/90dmsquash-live/apply-live-updates.sh
+index bcca761b..3df2d4ad 100755
+--- a/modules.d/90dmsquash-live/apply-live-updates.sh
++++ b/modules.d/90dmsquash-live/apply-live-updates.sh
+@@ -1,6 +1,6 @@
+ #!/bin/sh
+ 
+-if [ -L /run/rootfsbase ] && [ -d /run/initramfs/live/updates -o -d /updates ]; then
++if [ -h /dev/root ] && [ -d /run/initramfs/live/updates -o -d /updates ]; then
+     info "Applying updates to live image..."
+     mount -o bind /run $NEWROOT/run
+     # avoid overwriting symlinks (e.g. /lib -> /usr/lib) with directories
+

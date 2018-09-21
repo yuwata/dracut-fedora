@@ -1,0 +1,23 @@
+From f8cad00948c10107f84b9fcba812589a256f8f80 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 16 Aug 2018 11:47:21 +0200
+Subject: [PATCH] test: for V=2 tail only the last MB of logs
+
+---
+ test/test-functions | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/test/test-functions b/test/test-functions
+index 0c9d88c8..6d7f418b 100644
+--- a/test/test-functions
++++ b/test/test-functions
+@@ -104,7 +104,7 @@ while (($# > 0)); do
+ 	    else
+ 	        echo -e "TEST: $TEST_DESCRIPTION " $COLOR_FAILURE "[FAILED]" $COLOR_NORMAL
+                 if [ "$V" == "2" ]; then
+-	            cat $(pwd)/server${TEST_RUN_ID:+-$TEST_RUN_ID}.log $(pwd)/test${TEST_RUN_ID:+-$TEST_RUN_ID}.log
++	            tail -c 1048576 $(pwd)/server${TEST_RUN_ID:+-$TEST_RUN_ID}.log $(pwd)/test${TEST_RUN_ID:+-$TEST_RUN_ID}.log
+ 	            echo -e "TEST: $TEST_DESCRIPTION " $COLOR_FAILURE "[FAILED]" $COLOR_NORMAL
+                 else
+ 	            echo "see $(pwd)/test${TEST_RUN_ID:+-$TEST_RUN_ID}.log"
+

@@ -1,0 +1,37 @@
+From 9e82732dd412a49cbdf9c4b998f04ac0a39e393f Mon Sep 17 00:00:00 2001
+From: Lubomir Rintel <lkundrak@v3.sk>
+Date: Thu, 30 Aug 2018 16:21:17 +0200
+Subject: [PATCH] iscsi: do not replace the configuration in the host system
+
+  ln: failed to create symbolic link '/usr/lib/systemd/system/sockets.target.wants/iscsid.socket': Permission denied
+  ln: failed to create symbolic link '/usr/lib/systemd/system/sockets.target.wants/iscsiuio.socket': Permission denied
+
+No way. Just ensure the links are there in the initramfs image. In fact,
+that is already the case for iscsiuio.socket. Add iscsid.socket too.
+---
+ modules.d/95iscsi/module-setup.sh | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
+
+diff --git a/modules.d/95iscsi/module-setup.sh b/modules.d/95iscsi/module-setup.sh
+index d8405fce..04beae4c 100755
+--- a/modules.d/95iscsi/module-setup.sh
++++ b/modules.d/95iscsi/module-setup.sh
+@@ -208,9 +208,6 @@ install() {
+     inst_libdir_file 'libgcc_s.so*'
+     inst_multiple umount hostname iscsi-iname iscsiadm iscsid
+ 
+-    ln -sf $systemdsystemunitdir/iscsid.socket $systemdsystemunitdir/sockets.target.wants/iscsid.socket
+-    ln -sf $systemdsystemunitdir/iscsiuio.socket $systemdsystemunitdir/sockets.target.wants/iscsiuio.socket
+-
+     inst_multiple -o \
+         $systemdsystemunitdir/iscsid.socket \
+         $systemdsystemunitdir/iscsid.service \
+@@ -243,6 +240,7 @@ install() {
+ 
+         mkdir -p "${initdir}/$systemdsystemunitdir/sockets.target.wants"
+         for i in \
++                iscsid.socket \
+                 iscsiuio.socket \
+             ; do
+             ln_r "$systemdsystemunitdir/${i}" "$systemdsystemunitdir/sockets.target.wants/${i}"
+

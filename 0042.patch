@@ -1,0 +1,25 @@
+From 1363167d655f8d08ea8fd71e56c8c85ff94ccc04 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Tue, 14 Aug 2018 16:58:52 +0200
+Subject: [PATCH] Update README.md
+
+---
+ README.md | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/README.md b/README.md
+index e229641b..36ae7e1b 100644
+--- a/README.md
++++ b/README.md
+@@ -2,6 +2,10 @@
+ 
+ dracut is an initramfs infrastructure.
+ 
++## Travis
++
++[![Build Status](https://travis-ci.org/dracutdevs/dracut.svg?branch=master)](https://travis-ci.org/dracutdevs/dracut)
++
+ ## CentOS CI
+ 
+ [![Build Status](https://ci.centos.org/job/dracut-push-master/badge/icon)](https://ci.centos.org/job/dracut-push-master/)
+

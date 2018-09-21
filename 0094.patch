@@ -1,0 +1,27 @@
+From 0aa2e5f7280a0f88d5f8d69dd9467e7b81d6a231 Mon Sep 17 00:00:00 2001
+From: Lubomir Rintel <lkundrak@v3.sk>
+Date: Thu, 30 Aug 2018 18:41:37 +0200
+Subject: [PATCH] iscsi: start iscsid even w/o systemd
+
+---
+ modules.d/95iscsi/iscsiroot.sh | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/modules.d/95iscsi/iscsiroot.sh b/modules.d/95iscsi/iscsiroot.sh
+index 76c8b3fe..4efc1d12 100755
+--- a/modules.d/95iscsi/iscsiroot.sh
++++ b/modules.d/95iscsi/iscsiroot.sh
+@@ -194,6 +194,12 @@ handle_netroot()
+             sleep 1
+         fi
+     fi
++
++   if [ -z "$DRACUT_SYSTEMD" ]; then
++       iscsid
++       sleep 2
++   fi
++
+ # FIXME $iscsi_protocol??
+ 
+     if [ "$root" = "dhcp" ] || [ "$netroot" = "dhcp" ]; then
+

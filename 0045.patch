@@ -1,0 +1,94 @@
+From 65d16d19141d0378f6cbab33b435a231ffdd37c4 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 16 Aug 2018 08:50:11 +0200
+Subject: [PATCH] travis: extend matrix
+
+---
+ .travis.yml    | 45 ++++++++++++++++++++++++++++++++++++++++++---
+ fedora-test.sh |  4 +++-
+ 2 files changed, 45 insertions(+), 4 deletions(-)
+
+diff --git a/.travis.yml b/.travis.yml
+index 96dcd951..fbaafdac 100644
+--- a/.travis.yml
++++ b/.travis.yml
+@@ -4,12 +4,51 @@ services:
+   - docker
+ env:
+   matrix:
+-    - IMAGE=latest
+-    - IMAGE=rawhide
++    - IMAGE=latest TESTS=01
++    - IMAGE=latest TESTS=02
++    - IMAGE=latest TESTS=03
++    - IMAGE=latest TESTS=04
++    - IMAGE=latest TESTS=10
++    - IMAGE=latest TESTS=11
++    - IMAGE=latest TESTS=12
++    - IMAGE=latest TESTS=13
++    - IMAGE=latest TESTS=14
++    - IMAGE=latest TESTS=15
++    - IMAGE=latest TESTS=16
++    - IMAGE=latest TESTS=17
++    - IMAGE=latest TESTS=18
++    - IMAGE=latest TESTS=20
++    - IMAGE=latest TESTS=30
++    - IMAGE=latest TESTS=31
++    - IMAGE=latest TESTS=40
++    - IMAGE=latest TESTS=50
++    - IMAGE=latest TESTS=70
++    - IMAGE=latest TESTS=99
++    - IMAGE=rawhide TESTS=01
++    - IMAGE=rawhide TESTS=02
++    - IMAGE=rawhide TESTS=03
++    - IMAGE=rawhide TESTS=04
++    - IMAGE=rawhide TESTS=10
++    - IMAGE=rawhide TESTS=11
++    - IMAGE=rawhide TESTS=12
++    - IMAGE=rawhide TESTS=13
++    - IMAGE=rawhide TESTS=14
++    - IMAGE=rawhide TESTS=15
++    - IMAGE=rawhide TESTS=16
++    - IMAGE=rawhide TESTS=17
++    - IMAGE=rawhide TESTS=18
++    - IMAGE=rawhide TESTS=20
++    - IMAGE=rawhide TESTS=30
++    - IMAGE=rawhide TESTS=31
++    - IMAGE=rawhide TESTS=40
++    - IMAGE=rawhide TESTS=50
++    - IMAGE=rawhide TESTS=70
++    - IMAGE=rawhide TESTS=99
++
+ before_script:
+ - docker pull fedora:$IMAGE
+ script:
+-- docker run --privileged -it -v $(pwd)/:/dracut fedora:$IMAGE /dracut/fedora-test.sh $IMAGE-$$
++- docker run --privileged -it -v $(pwd)/:/dracut fedora:$IMAGE /dracut/fedora-test.sh $IMAGE-$$ $TESTS
+ notifications:
+   webhooks:
+     urls:
+diff --git a/fedora-test.sh b/fedora-test.sh
+index 9528f08c..df7147c6 100755
+--- a/fedora-test.sh
++++ b/fedora-test.sh
+@@ -2,9 +2,10 @@
+ 
+ set -ex
+ 
+-cd ${0%/*}
++[[ -d ${0%/*} ]] && cd ${0%/*}
+ 
+ RUN_ID="$1"
++TESTS=$2
+ 
+ dnf -y update --best --allowerasing
+ 
+@@ -51,6 +52,7 @@ cd test
+ time sudo make \
+      KVERSION=$(rpm -qa kernel --qf '%{VERSION}-%{RELEASE}.%{ARCH}\n' | sort -rn | head -1) \
+      TEST_RUN_ID=$RUN_ID \
++     ${TESTS:+TESTS="$TESTS"} \
+      -k V=2 \
+      SKIP="14 16" \
+      check
+

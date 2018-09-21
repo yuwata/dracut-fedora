@@ -1,0 +1,26 @@
+From 0f294d90b246e15d00dd56627a8085e5bfc5bf85 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Tue, 14 Aug 2018 15:54:42 +0200
+Subject: [PATCH] TEST-31-ISCSI-MULTI: increase verbose level
+
+---
+ test/TEST-31-ISCSI-MULTI/test.sh | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/test/TEST-31-ISCSI-MULTI/test.sh b/test/TEST-31-ISCSI-MULTI/test.sh
+index 1ed3fb7b..5c38249c 100755
+--- a/test/TEST-31-ISCSI-MULTI/test.sh
++++ b/test/TEST-31-ISCSI-MULTI/test.sh
+@@ -3,9 +3,9 @@ TEST_DESCRIPTION="root filesystem over multiple iSCSI"
+ 
+ KVERSION=${KVERSION-$(uname -r)}
+ 
+-DEBUGFAIL="loglevel=1"
++#DEBUGFAIL="loglevel=1"
+ #DEBUGFAIL="rd.shell rd.break rd.debug loglevel=7 "
+-#DEBUGFAIL="rd.debug loglevel=7 "
++DEBUGFAIL="rd.debug loglevel=7 "
+ #SERVER_DEBUG="rd.debug loglevel=7"
+ #SERIAL="tcp:127.0.0.1:9999"
+ 
+

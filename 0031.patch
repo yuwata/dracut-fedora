@@ -1,0 +1,23 @@
+From bb75d16521a9d76ccedbf06f3a6239efbbca77d7 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Tue, 14 Aug 2018 14:07:12 +0200
+Subject: [PATCH] kernel-network-modules: add vlan kernel modules
+
+---
+ modules.d/90kernel-network-modules/module-setup.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/modules.d/90kernel-network-modules/module-setup.sh b/modules.d/90kernel-network-modules/module-setup.sh
+index 16ed3a74..600ef112 100755
+--- a/modules.d/90kernel-network-modules/module-setup.sh
++++ b/modules.d/90kernel-network-modules/module-setup.sh
+@@ -28,7 +28,7 @@ installkernel() {
+         =drivers/net/phy \
+         =drivers/net/team \
+         =drivers/net/ethernet \
+-        ecb arc4 bridge stp llc ipv6 bonding 8021q af_packet virtio_net xennet
++        ecb arc4 bridge stp llc ipv6 bonding 8021q ipvlan macvlan af_packet virtio_net xennet
+     hostonly="" instmods iscsi_ibft crc32c iscsi_boot_sysfs
+ }
+ 
+

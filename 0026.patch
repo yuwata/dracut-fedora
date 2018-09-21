@@ -1,0 +1,231 @@
+From 82fe4ea0a5a745c920aa396775b9ebb52b4d2927 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Tue, 14 Aug 2018 11:04:17 +0200
+Subject: [PATCH] enable parallel test suite
+
+$ time sudo make -j SKIP=14 V=2 check
+make[1]: Entering directory '/home/harald/git/dracut/test/TEST-13-ENC-RAID-LVM'
+make[1]: Entering directory '/home/harald/git/dracut/test/TEST-40-NBD'
+make[1]: Entering directory '/home/harald/git/dracut/test/TEST-04-FULL-SYSTEMD'
+make[1]: Entering directory '/home/harald/git/dracut/test/TEST-12-RAID-DEG'
+make[1]: Entering directory '/home/harald/git/dracut/test/TEST-15-BTRFSRAID'
+make[1]: Entering directory '/home/harald/git/dracut/test/TEST-16-DMSQUASH'
+make[1]: Entering directory '/home/harald/git/dracut/test/TEST-17-LVM-THIN'
+make[1]: Entering directory '/home/harald/git/dracut/test/TEST-11-LVM'
+make[1]: Entering directory '/home/harald/git/dracut/test/TEST-31-ISCSI-MULTI'
+make[1]: Entering directory '/home/harald/git/dracut/test/TEST-20-NFS'
+make[1]: Entering directory '/home/harald/git/dracut/test/TEST-99-RPM'
+make[1]: Entering directory '/home/harald/git/dracut/test/TEST-02-SYSTEMD'
+make[1]: Entering directory '/home/harald/git/dracut/test/TEST-30-ISCSI'
+make[1]: Entering directory '/home/harald/git/dracut/test/TEST-01-BASIC'
+make[1]: Entering directory '/home/harald/git/dracut/test/TEST-03-USR-MOUNT'
+make[1]: Entering directory '/home/harald/git/dracut/test/TEST-70-BONDBRIDGETEAMVLAN'
+make[1]: Entering directory '/home/harald/git/dracut/test/TEST-50-MULTINIC'
+make[1]: Entering directory '/home/harald/git/dracut/test/TEST-10-RAID'
+make[1]: Entering directory '/home/harald/git/dracut/test/TEST-18-LVM-ENC-LV'
+TEST: root filesystem on an encrypted LVM PV on a degraded RAID-5 [STARTED]
+TEST: root filesystem on NBD [STARTED]
+TEST: root filesystem on NBD [SKIPPED]
+TEST: Full systemd serialization/deserialization test with /usr mount [STARTED]
+TEST: root filesystem on multiple device btrfs [STARTED]
+make[1]: Leaving directory '/home/harald/git/dracut/test/TEST-40-NBD'
+TEST: root filesystem on a LiveCD dmsquash filesystem [STARTED]
+TEST: root filesystem on a LiveCD dmsquash filesystem [SKIPPED]
+make[1]: Leaving directory '/home/harald/git/dracut/test/TEST-16-DMSQUASH'
+TEST: root filesystem on LVM on encrypted partitions of a RAID-5 [STARTED]
+TEST: root filesystem on LVM PV [STARTED]
+TEST: rpm integrity after dracut and kernel install [STARTED]
+TEST: root filesystem on NFS [STARTED]
+TEST: root filesystem over iSCSI [STARTED]
+TEST: root filesystem on LVM PV with thin pool [STARTED]
+TEST: root filesystem over iSCSI [STARTED]
+TEST: root filesystem on a ext3 filesystem [STARTED]
+TEST: root filesystem on a ext3 filesystem [STARTED]
+TEST: root filesystem on a btrfs filesystem with /usr subvolume [STARTED]
+TEST: root filesystem on NFS with bridging/bonding/vlan [STARTED]
+TEST: root filesystem on NFS with multiple nics [STARTED]
+TEST: root filesystem on an encrypted LVM PV on a RAID-5 [STARTED]
+TEST: root filesystem on LVM on encrypted partitions of a RAID-5 [STARTED]
+TEST: root filesystem on LVM PV [OK]
+make[1]: Leaving directory '/home/harald/git/dracut/test/TEST-11-LVM'
+TEST: root filesystem on multiple device btrfs [OK]
+make[1]: Leaving directory '/home/harald/git/dracut/test/TEST-15-BTRFSRAID'
+TEST: root filesystem on LVM PV with thin pool [OK]
+make[1]: Leaving directory '/home/harald/git/dracut/test/TEST-17-LVM-THIN'
+TEST: root filesystem on a ext3 filesystem [OK]
+make[1]: Leaving directory '/home/harald/git/dracut/test/TEST-02-SYSTEMD'
+TEST: root filesystem on a btrfs filesystem with /usr subvolume [OK]
+make[1]: Leaving directory '/home/harald/git/dracut/test/TEST-03-USR-MOUNT'
+TEST: root filesystem on LVM on encrypted partitions of a RAID-5 [OK]
+make[1]: Leaving directory '/home/harald/git/dracut/test/TEST-18-LVM-ENC-LV'
+TEST: Full systemd serialization/deserialization test with /usr mount [OK]
+make[1]: Leaving directory '/home/harald/git/dracut/test/TEST-04-FULL-SYSTEMD'
+TEST: root filesystem on an encrypted LVM PV on a RAID-5 [OK]
+make[1]: Leaving directory '/home/harald/git/dracut/test/TEST-10-RAID'
+TEST: root filesystem on LVM on encrypted partitions of a RAID-5 [OK]
+make[1]: Leaving directory '/home/harald/git/dracut/test/TEST-13-ENC-RAID-LVM'
+TEST: root filesystem over iSCSI [OK]
+make[1]: Leaving directory '/home/harald/git/dracut/test/TEST-30-ISCSI'
+TEST: root filesystem on a ext3 filesystem [OK]
+make[1]: Leaving directory '/home/harald/git/dracut/test/TEST-01-BASIC'
+TEST: root filesystem over iSCSI [OK]
+make[1]: Leaving directory '/home/harald/git/dracut/test/TEST-31-ISCSI-MULTI'
+TEST: rpm integrity after dracut and kernel install [OK]
+make[1]: Leaving directory '/home/harald/git/dracut/test/TEST-99-RPM'
+TEST: root filesystem on NFS [OK]
+make[1]: Leaving directory '/home/harald/git/dracut/test/TEST-20-NFS'
+TEST: root filesystem on NFS with bridging/bonding/vlan [OK]
+make[1]: Leaving directory '/home/harald/git/dracut/test/TEST-70-BONDBRIDGETEAMVLAN'
+TEST: root filesystem on an encrypted LVM PV on a degraded RAID-5 [OK]
+make[1]: Leaving directory '/home/harald/git/dracut/test/TEST-12-RAID-DEG'
+TEST: root filesystem on NFS with multiple nics [OK]
+make[1]: Leaving directory '/home/harald/git/dracut/test/TEST-50-MULTINIC'
+
+real	9m3,969s
+user	22m50,323s
+sys	5m24,411s
+---
+ test/Makefile       | 21 +++++++++--------
+ test/test-functions | 68 ++++++++++++++++++++++++++++-------------------------
+ 2 files changed, 47 insertions(+), 42 deletions(-)
+
+diff --git a/test/Makefile b/test/Makefile
+index eaa944fb..0b33660b 100644
+--- a/test/Makefile
++++ b/test/Makefile
+@@ -1,15 +1,16 @@
+-.PHONY: all check clean
++.PHONY: all check clean $(wildcard TEST-??-*)
+ 
+-check:
++$(wildcard TEST-??-*):
+ 	@[ "$$EUID" == "0" ] || { echo "'check' must be run as root! Please use 'sudo'."; exit 1; }
+-	@{ ret=0; \
+-	for i in TEST-[0-9]*; do \
+-		[ -d $$i ] || continue ; \
+-		[ -f $$i/Makefile ] || continue ; \
+-		if [ -n "$$TESTS" ]; then t=$${i##TEST-}; t=$${t%%-*}; [ "$${TESTS#*$$t*}" != "$$TESTS" ] || continue; fi; \
+-		if [ -n "$$SKIP" ]; then t=$${i##TEST-}; t=$${t%%-*}; [ "$${SKIP#*$$t*}" != "$$SKIP" ] && continue; fi; \
+-		$(MAKE) -C $$i all ; ret=$$((ret + $$?)); \
+-	done; exit $$ret; }
++	@{ \
++		[ -d $@ ] || exit 0; \
++		[ -f $@/Makefile ] || exit 0; \
++		if [ -n "$$TESTS" ]; then t=$${$@##TEST-}; t=$${t%%-*}; [ "$${TESTS#*$$t*}" != "$$TESTS" ] || exit 0; fi; \
++		if [ -n "$$SKIP" ]; then t=$${$@##TEST-}; t=$${t%%-*}; [ "$${SKIP#*$$t*}" != "$$SKIP" ] && exit 0; fi; \
++		$(MAKE) -C $@ all ; \
++	}
++
++check: $(wildcard TEST-??-*)
+ 
+ clean:
+ 	@for i in TEST-[0-9]*; do \
+diff --git a/test/test-functions b/test/test-functions
+index 2b8a4d26..57611ff5 100644
+--- a/test/test-functions
++++ b/test/test-functions
+@@ -4,14 +4,14 @@ export PATH
+ 
+ [[ -e .testdir ]] && . .testdir
+ if [[ -z "$TESTDIR" ]] || [[ ! -d "$TESTDIR" ]]; then
+-   TESTDIR=$(mktemp -d -p "/var/tmp" -t dracut-test.XXXXXX)
++    TESTDIR=$(mktemp -d -p "/var/tmp" -t dracut-test.XXXXXX)
+ fi
+ echo "TESTDIR=\"$TESTDIR\"" > .testdir
+ export TESTDIR
+ 
+ command -v test_check &>/dev/null || test_check() {
+-    :
+-}
++        :
++    }
+ 
+ # terminal sequence to set color to a 'success' color (currently: green)
+ function SETCOLOR_SUCCESS() { echo -en '\033[0;32m'; }
+@@ -22,6 +22,11 @@ function SETCOLOR_WARNING() { echo -en '\033[0;33m'; }
+ # terminal sequence to reset to the default color.
+ function SETCOLOR_NORMAL() { echo -en '\033[0;39m'; }
+ 
++COLOR_SUCCESS='\033[0;32m'
++COLOR_FAILURE='\033[0;31m'
++COLOR_WARNING='\033[0;33m'
++COLOR_NORMAL='\033[0;39m'
++
+ check_root() {
+     if (( $EUID != 0 )); then
+         SETCOLOR_FAILURE; echo "Tests must be run as root! Please use 'sudo'."; SETCOLOR_NORMAL
+@@ -49,45 +54,44 @@ while (($# > 0)); do
+ 	    exit $?;;
+         --all)
+             check_root
+-	    echo -n "TEST: $TEST_DESCRIPTION ";
+             if ! test_check 2&>test.log ; then
+-                SETCOLOR_WARNING
+-                echo "[SKIPPED]"
+-                SETCOLOR_NORMAL
++ 	        echo -e "TEST: $TEST_DESCRIPTION " $COLOR_WARNING "[SKIPPED]" $COLOR_NORMAL
+ 		exit 0;
++            else
++	        echo "TEST: $TEST_DESCRIPTION [STARTED]";
+             fi
+             if [ "$V" != "1" ]; then
+-	    (
+-		test_setup && test_run
+-		ret=$?
+-		test_cleanup
+-		rm -fr -- "$TESTDIR"
+-		rm -f -- .testdir
+-		exit $ret
+-	    ) </dev/null >test.log 2>&1
++	        (
++		    test_setup && test_run
++		    ret=$?
++		    test_cleanup
++		    rm -fr -- "$TESTDIR"
++		    rm -f -- .testdir
++		    exit $ret
++	        ) </dev/null >test.log 2>&1
+             else
+-            set -o pipefail
+-            (
+-		test_setup && test_run
+-		ret=$?
+-		test_cleanup
+-		rm -fr -- "$TESTDIR"
+-		rm -f -- .testdir
+-		exit $ret
+-	    ) </dev/null 2>&1 | tee test.log
++                set -o pipefail
++                (
++		    test_setup && test_run
++		    ret=$?
++		    test_cleanup
++		    rm -fr -- "$TESTDIR"
++		    rm -f -- .testdir
++		    exit $ret
++	        ) </dev/null 2>&1 | tee test.log
+             fi
+ 	    ret=$?
+             set +o pipefail
+ 	    if [ $ret -eq 0 ]; then
+-               rm -- test.log
+-               SETCOLOR_SUCCESS
+-	       echo "[OK]"
+-               SETCOLOR_NORMAL
++                rm -- test.log
++	        echo -e "TEST: $TEST_DESCRIPTION " $COLOR_SUCCESS "[OK]" $COLOR_NORMAL
+ 	    else
+-               SETCOLOR_FAILURE
+-	       echo "[FAILED]"
+-               SETCOLOR_NORMAL
+-	       echo "see $(pwd)/test.log"
++	        echo -e "TEST: $TEST_DESCRIPTION " $COLOR_FAILURE "[FAILED]" $COLOR_NORMAL
++                if [ "$V" == "2" ]; then
++	            cat $(pwd)/test.log
++                else
++	            echo "see $(pwd)/test.log"
++                fi
+ 	    fi
+ 	    exit $ret;;
+         *) break ;;
+

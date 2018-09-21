@@ -1,0 +1,23 @@
+From 75b8b144a1cf5c7e15e0454f847615cadf6518e9 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Tue, 14 Aug 2018 17:02:14 +0200
+Subject: [PATCH] fedora-test.sh: don't parallelize travis tests
+
+---
+ fedora-test.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/fedora-test.sh b/fedora-test.sh
+index 146c7f2f..9528f08c 100755
+--- a/fedora-test.sh
++++ b/fedora-test.sh
+@@ -48,7 +48,7 @@ make -j$NCPU all syncheck rpm
+ 
+ cd test
+ 
+-time sudo make -j$((NCPU/2+1)) \
++time sudo make \
+      KVERSION=$(rpm -qa kernel --qf '%{VERSION}-%{RELEASE}.%{ARCH}\n' | sort -rn | head -1) \
+      TEST_RUN_ID=$RUN_ID \
+      -k V=2 \
+

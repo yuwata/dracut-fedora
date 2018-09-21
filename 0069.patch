@@ -1,0 +1,30 @@
+From bd03d374b704324b595e2af1901e590ff7c5a92b Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 16 Aug 2018 14:28:54 +0200
+Subject: [PATCH] travis: modprobe amd nested=1
+
+GREAT!
+
+$ modinfo kvm-intel kvm-amd| fgrep nested
+parm:           nested:bool
+parm:           nested:int
+---
+ .travis.yml | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/.travis.yml b/.travis.yml
+index 91ecafed..0932805f 100644
+--- a/.travis.yml
++++ b/.travis.yml
+@@ -14,8 +14,8 @@ env:
+ before_script:
+   - docker pull fedora:$IMAGE
+   - |
+-    sudo modprobe kvm-intel nested=y || :
+-    sudo modprobe kvm-amd nested=y || :
++    sudo modprobe kvm-intel nested=1 || :
++    sudo modprobe kvm-amd nested=1 || :
+     dmesg | tail || :
+   - git pull --depth=100
+   - |
+

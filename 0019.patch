@@ -1,0 +1,79 @@
+From 746135dd1ebc8dc7e26132bfa14ac159db7b2b95 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Mon, 13 Aug 2018 10:01:36 +0200
+Subject: [PATCH] mdraid: better handling of various UUID formats
+
+---
+ modules.d/90mdraid/mdraid_start.sh |  4 ++++
+ modules.d/90mdraid/parse-md.sh     | 19 ++++++++-----------
+ 2 files changed, 12 insertions(+), 11 deletions(-)
+
+diff --git a/modules.d/90mdraid/mdraid_start.sh b/modules.d/90mdraid/mdraid_start.sh
+index 2f5daff1..77e843d7 100755
+--- a/modules.d/90mdraid/mdraid_start.sh
++++ b/modules.d/90mdraid/mdraid_start.sh
+@@ -39,6 +39,9 @@ _md_force_run() {
+     _offroot=$(strstr "$(mdadm --help-options 2>&1)" offroot && echo --offroot)
+ 
+     if [ -n "$_MD_UUID" ]; then
++        _MD_UUID=$(str_replace "$_MD_UUID" "-" "")
++        _MD_UUID=$(str_replace "$_MD_UUID" ":" "")
++
+         for _md in /dev/md[0-9_]*; do
+             [ -b "$_md" ] || continue
+             _UUID=$(
+@@ -50,6 +53,7 @@ _md_force_run() {
+                 )
+ 
+             [ -z "$_UUID" ] && continue
++            _UUID=$(str_replace "$_UUID" ":" "")
+ 
+             # check if we should handle this device
+             strstr " $_MD_UUID " " $_UUID " || continue
+diff --git a/modules.d/90mdraid/parse-md.sh b/modules.d/90mdraid/parse-md.sh
+index 428f9515..4d9baa52 100755
+--- a/modules.d/90mdraid/parse-md.sh
++++ b/modules.d/90mdraid/parse-md.sh
+@@ -1,6 +1,9 @@
+ #!/bin/sh
+ 
+ MD_UUID=$(getargs rd.md.uuid -d rd_MD_UUID=)
++# normalize the uuid
++MD_UUID=$(str_replace "$MD_UUID" "-" "")
++MD_UUID=$(str_replace "$MD_UUID" ":" "")
+ 
+ if ( ! [ -n "$MD_UUID" ] && ! getargbool 0 rd.auto ) || ! getargbool 1 rd.md -d -n rd_NO_MD; then
+     info "rd.md=0: removing MD RAID activation"
+@@ -12,13 +15,12 @@ else
+             [ -e "$f" ] || continue
+             while read line || [ -n "$line" ]; do
+                 if [ "${line%%UUID CHECK}" != "$line" ]; then
++                    for uuid in $MD_UUID; do
++                        printf 'ENV{ID_FS_UUID}=="%s", GOTO="md_uuid_ok"\n' "$(expr substr $uuid 1 8)-$(expr substr $uuid 9 4)-$(expr substr $uuid 13 4)-$(expr substr $uuid 17 4)-$(expr substr $uuid 21 12)"
++                    done;
+                     printf 'IMPORT{program}="/sbin/mdadm --examine --export $tempnode"\n'
+                     for uuid in $MD_UUID; do
+-                        uuid=$(str_replace "$uuid" "-" "")
+-                        uuid=$(str_replace "$uuid" ":" "")
+-                        uuid="$(expr substr $uuid 1 8)-$(expr substr $uuid 9 4)-$(expr substr $uuid 13 4)-$(expr substr $uuid 17 4)-$(expr substr $uuid 21 12)"
+-                        printf 'ENV{MD_UUID}=="%s", GOTO="md_uuid_ok"\n' $uuid
+-                        printf 'ENV{ID_FS_UUID}=="%s", GOTO="md_uuid_ok"\n' $uuid
++                        printf 'ENV{MD_UUID}=="%s", GOTO="md_uuid_ok"\n' "$(expr substr $uuid 1 8):$(expr substr $uuid 9 8):$(expr substr $uuid 17 8):$(expr substr $uuid 25 8)"
+                     done;
+                     printf 'GOTO="md_end"\n'
+                     printf 'LABEL="md_uuid_ok"\n'
+@@ -29,12 +31,7 @@ else
+             mv "${f}.new" "$f"
+         done
+         for uuid in $MD_UUID; do
+-            if strstr "$uuid" "-"; then
+-                # convert ID_FS_UUID to MD_UUID format
+-                uuid=$(str_replace "$uuid" "-" "")
+-                uuid=$(str_replace "$uuid" ":" "")
+-                uuid="$(expr substr $uuid 1 8):$(expr substr $uuid 9 8):$(expr substr $uuid 17 8):$(expr substr $uuid 25 8)"
+-            fi
++            uuid="$(expr substr $uuid 1 8):$(expr substr $uuid 9 8):$(expr substr $uuid 17 8):$(expr substr $uuid 25 8)"
+             wait_for_dev "/dev/disk/by-id/md-uuid-${uuid}"
+         done
+     fi
+

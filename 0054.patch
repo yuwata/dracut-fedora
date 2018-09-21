@@ -1,0 +1,39 @@
+From 6f90be2971439e84c4efb61d1fc888b165b3f3ca Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Thu, 16 Aug 2018 10:33:06 +0200
+Subject: [PATCH] travis: fixup
+
+---
+ .travis.yml | 13 ++++---------
+ 1 file changed, 4 insertions(+), 9 deletions(-)
+
+diff --git a/.travis.yml b/.travis.yml
+index 72cfe8f9..cd05ceae 100644
+--- a/.travis.yml
++++ b/.travis.yml
+@@ -10,20 +10,15 @@ env:
+   - IMAGE=latest  TESTS=50
+   - IMAGE=latest  TESTS=70
+   - IMAGE=latest  TESTS=99
+-#  - IMAGE=rawhide TESTS="01 02 03 04 10 11 12 13 15 17 18"
+-#  - IMAGE=rawhide TESTS=20
+-#  - IMAGE=rawhide TESTS="30 31"
+-#  - IMAGE=rawhide TESTS=50
+-#  - IMAGE=rawhide TESTS=70
+-#  - IMAGE=rawhide TESTS=99
+ 
+ before_script:
+-- docker pull fedora:$IMAGE
+-- git describe --abbrev=0 --tags || :
+-- git describe --tags || :
++  - docker pull fedora:$IMAGE
++  - git describe --abbrev=0 --tags || :
++  - git describe --tags || :
+ 
+ script:
+ - docker run --privileged -it -v $(pwd)/:/dracut fedora:$IMAGE /dracut/fedora-test.sh $IMAGE-$$ "$TESTS"
++
+ notifications:
+   webhooks:
+     urls:
+

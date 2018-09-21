@@ -1,0 +1,21 @@
+From 604c09b1dacd4a364ee88d0e405a4e6692bdc1c2 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Tue, 14 Aug 2018 15:28:56 +0200
+Subject: [PATCH] TEST-31-ISCSI-MULTI/test.sh: fixed test description
+
+---
+ test/TEST-31-ISCSI-MULTI/test.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/test/TEST-31-ISCSI-MULTI/test.sh b/test/TEST-31-ISCSI-MULTI/test.sh
+index c2f86ac8..1ed3fb7b 100755
+--- a/test/TEST-31-ISCSI-MULTI/test.sh
++++ b/test/TEST-31-ISCSI-MULTI/test.sh
+@@ -1,5 +1,5 @@
+ #!/bin/bash
+-TEST_DESCRIPTION="root filesystem over iSCSI"
++TEST_DESCRIPTION="root filesystem over multiple iSCSI"
+ 
+ KVERSION=${KVERSION-$(uname -r)}
+ 
+

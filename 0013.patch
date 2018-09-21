@@ -58,3 +58,4 @@ index 754ed3c9..9b9d497a 100644
  %{dracutlibdir}/dracut.conf.d/02-rescue.conf
  %if 0%{?fedora} || 0%{?rhel}
  %{_prefix}/lib/kernel/install.d/51-dracut-rescue.install
+

@@ -1,0 +1,46 @@
+From e9a84e0a215fb5a79e563f665bc406c0ea177d32 Mon Sep 17 00:00:00 2001
+From: Daniel Molkentin <dmolkentin@suse.com>
+Date: Wed, 5 Sep 2018 12:06:06 +0200
+Subject: [PATCH] 98dracut-systemd: Start systemd-vconsole-setup before
+ dracut-cmdline-ask
+
+This is what happened before this patch (edited for brevity):
+
+  dracut-cmdline-ask.service in modules.d/98dracut-systemd, which invokes
+  dracut-cmdline-ask.sh. This script and systemd-vconsole-setup are
+  started in parallel for the same console (tty1).
+
+  Then dracut-cmdline-ask quits immediately without doing anything (unless
+  rd.cmdline=ask is given). As this is a bash script and it gets tty as
+  stdin as specified in its *.service, this triggers the hangup of tty1 at
+  its exit.
+
+  Meanwhile systemd-vconsole-setup continues and tries some ioctls after
+  that, but they fail because of the hung up tty1.
+
+The usual culprit for starting systemd-vconsole-setup early on is
+plymouth-start.service, even if plymouth.enable=0 is set.
+
+A popular (and annoying) symptom of this as reported by users was
+the inability use their configured keyboard layout in plymouth when
+unlocking their crypted block devices.
+
+Reference: boo#1055834
+---
+ modules.d/98dracut-systemd/dracut-cmdline-ask.service | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/modules.d/98dracut-systemd/dracut-cmdline-ask.service b/modules.d/98dracut-systemd/dracut-cmdline-ask.service
+index ce7deda5..b96c2aaf 100644
+--- a/modules.d/98dracut-systemd/dracut-cmdline-ask.service
++++ b/modules.d/98dracut-systemd/dracut-cmdline-ask.service
+@@ -7,6 +7,8 @@ Description=dracut ask for additional cmdline parameters
+ DefaultDependencies=no
+ Before=dracut-cmdline.service
+ After=systemd-journald.socket
++After=systemd-vconsole-setup.service
++Requires=systemd-vconsole-setup.service
+ Wants=systemd-journald.socket
+ ConditionPathExists=/usr/lib/initrd-release
+ ConditionKernelCommandLine=|rd.cmdline=ask
+
