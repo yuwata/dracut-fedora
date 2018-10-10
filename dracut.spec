@@ -1,6 +1,6 @@
-%global gitcommit e9a84e0a215fb5a79e563f665bc406c0ea177d32
+%global gitcommit db4d6bb42c3e9a2bf7a62d8327cc3c13e5594935
 %{?gitcommit:%global gitcommitshort %(c=%{gitcommit}; echo ${c:0:7})}
-%global gitdate 20180905
+%global gitdate 20181009
 
 %define dracutlibdir %{_prefix}/lib/dracut
 %bcond_without doc
@@ -9,10 +9,10 @@
 # strip the automatically generated dep here and instead co-own the
 # directory.
 %global __requires_exclude pkg-config
-%define dist_free_release 14.3.git%{gitdate}
+%define dist_free_release 4.1.git%{gitdate}
 
 Name: dracut
-Version: 048
+Version: 049
 Release: %{dist_free_release}%{?dist}
 
 Summary: Initramfs generator using udev
@@ -58,7 +58,7 @@ BuildRequires: docbook-style-xsl docbook-dtds libxslt
 %endif
 
 %if 0%{?suse_version}
--BuildRequires: docbook-xsl-stylesheets libxslt
+BuildRequires: docbook-xsl-stylesheets libxslt
 %endif
 
 BuildRequires: asciidoc
@@ -186,6 +186,16 @@ Requires: %{name} = %{version}-%{release}
 
 %description tools
 This package contains tools to assemble the local initrd and host configuration.
+
+%package squash
+Summary: dracut module to build an initramfs with most files in a squashfs image
+Requires: %{name} = %{version}-%{release}
+Requires: squashfs-tools
+
+%description squash
+This package provides a dracut module to build an initramfs, but store most files
+in a squashfs image, result in a smaller initramfs size and reduce runtime memory
+usage.
 
 %prep
 %if %{defined gitcommit}
@@ -353,6 +363,7 @@ install -m 0755 51-dracut-rescue-postinst.sh $RPM_BUILD_ROOT%{_sysconfdir}/kerne
 %{dracutlibdir}/modules.d/90dm
 %{dracutlibdir}/modules.d/90dmraid
 %{dracutlibdir}/modules.d/90kernel-modules
+%{dracutlibdir}/modules.d/90kernel-modules-extra
 %{dracutlibdir}/modules.d/90lvm
 %{dracutlibdir}/modules.d/90mdraid
 %{dracutlibdir}/modules.d/90multipath
@@ -422,6 +433,8 @@ install -m 0755 51-dracut-rescue-postinst.sh $RPM_BUILD_ROOT%{_sysconfdir}/kerne
 
 %files network
 %{dracutlibdir}/modules.d/02systemd-networkd
+%{dracutlibdir}/modules.d/35network-manager
+%{dracutlibdir}/modules.d/35network-legacy
 %{dracutlibdir}/modules.d/40network
 %{dracutlibdir}/modules.d/45ifcfg
 %{dracutlibdir}/modules.d/90kernel-network-modules
@@ -457,6 +470,9 @@ install -m 0755 51-dracut-rescue-postinst.sh $RPM_BUILD_ROOT%{_sysconfdir}/kerne
 %dir /var/lib/dracut
 %dir /var/lib/dracut/overlay
 
+%files squash
+%{dracutlibdir}/modules.d/99squash
+
 %files config-generic
 %{dracutlibdir}/dracut.conf.d/02-generic-image.conf
 
@@ -469,14 +485,18 @@ install -m 0755 51-dracut-rescue-postinst.sh $RPM_BUILD_ROOT%{_sysconfdir}/kerne
 %endif
 
 %changelog
-* Wed Sep 05 2018 Yu Watanabe <watanabe.yu@gmail.com> - 048-14.3.git20180905
-- Update to latest git snapshot e9a84e0a215fb5a79e563f665bc406c0ea177d32
+* Thu Oct 11 2018 Yu Watanabe <watanabe.yu@gmail.com> - 049-4.1.git20181009
+- Update to latest git snapshot db4d6bb42c3e9a2bf7a62d8327cc3c13e5594935
 
-* Thu Aug 23 2018 Yu Watanabe <watanabe.yu@gmail.com> - 048-14.2.git20180821
-- Update to latest git snapshot 09ba1b289f2cba613c1950b03f0f549ebb7eb83f
+* Wed Oct 10 2018 Harald Hoyer <harald@redhat.com> - 049-4.git20181010
+- fixed spec file
+- git snapshot
 
-* Mon Jul 30 2018 Yu Watanabe <watanabe.yu@gmail.com> - 048-14.1.git20180726
-- Update to latest git snapshot 55a12055c511979be0a471d0d7c24c040b830887
+* Mon Oct 08 2018 Harald Hoyer <harald@redhat.com> - 049-1
+- version 049
+
+* Fri Sep 21 2018 Harald Hoyer <harald@redhat.com> - 048-99.git20180921
+- git snapshot
 
 * Thu Jul 26 2018 Harald Hoyer <harald@redhat.com> - 048-14.git20180726
 - bring back 51-dracut-rescue-postinst.sh
