@@ -1,0 +1,23 @@
+From db4d6bb42c3e9a2bf7a62d8327cc3c13e5594935 Mon Sep 17 00:00:00 2001
+From: Pedro Monreal <pmgdeb@gmail.com>
+Date: Mon, 8 Oct 2018 11:09:11 +0200
+Subject: [PATCH] Added space in Resolving executable dependencies done as in
+ the rest of the messages
+
+---
+ dracut.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/dracut.sh b/dracut.sh
+index e683a9bc..fb50cfda 100755
+--- a/dracut.sh
++++ b/dracut.sh
+@@ -1572,7 +1572,7 @@ if [[ $kernel_only != yes ]]; then
+         dinfo "*** Resolving executable dependencies ***"
+         find "$initdir" -type f -perm /0111 -not -path '*.ko' -print0 \
+         | xargs -r -0 $DRACUT_INSTALL ${initdir:+-D "$initdir"} -R ${DRACUT_FIPS_MODE:+-f} --
+-        dinfo "*** Resolving executable dependencies done***"
++        dinfo "*** Resolving executable dependencies done ***"
+     fi
+ 
+     # Now we are done with lazy resolving, always install dependencies

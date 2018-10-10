@@ -1,0 +1,44 @@
+From f51ab4a81f1fedb9eac31ecd22a3f87db3951650 Mon Sep 17 00:00:00 2001
+From: Kairui Song <kasong@redhat.com>
+Date: Sat, 29 Sep 2018 17:14:31 +0800
+Subject: [PATCH] dracut.spec: Fix error introduced by 70291ed
+
+70291e0 ('dracut.spec: Add dracut-squash package') introduced a new
+dracut-squash package, but by accident it overrided some other package
+spec and the dependency name is wrong. This patch will fix it.
+---
+ dracut.spec | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/dracut.spec b/dracut.spec
+index 155868ce..0c266192 100644
+--- a/dracut.spec
++++ b/dracut.spec
+@@ -181,7 +181,7 @@ This package contains tools to assemble the local initrd and host configuration.
+ %package squash
+ Summary: dracut module to build an initramfs with most files in a squashfs image
+ Requires: %{name} = %{version}-%{release}
+-Requires: squash-tools
++Requires: squashfs-tools
+ 
+ %description squash
+ This package provides a dracut module to build an initramfs, but store most files
+@@ -452,14 +452,14 @@ install -m 0755 51-dracut-rescue-postinst.sh $RPM_BUILD_ROOT%{_sysconfdir}/kerne
+ %doc %{_mandir}/man8/dracut-catimages.8*
+ %endif
+ 
+-%files squash
+-%{dracutlibdir}/modules.d/99squash
+-
+ %{_bindir}/dracut-catimages
+ %dir /boot/dracut
+ %dir /var/lib/dracut
+ %dir /var/lib/dracut/overlay
+ 
++%files squash
++%{dracutlibdir}/modules.d/99squash
++
+ %files config-generic
+ %{dracutlibdir}/dracut.conf.d/02-generic-image.conf
+ 
+
