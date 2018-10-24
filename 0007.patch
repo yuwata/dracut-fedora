@@ -1,0 +1,26 @@
+From 7117bf627028298970d8a6a5e153e1942f3430f3 Mon Sep 17 00:00:00 2001
+From: Daniel Molkentin <dmolkentin@suse.com>
+Date: Fri, 19 Oct 2018 14:30:36 +0200
+Subject: [PATCH] 99base: Allow files with backslashes in hostonly files
+
+Files with blackslashes are routinely by systemd.
+
+Reference: bsc#1090884
+---
+ modules.d/99base/dracut-lib.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/modules.d/99base/dracut-lib.sh b/modules.d/99base/dracut-lib.sh
+index f71e757c..ab348855 100755
+--- a/modules.d/99base/dracut-lib.sh
++++ b/modules.d/99base/dracut-lib.sh
+@@ -1327,7 +1327,7 @@ show_memstats()
+ remove_hostonly_files() {
+     rm -fr /etc/cmdline /etc/cmdline.d/*.conf "$hookdir/initqueue/finished"
+     if [ -f /lib/dracut/hostonly-files ]; then
+-        while read line || [ -n "$line" ]; do
++        while read -r line || [ -n "$line" ]; do
+             [ -e "$line" ] || [ -h "$line" ] || continue
+             rm -f "$line"
+         done < /lib/dracut/hostonly-files
+

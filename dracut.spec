@@ -5,7 +5,7 @@
 # strip the automatically generated dep here and instead co-own the
 # directory.
 %global __requires_exclude pkg-config
-%define dist_free_release 4.git20181010
+%define dist_free_release 11.git20181024
 
 Name: dracut
 Version: 049
@@ -31,6 +31,13 @@ Source0: http://www.kernel.org/pub/linux/utils/boot/dracut/dracut-%{version}.tar
 Patch1: 0001.patch
 Patch2: 0002.patch
 Patch3: 0003.patch
+Patch4: 0004.patch
+Patch5: 0005.patch
+Patch6: 0006.patch
+Patch7: 0007.patch
+Patch8: 0008.patch
+Patch9: 0009.patch
+Patch10: 0010.patch
 
 Source1: https://www.gnu.org/licenses/lgpl-2.1.txt
 
@@ -476,6 +483,9 @@ install -m 0755 51-dracut-rescue-postinst.sh $RPM_BUILD_ROOT%{_sysconfdir}/kerne
 %endif
 
 %changelog
+* Wed Oct 24 2018 Harald Hoyer <harald@redhat.com> - 049-11.git20181024
+- git snapshot
+
 * Wed Oct 10 2018 Harald Hoyer <harald@redhat.com> - 049-4.git20181010
 - fixed spec file
 - git snapshot

@@ -1,0 +1,37 @@
+From 765b20333d9589e09b29dbe0d8304a56745623c6 Mon Sep 17 00:00:00 2001
+From: Dusty Mabe <dusty@dustymabe.com>
+Date: Mon, 22 Oct 2018 13:25:29 -0400
+Subject: [PATCH] 95iscsi: drop systemd dracut service dependencies for iscsid
+
+These dependencies cause an odd issue where swap devices specified
+by resume= on the kernel command line will cause systemd device
+timeouts to occur on boot. According to @haraldh these lines aren't
+needed because the socket activiation will take care of it for us.
+Removing these lines now as it fixes the resume= device timeout issue.
+
+Fixes #480
+Fixes https://bugzilla.redhat.com/show_bug.cgi?id=1641268
+---
+ modules.d/95iscsi/module-setup.sh | 8 --------
+ 1 file changed, 8 deletions(-)
+
+diff --git a/modules.d/95iscsi/module-setup.sh b/modules.d/95iscsi/module-setup.sh
+index 5c2073bb..3c791001 100755
+--- a/modules.d/95iscsi/module-setup.sh
++++ b/modules.d/95iscsi/module-setup.sh
+@@ -257,14 +257,6 @@ install() {
+             ; do
+             ln_r "$systemdsystemunitdir/${i}" "$systemdsystemunitdir/basic.target.wants/${i}"
+         done
+-
+-        # Make sure iscsid is started after dracut-cmdline and ready for the initqueue
+-        mkdir -p "${initdir}/$systemdsystemunitdir/iscsid.service.d"
+-        (
+-            echo "[Unit]"
+-            echo "After=dracut-cmdline.service"
+-            echo "Before=dracut-initqueue.service"
+-        ) > "${initdir}/$systemdsystemunitdir/iscsid.service.d/dracut.conf"
+     fi
+     inst_dir /var/lib/iscsi
+     dracut_need_initqueue
+

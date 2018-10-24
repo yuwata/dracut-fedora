@@ -1,0 +1,31 @@
+From b9af0fcdfb2364245b333a123cdb07523855079f Mon Sep 17 00:00:00 2001
+From: Kairui Song <kasong@redhat.com>
+Date: Thu, 18 Oct 2018 17:05:22 +0800
+Subject: [PATCH] 99squash: Don't clean up squahfs on isolate
+
+The only time we need to cleanup squahfs manually is on switch root, to
+release resource and memory. We've covered that by setting
+"Conflicts=initrd-switch-root.target" for squash cleanup service.
+On shutdown systemd will take care of squahfs mounts. But for other
+isolate, files in initramfs are most likely still required, so don't
+clean up squahfs. For example, kdump's emergency handler will isolate
+into its own target, if squahfs is cleaned up it will fail.
+
+Signed-off-by: Kairui Song <kasong@redhat.com>
+---
+ modules.d/99squash/squash-mnt-clear.service | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/modules.d/99squash/squash-mnt-clear.service b/modules.d/99squash/squash-mnt-clear.service
+index 8dd17812..f8d5db46 100644
+--- a/modules.d/99squash/squash-mnt-clear.service
++++ b/modules.d/99squash/squash-mnt-clear.service
+@@ -9,6 +9,7 @@ After=dracut-initqueue.service dracut-pre-pivot.service
+ Before=initrd-cleanup.service
+ ConditionPathExists=/squash/root
+ Conflicts=initrd-switch-root.target
++IgnoreOnIsolate=true
+ 
+ [Service]
+ Type=oneshot
+

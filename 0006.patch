@@ -1,0 +1,28 @@
+From e54ab383f7529f340d69536709624dffb30046a1 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Renaud=20M=C3=A9trich?= <rmetrich@redhat.com>
+Date: Fri, 19 Oct 2018 13:21:37 +0200
+Subject: [PATCH] fips: check fips integrity just before mounting local
+ filesystems in /sysroot
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Renaud Métrich <rmetrich@redhat.com>
+---
+ modules.d/01fips/module-setup.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/modules.d/01fips/module-setup.sh b/modules.d/01fips/module-setup.sh
+index f3af4d90..808292af 100755
+--- a/modules.d/01fips/module-setup.sh
++++ b/modules.d/01fips/module-setup.sh
+@@ -52,7 +52,7 @@ installkernel() {
+ # called by dracut
+ install() {
+     local _dir
+-    inst_hook pre-trigger 01 "$moddir/fips-boot.sh"
++    inst_hook pre-mount 01 "$moddir/fips-boot.sh"
+     inst_hook pre-pivot 01 "$moddir/fips-noboot.sh"
+     inst_script "$moddir/fips.sh" /sbin/fips.sh
+ 
+

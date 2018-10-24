@@ -1,0 +1,24 @@
+From b38b7fef36333a59890233dccfbbb6d2c40ebe83 Mon Sep 17 00:00:00 2001
+From: Daniel Molkentin <dmolkentin@suse.com>
+Date: Fri, 19 Oct 2018 14:39:30 +0200
+Subject: [PATCH] 95dasd_rules: mark dasd rules host_only
+
+Reference: bsc#1090884
+---
+ modules.d/95dasd_rules/module-setup.sh | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/modules.d/95dasd_rules/module-setup.sh b/modules.d/95dasd_rules/module-setup.sh
+index 488400c3..124dbad9 100755
+--- a/modules.d/95dasd_rules/module-setup.sh
++++ b/modules.d/95dasd_rules/module-setup.sh
+@@ -54,6 +54,8 @@ install() {
+     if [[ $hostonly ]] ; then
+         inst_rules_wildcard 51-dasd-*.rules
+         inst_rules_wildcard 41-s390x-dasd-*.rules
++        mark_hostonly /etc/udev/rules.d/51-dasd-*.rules
++        mark_hostonly /etc/udev/rules.d/41-s390x-dasd-*.rules
+     fi
+     inst_rules 59-dasd.rules
+ }
+
