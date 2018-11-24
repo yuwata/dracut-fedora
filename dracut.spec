@@ -1,6 +1,6 @@
-%global gitcommit 83cbc06ab91288e2d931b4f36935bfdb79a99b0e
+%global gitcommit 01ffcf342ae65984c655f10a2fd35019a492ee5c
 %{?gitcommit:%global gitcommitshort %(c=%{gitcommit}; echo ${c:0:7})}
-%global gitdate 20181012
+%global gitdate 20181115
 
 %define dracutlibdir %{_prefix}/lib/dracut
 %bcond_without doc
@@ -9,7 +9,7 @@
 # strip the automatically generated dep here and instead co-own the
 # directory.
 %global __requires_exclude pkg-config
-%define dist_free_release 4.2.git%{gitdate}
+%define dist_free_release 11.1.git%{gitdate}
 
 Name: dracut
 Version: 049
@@ -485,11 +485,11 @@ install -m 0755 51-dracut-rescue-postinst.sh $RPM_BUILD_ROOT%{_sysconfdir}/kerne
 %endif
 
 %changelog
-* Mon Oct 15 2018 Yu Watanabe <watanabe.yu@gmail.com> - 049-4.2.git20181012
-- Update to latest git snapshot 83cbc06ab91288e2d931b4f36935bfdb79a99b0e
+* Sun Nov 25 2018 Yu Watanabe <watanabe.yu@gmail.com> - 049-11.1.git20181115
+- Update to latest git snapshot 01ffcf342ae65984c655f10a2fd35019a492ee5c
 
-* Thu Oct 11 2018 Yu Watanabe <watanabe.yu@gmail.com> - 049-4.1.git20181009
-- Update to latest git snapshot db4d6bb42c3e9a2bf7a62d8327cc3c13e5594935
+* Wed Oct 24 2018 Harald Hoyer <harald@redhat.com> - 049-11.git20181024
+- git snapshot
 
 * Wed Oct 10 2018 Harald Hoyer <harald@redhat.com> - 049-4.git20181010
 - fixed spec file
