@@ -1,6 +1,6 @@
-%global gitcommit 01ffcf342ae65984c655f10a2fd35019a492ee5c
+%global gitcommit fb280834d77a17a508d2bb22f5196de9ffd4fee7
 %{?gitcommit:%global gitcommitshort %(c=%{gitcommit}; echo ${c:0:7})}
-%global gitdate 20181115
+%global gitdate 20181130
 
 %define dracutlibdir %{_prefix}/lib/dracut
 %bcond_without doc
@@ -9,7 +9,7 @@
 # strip the automatically generated dep here and instead co-own the
 # directory.
 %global __requires_exclude pkg-config
-%define dist_free_release 11.1.git%{gitdate}
+%define dist_free_release 11.2.git%{gitdate}
 
 Name: dracut
 Version: 049
@@ -485,6 +485,9 @@ install -m 0755 51-dracut-rescue-postinst.sh $RPM_BUILD_ROOT%{_sysconfdir}/kerne
 %endif
 
 %changelog
+* Mon Dec 03 2018 Yu Watanabe <watanabe.yu@gmail.com> - 049-11.2.git20181130
+- Update to latest git snapshot fb280834d77a17a508d2bb22f5196de9ffd4fee7
+
 * Sun Nov 25 2018 Yu Watanabe <watanabe.yu@gmail.com> - 049-11.1.git20181115
 - Update to latest git snapshot 01ffcf342ae65984c655f10a2fd35019a492ee5c
 
