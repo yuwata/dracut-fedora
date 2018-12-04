@@ -1,0 +1,22 @@
+From b8a8d7a64e146e452608b1f4bea1580a7b9449f6 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Tue, 4 Dec 2018 10:22:28 +0100
+Subject: [PATCH] fedora-test.sh: install tcpdump
+
+---
+ fedora-test.sh | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/fedora-test.sh b/fedora-test.sh
+index 87023a84..e897c325 100755
+--- a/fedora-test.sh
++++ b/fedora-test.sh
+@@ -39,6 +39,7 @@ dnf -y install --best --allowerasing \
+     /usr/bin/qemu-kvm \
+     /usr/bin/qemu-system-$(uname -i) \
+     e2fsprogs \
++    tcpdump \
+     $NULL &>/dev/null
+ 
+ ./configure
+

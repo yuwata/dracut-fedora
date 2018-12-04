@@ -1,0 +1,23 @@
+From 712f471ebfae70fd71c0c740e9a3e120464ca7e7 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Tue, 4 Dec 2018 10:06:12 +0100
+Subject: [PATCH] test/test-functions: correctly move server.log
+
+---
+ test/test-functions | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/test/test-functions b/test/test-functions
+index a6254ec7..51b3df80 100644
+--- a/test/test-functions
++++ b/test/test-functions
+@@ -80,7 +80,7 @@ while (($# > 0)); do
+                     ret=$?
+                     test_cleanup
+                     if ((ret!=0)) && [[ -f "$TESTDIR"/server.log ]]; then
+-                        mv [[ -f "$TESTDIR"/server.log ]] ./server${TEST_RUN_ID:+-$TEST_RUN_ID}.log
++                        mv "$TESTDIR"/server.log ./server${TEST_RUN_ID:+-$TEST_RUN_ID}.log
+                     fi
+                     rm -fr -- "$TESTDIR"
+                     rm -f -- .testdir${TEST_RUN_ID:+-$TEST_RUN_ID}
+

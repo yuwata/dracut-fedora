@@ -1,0 +1,156 @@
+From f18d069d4664c148df8563139b358806ecfe6799 Mon Sep 17 00:00:00 2001
+From: Pedro Monreal <pmgdeb@gmail.com>
+Date: Thu, 8 Nov 2018 14:15:38 +0100
+Subject: [PATCH] Fixed some SUSE specific typos and outputs
+
+---
+ dracut.conf.5.asc                                        | 2 +-
+ dracut.conf.d/suse.conf.example                          | 4 ++--
+ dracut.sh                                                | 4 ++--
+ dracut.usage.asc                                         | 6 +++---
+ mkinitrd-suse.sh                                         | 4 ++--
+ modules.d/98dracut-systemd/dracut-shutdown.service.8.asc | 2 +-
+ modules.d/98syslog/README                                | 2 +-
+ modules.d/99base/dracut-lib.sh                           | 2 +-
+ 8 files changed, 13 insertions(+), 13 deletions(-)
+
+diff --git a/dracut.conf.5.asc b/dracut.conf.5.asc
+index 1dfa28f6..081ed70c 100644
+--- a/dracut.conf.5.asc
++++ b/dracut.conf.5.asc
+@@ -157,7 +157,7 @@ provide a valid _/etc/fstab_.
+     archive. This cpio archive gets glued (concatenated, uncompressed one
+     must be the first one) to the compressed cpio archive. The first,
+     uncompressed cpio archive is for data which the kernel must be able
+-    to access very early (and cannot make use of uncompress alogrithms yet)
++    to access very early (and cannot make use of uncompress algorithms yet)
+     like microcode or ACPI tables (default=no).
+ 
+ *acpi_table_dir=*"__<dir>__"::
+diff --git a/dracut.conf.d/suse.conf.example b/dracut.conf.d/suse.conf.example
+index 37ffd72b..b5d962db 100644
+--- a/dracut.conf.d/suse.conf.example
++++ b/dracut.conf.d/suse.conf.example
+@@ -1,6 +1,6 @@
+-# SUSE specifc dracut settings
++# SUSE specific dracut settings
+ #
+-# SUSE by default always builds a as small as possible initrd for performance
++# SUSE by default always builds as small as possible initrd for performance
+ # and resource reasons.
+ # If you like to build a generic initrd which works on other platforms than
+ # on the one dracut/mkinitrd got called comment out below setting(s).
+diff --git a/dracut.sh b/dracut.sh
+index fb50cfda..e706714e 100755
+--- a/dracut.sh
++++ b/dracut.sh
+@@ -1690,7 +1690,7 @@ if [[ $early_microcode = yes ]]; then
+         for _fwdir in $fw_dir; do
+             if [[ -d $_fwdir && -d $_fwdir/$_fw ]]; then
+                 _src="*"
+-                dinfo "*** Constructing ${ucode_dest[$idx]} ****"
++                dinfo "*** Constructing ${ucode_dest[$idx]} ***"
+                 if [[ $hostonly ]]; then
+                     _src=$(get_ucode_file)
+                     [[ $_src ]] || break
+@@ -1790,7 +1790,7 @@ if dracut_module_included "squash"; then
+ 
+     # Move some files out side of the squash image, including:
+     # - Files required to boot and mount the squashfs image
+-    # - Files need to be accessable without mounting the squash image
++    # - Files need to be accessible without mounting the squash image
+     required_in_root() {
+         local file=$1
+         local _sqsh_file=$squash_dir/$file
+diff --git a/dracut.usage.asc b/dracut.usage.asc
+index 2b598ee6..0f219fc9 100644
+--- a/dracut.usage.asc
++++ b/dracut.usage.asc
+@@ -83,7 +83,7 @@ on the command line:
+ === Adding Kernel Modules
+ If you need a special kernel module in the initramfs, which is not
+ automatically picked up by dracut, you have the use the --add-drivers option
+-on the command line or  the drivers vaiable in  the _/etc/dracut.conf_
++on the command line or  the drivers variable in  the _/etc/dracut.conf_
+ or _/etc/dracut.conf.d/myconf.conf_ configuration file (see *dracut.conf*(5)):
+ ----
+ # dracut --add-drivers mymod initramfs-with-mymod.img
+@@ -94,7 +94,7 @@ An initramfs generated without the "hostonly" mode, does not contain any system
+ configuration files (except for some special exceptions), so the configuration
+ has to be done on the kernel command line. With this flexibility, you can easily
+ boot from a changed root partition, without the need to recompile the initramfs
+-image. So, you could completly change your root partition (move it inside a md
++image. So, you could completely change your root partition (move it inside a md
+ raid with encryption and LVM on top), as long as you specify the correct
+ filesystem LABEL or UUID on the kernel command line for your root device, dracut
+ will find it and boot from it.
+@@ -185,7 +185,7 @@ This turns off every automatic assembly of LVM, MD raids, DM raids and
+ crypto LUKS.
+ 
+ Of course, you could also omit the dracut modules in the initramfs creation
+-process, but then you would lose the posibility to turn it on on demand.
++process, but then you would lose the possibility to turn it on on demand.
+ 
+ 
+ [[Injecting]]
+diff --git a/mkinitrd-suse.sh b/mkinitrd-suse.sh
+index 20d85da1..b6af2b19 100755
+--- a/mkinitrd-suse.sh
++++ b/mkinitrd-suse.sh
+@@ -1,6 +1,6 @@
+ #!/bin/bash --norc
+ #
+-# mkinitrd compability wrapper for SUSE.
++# mkinitrd compatibility wrapper for SUSE.
+ #
+ # Copyright (c) 2013 SUSE Linux Products GmbH. All rights reserved.
+ #
+@@ -62,7 +62,7 @@ usage () {
+     $cmd "				/etc/sysconfig/kernel."
+     $cmd "	-d root_device		Root device. Defaults to the device from"
+     $cmd "				which / is mounted. Overrides the rootdev"
+-    $cmd "				enviroment variable if set."
++    $cmd "				environment variable if set."
+     $cmd "	-j device		Journal device"
+     $cmd "	-D interface		Run dhcp on the specified interface."
+     $cmd "	-I interface		Configure the specified interface statically."
+diff --git a/modules.d/98dracut-systemd/dracut-shutdown.service.8.asc b/modules.d/98dracut-systemd/dracut-shutdown.service.8.asc
+index f4fbb618..ba80b187 100644
+--- a/modules.d/98dracut-systemd/dracut-shutdown.service.8.asc
++++ b/modules.d/98dracut-systemd/dracut-shutdown.service.8.asc
+@@ -15,7 +15,7 @@ dracut-shutdown.service
+ DESCRIPTION
+ -----------
+ This service unpacks the initramfs image to /run/initramfs.
+-systemd pivots into /run/initramfs at shutdown, so the root filesytem
++systemd pivots into /run/initramfs at shutdown, so the root filesystem
+ can be safely unmounted.
+ 
+ The following steps are executed during a shutdown:
+diff --git a/modules.d/98syslog/README b/modules.d/98syslog/README
+index 30a819c0..9eb5adee 100644
+--- a/modules.d/98syslog/README
++++ b/modules.d/98syslog/README
+@@ -11,7 +11,7 @@ Then if syslog is configured it is started and will forward all
+ kernel messages to the given syslog server.
+ 
+ The syslog implementation is detected automatically by finding the
+-apropriate binary with the following order:
++appropriate binary with the following order:
+ rsyslogd
+ syslogd
+ syslog-ng
+diff --git a/modules.d/99base/dracut-lib.sh b/modules.d/99base/dracut-lib.sh
+index ab348855..3eb255e6 100755
+--- a/modules.d/99base/dracut-lib.sh
++++ b/modules.d/99base/dracut-lib.sh
+@@ -620,7 +620,7 @@ nfsroot_to_var() {
+ # prints:
+ #   ENV{ID_FS_LABEL}="boot"
+ #
+-# TOOD: symlinks
++# TODO: symlinks
+ udevmatch() {
+     case "$1" in
+     UUID=????????-????-????-????-????????????|LABEL=*|PARTLABEL=*|PARTUUID=????????-????-????-????-????????????)
+

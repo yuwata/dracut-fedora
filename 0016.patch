@@ -1,0 +1,24 @@
+From 76522d58c337e695cbffdc10afb04344f16f81b0 Mon Sep 17 00:00:00 2001
+From: Lukas Nykryn <lnykryn@redhat.com>
+Date: Tue, 27 Nov 2018 15:27:53 +0100
+Subject: [PATCH] dracut-initramfs-restore: set selinux labels
+
+---
+ dracut-initramfs-restore.sh | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/dracut-initramfs-restore.sh b/dracut-initramfs-restore.sh
+index 67fc88fa..18469772 100644
+--- a/dracut-initramfs-restore.sh
++++ b/dracut-initramfs-restore.sh
+@@ -49,4 +49,9 @@ if [[ -d squash ]]; then
+     fi
+ fi
+ 
++if [ -e /etc/selinux/config -a -x /usr/sbin/setfiles ] ; then
++    . /etc/selinux/config
++    /usr/sbin/setfiles -v -r /run/initramfs /etc/selinux/${SELINUXTYPE}/contexts/files/file_contexts /run/initramfs > /dev/null
++fi
++
+ exit 0
+

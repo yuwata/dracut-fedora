@@ -1,0 +1,43 @@
+From 48c283a29638e2c1e24cf282e673ddf8525b4199 Mon Sep 17 00:00:00 2001
+From: Lukas Nykryn <lnykryn@redhat.com>
+Date: Thu, 25 Oct 2018 15:30:36 +0200
+Subject: [PATCH] dracut.install: call dracut with --force
+
+The kernel-install is called even if you run make install.
+Since we don't call dracut with -f a second make install will fail
+because initrd with same version is already there.
+This makes kernel developers feel miserable.
+
+https://bugzilla.redhat.com/show_bug.cgi?id=1642402
+---
+ 50-dracut.install        | 2 +-
+ 51-dracut-rescue.install | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/50-dracut.install b/50-dracut.install
+index 64e3549f..bbb73442 100755
+--- a/50-dracut.install
++++ b/50-dracut.install
+@@ -49,7 +49,7 @@ case "$COMMAND" in
+                 break
+             fi
+         done
+-	dracut ${noimageifnotneeded:+--noimageifnotneeded} "$BOOT_DIR_ABS/$INITRD" "$KERNEL_VERSION"
++	dracut -f ${noimageifnotneeded:+--noimageifnotneeded} "$BOOT_DIR_ABS/$INITRD" "$KERNEL_VERSION"
+         ret=$?
+ 	;;
+     remove)
+diff --git a/51-dracut-rescue.install b/51-dracut-rescue.install
+index 6ddafdb6..ef8afac1 100755
+--- a/51-dracut-rescue.install
++++ b/51-dracut-rescue.install
+@@ -98,7 +98,7 @@ case "$COMMAND" in
+         fi
+ 
+         if [[ ! -f "$BOOT_DIR_ABS/$INITRD" ]]; then
+-            dracut --no-hostonly -a "rescue" "$BOOT_DIR_ABS/$INITRD" "$KERNEL_VERSION"
++            dracut -f --no-hostonly -a "rescue" "$BOOT_DIR_ABS/$INITRD" "$KERNEL_VERSION"
+             ((ret+=$?))
+         fi
+ 
+

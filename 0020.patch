@@ -1,0 +1,46 @@
+From f6e3b59e5ea6f52a25631557badc7f4dfabbd7ee Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Tue, 21 Aug 2018 13:14:44 +0200
+Subject: [PATCH] network: skip already enslaved interfaces
+
+---
+ modules.d/35network-legacy/ifup.sh | 6 +++++-
+ modules.d/40network/net-lib.sh     | 7 +++++++
+ 2 files changed, 12 insertions(+), 1 deletion(-)
+
+diff --git a/modules.d/35network-legacy/ifup.sh b/modules.d/35network-legacy/ifup.sh
+index ea2a67ff..b4f5bf10 100755
+--- a/modules.d/35network-legacy/ifup.sh
++++ b/modules.d/35network-legacy/ifup.sh
+@@ -408,7 +408,11 @@ for p in $(getargs ip=); do
+     esac
+ 
+     # If this option isn't directed at our interface, skip it
+-    [ -n "$dev" ] && [ "$dev" != "$netif" ] && continue
++    if [ -n "$dev" ]; then
++        [ "$dev" != "$netif" ] && continue
++    else
++        iface_is_enslaved "$netif" && continue
++    fi
+ 
+     # Store config for later use
+     for i in ip srv gw mask hostname macaddr mtu dns1 dns2; do
+diff --git a/modules.d/40network/net-lib.sh b/modules.d/40network/net-lib.sh
+index 1e7f1b33..964ed3ab 100755
+--- a/modules.d/40network/net-lib.sh
++++ b/modules.d/40network/net-lib.sh
+@@ -745,6 +745,13 @@ iface_has_link() {
+     iface_has_carrier "$@"
+ }
+ 
++iface_is_enslaved() {
++    local _li
++    _li=$(ip -o link show dev $1)
++    strstr "$li" " master " || return 1
++    return 0
++}
++
+ find_iface_with_link() {
+     local iface_path="" iface=""
+     for iface_path in /sys/class/net/*; do
+

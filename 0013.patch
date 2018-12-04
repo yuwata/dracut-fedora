@@ -1,0 +1,72 @@
+From a60af534132828fd46fa017291f7ed7cfeab1dc3 Mon Sep 17 00:00:00 2001
+From: Kairui Song <kasong@redhat.com>
+Date: Fri, 9 Nov 2018 10:48:28 +0800
+Subject: [PATCH] squash: unsquash the root image instead of mounting it on
+ shutdown
+
+When building squash image, squash module forgot to install the new
+shutdown.sh, and the shutdown hooks are always skipped on ordinary
+shutdown if squash module is enabled.
+
+The new shutdown.sh will remount the squash image and then everything
+will just work, but currently re-mounting the squash image on shutdown
+may have selinux problem and make the system hang, and there is no
+easy way to fix it.
+
+So skip fixing the shutdown.sh not being install problem, instead
+just drop the new shutdown.sh, and unsquash the image on ordinary
+shutdown, which is safer and should always work.
+
+Signed-off-by: Kairui Song <kasong@redhat.com>
+---
+ dracut-initramfs-restore.sh    | 9 +++++++++
+ dracut.sh                      | 2 --
+ modules.d/99squash/shutdown.sh | 7 -------
+ 3 files changed, 9 insertions(+), 9 deletions(-)
+
+diff --git a/dracut-initramfs-restore.sh b/dracut-initramfs-restore.sh
+index 94794804..67fc88fa 100644
+--- a/dracut-initramfs-restore.sh
++++ b/dracut-initramfs-restore.sh
+@@ -40,4 +40,13 @@ else
+     exit 1
+ fi
+ 
++if [[ -d squash ]]; then
++    unsquashfs -no-xattrs -f -d . squash/root.img >/dev/null
++    if [ $? -ne 0 ]; then
++        echo "Squash module is enabled for this initramfs but failed to unpack squash/root.img" >&2
++        rm -f -- /run/initramfs/shutdown
++        exit 1
++    fi
++fi
++
+ exit 0
+diff --git a/dracut.sh b/dracut.sh
+index e706714e..3dc2adc0 100755
+--- a/dracut.sh
++++ b/dracut.sh
+@@ -1849,9 +1849,7 @@ if dracut_module_included "squash"; then
+     done
+ 
+     mv $initdir/init $initdir/init.stock
+-    mv $initdir/shutdown $initdir/shutdown.stock
+     ln -s squash/init.sh $initdir/init
+-    ln -s squash/shutdown.sh $initdir/shutdown
+ 
+     mksquashfs $squash_dir $squash_img -comp xz -b 64K -Xdict-size 100% &> /dev/null
+ 
+diff --git a/modules.d/99squash/shutdown.sh b/modules.d/99squash/shutdown.sh
+deleted file mode 100755
+index 535779f4..00000000
+--- a/modules.d/99squash/shutdown.sh
++++ /dev/null
+@@ -1,7 +0,0 @@
+-#!/bin/sh
+-/squash/setup-squash.sh
+-
+-exec /shutdown.stock
+-
+-echo "Something went wrong when trying to start original shutdown executable!"
+-exit 1
+

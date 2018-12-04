@@ -38,3 +38,4 @@ index 80623437..503d069f 100644
  syncheck:
  	@ret=0;for i in dracut-initramfs-restore.sh modules.d/*/*.sh; do \
                  [ "$${i##*/}" = "module-setup.sh" ] && continue; \
+

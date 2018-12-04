@@ -1,0 +1,26 @@
+From fb280834d77a17a508d2bb22f5196de9ffd4fee7 Mon Sep 17 00:00:00 2001
+From: "Bruno E. O. Meneguele" <bmeneg@redhat.com>
+Date: Fri, 30 Nov 2018 13:01:21 -0200
+Subject: [PATCH] dracut.modules.7.asc: typo correction
+
+Correct simple typo in .7 manpage for dracut.
+
+Signed-off-by: Bruno E. O. Meneguele <bmeneg@redhat.com>
+---
+ dracut.modules.7.asc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/dracut.modules.7.asc b/dracut.modules.7.asc
+index c34d005d..387f6da0 100644
+--- a/dracut.modules.7.asc
++++ b/dracut.modules.7.asc
+@@ -266,7 +266,7 @@ installs an executable/script <src> in the dracut hook <hookdir> with priority
+ 
+ ==== inst_rules <udevrule> [ <udevrule> ...]
+ 
+-installs one ore more udev rules. Non-existant udev rules are reported, but do
++installs one or more udev rules. Non-existant udev rules are reported, but do
+ not let dracut fail.
+ 
+ ==== instmods <kernelmodule> [ <kernelmodule> ... ]
+
