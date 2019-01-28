@@ -13,10 +13,8 @@ Release: %{dist_free_release}%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
-Group: System Environment/Base
 %endif
 %if 0%{?suse_version}
-Group: System/Base
 %endif
 
 # The entire source code is GPLv2+
