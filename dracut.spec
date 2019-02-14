@@ -5,11 +5,11 @@
 # strip the automatically generated dep here and instead co-own the
 # directory.
 %global __requires_exclude pkg-config
-%define dist_free_release 25.git20181204
+%define dist_free_release 26.git20181204
 
 Name: dracut
 Version: 049
-Release: %{dist_free_release}%{?dist}.1
+Release: %{dist_free_release}%{?dist}
 
 Summary: Initramfs generator using udev
 %if 0%{?fedora} || 0%{?rhel}
@@ -50,6 +50,11 @@ Patch21: 0021.patch
 Patch22: 0022.patch
 Patch23: 0023.patch
 Patch24: 0024.patch
+
+# https://github.com/dracutdevs/dracut/pull/541
+# Fixes https://bugzilla.redhat.com/show_bug.cgi?id=1676357
+# dracut-install crash during kernel scriptlets
+Patch100: 541.patch
 
 Source1: https://www.gnu.org/licenses/lgpl-2.1.txt
 
@@ -495,6 +500,9 @@ install -m 0755 51-dracut-rescue-postinst.sh $RPM_BUILD_ROOT%{_sysconfdir}/kerne
 %endif
 
 %changelog
+* Thu Feb 14 2019 Adam Williamson <awilliam@redhat.com> - 049-26.git20181204
+- Backport PR #541 to fix RHBZ #1676357 (crasher bug)
+
 * Thu Jan 31 2019 Fedora Release Engineering <releng@fedoraproject.org> - 049-25.git20181204.1
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_30_Mass_Rebuild
 
