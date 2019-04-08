@@ -1,6 +1,6 @@
-%global gitcommit 1ff306a3964840fc548188a8aa4862143b347e8a
+%global gitcommit 8365177644bee107dcb66a71c8a7509900c9ece4
 %{?gitcommit:%global gitcommitshort %(c=%{gitcommit}; echo ${c:0:7})}
-%global gitdate 20190110
+%global gitdate 20190322
 
 %define dracutlibdir %{_prefix}/lib/dracut
 %bcond_without doc
@@ -9,19 +9,13 @@
 # strip the automatically generated dep here and instead co-own the
 # directory.
 %global __requires_exclude pkg-config
-%define dist_free_release 25.3.git%{gitdate}
+%define dist_free_release 26.1.git%{gitdate}
 
 Name: dracut
 Version: 049
 Release: %{dist_free_release}%{?dist}
 
 Summary: Initramfs generator using udev
-%if 0%{?fedora} || 0%{?rhel}
-Group: System Environment/Base
-%endif
-%if 0%{?suse_version}
-Group: System/Base
-%endif
 
 # The entire source code is GPLv2+
 # except install/* which is LGPLv2+
@@ -485,14 +479,14 @@ install -m 0755 51-dracut-rescue-postinst.sh $RPM_BUILD_ROOT%{_sysconfdir}/kerne
 %endif
 
 %changelog
-* Sun Jan 13 2019 Yu Watanabe <watanabe.yu@gmail.com> - 049-25.3.git20190110
-- Update to latest git snapshot 1ff306a3964840fc548188a8aa4862143b347e8a
+* Tue Apr 09 2019 Yu Watanabe <watanabe.yu@gmail.com> - 049-26.1.git20190322
+- Update to latest git snapshot 8365177644bee107dcb66a71c8a7509900c9ece4
 
-* Sat Dec 22 2018 Yu Watanabe <watanabe.yu@gmail.com> - 049-25.2.git20181220
-- Update to latest git snapshot 7e944c77c0e05f2cc28e11227b465525c5131772
+* Thu Feb 14 2019 Adam Williamson <awilliam@redhat.com> - 049-26.git20181204
+- Backport PR #541 to fix RHBZ #1676357 (crasher bug)
 
-* Thu Dec 06 2018 Yu Watanabe <watanabe.yu@gmail.com> - 049-25.1.git20181204
-- Update to latest git snapshot ebe1821635dd99f07c817179ee5358d27aab53c5
+* Thu Jan 31 2019 Fedora Release Engineering <releng@fedoraproject.org> - 049-25.git20181204.1
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_30_Mass_Rebuild
 
 * Tue Dec 04 2018 Harald Hoyer <harald@redhat.com> - 049-25.git20181204
 - git snapshot
